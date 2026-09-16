@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-16",
+  "matchups": [
+    {
+      "home_team": "阪神",
+      "away_team": "巨人",
+      "home_starter": "才木",
+      "away_starter": "戸郷",
+      "home_win_rate": 0.542,
+      "away_win_rate": 0.458
+    }
+  ]
+}
