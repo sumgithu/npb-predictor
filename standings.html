@@ -71,7 +71,7 @@
   <div class="container">
     <header>
       <h1>NPB 自力確定クリンチナンバー解析</h1>
-      <p style="font-size: 0.85rem; color: var(--text-sub); margin-top: 4px;">直接対決（H2H）残日程を完全考慮した数理モデル</p>
+      <p style="font-size: 0.85rem; color: var(--text-sub); margin-top: 4px;">直接対決（H2H）残日程を考慮した数理モデル</p>
     </header>
 
     <div class="control-panel">
@@ -124,9 +124,14 @@
     }
 
     function renderTable() {
-      if (!rawData || !rawData.history[selectedDate]) {
-        document.getElementById('standings-body').innerHTML = `<tr><td colspan="13" style="padding: 24px;">選択された日付のデータが存在しません。</td></tr>`;
-        return;
+      if (!rawData || !rawData.history) return;
+      
+      // 選択日付が履歴にない場合は最も近い有効日付を選択
+      if (!rawData.history[selectedDate]) {
+        const dates = rawData.available_dates;
+        const past = dates.filter(d => d <= selectedDate);
+        selectedDate = past.length ? past[past.length - 1] : dates[0];
+        document.getElementById('date-picker').value = selectedDate;
       }
 
       const list = rawData.history[selectedDate][currentLeague];
@@ -153,7 +158,7 @@
         tbody.appendChild(tr);
       });
 
-      document.getElementById('status-info').textContent = `表示中: ${selectedDate} 終了時点（全日程143試合・H2H逆算適用済）`;
+      document.getElementById('status-info').textContent = `表示中: ${selectedDate} 終了時点（全日程143試合・直接対決H2H逆算適用済）`;
     }
 
     function switchLeague(league) {
@@ -176,15 +181,7 @@
         selectedDate = rawData.latest_date;
 
         picker.addEventListener('change', (e) => {
-          // 最も近い有効日付にフォールバック
-          if (rawData.history[e.target.value]) {
-            selectedDate = e.target.value;
-          } else {
-            // 前方探索で一番近い過去の試合日を選択
-            const pastDates = dates.filter(d => d <= e.target.value);
-            selectedDate = pastDates.length ? pastDates[pastDates.length - 1] : dates[0];
-            picker.value = selectedDate;
-          }
+          selectedDate = e.target.value;
           renderTable();
         });
 
