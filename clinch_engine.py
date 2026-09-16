@@ -66,9 +66,6 @@ def get_remaining_h2h(t1, t2, h2h_played, rem_1, rem_2):
     return max(0, min(max_games - played, rem_1, rem_2))
 
 def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
-    """
-    target_k: 1(CN/優勝), 2(2nd/本拠), 3(3rd/CS), 4(4th), 5(5th/最下位回避)
-    """
     ta = team_a["team"]
     rem_a = team_a["remaining"]
     a_max_win = team_a["win"] + rem_a
@@ -77,8 +74,6 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
 
     others = [ot for ot in all_teams if ot["team"] != ta]
 
-    # --- 1. 完全消滅判定 ---
-    # 他チームの中で、残り全敗しても team_a の全勝勝率を上回るチームが target_k チーム以上あれば完全消滅
     guaranteed_higher = 0
     for ot in others:
         ot_min_rate = calc_win_rate(ot["win"], ot["lose"] + ot["remaining"])
@@ -88,8 +83,6 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
     if guaranteed_higher >= target_k:
         return "-"
 
-    # --- 2. 完全確定判定 ---
-    # 自チームが残り全敗しても、自チームを上回る可能性のあるチームが target_k 未満であれば完全確定
     threats = 0
     for ot in others:
         ot_max_rate = calc_win_rate(ot["win"] + ot["remaining"], ot["lose"])
@@ -99,17 +92,14 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
     if threats < target_k:
         return "確定"
 
-    # --- 3. クリンチナンバー（自力確定必要勝利数 X）の厳密探索 ---
     border = all_teams[target_k] if team_a["rank"] <= target_k else all_teams[target_k - 1]
     tb = border["team"]
     rem_b = border["remaining"]
     rem_h2h = get_remaining_h2h(ta, tb, h2h_played, rem_a, rem_b)
 
-    # 自力確定探索 (0 〜 rem_a)
     magic = None
     for x in range(0, rem_a + 1):
         a_losses = rem_a - x
-        # 最悪ケース：自軍の敗戦が直接対決に集中した際、相手Bに最低限つく敗戦数
         forced_b_losses = max(0, rem_h2h - a_losses)
         b_max_win = border["win"] + (rem_b - forced_b_losses)
         b_max_lose = border["lose"] + forced_b_losses
@@ -123,7 +113,6 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
     if magic is not None:
         return "確定" if magic == 0 else magic
 
-    # --- 4. 自力消滅だが可能性あり（他力アシストが必要な仮想必要数） ---
     b_abs_max_rate = calc_win_rate(border["win"] + rem_b, border["lose"])
     for x in range(rem_a + 1, rem_a + 30):
         a_rate = calc_win_rate(team_a["win"] + x, team_a["lose"])
@@ -133,11 +122,8 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
     return "-"
 
 def validate_and_assert_standings(teams):
-    """数学的不変則（順位包含則・単調性）の検証"""
     keys = ["magic_1st", "magic_2nd", "magic_3rd", "magic_4th", "magic_5th"]
-
     for t in teams:
-        # 上位目標（CN）が確定なら、下位目標（CSや最下位回避）も当然確定
         confirmed = False
         for k in keys:
             if t[k] == "確定":
@@ -145,7 +131,6 @@ def validate_and_assert_standings(teams):
             elif confirmed:
                 t[k] = "確定"
 
-        # 下位目標（最下位回避）が消滅なら、上位目標も当然消滅
         eliminated = False
         for k in reversed(keys):
             if t[k] == "-":
@@ -153,7 +138,6 @@ def validate_and_assert_standings(teams):
             elif eliminated:
                 t[k] = "-"
 
-        # 単調性の検証（CN >= 2nd >= 3rd >= 4th >= 5th）
         last_val = 0
         for k in reversed(keys):
             val = t[k]
@@ -162,7 +146,6 @@ def validate_and_assert_standings(teams):
                     t[k] = last_val
                 else:
                     last_val = val
-
     return teams
 
 def build_all_history(games):
@@ -171,26 +154,58 @@ def build_all_history(games):
     history_snapshots = {}
 
     for target_date in unique_dates:
-        records = {t: {"team": t, "games": 0, "win": 0, "lose": 0, "draw": 0} for t in all_teams}
+        records = {t: {
+            "team": t, "games": 0, "win": 0, "lose": 0, "draw": 0,
+            "home": {"win": 0, "lose": 0, "draw": 0},
+            "away": {"win": 0, "lose": 0, "draw": 0},
+            "interleague": {"win": 0, "lose": 0, "draw": 0}
+        } for t in all_teams}
+
         h2h_played = {t1: {t2: 0 for t2 in all_teams} for t1 in all_teams}
+        h2h_details = {t1: {t2: {"win": 0, "lose": 0, "draw": 0} for t2 in all_teams} for t1 in all_teams}
 
         for g in games:
             if g["date"] <= target_date:
                 h, a = g["home"], g["away"]
+                hs, as_ = g["home_score"], g["away_score"]
+
                 records[h]["games"] += 1
                 records[a]["games"] += 1
                 h2h_played[h][a] += 1
                 h2h_played[a][h] += 1
 
-                if g["home_score"] > g["away_score"]:
+                is_inter = (h in CENTRAL_TEAMS and a in PACIFIC_TEAMS) or (h in PACIFIC_TEAMS and a in CENTRAL_TEAMS)
+
+                if hs > as_:
                     records[h]["win"] += 1
+                    records[h]["home"]["win"] += 1
                     records[a]["lose"] += 1
-                elif g["home_score"] < g["away_score"]:
+                    records[a]["away"]["lose"] += 1
+                    h2h_details[h][a]["win"] += 1
+                    h2h_details[a][h]["lose"] += 1
+                    if is_inter:
+                        records[h]["interleague"]["win"] += 1
+                        records[a]["interleague"]["lose"] += 1
+                elif hs < as_:
                     records[a]["win"] += 1
+                    records[a]["away"]["win"] += 1
                     records[h]["lose"] += 1
+                    records[h]["home"]["lose"] += 1
+                    h2h_details[a][h]["win"] += 1
+                    h2h_details[h][a]["lose"] += 1
+                    if is_inter:
+                        records[a]["interleague"]["win"] += 1
+                        records[h]["interleague"]["lose"] += 1
                 else:
                     records[h]["draw"] += 1
+                    records[h]["home"]["draw"] += 1
                     records[a]["draw"] += 1
+                    records[a]["away"]["draw"] += 1
+                    h2h_details[h][a]["draw"] += 1
+                    h2h_details[a][h]["draw"] += 1
+                    if is_inter:
+                        records[h]["interleague"]["draw"] += 1
+                        records[a]["interleague"]["draw"] += 1
 
         def format_league(league_teams):
             table = []
@@ -198,6 +213,8 @@ def build_all_history(games):
                 r = records[t]
                 r["remaining"] = TOTAL_GAMES - r["games"]
                 r["rate"] = calc_win_rate(r["win"], r["lose"])
+                # カード別対戦成績詳細を格納
+                r["h2h"] = {opp: h2h_details[t][opp] for opp in league_teams}
                 table.append(r)
             table.sort(key=lambda x: (x["rate"], x["win"]), reverse=True)
             top_w, top_l = table[0]["win"], table[0]["lose"]
@@ -252,7 +269,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print("数学的定義完全準拠：history_standings.json 更新完了")
+    print("対戦マトリクス・ホームロード集計完了：history_standings.json 更新完了")
 
 if __name__ == "__main__":
     main()
