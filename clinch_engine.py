@@ -1,7 +1,6 @@
 import datetime
 import json
 import os
-import re
 
 TOTAL_GAMES = 143
 GAMES_INTRA = 25  # 同一リーグ内対戦総数
@@ -119,40 +118,64 @@ def build_standings_at_date(db, target_date_str):
         "pacific": format_league(PACIFIC_TEAMS)
     }, h2h_played
 
-def calc_clinch_magic_h2h(team_a, border_team, h2h_played):
+def evaluate_target_clinch(team_a, target_k, all_teams, h2h_played):
     """
-    相手の最高可能勝率を上回るために必要な勝利数 X を算出。
-    X が残り試合数を超えても、可能性があればその数値をそのまま返す。
+    team_a が target_k 位以内を確定させるための条件を厳密計算
+    target_k: 1(優勝), 2(2位以上), 3(3位以上), 4(4位以上), 5(5位以上)
     """
     ta = team_a["team"]
-    tb = border_team["team"]
     rem_a = TOTAL_GAMES - team_a["games"]
+    a_max_win = team_a["win"] + rem_a
+    a_max_rate = calc_win_rate(a_max_win, team_a["lose"])
+    a_min_rate = calc_win_rate(team_a["win"], team_a["lose"] + rem_a)
+
+    # 1. 完全消滅（エリミネーション）判定：
+    # target_k 位以上になるためには、「自チームより上のチームが target_k チーム未満」でなければならない。
+    # すでに target_k 以上のチームが、自チームの最高可能勝率を上回る最低保証成績を持っているか？
+    higher_guaranteed_teams = 0
+    for other in all_teams:
+        if other["team"] == ta:
+            continue
+        other_rem = TOTAL_GAMES - other["games"]
+        # other が全敗したときの最低勝率
+        other_min_rate = calc_win_rate(other["win"], other["lose"] + other_rem)
+        if other_min_rate > a_max_rate:
+            higher_guaranteed_teams += 1
+
+    if higher_guaranteed_teams >= target_k:
+        return "-"  # 広島の優勝のように、数学的に席が残っていない場合は即座に消滅
+
+    # 2. 完全確定判定：
+    # 自チームが残り全敗しても、target_k 位以内に入ることが保証されているか？
+    # ＝自チームを上回る可能性のあるチーム数が target_k 未満であるか
+    potential_threats = 0
+    for other in all_teams:
+        if other["team"] == ta:
+            continue
+        other_rem = TOTAL_GAMES - other["games"]
+        other_max_rate = calc_win_rate(other["win"] + other_rem, other["lose"])
+        if other_max_rate >= a_min_rate:
+            potential_threats += 1
+
+    if potential_threats < target_k:
+        return "確定"
+
+    # 3. 必要勝利数の算出
+    # target_k 位を争う直接のライバルチーム（ボーダーチーム）を特定
+    # 自チームが圏内(rank <= target_k)なら target_k+1 位のチーム
+    # 自チームが圏外(rank > target_k)なら target_k 位のチーム
+    border_team = all_teams[target_k] if team_a["rank"] <= target_k else all_teams[target_k - 1]
+    tb = border_team["team"]
     rem_b = TOTAL_GAMES - border_team["games"]
 
     played = h2h_played.get(ta, {}).get(tb, 21)
     rem_h2h = max(0, GAMES_INTRA - played)
     rem_h2h = min(rem_h2h, rem_a, rem_b)
 
-    # 1. 相手Bが残り全勝しても届かない（完全確定）
-    b_abs_max_win = border_team["win"] + rem_b
-    b_abs_max_rate = calc_win_rate(b_abs_max_win, border_team["lose"])
-    a_cur_min_rate = calc_win_rate(team_a["win"], team_a["lose"] + rem_a)
-    if a_cur_min_rate > b_abs_max_rate:
-        return "確定"
-
-    # 2. 完全消滅判定（A全勝 vs B全敗）
-    a_abs_max_win = team_a["win"] + rem_a
-    a_abs_max_rate = calc_win_rate(a_abs_max_win, team_a["lose"])
-    b_abs_min_rate = calc_win_rate(border_team["win"], border_team["lose"] + rem_b)
-    if a_abs_max_rate < b_abs_min_rate:
-        return "-"  # エリミネーション（完全消滅）
-
-    # 3. 相手Bの最高勝率を上回るために必要な勝利数 X の算出
-    # 自力確定探索 (0 〜 rem_a)
+    # 自力確定可能かの探索 (0 〜 rem_a)
     for x in range(0, rem_a + 1):
         forced_b_losses = min(x, rem_h2h)
-        b_possible_wins = rem_b - forced_b_losses
-        b_max_win = border_team["win"] + b_possible_wins
+        b_max_win = border_team["win"] + (rem_b - forced_b_losses)
         b_max_lose = border_team["lose"] + forced_b_losses
         b_max_rate = calc_win_rate(b_max_win, b_max_lose)
 
@@ -160,28 +183,23 @@ def calc_clinch_magic_h2h(team_a, border_team, h2h_played):
         if a_rate > b_max_rate:
             return "確定" if x == 0 else x
 
-    # 4. 自力消滅しているが可能性が残っている場合：
-    # 「相手Bが全勝ペースを維持したと仮定したとき、数学的に何勝相当が必要か」
-    # （例：巨人が14勝など、残り試合数をオーバーした必要勝利数）
-    for x in range(rem_a + 1, rem_a + 20):
-        # 仮想的にx勝したときの必要レート
+    # 4. 自力消滅だが可能性が残っている場合（他力アシストが必要）
+    # 相手が全勝ペースと仮定した際の数学的必要数（rem_a を超過する数値）
+    b_abs_max_rate = calc_win_rate(border_team["win"] + rem_b, border_team["lose"])
+    for x in range(rem_a + 1, rem_a + 25):
         a_rate = calc_win_rate(team_a["win"] + x, team_a["lose"])
         if a_rate > b_abs_max_rate:
             return x
 
-    # それでも求まらない場合は全勝＋相手敗戦の境界として rem_a + 1
     return rem_a + 1
 
 def evaluate_league_clinches(teams, h2h_played):
-    for i, t in enumerate(teams):
-        rank = i + 1
-        for k, key in [(1, "magic_1st"), (2, "magic_2nd"), (3, "magic_3rd"), (4, "magic_4th"), (5, "magic_5th")]:
-            if rank <= k:
-                border = teams[k]
-                t[key] = calc_clinch_magic_h2h(t, border, h2h_played)
-            else:
-                border = teams[0] if k == 1 else teams[k - 1]
-                t[key] = calc_clinch_magic_h2h(t, border, h2h_played)
+    for t in teams:
+        t["magic_1st"] = evaluate_target_clinch(t, 1, teams, h2h_played)
+        t["magic_2nd"] = evaluate_target_clinch(t, 2, teams, h2h_played)
+        t["magic_3rd"] = evaluate_target_clinch(t, 3, teams, h2h_played)
+        t["magic_4th"] = evaluate_target_clinch(t, 4, teams, h2h_played)
+        t["magic_5th"] = evaluate_target_clinch(t, 5, teams, h2h_played)
     return teams
 
 def main():
@@ -219,7 +237,7 @@ def main():
             "pacific": history_snapshots[game_dates[-1]]["pacific"]
         }, f, ensure_ascii=False, indent=2)
 
-    print("クリンチナンバー厳密計算完了")
+    print("厳密クリンチ・エリミネーション計算完了")
 
 if __name__ == "__main__":
     main()
