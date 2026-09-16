@@ -1,10 +1,12 @@
 import datetime
 import json
 import re
-import time
 import requests
 from bs4 import BeautifulSoup
 
+# ==========================================
+# 1. チーム基礎データ（直近80試合の得点・失点）
+# ==========================================
 TEAM_STATS = {
     "阪神": {"runs_scored": 320, "runs_allowed": 260},
     "広島": {"runs_scored": 310, "runs_allowed": 290},
@@ -17,7 +19,7 @@ TEAM_STATS = {
     "ロッテ": {"runs_scored": 290, "runs_allowed": 300},
     "楽天": {"runs_scored": 280, "runs_allowed": 320},
     "オリックス": {"runs_scored": 270, "runs_allowed": 300},
-    "西武": {"runs_scored": 230, "runs_allowed": 340}
+    "西武": {"runs_scored": 230, "runs_allowed": 340},
 }
 
 TEAM_NAME_MAP = {
@@ -27,13 +29,17 @@ TEAM_NAME_MAP = {
     "巨人": "巨人", "広島": "広島", "ヤクルト": "ヤクルト", "中日": "中日"
 }
 
+# ==========================================
+# 2. 先発投手FIPマスタ
+# ==========================================
 PITCHER_FIP = {
     "才木": 2.25, "村上": 2.50, "戸郷": 2.65, "菅野": 2.80, "東": 2.30,
     "有原": 2.80, "伊藤大": 2.60, "モイネロ": 2.10, "小島": 3.40, "早川": 3.10,
     "宮城": 2.40, "今井": 2.70, "西野": 3.20, "種市": 3.15, "佐々木朗": 2.10,
     "岸": 3.30, "則本": 3.40, "藤平": 2.90, "大津": 3.00, "スチュワート": 3.20,
     "エスピノーザ": 3.10, "山下": 2.80, "田嶋": 3.30, "古謝": 3.45, "内": 3.50,
-    "カイケル": 3.30, "高橋宏": 1.95, "床田": 2.55, "大瀬良": 2.90
+    "カイケル": 3.30, "高橋宏": 1.95, "床田": 2.55, "大瀬良": 2.90, "唐川": 3.50,
+    "カスティーヨ": 3.40, "荘司": 3.20, "高橋礼": 3.60, "石川": 3.70
 }
 DEFAULT_FIP = 3.50
 
@@ -48,11 +54,27 @@ def log5_matchup(p_a, p_b):
     return num / den if den != 0 else 0.500
 
 def clean_pitcher_name(text):
+    """球場名、配信情報、スコア表記を徹底的に排除して投手名だけを残す"""
     if not text:
         return "未定"
-    # 不要な記号や文字を排除
-    cleaned = re.sub(r'(予告先発|投手|先発|勝|敗|Ｓ|H|\[|\]|\:|\s+|\d+回|[表裏])', '', text).strip()
-    return cleaned if 2 <= len(cleaned) <= 6 else "未定"
+    
+    # 確実に除外したいキーワードリスト
+    ng_words = [
+        "ドーム", "スタジアム", "球場", "京セラ", "PayPay", "ZOZO", "神宮", "甲子園",
+        "配信", "ライブ", "LIVE", "中継", "放送", "速報", "試合", "終了", "中止",
+        "一球", "テキスト", "ハイライト", "回", "表", "裏", "予告先発"
+    ]
+    for ng in ng_words:
+        if ng in text:
+            return "未定"
+            
+    # 余分な記号や役職テキストをトリム
+    cleaned = re.sub(r'(予告先発|投手|先発|勝|敗|Ｓ|H|\[|\]|\:|\s+|\d+)', '', text).strip()
+    
+    # 日本のプロ野球選手の苗字は概ね1文字〜5文字（外国人含む）
+    if 1 <= len(cleaned) <= 6 and cleaned not in TEAM_STATS:
+        return cleaned
+    return "未定"
 
 def calculate_win_rate(home_team, away_team, home_starter, away_starter):
     h_stat = TEAM_STATS.get(home_team, {"runs_scored": 300, "runs_allowed": 300})
@@ -65,7 +87,7 @@ def calculate_win_rate(home_team, away_team, home_starter, away_starter):
 
     fip_h = PITCHER_FIP.get(home_starter, DEFAULT_FIP)
     fip_a = PITCHER_FIP.get(away_starter, DEFAULT_FIP)
-    fip_multiplier = (DEFAULT_FIP / fip_h) / (DEFAULT_FIP / fip_a)
+    fip_multiplier = (DEFAULT_FIP / fip_h) / (DEFAULT_FIP / fip_away_starter := fip_a)
 
     base_odds = base_win / (1.0 - base_win)
     adj_win = (base_odds * fip_multiplier) / (1.0 + (base_odds * fip_multiplier))
@@ -74,24 +96,25 @@ def calculate_win_rate(home_team, away_team, home_starter, away_starter):
     return round(final_h, 3), round(1.0 - final_h, 3)
 
 def get_starters_from_game_page(game_url, headers):
-    """試合詳細ページにアクセスして確実に先発投手を特定する"""
+    """試合詳細（スコアボード/スタメンページ）から先発投手枠を直接抽出"""
     try:
         res = requests.get(game_url, headers=headers, timeout=5)
         soup = BeautifulSoup(res.text, "html.parser")
         
-        # 予告先発または責任投手/先発投手の表示領域を探す
-        pitchers = []
-        for p_tag in soup.find_all(["span", "a", "td"], class_=lambda c: c and any(x in c for x in ["pitcher", "starter", "name"])):
-            c_name = clean_pitcher_name(p_tag.text)
-            if c_name != "未定" and c_name not in TEAM_STATS and c_name not in pitchers:
-                pitchers.append(c_name)
-            if len(pitchers) >= 2:
-                break
+        # 1. 試合中・終了後の「先発・バッテリー情報」枠から探索
+        pitcher_names = []
         
-        if len(pitchers) >= 2:
-            return pitchers[0], pitchers[1]
-        elif len(pitchers) == 1:
-            return pitchers[0], "未定"
+        # スポーツナビの投手表示エリア（テーブル・選手リンク）
+        pitcher_elements = soup.select(".bb-head01__pitcher, .bb-gameScoreTable__pitcher, a[href*='/npb/player/']")
+        for el in pitcher_elements:
+            name = clean_pitcher_name(el.text)
+            if name != "未定" and name not in pitcher_names:
+                pitcher_names.append(name)
+            if len(pitcher_names) >= 2:
+                break
+                
+        if len(pitcher_names) >= 2:
+            return pitcher_names[0], pitcher_names[1]
     except Exception:
         pass
     return "未定", "未定"
@@ -112,43 +135,33 @@ def scrape_matchups():
         cards = soup.find_all(["section", "li"], class_=lambda c: c and any(x in c for x in ["bb-score", "bb-schedule__item"]))
 
         for card in cards:
-            text = card.get_text()
-
-            # チーム特定
+            # チーム名特定
             teams = []
-            for k in TEAM_NAME_MAP.keys():
-                idx = text.find(k)
-                if idx != -1:
-                    norm = TEAM_NAME_MAP[k]
-                    teams.append((idx, norm))
-            teams.sort(key=lambda x: x[0])
+            for team_link in card.select(".bb-score__team, .bb-splitBox__lead"):
+                for k, v in TEAM_NAME_MAP.items():
+                    if k in team_link.text and v not in teams:
+                        teams.append(v)
+            
+            # フォールバック（カード内テキストから探索）
+            if len(teams) < 2:
+                text = card.get_text()
+                for k, v in TEAM_NAME_MAP.items():
+                    if k in text and v not in teams:
+                        teams.append(v)
 
-            unique_teams = []
-            for _, t in teams:
-                if t not in unique_teams:
-                    unique_teams.append(t)
-
-            if len(unique_teams) < 2:
+            if len(teams) < 2:
                 continue
 
-            away_team, home_team = unique_teams[0], unique_teams[1]
+            away_team, home_team = teams[0], teams[1]
 
-            # 試合リンクを探して先発投手を深掘り取得
+            # 試合URLから先発投手を取得
             away_starter, home_starter = "未定", "未定"
-            link_tag = card.find("a", href=lambda h: h and ("/npb/game/" in h))
-            if link_tag:
-                game_url = link_tag["href"]
+            link = card.find("a", href=lambda h: h and "/npb/game/" in h)
+            if link:
+                game_url = link["href"]
                 if not game_url.startswith("http"):
                     game_url = base_url + game_url
                 away_starter, home_starter = get_starters_from_game_page(game_url, headers)
-
-            # 詳細ページで取れなかった場合はカード内の文字列からフォールバック
-            if away_starter == "未定":
-                for tag in card.find_all(["a", "span"]):
-                    c = clean_pitcher_name(tag.text)
-                    if c != "未定" and c not in [away_team, home_team]:
-                        away_starter = c
-                        break
 
             home_win, away_win = calculate_win_rate(home_team, away_team, home_starter, away_starter)
 
