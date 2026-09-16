@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-16 20:46 JST",
+  "updated_at": "2026-09-16 20:55 JST",
   "central": [
     {
       "rank": 1,
@@ -8,13 +8,13 @@
       "win": 69,
       "lose": 57,
       "draw": 1,
-      "rate": 0.0,
-      "diff": 0.0,
-      "magic_1st": 15,
-      "magic_2nd": 11,
-      "magic_3rd": "確定",
+      "rate": 0.548,
+      "diff": 16.0,
+      "magic_1st": 14,
+      "magic_2nd": 10,
+      "magic_3rd": 2,
       "magic_4th": "確定",
-      "magic_5th": "確定"
+      "magic_5th": 2
     },
     {
       "rank": 2,
@@ -23,11 +23,11 @@
       "win": 70,
       "lose": 59,
       "draw": 2,
-      "rate": 0.0,
+      "rate": 0.543,
       "diff": 0.5,
-      "magic_1st": 9,
-      "magic_2nd": 9,
-      "magic_3rd": "確定",
+      "magic_1st": "-",
+      "magic_2nd": 8,
+      "magic_3rd": 1,
       "magic_4th": "確定",
       "magic_5th": "確定"
     },
@@ -38,13 +38,13 @@
       "win": 64,
       "lose": 63,
       "draw": 3,
-      "rate": 0.0,
-      "diff": 0.0,
-      "magic_1st": 7,
-      "magic_2nd": 7,
-      "magic_3rd": "確定",
-      "magic_4th": "確定",
-      "magic_5th": "確定"
+      "rate": 0.504,
+      "diff": 5.0,
+      "magic_1st": "-",
+      "magic_2nd": "-",
+      "magic_3rd": 6,
+      "magic_4th": 3,
+      "magic_5th": 6
     },
     {
       "rank": 4,
@@ -53,13 +53,13 @@
       "win": 56,
       "lose": 71,
       "draw": 2,
-      "rate": 0.0,
-      "diff": 0.0,
-      "magic_1st": 13,
-      "magic_2nd": 13,
-      "magic_3rd": 13,
-      "magic_4th": 13,
-      "magic_5th": 1
+      "rate": 0.441,
+      "diff": 8.0,
+      "magic_1st": "-",
+      "magic_2nd": "-",
+      "magic_3rd": "-",
+      "magic_4th": 12,
+      "magic_5th": 14
     },
     {
       "rank": 5,
@@ -68,12 +68,12 @@
       "win": 57,
       "lose": 74,
       "draw": 2,
-      "rate": 0.0,
-      "diff": 0.0,
-      "magic_1st": 1,
-      "magic_2nd": 1,
-      "magic_3rd": 1,
-      "magic_4th": 1,
+      "rate": 0.435,
+      "diff": 1.0,
+      "magic_1st": "-",
+      "magic_2nd": "-",
+      "magic_3rd": "-",
+      "magic_4th": "-",
       "magic_5th": "-"
     },
     {
@@ -83,13 +83,13 @@
       "win": 52,
       "lose": 70,
       "draw": 4,
-      "rate": 0.0,
+      "rate": 0.426,
       "diff": 0.5,
-      "magic_1st": 16,
-      "magic_2nd": 16,
-      "magic_3rd": 16,
-      "magic_4th": 16,
-      "magic_5th": 1
+      "magic_1st": "-",
+      "magic_2nd": "-",
+      "magic_3rd": "-",
+      "magic_4th": "-",
+      "magic_5th": "-"
     }
   ],
   "pacific": [
@@ -100,10 +100,10 @@
       "win": 82,
       "lose": 45,
       "draw": 3,
-      "rate": 0.0,
-      "diff": 0.0,
-      "magic_1st": "確定",
-      "magic_2nd": "確定",
+      "rate": 0.646,
+      "diff": 13.0,
+      "magic_1st": 3,
+      "magic_2nd": 2,
       "magic_3rd": "確定",
       "magic_4th": "確定",
       "magic_5th": "確定"
@@ -115,12 +115,12 @@
       "win": 73,
       "lose": 55,
       "draw": 4,
-      "rate": 0.0,
+      "rate": 0.57,
       "diff": 9.5,
-      "magic_1st": 11,
-      "magic_2nd": 11,
+      "magic_1st": "-",
+      "magic_2nd": 10,
       "magic_3rd": "確定",
-      "magic_4th": "確定",
+      "magic_4th": 2,
       "magic_5th": "確定"
     },
     {
@@ -130,12 +130,12 @@
       "win": 72,
       "lose": 57,
       "draw": 3,
-      "rate": 0.0,
+      "rate": 0.558,
       "diff": 1.5,
-      "magic_1st": 5,
-      "magic_2nd": 5,
-      "magic_3rd": "確定",
-      "magic_4th": "確定",
+      "magic_1st": "-",
+      "magic_2nd": "-",
+      "magic_3rd": 1,
+      "magic_4th": 4,
       "magic_5th": "確定"
     },
     {
@@ -145,13 +145,13 @@
       "win": 61,
       "lose": 68,
       "draw": 2,
-      "rate": 0.0,
-      "diff": 0.0,
-      "magic_1st": 4,
-      "magic_2nd": 4,
-      "magic_3rd": 4,
-      "magic_4th": 4,
-      "magic_5th": "確定"
+      "rate": 0.473,
+      "diff": 11.0,
+      "magic_1st": "-",
+      "magic_2nd": "-",
+      "magic_3rd": "-",
+      "magic_4th": "-",
+      "magic_5th": 3
     },
     {
       "rank": 5,
@@ -160,13 +160,13 @@
       "win": 58,
       "lose": 65,
       "draw": 3,
-      "rate": 0.0,
+      "rate": 0.472,
       "diff": 0.0,
-      "magic_1st": 16,
-      "magic_2nd": 16,
-      "magic_3rd": 16,
-      "magic_4th": 7,
-      "magic_5th": "確定"
+      "magic_1st": "-",
+      "magic_2nd": "-",
+      "magic_3rd": "-",
+      "magic_4th": "-",
+      "magic_5th": 6
     },
     {
       "rank": 6,
@@ -175,13 +175,13 @@
       "win": 48,
       "lose": 78,
       "draw": 1,
-      "rate": 0.0,
+      "rate": 0.381,
       "diff": 11.5,
-      "magic_1st": 1,
-      "magic_2nd": 1,
-      "magic_3rd": 1,
-      "magic_4th": 1,
-      "magic_5th": 1
+      "magic_1st": "-",
+      "magic_2nd": "-",
+      "magic_3rd": "-",
+      "magic_4th": "-",
+      "magic_5th": "-"
     }
   ]
 }
