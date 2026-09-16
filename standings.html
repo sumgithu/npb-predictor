@@ -18,7 +18,7 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg); color: var(--text-main); padding: 20px 12px 50px; }
+    body { background-color: var(--bg); color: var(--text-main); padding: 20px 12px 60px; }
     .container { max-width: 1000px; margin: 0 auto; }
 
     header { text-align: center; margin-bottom: 24px; }
@@ -45,6 +45,7 @@
     .table-wrapper {
       background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border);
       overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04);
+      margin-bottom: 20px;
     }
     table { width: 100%; border-collapse: collapse; min-width: 820px; text-align: center; font-size: 0.88rem; }
     th, td { padding: 12px 8px; border-bottom: 1px solid var(--border); }
@@ -62,7 +63,7 @@
     .badge-fixed { background-color: #d1fae5; color: #065f46; }
     .badge-magic { background-color: #fee2e2; color: #991b1b; }
     
-    /* 自力消滅アラート（残り試合オーバー時）：◇枠・赤文字装飾 */
+    /* 自力消滅アラート（残り試合オーバー時） */
     .badge-eliminated {
       background-color: #fff1f2;
       color: var(--badge-alert);
@@ -73,9 +74,34 @@
     }
     .badge-dash { color: #94a3b8; font-weight: 500; }
 
-    .legend {
-      margin-top: 12px; font-size: 0.8rem; color: var(--text-sub); display: flex; gap: 16px; justify-content: flex-end;
+    /* 注釈・凡例パネル */
+    .notes-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      font-size: 0.83rem;
+      line-height: 1.65;
+      color: #334155;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
+    .notes-title {
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: #1e293b;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .notes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .note-item dl { margin: 0; }
+    .note-item dt { font-weight: 700; color: #1e3a8a; margin-bottom: 2px; }
+    .note-item dd { margin: 0 0 8px 0; color: #475569; }
   </style>
 </head>
 <body>
@@ -83,7 +109,7 @@
   <div class="container">
     <header>
       <h1>NPB 自力確定クリンチナンバー解析</h1>
-      <p style="font-size: 0.85rem; color: var(--text-sub); margin-top: 4px;">全143試合制・直接対決H2H逆算・自力消滅アラート対応</p>
+      <p style="font-size: 0.85rem; color: var(--text-sub); margin-top: 4px;">全143試合制・直接対決（H2H）残日程を考慮した数理モデル</p>
     </header>
 
     <div class="control-panel">
@@ -123,11 +149,44 @@
       </table>
     </div>
 
-    <div class="legend">
-      <span><span class="badge badge-fixed">確定</span>：確定済</span>
-      <span><span class="badge badge-magic">12</span>：自力確定可能</span>
-      <span><span class="badge badge-eliminated">◇14◇</span>：自力消滅（可能性あり）</span>
-      <span><span class="badge-dash">-</span>：完全消滅</span>
+    <!-- 欄外注釈パネル -->
+    <div class="notes-card">
+      <div class="notes-title">
+        <span>ℹ️</span> 項目および表示記号の解説
+      </div>
+      <div class="notes-grid">
+        <div class="note-item">
+          <dl>
+            <dt>CS(優勝) / チャンピオンシップナンバー</dt>
+            <dd>リーグ1位（優勝）を確定させるために必要な勝利数です。首位以外のチームでも逆転優勝の可能性があれば算出されます。</dd>
+
+            <dt>2nd(本拠) / 2位以上確定ナンバー</dt>
+            <dd>クライマックスシリーズ（CS）第1ステージの本拠地主催権（2位以上）を確定させるために必要な勝利数です。</dd>
+
+            <dt>3rd(CS) / Aクラス進出確定ナンバー</dt>
+            <dd>CS進出（3位以上）を確定させるために必要な勝利数です。</dd>
+
+            <dt>4th / 5th(最下位回避)</dt>
+            <dd>それぞれ4位以上、最下位脱出（5位以上）を確定させるための必要勝利数です。</dd>
+          </dl>
+        </div>
+
+        <div class="note-item">
+          <dl>
+            <dt><span class="badge badge-fixed">確定</span></dt>
+            <dd>他チームが残り全勝しても自チームを逆転できない、数学的に順位が確定した状態です。</dd>
+
+            <dt><span class="badge badge-magic">12</span>（通常の数値）</dt>
+            <dd><strong>自力確定可能</strong>：残り試合数の範囲内で、自チームの勝利のみによって自力でその順位を確定できる必要勝利数です。</dd>
+
+            <dt><span class="badge badge-eliminated">◇14◇</span>（ひし形枠＋赤文字）</dt>
+            <dd><strong>自力確定消滅（可能性あり）</strong>：必要勝利数が残り試合数を超過している状態です。自チームの残り全勝に加えて、上位チームの敗戦アシスト（他力）が必要ですが、数学的な逆転可能性は残っています。</dd>
+
+            <dt><span class="badge-dash">-</span>（ハイフン）</dt>
+            <dd><strong>完全消滅（エリミネーション）</strong>：相手チームが残り全敗し、自チームが残り全勝しても届かない、可能性が完全に消滅した状態です。</dd>
+          </dl>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -139,7 +198,7 @@
     function renderBadge(val, remainingGames) {
       if (val === '確定') return `<span class="badge badge-fixed">確定</span>`;
       if (typeof val === 'number') {
-        // 必要勝利数が残り試合数を超えている場合は「◇14◇」として強調
+        // 必要勝利数が残り試合数を超えている場合は「◇14◇」としてアラート表示
         if (val > remainingGames) {
           return `<span class="badge badge-eliminated">◇${val}◇</span>`;
         }
