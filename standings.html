@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NPB クリンチナンバー・順位表</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-sub: #64748b;
+      --primary: #0284c7;
+      --badge-clinch: #10b981;
+      --badge-magic: #ef4444;
+      --badge-none: #cbd5e1;
+      --border: #e2e8f0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text-main); padding: 16px 12px 40px; }
+    .container { max-width: 900px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 20px; }
+    header h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
+    #update-time { font-size: 0.85rem; color: var(--text-sub); }
+
+    .tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 16px; }
+    .tab-btn {
+      padding: 8px 24px; border-radius: 20px; border: 1px solid var(--border);
+      background: #fff; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    }
+    .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    .table-wrapper {
+      background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border);
+      overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03);
+    }
+
+    table { width: 100%; border-collapse: collapse; min-width: 680px; text-align: center; font-size: 0.88rem; }
+    th, td { padding: 10px 8px; border-bottom: 1px solid var(--border); }
+    th { background-color: #f1f5f9; color: var(--text-sub); font-weight: 600; font-size: 0.8rem; }
+    tr:last-child td { border-bottom: none; }
+    
+    .team-col { text-align: left; font-weight: 700; }
+    .rank-cell { font-weight: 700; color: var(--text-sub); }
+    
+    .badge {
+      display: inline-block; min-width: 28px; padding: 2px 6px; border-radius: 12px;
+      font-size: 0.75rem; font-weight: 700; text-align: center;
+    }
+    .badge-fixed { background-color: #d1fae5; color: #065f46; }
+    .badge-num { background-color: #fee2e2; color: #991b1b; }
+    .badge-dash { color: var(--badge-none); }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>NPB クリンチナンバー・順位表</h1>
+      <p id="update-time">データ取得中...</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchLeague('central')">セ・リーグ</button>
+      <button class="tab-btn" onclick="switchLeague('pacific')">パ・リーグ</button>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>順位</th>
+            <th style="text-align:left;">球団</th>
+            <th>試</th>
+            <th>勝</th>
+            <th>敗</th>
+            <th>分</th>
+            <th>勝率</th>
+            <th>差</th>
+            <th>1st(優勝)</th>
+            <th>2nd(本拠)</th>
+            <th>3rd(CS)</th>
+            <th>4th</th>
+            <th>5th(最下位回避)</th>
+          </tr>
+        </thead>
+        <tbody id="standings-body">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let globalData = null;
+    let currentLeague = 'central';
+
+    function renderBadge(val) {
+      if (val === '確定') return `<span class="badge badge-fixed">確定</span>`;
+      if (typeof val === 'number') return `<span class="badge badge-num">M${val}</span>`;
+      return `<span class="badge-dash">-</span>`;
+    }
+
+    function renderTable() {
+      if (!globalData) return;
+      const list = globalData[currentLeague];
+      const tbody = document.getElementById('standings-body');
+      tbody.innerHTML = '';
+
+      list.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="rank-cell">${t.rank}</td>
+          <td class="team-col">${t.team}</td>
+          <td>${t.games}</td>
+          <td>${t.win}</td>
+          <td>${t.lose}</td>
+          <td>${t.draw}</td>
+          <td>${t.rate.toFixed(3)}</td>
+          <td>${t.diff}</td>
+          <td>${renderBadge(t.magic_1st)}</td>
+          <td>${renderBadge(t.magic_2nd)}</td>
+          <td>${renderBadge(t.magic_3rd)}</td>
+          <td>${renderBadge(t.magic_4th)}</td>
+          <td>${renderBadge(t.magic_5th)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function switchLeague(league) {
+      currentLeague = league;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      renderTable();
+    }
+
+    async function init() {
+      try {
+        const res = await fetch(`standings.json?t=${new Date().getTime()}`);
+        globalData = await res.json();
+        document.getElementById('update-time').textContent = `更新日時: ${globalData.updated_at}`;
+        renderTable();
+      } catch (err) {
+        document.getElementById('update-time').textContent = 'データ読み込みエラー';
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
