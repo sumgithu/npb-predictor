@@ -2,20 +2,28 @@
   "date": "2026-09-16",
   "matchups": [
     {
+      "home_team": "ロッテ",
+      "away_team": "ソフトバンク",
+      "home_starter": "山口航輝",
+      "away_starter": "藤原恭大",
+      "home_win_rate": 0.328,
+      "away_win_rate": 0.672
+    },
+    {
       "home_team": "楽天",
       "away_team": "ロッテ",
-      "home_starter": "未定",
-      "away_starter": "ライブ配信中",
+      "home_starter": "山口航輝",
+      "away_starter": "藤原恭大",
       "home_win_rate": 0.485,
       "away_win_rate": 0.515
     },
     {
-      "home_team": "ソフトバンク",
-      "away_team": "オリックス",
-      "home_starter": "未定",
-      "away_starter": "京セラD大阪",
-      "home_win_rate": 0.77,
-      "away_win_rate": 0.23
+      "home_team": "オリックス",
+      "away_team": "ソフトバンク",
+      "home_starter": "来田涼斗",
+      "away_starter": "太田椋",
+      "home_win_rate": 0.3,
+      "away_win_rate": 0.7
     }
   ]
 }
