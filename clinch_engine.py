@@ -66,6 +66,9 @@ def get_remaining_h2h(t1, t2, h2h_played, rem_1, rem_2):
     return max(0, min(max_games - played, rem_1, rem_2))
 
 def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
+    """
+    target_k: 1(CN/優勝), 2(2nd/本拠), 3(3rd/CS), 4(4th), 5(5th/最下位回避)
+    """
     ta = team_a["team"]
     rem_a = team_a["remaining"]
     a_max_win = team_a["win"] + rem_a
@@ -74,6 +77,8 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
 
     others = [ot for ot in all_teams if ot["team"] != ta]
 
+    # --- 1. 完全消滅（Elimination）判定 ---
+    # 他チームが残り全敗したときの最低保証成績が、自チーム全勝時の最高成績を上回っているチーム数を集計
     guaranteed_higher = 0
     for ot in others:
         ot_min_rate = calc_win_rate(ot["win"], ot["lose"] + ot["remaining"])
@@ -83,6 +88,7 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
     if guaranteed_higher >= target_k:
         return "-"
 
+    # --- 2. 完全確定（Clinched）判定 ---
     threats = 0
     for ot in others:
         ot_max_rate = calc_win_rate(ot["win"] + ot["remaining"], ot["lose"])
@@ -92,11 +98,19 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
     if threats < target_k:
         return "確定"
 
-    border = all_teams[target_k] if team_a["rank"] <= target_k else all_teams[target_k - 1]
+    # --- 3. クリンチナンバーの探索 ---
+    # 比較基準チーム（ボーダー）：
+    # target_k=1（優勝争い）の場合、自チームが2位以下ならターゲットは常に首位（all_teams[0]）
+    if target_k == 1:
+        border = all_teams[1] if team_a["rank"] == 1 else all_teams[0]
+    else:
+        border = all_teams[target_k] if team_a["rank"] <= target_k else all_teams[target_k - 1]
+
     tb = border["team"]
     rem_b = border["remaining"]
     rem_h2h = get_remaining_h2h(ta, tb, h2h_played, rem_a, rem_b)
 
+    # 自力確定探索 (0 〜 rem_a)
     magic = None
     for x in range(0, rem_a + 1):
         a_losses = rem_a - x
@@ -113,17 +127,22 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
     if magic is not None:
         return "確定" if magic == 0 else magic
 
+    # --- 4. 自力消滅だが可能性あり（逆転可能シナリオ） ---
+    # 首位が全勝ペースを維持したと仮定した際の数学的必要数（rem_a を超過する数値）
     b_abs_max_rate = calc_win_rate(border["win"] + rem_b, border["lose"])
-    for x in range(rem_a + 1, rem_a + 30):
+    for x in range(rem_a + 1, rem_a + 40):
         a_rate = calc_win_rate(team_a["win"] + x, team_a["lose"])
         if a_rate > b_abs_max_rate:
             return x
 
-    return "-"
+    # 相手が全勝ペースでは届かないが、相手の敗戦アシストで逆転可能な場合
+    return rem_a + 1
 
 def validate_and_assert_standings(teams):
     keys = ["magic_1st", "magic_2nd", "magic_3rd", "magic_4th", "magic_5th"]
+
     for t in teams:
+        # 上位目標確定なら下位も確定
         confirmed = False
         for k in keys:
             if t[k] == "確定":
@@ -131,6 +150,7 @@ def validate_and_assert_standings(teams):
             elif confirmed:
                 t[k] = "確定"
 
+        # 下位目標消滅なら上位も消滅
         eliminated = False
         for k in reversed(keys):
             if t[k] == "-":
@@ -138,6 +158,7 @@ def validate_and_assert_standings(teams):
             elif eliminated:
                 t[k] = "-"
 
+        # 単調性チェック
         last_val = 0
         for k in reversed(keys):
             val = t[k]
@@ -146,6 +167,7 @@ def validate_and_assert_standings(teams):
                     t[k] = last_val
                 else:
                     last_val = val
+
     return teams
 
 def build_all_history(games):
@@ -213,7 +235,6 @@ def build_all_history(games):
                 r = records[t]
                 r["remaining"] = TOTAL_GAMES - r["games"]
                 r["rate"] = calc_win_rate(r["win"], r["lose"])
-                # カード別対戦成績詳細を格納
                 r["h2h"] = {opp: h2h_details[t][opp] for opp in league_teams}
                 table.append(r)
             table.sort(key=lambda x: (x["rate"], x["win"]), reverse=True)
@@ -269,7 +290,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print("対戦マトリクス・ホームロード集計完了：history_standings.json 更新完了")
+    print("完全消滅判定修正完了：history_standings.json 更新完了")
 
 if __name__ == "__main__":
     main()
