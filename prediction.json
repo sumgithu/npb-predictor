@@ -4,18 +4,18 @@
     {
       "home_team": "楽天",
       "away_team": "ロッテ",
-      "home_starter": "未定",
-      "away_starter": "未定",
+      "home_starter": "岸",
+      "away_starter": "種市",
       "home_win_rate": 0.485,
       "away_win_rate": 0.515
     },
     {
       "home_team": "ソフトバンク",
       "away_team": "オリックス",
-      "home_starter": "未定",
-      "away_starter": "未定",
-      "home_win_rate": 0.77,
-      "away_win_rate": 0.23
+      "home_starter": "大津",
+      "away_starter": "エスピノーザ",
+      "home_win_rate": 0.65,
+      "away_win_rate": 0.35
     }
   ]
 }
