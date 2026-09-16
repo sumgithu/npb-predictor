@@ -232,16 +232,7 @@ def main():
     # 試合中止や試合なし日等でスクレイピングできなかった場合のフォールバック用ダミー
     if not matchups:
         print("試合予定が取得できなかったため、サンプルデータを生成します。")
-        matchups = [
-            {
-                "home_team": "阪神",
-                "away_team": "巨人",
-                "home_starter": "才木",
-                "away_starter": "戸郷",
-                "home_win_rate": 0.542,
-                "away_win_rate": 0.458,
-            }
-        ]
+        matchups = []
 
     output_data = {"date": today_str, "matchups": matchups}
 
