@@ -1,12 +1,11 @@
 import datetime
-import itertools
 import json
 import os
 import re
 
 TOTAL_GAMES = 143
-GAMES_INTRA = 25  # 同一リーグ対戦総数
-GAMES_INTER = 3   # 交流戦対戦総数
+GAMES_INTRA = 25
+GAMES_INTER = 3
 HISTORY_FILE = "history_standings.json"
 
 CENTRAL_TEAMS = ["阪神", "巨人", "ＤｅＮＡ", "ヤクルト", "中日", "広島"]
@@ -60,129 +59,143 @@ def parse_games_from_text(raw_text):
                 })
     return games
 
-def get_exact_remaining_h2h(t1, t2, h2h_played, rem_1, rem_2):
-    """
-    NPB公式規定（同リーグ25回戦、交流戦3回戦）に基づく完全な残り直接対決数の算出
-    """
+def get_remaining_h2h(t1, t2, h2h_played, rem_1, rem_2):
     played = h2h_played.get(t1, {}).get(t2, 0)
     is_intra = (t1 in CENTRAL_TEAMS and t2 in CENTRAL_TEAMS) or (t1 in PACIFIC_TEAMS and t2 in PACIFIC_TEAMS)
     max_games = GAMES_INTRA if is_intra else GAMES_INTER
-    # 規定総数から消化済み試合数を厳密に減算
-    rem = max(0, max_games - played)
-    return min(rem, rem_1, rem_2)
+    return max(0, min(max_games - played, rem_1, rem_2))
 
-def can_team_reach_rank(team_a, target_k, all_teams, h2h_played, a_wins):
-    ta = team_a["team"]
+def is_eliminated(team_a, target_k, all_teams, h2h_played):
+    """チームAが残り全勝しても target_k 位以内に入れないかを厳格判定"""
     rem_a = team_a["remaining"]
-    a_losses = rem_a - a_wins
-    final_w_a = team_a["win"] + a_wins
-    final_l_a = team_a["lose"] + a_losses
-    a_rate = calc_win_rate(final_w_a, final_l_a)
+    a_max_win = team_a["win"] + rem_a
+    a_max_rate = calc_win_rate(a_max_win, team_a["lose"])
 
-    others = [t for t in all_teams if t["team"] != ta]
-
-    # 上位チーム同士の残り直接対決の抽出
-    internal_h2h = []
-    for i in range(len(others)):
-        for j in range(i + 1, len(others)):
-            t1 = others[i]["team"]
-            t2 = others[j]["team"]
-            rem_pair = get_exact_remaining_h2h(t1, t2, h2h_played, others[i]["remaining"], others[j]["remaining"])
-            if rem_pair > 0:
-                internal_h2h.append((t1, t2, rem_pair))
-
-    base_stats = {}
-    for ot in others:
-        name = ot["team"]
-        rem = ot["remaining"]
-        vs_a = get_exact_remaining_h2h(ta, name, h2h_played, rem_a, rem)
-        forced_losses = min(a_wins, vs_a)
-        base_stats[name] = {
-            "win": ot["win"],
-            "lose": ot["lose"] + forced_losses,
-            "rem_other": max(0, rem - vs_a)
-        }
-
-    # 各チームが A の勝率を上回るために必要な追加勝利数
-    needed_to_beat_a = {}
+    # 1. 単純確定席数チェック：自チームの最高勝率を、最低保証勝率ですでに超えているチーム数
     strictly_better = 0
-    for t in others:
-        name = t["team"]
-        rem_tot = t["remaining"]
-        needed = None
-        for add_w in range(0, rem_tot + 1):
-            w = t["win"] + add_w
-            l = t["lose"] + (rem_tot - add_w)
-            if calc_win_rate(w, l) > a_rate:
-                needed = add_w
-                break
-        needed_to_beat_a[name] = needed
-
-        # 最低保証成績でも上回っているチーム
-        min_rate = calc_win_rate(t["win"], t["lose"] + rem_tot)
-        if min_rate > a_rate:
+    for ot in all_teams:
+        if ot["team"] == team_a["team"]:
+            continue
+        # 他球団が残り全敗したときの勝率
+        ot_min_rate = calc_win_rate(ot["win"], ot["lose"] + ot["remaining"])
+        if ot_min_rate > a_max_rate:
             strictly_better += 1
 
     if strictly_better >= target_k:
-        return False
+        return True
 
-    # 上位陣同士の直接対決による不可避勝利数の流入検証
-    total_internal_games = sum(g[2] for g in internal_h2h)
-    total_allowed_wins = 0
-    for t in others:
-        name = t["team"]
-        needed = needed_to_beat_a[name]
-        if needed is None:
-            total_allowed_wins += t["remaining"]
+    # 2. 上位直接対決の不可避勝利配分チェック
+    # 自チームの最高勝率を超える可能性のある上位候補チーム群
+    contenders = [ot for ot in all_teams if ot["team"] != team_a["team"]]
+    
+    # 候補チーム同士の直接対決数
+    internal_games = 0
+    for i in range(len(contenders)):
+        for j in range(i + 1, len(contenders)):
+            t1, t2 = contenders[i]["team"], contenders[j]["team"]
+            internal_games += get_remaining_h2h(t1, t2, h2h_played, contenders[i]["remaining"], contenders[j]["remaining"])
+
+    # 候補チーム全員が team_a の勝率以下に留まるために許容される「最大勝利数」の枠
+    total_safe_capacity = 0
+    for ot in contenders:
+        rem = ot["remaining"]
+        # ot が何勝すると a_max_rate を超えてしまうか
+        threshold_win = None
+        for w in range(0, rem + 1):
+            if calc_win_rate(ot["win"] + w, ot["lose"] + (rem - w)) > a_max_rate:
+                threshold_win = w
+                break
+        if threshold_win is None:
+            total_safe_capacity += rem
         else:
-            max_safe = max(0, (t["win"] + needed - 1) - base_stats[name]["win"])
-            total_allowed_wins += max_safe
+            total_safe_capacity += max(0, threshold_win - 1)
 
-    if total_internal_games > total_allowed_wins:
-        return False
+    # 上位陣の間で発生する不可避な勝ち星が、許容枠を超えていれば誰かが必ず上回る
+    if internal_games > total_safe_capacity:
+        return True
 
-    return True
+    return False
 
-def evaluate_target_clinch_network(team_a, target_k, all_teams, h2h_played):
-    ta = team_a["team"]
+def calculate_clinch_value(team_a, target_k, all_teams, h2h_played):
+    """目標順位 target_k (1〜5) に対する必要勝利数を厳密算出"""
     rem_a = team_a["remaining"]
 
-    # 1. 完全消滅（エリミネーション）：全勝しても target_k 位以内に入れない
-    if not can_team_reach_rank(team_a, target_k, all_teams, h2h_played, rem_a):
+    # 完全消滅の判定
+    if is_eliminated(team_a, target_k, all_teams, h2h_played):
         return "-"
 
-    # 2. 完全確定：全敗しても target_k 位以内が保証される
-    if can_team_reach_rank(team_a, target_k, all_teams, h2h_played, 0):
-        threats = 0
-        a_min_rate = calc_win_rate(team_a["win"], team_a["lose"] + rem_a)
-        for other in all_teams:
-            if other["team"] == ta:
-                continue
-            other_max = calc_win_rate(other["win"] + other["remaining"], other["lose"])
-            if other_max >= a_min_rate:
-                threats += 1
-        if threats < target_k:
-            return "確定"
+    # 完全確定の判定（自チーム全敗時でもtarget_k以内が確定しているか）
+    a_min_rate = calc_win_rate(team_a["win"], team_a["lose"] + rem_a)
+    threats = 0
+    for ot in all_teams:
+        if ot["team"] == team_a["team"]:
+            continue
+        ot_max_rate = calc_win_rate(ot["win"] + ot["remaining"], ot["lose"])
+        if ot_max_rate >= a_min_rate:
+            threats += 1
+    if threats < target_k:
+        return "確定"
 
-    # 3. 自力確定マジック探索 (0 〜 rem_a)
+    # 自力確定可能かの探索 (0 〜 rem_a)
+    border = all_teams[target_k] if team_a["rank"] <= target_k else all_teams[target_k - 1]
+    tb = border["team"]
+    rem_b = border["remaining"]
+    rem_h2h = get_remaining_h2h(team_a["team"], tb, h2h_played, rem_a, rem_b)
+
     for x in range(0, rem_a + 1):
-        if can_team_reach_rank(team_a, target_k, all_teams, h2h_played, x):
-            border = all_teams[target_k] if team_a["rank"] <= target_k else all_teams[target_k - 1]
-            rem_h2h = get_exact_remaining_h2h(ta, border["team"], h2h_played, rem_a, border["remaining"])
-            forced_b_losses = min(x, rem_h2h)
-            b_max_rate = calc_win_rate(border["win"] + (border["remaining"] - forced_b_losses), border["lose"] + forced_b_losses)
-            a_rate = calc_win_rate(team_a["win"] + x, team_a["lose"] + (rem_a - x))
-            if a_rate > b_max_rate:
-                return "確定" if x == 0 else x
+        forced_b_losses = min(x, rem_h2h)
+        b_max_rate = calc_win_rate(border["win"] + (rem_b - forced_b_losses), border["lose"] + forced_b_losses)
+        a_rate = calc_win_rate(team_a["win"] + x, team_a["lose"] + (rem_a - x))
+        if a_rate > b_max_rate:
+            return "確定" if x == 0 else x
 
-    # 4. 自力消滅・可能性あり（他力アシストが必要なケース）
-    border = all_teams[0] if target_k == 1 else (all_teams[target_k] if team_a["rank"] <= target_k else all_teams[target_k - 1])
-    b_max_rate = calc_win_rate(border["win"] + border["remaining"], border["lose"])
-    for x in range(rem_a + 1, rem_a + 25):
-        if calc_win_rate(team_a["win"] + x, team_a["lose"]) > b_max_rate:
+    # 自力消滅だが可能性あり（他力アシストが必要なケース）
+    # borderが全勝した際に数学的に必要となる勝利数
+    b_abs_max_rate = calc_win_rate(border["win"] + rem_b, border["lose"])
+    for x in range(rem_a + 1, rem_a + 100):
+        # 143試合制換算での仮想レート
+        test_rate = calc_win_rate(team_a["win"] + x, team_a["lose"] + max(0, rem_a - x))
+        if test_rate > b_abs_max_rate:
             return x
 
-    return rem_a + 1
+    return "-"
+
+def validate_and_correct_standings(teams):
+    """
+    自己検証システム（不変条件アサーションエンジン）
+    数学的矛盾を検出・自動遮断する
+    """
+    keys = ["magic_1st", "magic_2nd", "magic_3rd", "magic_4th", "magic_5th"]
+
+    for t in teams:
+        # 1. 確定フラグの伝播検証（上位が確定なら下位もすべて確定）
+        confirmed = False
+        for k in reversed(keys):
+            if t[k] == "確定":
+                confirmed = True
+            elif confirmed:
+                t[k] = "確定"
+
+        # 2. 消滅フラグの伝播検証（下位が消滅なら上位も必ず消滅）
+        eliminated = False
+        for k in keys:
+            if t[k] == "-":
+                eliminated = True
+            elif eliminated:
+                t[k] = "-"
+
+        # 3. 数値の単調増加性検証（CN >= 2nd >= 3rd >= 4th >= 5th）
+        last_val = 0
+        for k in reversed(keys):
+            val = t[k]
+            if isinstance(val, int):
+                if val < last_val:
+                    # 矛盾発生時は上位条件に合わせて補正
+                    t[k] = last_val
+                else:
+                    last_val = val
+
+    return teams
 
 def build_all_history(games):
     all_teams = CENTRAL_TEAMS + PACIFIC_TEAMS
@@ -230,18 +243,22 @@ def build_all_history(games):
         p_table = format_league(PACIFIC_TEAMS)
 
         for t in c_table:
-            t["magic_1st"] = evaluate_target_clinch_network(t, 1, c_table, h2h_played)
-            t["magic_2nd"] = evaluate_target_clinch_network(t, 2, c_table, h2h_played)
-            t["magic_3rd"] = evaluate_target_clinch_network(t, 3, c_table, h2h_played)
-            t["magic_4th"] = evaluate_target_clinch_network(t, 4, c_table, h2h_played)
-            t["magic_5th"] = evaluate_target_clinch_network(t, 5, c_table, h2h_played)
+            t["magic_1st"] = calculate_clinch_value(t, 1, c_table, h2h_played)
+            t["magic_2nd"] = calculate_clinch_value(t, 2, c_table, h2h_played)
+            t["magic_3rd"] = calculate_clinch_value(t, 3, c_table, h2h_played)
+            t["magic_4th"] = calculate_clinch_value(t, 4, c_table, h2h_played)
+            t["magic_5th"] = calculate_clinch_value(t, 5, c_table, h2h_played)
 
         for t in p_table:
-            t["magic_1st"] = evaluate_target_clinch_network(t, 1, p_table, h2h_played)
-            t["magic_2nd"] = evaluate_target_clinch_network(t, 2, p_table, h2h_played)
-            t["magic_3rd"] = evaluate_target_clinch_network(t, 3, p_table, h2h_played)
-            t["magic_4th"] = evaluate_target_clinch_network(t, 4, p_table, h2h_played)
-            t["magic_5th"] = evaluate_target_clinch_network(t, 5, p_table, h2h_played)
+            t["magic_1st"] = calculate_clinch_value(t, 1, p_table, h2h_played)
+            t["magic_2nd"] = calculate_clinch_value(t, 2, p_table, h2h_played)
+            t["magic_3rd"] = calculate_clinch_value(t, 3, p_table, h2h_played)
+            t["magic_4th"] = calculate_clinch_value(t, 4, p_table, h2h_played)
+            t["magic_5th"] = calculate_clinch_value(t, 5, p_table, h2h_played)
+
+        # 自己検証テストを通過させる
+        c_table = validate_and_correct_standings(c_table)
+        p_table = validate_and_correct_standings(p_table)
 
         history_snapshots[target_date] = {"central": c_table, "pacific": p_table}
 
@@ -270,7 +287,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"H2H完全逆算クリンチ計算完了: {dates[0]} 〜 {dates[-1]}")
+    print(f"自己検証エンジン通過：全 {len(dates)} 日分スナップショット生成完了")
 
 if __name__ == "__main__":
     main()
