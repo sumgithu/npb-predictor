@@ -22570,7 +22570,7 @@
           "rank": 3,
           "diff": 9.5,
           "magic_1st": 45,
-          "magic_2nd": 72,
+          "magic_2nd": 45,
           "magic_3rd": 36,
           "magic_4th": 32,
           "magic_5th": 34
@@ -23312,7 +23312,7 @@
           "magic_1st": 44,
           "magic_2nd": 44,
           "magic_3rd": 44,
-          "magic_4th": 70,
+          "magic_4th": 44,
           "magic_5th": 43
         }
       ]
@@ -23378,7 +23378,7 @@
           "rank": 4,
           "diff": 11.0,
           "magic_1st": 42,
-          "magic_2nd": 68,
+          "magic_2nd": 42,
           "magic_3rd": 34,
           "magic_4th": 29,
           "magic_5th": 31
@@ -23693,7 +23693,7 @@
           "magic_2nd": 39,
           "magic_3rd": 38,
           "magic_4th": 37,
-          "magic_5th": 22
+          "magic_5th": 23
         },
         {
           "team": "楽天",
@@ -23708,7 +23708,7 @@
           "magic_1st": 42,
           "magic_2nd": 42,
           "magic_3rd": 42,
-          "magic_4th": 68,
+          "magic_4th": 42,
           "magic_5th": 41
         }
       ]
@@ -23891,7 +23891,7 @@
           "magic_2nd": 40,
           "magic_3rd": 37,
           "magic_4th": 37,
-          "magic_5th": 22
+          "magic_5th": 23
         },
         {
           "team": "楽天",
@@ -23906,7 +23906,7 @@
           "magic_1st": 41,
           "magic_2nd": 41,
           "magic_3rd": 41,
-          "magic_4th": 67,
+          "magic_4th": 41,
           "magic_5th": 39
         }
       ]
@@ -24089,7 +24089,7 @@
           "magic_2nd": 39,
           "magic_3rd": 36,
           "magic_4th": 35,
-          "magic_5th": 21
+          "magic_5th": 22
         },
         {
           "team": "楽天",
@@ -24287,7 +24287,7 @@
           "magic_2nd": 57,
           "magic_3rd": 36,
           "magic_4th": 34,
-          "magic_5th": 20
+          "magic_5th": 22
         },
         {
           "team": "楽天",
@@ -24485,7 +24485,7 @@
           "magic_2nd": 59,
           "magic_3rd": 35,
           "magic_4th": 33,
-          "magic_5th": 21
+          "magic_5th": 22
         },
         {
           "team": "楽天",
@@ -24631,7 +24631,7 @@
           "rate": 0.5688073394495413,
           "rank": 2,
           "diff": 6.5,
-          "magic_1st": 58,
+          "magic_1st": 32,
           "magic_2nd": 25,
           "magic_3rd": 17,
           "magic_4th": 18,
@@ -24664,7 +24664,7 @@
           "rank": 4,
           "diff": 15.5,
           "magic_1st": 33,
-          "magic_2nd": 58,
+          "magic_2nd": 33,
           "magic_3rd": 52,
           "magic_4th": 28,
           "magic_5th": 19
@@ -25063,7 +25063,7 @@
           "magic_2nd": 54,
           "magic_3rd": 46,
           "magic_4th": 27,
-          "magic_5th": 16
+          "magic_5th": 17
         },
         {
           "team": "ロッテ",
@@ -25079,7 +25079,7 @@
           "magic_2nd": 56,
           "magic_3rd": 32,
           "magic_4th": 30,
-          "magic_5th": 19
+          "magic_5th": 20
         },
         {
           "team": "楽天",
@@ -25160,7 +25160,7 @@
           "rank": 4,
           "diff": 12.0,
           "magic_1st": 34,
-          "magic_2nd": 58,
+          "magic_2nd": 34,
           "magic_3rd": 28,
           "magic_4th": 21,
           "magic_5th": 24
@@ -25258,10 +25258,10 @@
           "rank": 4,
           "diff": 16.0,
           "magic_1st": 31,
-          "magic_2nd": 56,
+          "magic_2nd": 31,
           "magic_3rd": 48,
           "magic_4th": 27,
-          "magic_5th": 15
+          "magic_5th": 17
         },
         {
           "team": "ロッテ",
@@ -25277,7 +25277,7 @@
           "magic_2nd": 56,
           "magic_3rd": 32,
           "magic_4th": 29,
-          "magic_5th": 18
+          "magic_5th": 20
         },
         {
           "team": "楽天",
@@ -25293,7 +25293,7 @@
           "magic_2nd": 34,
           "magic_3rd": 34,
           "magic_4th": 55,
-          "magic_5th": 60
+          "magic_5th": 34
         }
       ]
     },
@@ -25390,7 +25390,7 @@
           "rank": 6,
           "diff": 16.0,
           "magic_1st": 36,
-          "magic_2nd": 62,
+          "magic_2nd": 36,
           "magic_3rd": 30,
           "magic_4th": 30,
           "magic_5th": 26
@@ -25423,7 +25423,7 @@
           "rate": 0.5752212389380531,
           "rank": 2,
           "diff": 5.5,
-          "magic_1st": 53,
+          "magic_1st": 28,
           "magic_2nd": 19,
           "magic_3rd": 14,
           "magic_4th": 15,
@@ -25456,10 +25456,10 @@
           "rank": 4,
           "diff": 15.0,
           "magic_1st": 30,
-          "magic_2nd": 55,
+          "magic_2nd": 30,
           "magic_3rd": 44,
           "magic_4th": 26,
-          "magic_5th": 13
+          "magic_5th": 16
         },
         {
           "team": "ロッテ",
@@ -25475,7 +25475,7 @@
           "magic_2nd": 55,
           "magic_3rd": 31,
           "magic_4th": 28,
-          "magic_5th": 16
+          "magic_5th": 19
         },
         {
           "team": "楽天",
@@ -25491,7 +25491,7 @@
           "magic_2nd": 33,
           "magic_3rd": 33,
           "magic_4th": 56,
-          "magic_5th": 61
+          "magic_5th": 33
         }
       ]
     },
@@ -25540,7 +25540,7 @@
           "rank": 3,
           "diff": 12.5,
           "magic_1st": 31,
-          "magic_2nd": 56,
+          "magic_2nd": 31,
           "magic_3rd": 24,
           "magic_4th": 21,
           "magic_5th": 24
@@ -25556,7 +25556,7 @@
           "rank": 4,
           "diff": 13.0,
           "magic_1st": 32,
-          "magic_2nd": 58,
+          "magic_2nd": 32,
           "magic_3rd": 26,
           "magic_4th": 22,
           "magic_5th": 24
@@ -25588,7 +25588,7 @@
           "rank": 6,
           "diff": 15.0,
           "magic_1st": 35,
-          "magic_2nd": 61,
+          "magic_2nd": 35,
           "magic_3rd": 29,
           "magic_4th": 28,
           "magic_5th": 25
@@ -25621,7 +25621,7 @@
           "rate": 0.5789473684210527,
           "rank": 2,
           "diff": 5.5,
-          "magic_1st": 52,
+          "magic_1st": 27,
           "magic_2nd": 18,
           "magic_3rd": 12,
           "magic_4th": 13,
@@ -25654,10 +25654,10 @@
           "rank": 4,
           "diff": 16.0,
           "magic_1st": 29,
-          "magic_2nd": 57,
+          "magic_2nd": 29,
           "magic_3rd": 43,
           "magic_4th": 25,
-          "magic_5th": 14
+          "magic_5th": 16
         },
         {
           "team": "ロッテ",
@@ -25673,7 +25673,7 @@
           "magic_2nd": 57,
           "magic_3rd": 30,
           "magic_4th": 27,
-          "magic_5th": 16
+          "magic_5th": 19
         },
         {
           "team": "楽天",
@@ -25689,7 +25689,7 @@
           "magic_2nd": 32,
           "magic_3rd": 32,
           "magic_4th": 52,
-          "magic_5th": 57
+          "magic_5th": 32
         }
       ]
     },
@@ -25738,7 +25738,7 @@
           "rank": 3,
           "diff": 12.5,
           "magic_1st": 30,
-          "magic_2nd": 58,
+          "magic_2nd": 30,
           "magic_3rd": 23,
           "magic_4th": 21,
           "magic_5th": 25
@@ -25786,7 +25786,7 @@
           "rank": 6,
           "diff": 14.0,
           "magic_1st": 34,
-          "magic_2nd": 60,
+          "magic_2nd": 34,
           "magic_3rd": 28,
           "magic_4th": 26,
           "magic_5th": 24
@@ -25819,7 +25819,7 @@
           "rate": 0.5739130434782609,
           "rank": 2,
           "diff": 5.5,
-          "magic_1st": 50,
+          "magic_1st": 26,
           "magic_2nd": 19,
           "magic_3rd": 12,
           "magic_4th": 13,
@@ -25852,10 +25852,10 @@
           "rank": 4,
           "diff": 15.0,
           "magic_1st": 28,
-          "magic_2nd": 52,
+          "magic_2nd": 28,
           "magic_3rd": 42,
           "magic_4th": 24,
-          "magic_5th": 13
+          "magic_5th": 15
         },
         {
           "team": "ロッテ",
@@ -25871,7 +25871,7 @@
           "magic_2nd": 53,
           "magic_3rd": 29,
           "magic_4th": 26,
-          "magic_5th": 14
+          "magic_5th": 18
         },
         {
           "team": "楽天",
@@ -25887,7 +25887,7 @@
           "magic_2nd": 31,
           "magic_3rd": 31,
           "magic_4th": 54,
-          "magic_5th": 59
+          "magic_5th": 31
         }
       ]
     },
@@ -25936,7 +25936,7 @@
           "rank": 3,
           "diff": 12.5,
           "magic_1st": 29,
-          "magic_2nd": 57,
+          "magic_2nd": 29,
           "magic_3rd": 21,
           "magic_4th": 20,
           "magic_5th": 24
@@ -26017,7 +26017,7 @@
           "rate": 0.5739130434782609,
           "rank": 2,
           "diff": 6.0,
-          "magic_1st": 50,
+          "magic_1st": 26,
           "magic_2nd": 19,
           "magic_3rd": 11,
           "magic_4th": 12,
@@ -26050,10 +26050,10 @@
           "rank": 4,
           "diff": 16.0,
           "magic_1st": 27,
-          "magic_2nd": 54,
+          "magic_2nd": 27,
           "magic_3rd": 44,
           "magic_4th": 23,
-          "magic_5th": 14
+          "magic_5th": 16
         },
         {
           "team": "ロッテ",
@@ -26069,7 +26069,7 @@
           "magic_2nd": 54,
           "magic_3rd": 29,
           "magic_4th": 25,
-          "magic_5th": 14
+          "magic_5th": 18
         },
         {
           "team": "楽天",
@@ -26085,7 +26085,7 @@
           "magic_2nd": 30,
           "magic_3rd": 30,
           "magic_4th": 50,
-          "magic_5th": 55
+          "magic_5th": 30
         }
       ]
     },
@@ -26134,7 +26134,7 @@
           "rank": 3,
           "diff": 12.5,
           "magic_1st": 28,
-          "magic_2nd": 53,
+          "magic_2nd": 28,
           "magic_3rd": 20,
           "magic_4th": 19,
           "magic_5th": 22
@@ -26150,7 +26150,7 @@
           "rank": 4,
           "diff": 14.0,
           "magic_1st": 29,
-          "magic_2nd": 57,
+          "magic_2nd": 29,
           "magic_3rd": 24,
           "magic_4th": 19,
           "magic_5th": 22
@@ -26215,7 +26215,7 @@
           "rate": 0.5775862068965517,
           "rank": 2,
           "diff": 6.0,
-          "magic_1st": 49,
+          "magic_1st": 25,
           "magic_2nd": 18,
           "magic_3rd": 9,
           "magic_4th": 10,
@@ -26251,7 +26251,7 @@
           "magic_2nd": 26,
           "magic_3rd": 45,
           "magic_4th": 22,
-          "magic_5th": 13
+          "magic_5th": 16
         },
         {
           "team": "ロッテ",
@@ -26264,10 +26264,10 @@
           "rank": 5,
           "diff": 18.0,
           "magic_1st": 31,
-          "magic_2nd": 56,
+          "magic_2nd": 31,
           "magic_3rd": 30,
           "magic_4th": 24,
-          "magic_5th": 13
+          "magic_5th": 18
         },
         {
           "team": "楽天",
@@ -26279,11 +26279,11 @@
           "rate": 0.39473684210526316,
           "rank": 6,
           "diff": 27.0,
-          "magic_1st": 29,
-          "magic_2nd": 29,
-          "magic_3rd": 29,
-          "magic_4th": 49,
-          "magic_5th": 53
+          "magic_1st": "-",
+          "magic_2nd": "-",
+          "magic_3rd": "-",
+          "magic_4th": "-",
+          "magic_5th": "-"
         }
       ]
     },
@@ -26348,7 +26348,7 @@
           "rank": 4,
           "diff": 14.0,
           "magic_1st": 28,
-          "magic_2nd": 53,
+          "magic_2nd": 28,
           "magic_3rd": 23,
           "magic_4th": 17,
           "magic_5th": 21
@@ -26380,7 +26380,7 @@
           "rank": 6,
           "diff": 17.0,
           "magic_1st": 31,
-          "magic_2nd": 59,
+          "magic_2nd": 31,
           "magic_3rd": 29,
           "magic_4th": 27,
           "magic_5th": 21
@@ -26449,7 +26449,7 @@
           "magic_2nd": 25,
           "magic_3rd": 44,
           "magic_4th": 20,
-          "magic_5th": 11
+          "magic_5th": 15
         },
         {
           "team": "ロッテ",
@@ -26462,10 +26462,10 @@
           "rank": 5,
           "diff": 18.0,
           "magic_1st": 30,
-          "magic_2nd": 58,
+          "magic_2nd": 30,
           "magic_3rd": 48,
           "magic_4th": 24,
-          "magic_5th": 12
+          "magic_5th": 19
         },
         {
           "team": "楽天",
@@ -26478,10 +26478,10 @@
           "rank": 6,
           "diff": 27.0,
           "magic_1st": "-",
-          "magic_2nd": 28,
-          "magic_3rd": 28,
-          "magic_4th": 50,
-          "magic_5th": 52
+          "magic_2nd": "-",
+          "magic_3rd": "-",
+          "magic_4th": "-",
+          "magic_5th": "-"
         }
       ]
     },
@@ -26546,7 +26546,7 @@
           "rank": 4,
           "diff": 15.0,
           "magic_1st": 27,
-          "magic_2nd": 52,
+          "magic_2nd": 27,
           "magic_3rd": 23,
           "magic_4th": 22,
           "magic_5th": 16
@@ -26562,10 +26562,10 @@
           "rank": 5,
           "diff": 17.0,
           "magic_1st": 30,
-          "magic_2nd": 55,
+          "magic_2nd": 30,
           "magic_3rd": 28,
           "magic_4th": 26,
-          "magic_5th": 19
+          "magic_5th": 20
         },
         {
           "team": "中日",
@@ -26647,7 +26647,7 @@
           "magic_2nd": 24,
           "magic_3rd": 46,
           "magic_4th": 19,
-          "magic_5th": 10
+          "magic_5th": 15
         },
         {
           "team": "ロッテ",
@@ -26663,7 +26663,7 @@
           "magic_2nd": 29,
           "magic_3rd": 49,
           "magic_4th": 23,
-          "magic_5th": 11
+          "magic_5th": 19
         },
         {
           "team": "楽天",
@@ -26676,10 +26676,10 @@
           "rank": 6,
           "diff": 28.0,
           "magic_1st": "-",
-          "magic_2nd": 27,
-          "magic_3rd": 27,
-          "magic_4th": 49,
-          "magic_5th": 50
+          "magic_2nd": "-",
+          "magic_3rd": "-",
+          "magic_4th": "-",
+          "magic_5th": "-"
         }
       ]
     },
@@ -26744,10 +26744,10 @@
           "rank": 4,
           "diff": 16.0,
           "magic_1st": 26,
-          "magic_2nd": 53,
+          "magic_2nd": 26,
           "magic_3rd": 22,
           "magic_4th": 22,
-          "magic_5th": 15
+          "magic_5th": 16
         },
         {
           "team": "広島",
@@ -26760,7 +26760,7 @@
           "rank": 5,
           "diff": 17.0,
           "magic_1st": 29,
-          "magic_2nd": 54,
+          "magic_2nd": 29,
           "magic_3rd": 26,
           "magic_4th": 24,
           "magic_5th": 18
@@ -26825,7 +26825,7 @@
           "rate": 0.5619834710743802,
           "rank": 3,
           "diff": 7.0,
-          "magic_1st": 49,
+          "magic_1st": 22,
           "magic_2nd": 21,
           "magic_3rd": 8,
           "magic_4th": 10,
@@ -26843,9 +26843,9 @@
           "diff": 17.0,
           "magic_1st": 23,
           "magic_2nd": 23,
-          "magic_3rd": 48,
+          "magic_3rd": 23,
           "magic_4th": 19,
-          "magic_5th": 11
+          "magic_5th": 15
         },
         {
           "team": "ロッテ",
@@ -26858,10 +26858,10 @@
           "rank": 5,
           "diff": 18.0,
           "magic_1st": 28,
-          "magic_2nd": 56,
+          "magic_2nd": 28,
           "magic_3rd": 48,
           "magic_4th": 21,
-          "magic_5th": 10
+          "magic_5th": 18
         },
         {
           "team": "楽天",
@@ -26874,10 +26874,10 @@
           "rank": 6,
           "diff": 27.0,
           "magic_1st": "-",
-          "magic_2nd": 26,
-          "magic_3rd": 26,
-          "magic_4th": 45,
-          "magic_5th": 49
+          "magic_2nd": "-",
+          "magic_3rd": "-",
+          "magic_4th": "-",
+          "magic_5th": "-"
         }
       ]
     },
@@ -26942,10 +26942,10 @@
           "rank": 4,
           "diff": 15.0,
           "magic_1st": 25,
-          "magic_2nd": 49,
+          "magic_2nd": 25,
           "magic_3rd": 21,
           "magic_4th": 20,
-          "magic_5th": 14
+          "magic_5th": 15
         },
         {
           "team": "広島",
@@ -26958,7 +26958,7 @@
           "rank": 5,
           "diff": 17.0,
           "magic_1st": 28,
-          "magic_2nd": 53,
+          "magic_2nd": 28,
           "magic_3rd": 26,
           "magic_4th": 24,
           "magic_5th": 19
@@ -27023,7 +27023,7 @@
           "rate": 0.5619834710743802,
           "rank": 3,
           "diff": 7.0,
-          "magic_1st": 48,
+          "magic_1st": 21,
           "magic_2nd": 20,
           "magic_3rd": 7,
           "magic_4th": 9,
@@ -27041,9 +27041,9 @@
           "diff": 17.5,
           "magic_1st": 22,
           "magic_2nd": 22,
-          "magic_3rd": 48,
+          "magic_3rd": 22,
           "magic_4th": 19,
-          "magic_5th": 12
+          "magic_5th": 15
         },
         {
           "team": "ロッテ",
@@ -27056,10 +27056,10 @@
           "rank": 5,
           "diff": 18.0,
           "magic_1st": 28,
-          "magic_2nd": 56,
+          "magic_2nd": 28,
           "magic_3rd": 47,
           "magic_4th": 20,
-          "magic_5th": 10
+          "magic_5th": 18
         },
         {
           "team": "楽天",
@@ -27072,10 +27072,10 @@
           "rank": 6,
           "diff": 26.5,
           "magic_1st": "-",
-          "magic_2nd": 25,
-          "magic_3rd": 25,
-          "magic_4th": 41,
-          "magic_5th": 48
+          "magic_2nd": "-",
+          "magic_3rd": "-",
+          "magic_4th": "-",
+          "magic_5th": "-"
         }
       ]
     },
@@ -27140,10 +27140,10 @@
           "rank": 4,
           "diff": 16.0,
           "magic_1st": 24,
-          "magic_2nd": 51,
+          "magic_2nd": 24,
           "magic_3rd": 21,
           "magic_4th": 20,
-          "magic_5th": 13
+          "magic_5th": 15
         },
         {
           "team": "広島",
@@ -27156,7 +27156,7 @@
           "rank": 5,
           "diff": 17.0,
           "magic_1st": 27,
-          "magic_2nd": 52,
+          "magic_2nd": 27,
           "magic_3rd": 25,
           "magic_4th": 22,
           "magic_5th": 18
@@ -27221,7 +27221,7 @@
           "rate": 0.5619834710743802,
           "rank": 3,
           "diff": 7.0,
-          "magic_1st": 48,
+          "magic_1st": 21,
           "magic_2nd": 20,
           "magic_3rd": 7,
           "magic_4th": 9,
@@ -27239,9 +27239,9 @@
           "diff": 17.5,
           "magic_1st": 22,
           "magic_2nd": 22,
-          "magic_3rd": 48,
+          "magic_3rd": 22,
           "magic_4th": 19,
-          "magic_5th": 12
+          "magic_5th": 15
         },
         {
           "team": "ロッテ",
@@ -27254,10 +27254,10 @@
           "rank": 5,
           "diff": 18.0,
           "magic_1st": 28,
-          "magic_2nd": 56,
+          "magic_2nd": 28,
           "magic_3rd": 47,
           "magic_4th": 20,
-          "magic_5th": 10
+          "magic_5th": 18
         },
         {
           "team": "楽天",
@@ -27270,10 +27270,10 @@
           "rank": 6,
           "diff": 26.5,
           "magic_1st": "-",
-          "magic_2nd": 25,
-          "magic_3rd": 25,
-          "magic_4th": 41,
-          "magic_5th": 48
+          "magic_2nd": "-",
+          "magic_3rd": "-",
+          "magic_4th": "-",
+          "magic_5th": "-"
         }
       ]
     },
@@ -27338,10 +27338,10 @@
           "rank": 4,
           "diff": 16.0,
           "magic_1st": 23,
-          "magic_2nd": 51,
+          "magic_2nd": 23,
           "magic_3rd": 20,
           "magic_4th": 19,
-          "magic_5th": 13
+          "magic_5th": 14
         },
         {
           "team": "広島",
@@ -27354,7 +27354,7 @@
           "rank": 5,
           "diff": 17.5,
           "magic_1st": 26,
-          "magic_2nd": 53,
+          "magic_2nd": 26,
           "magic_3rd": 25,
           "magic_4th": 21,
           "magic_5th": 18
@@ -27419,7 +27419,7 @@
           "rate": 0.5655737704918032,
           "rank": 3,
           "diff": 7.0,
-          "magic_1st": 47,
+          "magic_1st": 20,
           "magic_2nd": 18,
           "magic_3rd": 6,
           "magic_4th": 7,
@@ -27437,9 +27437,9 @@
           "diff": 17.5,
           "magic_1st": 21,
           "magic_2nd": 21,
-          "magic_3rd": 47,
+          "magic_3rd": 21,
           "magic_4th": 18,
-          "magic_5th": 10
+          "magic_5th": 14
         },
         {
           "team": "ロッテ",
@@ -27452,10 +27452,10 @@
           "rank": 5,
           "diff": 19.0,
           "magic_1st": 27,
-          "magic_2nd": 54,
+          "magic_2nd": 27,
           "magic_3rd": 49,
           "magic_4th": 21,
-          "magic_5th": 9
+          "magic_5th": 18
         },
         {
           "team": "楽天",
@@ -27468,10 +27468,10 @@
           "rank": 6,
           "diff": 27.5,
           "magic_1st": "-",
-          "magic_2nd": 24,
-          "magic_3rd": 24,
-          "magic_4th": 43,
-          "magic_5th": 47
+          "magic_2nd": "-",
+          "magic_3rd": "-",
+          "magic_4th": "-",
+          "magic_5th": "-"
         }
       ]
     },
@@ -27601,7 +27601,7 @@
           "rate": 0.5702479338842975,
           "rank": 2,
           "diff": 7.0,
-          "magic_1st": 45,
+          "magic_1st": 20,
           "magic_2nd": 16,
           "magic_3rd": 5,
           "magic_4th": 5,
@@ -27617,7 +27617,7 @@
           "rate": 0.5691056910569106,
           "rank": 3,
           "diff": 7.0,
-          "magic_1st": 46,
+          "magic_1st": 19,
           "magic_2nd": 16,
           "magic_3rd": 5,
           "magic_4th": 5,
@@ -27634,10 +27634,10 @@
           "rank": 4,
           "diff": 17.5,
           "magic_1st": 20,
-          "magic_2nd": 48,
-          "magic_3rd": 46,
+          "magic_2nd": 20,
+          "magic_3rd": 20,
           "magic_4th": 17,
-          "magic_5th": 8
+          "magic_5th": 13
         },
         {
           "team": "ロッテ",
@@ -27650,10 +27650,10 @@
           "rank": 5,
           "diff": 20.0,
           "magic_1st": 26,
-          "magic_2nd": 52,
-          "magic_3rd": 50,
+          "magic_2nd": 26,
+          "magic_3rd": 26,
           "magic_4th": 22,
-          "magic_5th": 8
+          "magic_5th": 18
         },
         {
           "team": "楽天",
@@ -27668,8 +27668,8 @@
           "magic_1st": "-",
           "magic_2nd": "-",
           "magic_3rd": "-",
-          "magic_4th": 44,
-          "magic_5th": 45
+          "magic_4th": "-",
+          "magic_5th": "-"
         }
       ]
     },
@@ -27835,7 +27835,7 @@
           "magic_2nd": 19,
           "magic_3rd": 19,
           "magic_4th": 18,
-          "magic_5th": 7
+          "magic_5th": 14
         },
         {
           "team": "ロッテ",
@@ -27848,10 +27848,10 @@
           "rank": 5,
           "diff": 19.0,
           "magic_1st": 25,
-          "magic_2nd": 51,
-          "magic_3rd": 49,
+          "magic_2nd": 25,
+          "magic_3rd": 25,
           "magic_4th": 21,
-          "magic_5th": 7
+          "magic_5th": 18
         },
         {
           "team": "楽天",
@@ -27866,8 +27866,8 @@
           "magic_1st": "-",
           "magic_2nd": "-",
           "magic_3rd": "-",
-          "magic_4th": 43,
-          "magic_5th": 47
+          "magic_4th": "-",
+          "magic_5th": "-"
         }
       ]
     },
@@ -27932,7 +27932,7 @@
           "rank": 4,
           "diff": 15.0,
           "magic_1st": 21,
-          "magic_2nd": 48,
+          "magic_2nd": 21,
           "magic_3rd": 19,
           "magic_4th": 13,
           "magic_5th": 15
@@ -28013,7 +28013,7 @@
           "rate": 0.568,
           "rank": 3,
           "diff": 7.0,
-          "magic_1st": 44,
+          "magic_1st": 17,
           "magic_2nd": 15,
           "magic_3rd": 3,
           "magic_4th": 4,
@@ -28031,9 +28031,9 @@
           "diff": 18.5,
           "magic_1st": "-",
           "magic_2nd": 18,
-          "magic_3rd": 46,
+          "magic_3rd": 18,
           "magic_4th": 23,
-          "magic_5th": 6
+          "magic_5th": 14
         },
         {
           "team": "ロッテ",
@@ -28046,10 +28046,10 @@
           "rank": 5,
           "diff": 19.0,
           "magic_1st": 24,
-          "magic_2nd": 50,
+          "magic_2nd": 24,
           "magic_3rd": 45,
           "magic_4th": 19,
-          "magic_5th": 6
+          "magic_5th": 17
         },
         {
           "team": "楽天",
@@ -28064,8 +28064,8 @@
           "magic_1st": "-",
           "magic_2nd": "-",
           "magic_3rd": "-",
-          "magic_4th": 41,
-          "magic_5th": 48
+          "magic_4th": "-",
+          "magic_5th": "-"
         }
       ]
     },
@@ -28113,7 +28113,7 @@
           "rate": 0.4793388429752066,
           "rank": 3,
           "diff": 10.5,
-          "magic_1st": 48,
+          "magic_1st": 20,
           "magic_2nd": 38,
           "magic_3rd": 11,
           "magic_4th": 9,
@@ -28132,7 +28132,7 @@
           "magic_1st": 20,
           "magic_2nd": 20,
           "magic_3rd": 30,
-          "magic_4th": 12,
+          "magic_4th": 13,
           "magic_5th": 15
         },
         {
@@ -28165,7 +28165,7 @@
           "magic_2nd": 23,
           "magic_3rd": 32,
           "magic_4th": 19,
-          "magic_5th": 16
+          "magic_5th": 17
         }
       ],
       "pacific": [
@@ -28228,10 +28228,10 @@
           "rank": 4,
           "diff": 19.0,
           "magic_1st": 23,
-          "magic_2nd": 49,
+          "magic_2nd": 23,
           "magic_3rd": 41,
           "magic_4th": 17,
-          "magic_5th": 5
+          "magic_5th": 15
         },
         {
           "team": "オリックス",
@@ -28245,9 +28245,9 @@
           "diff": 19.5,
           "magic_1st": "-",
           "magic_2nd": 17,
-          "magic_3rd": 45,
+          "magic_3rd": 17,
           "magic_4th": 25,
-          "magic_5th": 5
+          "magic_5th": 14
         },
         {
           "team": "楽天",
@@ -28262,8 +28262,8 @@
           "magic_1st": "-",
           "magic_2nd": "-",
           "magic_3rd": "-",
-          "magic_4th": 20,
-          "magic_5th": 40
+          "magic_4th": "-",
+          "magic_5th": "-"
         }
       ]
     },
@@ -28311,7 +28311,7 @@
           "rate": 0.48360655737704916,
           "rank": 3,
           "diff": 10.0,
-          "magic_1st": 47,
+          "magic_1st": 19,
           "magic_2nd": 37,
           "magic_3rd": 10,
           "magic_4th": 10,
@@ -28331,7 +28331,7 @@
           "magic_2nd": 19,
           "magic_3rd": 31,
           "magic_4th": 15,
-          "magic_5th": 11
+          "magic_5th": 13
         },
         {
           "team": "広島",
@@ -28347,7 +28347,7 @@
           "magic_2nd": 23,
           "magic_3rd": 32,
           "magic_4th": 18,
-          "magic_5th": 15
+          "magic_5th": 17
         },
         {
           "team": "中日",
@@ -28361,9 +28361,9 @@
           "diff": 17.5,
           "magic_1st": "-",
           "magic_2nd": "-",
-          "magic_3rd": 36,
-          "magic_4th": 23,
-          "magic_5th": 25
+          "magic_3rd": "-",
+          "magic_4th": "-",
+          "magic_5th": "-"
         }
       ],
       "pacific": [
@@ -28426,10 +28426,10 @@
           "rank": 4,
           "diff": 19.0,
           "magic_1st": 22,
-          "magic_2nd": 48,
+          "magic_2nd": 22,
           "magic_3rd": 38,
           "magic_4th": 15,
-          "magic_5th": 4
+          "magic_5th": 13
         },
         {
           "team": "オリックス",
@@ -28443,9 +28443,9 @@
           "diff": 20.5,
           "magic_1st": "-",
           "magic_2nd": 16,
-          "magic_3rd": 43,
+          "magic_3rd": 16,
           "magic_4th": 26,
-          "magic_5th": 4
+          "magic_5th": 14
         },
         {
           "team": "楽天",
@@ -28460,8 +28460,8 @@
           "magic_1st": "-",
           "magic_2nd": "-",
           "magic_3rd": "-",
-          "magic_4th": 19,
-          "magic_5th": 39
+          "magic_4th": "-",
+          "magic_5th": "-"
         }
       ]
     },
@@ -28509,7 +28509,7 @@
           "rate": 0.4878048780487805,
           "rank": 3,
           "diff": 9.5,
-          "magic_1st": 46,
+          "magic_1st": 18,
           "magic_2nd": 36,
           "magic_3rd": 9,
           "magic_4th": 6,
@@ -28528,7 +28528,7 @@
           "magic_1st": 19,
           "magic_2nd": 19,
           "magic_3rd": 31,
-          "magic_4th": 11,
+          "magic_4th": 13,
           "magic_5th": 14
         },
         {
@@ -28543,9 +28543,9 @@
           "diff": 17.5,
           "magic_1st": "-",
           "magic_2nd": "-",
-          "magic_3rd": 36,
-          "magic_4th": 23,
-          "magic_5th": 23
+          "magic_3rd": "-",
+          "magic_4th": "-",
+          "magic_5th": "-"
         },
         {
           "team": "広島",
@@ -28561,7 +28561,7 @@
           "magic_2nd": 22,
           "magic_3rd": 34,
           "magic_4th": 18,
-          "magic_5th": 15
+          "magic_5th": 17
         }
       ],
       "pacific": [
@@ -28591,7 +28591,7 @@
           "rate": 0.5793650793650794,
           "rank": 2,
           "diff": 7.0,
-          "magic_1st": 39,
+          "magic_1st": 15,
           "magic_2nd": 9,
           "magic_3rd": 3,
           "magic_4th": 1,
@@ -28624,10 +28624,10 @@
           "rank": 4,
           "diff": 20.0,
           "magic_1st": "-",
-          "magic_2nd": 47,
+          "magic_2nd": 21,
           "magic_3rd": 39,
           "magic_4th": 15,
-          "magic_5th": 4
+          "magic_5th": 13
         },
         {
           "team": "オリックス",
@@ -28641,9 +28641,9 @@
           "diff": 20.5,
           "magic_1st": "-",
           "magic_2nd": 15,
-          "magic_3rd": 42,
+          "magic_3rd": 15,
           "magic_4th": 22,
-          "magic_5th": 3
+          "magic_5th": 13
         },
         {
           "team": "楽天",
@@ -28658,8 +28658,8 @@
           "magic_1st": "-",
           "magic_2nd": "-",
           "magic_3rd": "-",
-          "magic_4th": 19,
-          "magic_5th": 39
+          "magic_4th": "-",
+          "magic_5th": "-"
         }
       ]
     },
@@ -28707,7 +28707,7 @@
           "rate": 0.49193548387096775,
           "rank": 3,
           "diff": 8.5,
-          "magic_1st": 42,
+          "magic_1st": 17,
           "magic_2nd": 35,
           "magic_3rd": 8,
           "magic_4th": 4,
@@ -28726,7 +28726,7 @@
           "magic_1st": 18,
           "magic_2nd": 18,
           "magic_3rd": 30,
-          "magic_4th": 10,
+          "magic_4th": 12,
           "magic_5th": 12
         },
         {
@@ -28741,9 +28741,9 @@
           "diff": 17.5,
           "magic_1st": "-",
           "magic_2nd": "-",
-          "magic_3rd": 37,
-          "magic_4th": 24,
-          "magic_5th": 22
+          "magic_3rd": "-",
+          "magic_4th": "-",
+          "magic_5th": "-"
         },
         {
           "team": "広島",
@@ -28759,7 +28759,7 @@
           "magic_2nd": 21,
           "magic_3rd": 35,
           "magic_4th": 18,
-          "magic_5th": 14
+          "magic_5th": 17
         }
       ],
       "pacific": [
@@ -28789,7 +28789,7 @@
           "rate": 0.5793650793650794,
           "rank": 2,
           "diff": 7.5,
-          "magic_1st": 39,
+          "magic_1st": 14,
           "magic_2nd": 9,
           "magic_3rd": "確定",
           "magic_4th": "確定",
@@ -28823,9 +28823,9 @@
           "diff": 20.5,
           "magic_1st": "-",
           "magic_2nd": "-",
-          "magic_3rd": 40,
+          "magic_3rd": 14,
           "magic_4th": 19,
-          "magic_5th": 2
+          "magic_5th": 12
         },
         {
           "team": "ロッテ",
@@ -28838,10 +28838,10 @@
           "rank": 5,
           "diff": 21.0,
           "magic_1st": "-",
-          "magic_2nd": 47,
+          "magic_2nd": 20,
           "magic_3rd": 40,
           "magic_4th": 15,
-          "magic_5th": 4
+          "magic_5th": 13
         },
         {
           "team": "楽天",
@@ -28856,8 +28856,8 @@
           "magic_1st": "-",
           "magic_2nd": "-",
           "magic_3rd": "-",
-          "magic_4th": 40,
-          "magic_5th": 46
+          "magic_4th": "-",
+          "magic_5th": "-"
         }
       ]
     },
@@ -28924,7 +28924,7 @@
           "magic_1st": 17,
           "magic_2nd": 17,
           "magic_3rd": 29,
-          "magic_4th": 9,
+          "magic_4th": 11,
           "magic_5th": 11
         },
         {
@@ -28939,9 +28939,9 @@
           "diff": 16.5,
           "magic_1st": "-",
           "magic_2nd": "-",
-          "magic_3rd": 36,
-          "magic_4th": 23,
-          "magic_5th": 12
+          "magic_3rd": "-",
+          "magic_4th": "-",
+          "magic_5th": "-"
         },
         {
           "team": "広島",
@@ -28957,7 +28957,7 @@
           "magic_2nd": 20,
           "magic_3rd": 36,
           "magic_4th": 19,
-          "magic_5th": 14
+          "magic_5th": 17
         }
       ],
       "pacific": [
@@ -29021,9 +29021,9 @@
           "diff": 21.0,
           "magic_1st": "-",
           "magic_2nd": "-",
-          "magic_3rd": 40,
+          "magic_3rd": 14,
           "magic_4th": 13,
-          "magic_5th": 2
+          "magic_5th": 10
         },
         {
           "team": "ロッテ",
@@ -29036,10 +29036,10 @@
           "rank": 5,
           "diff": 22.0,
           "magic_1st": "-",
-          "magic_2nd": 46,
+          "magic_2nd": 19,
           "magic_3rd": 41,
           "magic_4th": 15,
-          "magic_5th": 4
+          "magic_5th": 12
         },
         {
           "team": "楽天",
@@ -29054,8 +29054,8 @@
           "magic_1st": "-",
           "magic_2nd": "-",
           "magic_3rd": "-",
-          "magic_4th": 40,
-          "magic_5th": 44
+          "magic_4th": "-",
+          "magic_5th": "-"
         }
       ]
     },
@@ -29122,7 +29122,7 @@
           "magic_1st": 16,
           "magic_2nd": 16,
           "magic_3rd": 30,
-          "magic_4th": 9,
+          "magic_4th": 11,
           "magic_5th": 12
         },
         {
@@ -29137,9 +29137,9 @@
           "diff": 15.5,
           "magic_1st": "-",
           "magic_2nd": "-",
-          "magic_3rd": 35,
-          "magic_4th": 20,
-          "magic_5th": 11
+          "magic_3rd": "-",
+          "magic_4th": "-",
+          "magic_5th": "-"
         },
         {
           "team": "広島",
@@ -29155,7 +29155,7 @@
           "magic_2nd": 19,
           "magic_3rd": 35,
           "magic_4th": 18,
-          "magic_5th": 13
+          "magic_5th": 16
         }
       ],
       "pacific": [
@@ -29219,9 +29219,9 @@
           "diff": 21.0,
           "magic_1st": "-",
           "magic_2nd": "-",
-          "magic_3rd": 40,
+          "magic_3rd": 14,
           "magic_4th": 13,
-          "magic_5th": 2
+          "magic_5th": 10
         },
         {
           "team": "ロッテ",
@@ -29234,10 +29234,10 @@
           "rank": 5,
           "diff": 22.0,
           "magic_1st": "-",
-          "magic_2nd": 46,
+          "magic_2nd": 19,
           "magic_3rd": 41,
           "magic_4th": 15,
-          "magic_5th": 4
+          "magic_5th": 12
         },
         {
           "team": "楽天",
@@ -29252,8 +29252,8 @@
           "magic_1st": "-",
           "magic_2nd": "-",
           "magic_3rd": "-",
-          "magic_4th": 40,
-          "magic_5th": 44
+          "magic_4th": "-",
+          "magic_5th": "-"
         }
       ]
     },
@@ -29318,9 +29318,9 @@
           "rank": 4,
           "diff": 13.5,
           "magic_1st": 15,
-          "magic_2nd": 43,
+          "magic_2nd": 15,
           "magic_3rd": 31,
-          "magic_4th": 9,
+          "magic_4th": 12,
           "magic_5th": 13
         },
         {
@@ -29335,9 +29335,9 @@
           "diff": 14.5,
           "magic_1st": "-",
           "magic_2nd": "-",
-          "magic_3rd": 34,
-          "magic_4th": 16,
-          "magic_5th": 10
+          "magic_3rd": "-",
+          "magic_4th": "-",
+          "magic_5th": "-"
         },
         {
           "team": "広島",
@@ -29350,10 +29350,10 @@
           "rank": 6,
           "diff": 15.0,
           "magic_1st": "-",
-          "magic_2nd": 46,
+          "magic_2nd": 18,
           "magic_3rd": 34,
           "magic_4th": 17,
-          "magic_5th": 12
+          "magic_5th": 15
         }
       ],
       "pacific": [
@@ -29417,9 +29417,9 @@
           "diff": 22.0,
           "magic_1st": "-",
           "magic_2nd": "-",
-          "magic_3rd": 39,
+          "magic_3rd": 13,
           "magic_4th": 18,
-          "magic_5th": 2
+          "magic_5th": 10
         },
         {
           "team": "ロッテ",
@@ -29432,10 +29432,10 @@
           "rank": 5,
           "diff": 22.0,
           "magic_1st": "-",
-          "magic_2nd": 42,
+          "magic_2nd": 18,
           "magic_3rd": 37,
           "magic_4th": 13,
-          "magic_5th": 3
+          "magic_5th": 10
         },
         {
           "team": "楽天",
@@ -29450,8 +29450,8 @@
           "magic_1st": "-",
           "magic_2nd": "-",
           "magic_3rd": "-",
-          "magic_4th": 36,
-          "magic_5th": 43
+          "magic_4th": "-",
+          "magic_5th": "-"
         }
       ]
     }
