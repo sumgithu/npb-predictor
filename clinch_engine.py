@@ -77,7 +77,7 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
 
     others = [ot for ot in all_teams if ot["team"] != ta]
 
-    # --- 1. 完全消滅（Elimination）判定 ---
+    # --- 1. 完全消滅判定 ---
     guaranteed_higher = 0
     for ot in others:
         ot_min_rate = calc_win_rate(ot["win"], ot["lose"] + ot["remaining"])
@@ -87,6 +87,7 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
     if guaranteed_higher >= target_k:
         return "-"
 
+    # 上位候補内部対決による不可避勝利判定
     contenders = [ot for ot in others if calc_win_rate(ot["win"] + ot["remaining"], ot["lose"]) > a_max_rate]
     internal_games = 0
     for i in range(len(contenders)):
@@ -106,7 +107,7 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
     if len(contenders) >= target_k and internal_games > total_safe_capacity:
         return "-"
 
-    # --- 2. 完全確定（Clinched）判定 ---
+    # --- 2. 完全確定判定 ---
     threats = 0
     for ot in others:
         ot_max_rate = calc_win_rate(ot["win"] + ot["remaining"], ot["lose"])
@@ -116,22 +117,26 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
     if threats < target_k:
         return "確定"
 
-    # --- 3. クリンチナンバー（必要勝利数）の算出 ---
+    # --- 3. クリンチナンバー（必要自力勝利数）の厳密算出 ---
     border = all_teams[target_k] if team_a["rank"] <= target_k else all_teams[target_k - 1]
     tb = border["team"]
     rem_b = border["remaining"]
     rem_h2h = get_remaining_h2h(ta, tb, h2h_played, rem_a, rem_b)
 
+    # 探索: Aが残り rem_a 試合中 x 勝 (rem_a - x 敗) したときの条件
     for x in range(0, rem_a + 1):
-        forced_b_losses = min(x, rem_h2h)
+        a_losses = rem_a - x
+        # 自チームの全敗数(a_losses)が直接対決に集中した際、相手Bに最低限つく敗戦数
+        forced_b_losses = max(0, rem_h2h - a_losses)
         b_max_win = border["win"] + (rem_b - forced_b_losses)
         b_max_lose = border["lose"] + forced_b_losses
         b_max_rate = calc_win_rate(b_max_win, b_max_lose)
 
-        a_rate = calc_win_rate(team_a["win"] + x, team_a["lose"] + (rem_a - x))
+        a_rate = calc_win_rate(team_a["win"] + x, team_a["lose"] + a_losses)
         if a_rate > b_max_rate:
             return "確定" if x == 0 else x
 
+    # 自力消滅だが可能性あり（他力アシストが必要なケース）
     b_abs_max_rate = calc_win_rate(border["win"] + rem_b, border["lose"])
     for x in range(rem_a + 1, rem_a + 25):
         a_rate = calc_win_rate(team_a["win"] + x, team_a["lose"])
@@ -141,7 +146,6 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
     return "-"
 
 def validate_and_assert_standings(teams):
-    """自己検証システム：数学的不変則（確定・消滅の伝播、単調性）の検証"""
     keys = ["magic_1st", "magic_2nd", "magic_3rd", "magic_4th", "magic_5th"]
 
     for t in teams:
@@ -260,7 +264,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print("完全自己検証エンジン通過：history_standings.json 更新完了")
+    print("直接対決最悪ケース考慮：history_standings.json 更新完了")
 
 if __name__ == "__main__":
     main()
