@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NPB クリンチナンバー動的解析</title>
+  <title>NPB クリンチナンバー＆対戦成績動的解析</title>
   <style>
     :root {
       --bg: #f8fafc;
@@ -15,11 +15,12 @@
       --badge-fixed: #10b981;
       --badge-magic: #ef4444;
       --badge-alert: #dc2626;
+      --matrix-header: #3b82f6;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: var(--bg); color: var(--text-main); padding: 20px 12px 60px; }
-    .container { max-width: 1000px; margin: 0 auto; }
+    .container { max-width: 1100px; margin: 0 auto; }
 
     header { text-align: center; margin-bottom: 24px; }
     header h1 { font-size: 1.5rem; font-weight: 800; color: #1e3a8a; }
@@ -42,6 +43,11 @@
     }
     .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
+    .section-title {
+      font-size: 1.1rem; font-weight: 800; color: #1e3a8a; margin: 28px 0 12px 4px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
     .table-wrapper {
       background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border);
       overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04);
@@ -56,46 +62,53 @@
     .rank-cell { font-weight: 800; color: var(--text-sub); }
     .rem-cell { font-weight: 700; color: #475569; background-color: #f8fafc; }
 
+    /* クリンチバッジ */
     .badge {
       display: inline-block; min-width: 32px; padding: 3px 8px; border-radius: 12px;
       font-size: 0.8rem; font-weight: 700; text-align: center;
     }
     .badge-fixed { background-color: #d1fae5; color: #065f46; }
     .badge-magic { background-color: #fee2e2; color: #991b1b; }
-    
     .badge-eliminated {
-      background-color: #fff1f2;
-      color: var(--badge-alert);
-      border: 1.5px dashed #f43f5e;
-      border-radius: 6px;
-      padding: 1px 6px;
-      font-weight: 800;
+      background-color: #fff1f2; color: var(--badge-alert);
+      border: 1.5px dashed #f43f5e; border-radius: 6px; padding: 1px 6px; font-weight: 800;
     }
     .badge-dash { color: #94a3b8; font-weight: 500; }
 
+    /* 対戦成績表 (Matrix Table) のスタイル */
+    .matrix-table th {
+      background-color: var(--matrix-header);
+      color: #ffffff;
+      font-weight: 700;
+      border-right: 1px solid rgba(255,255,255,0.2);
+    }
+    .matrix-table td {
+      font-size: 0.86rem;
+      border-right: 1px solid var(--border);
+    }
+    .matrix-self {
+      color: #94a3b8;
+      font-weight: bold;
+      background-color: #f8fafc;
+    }
+    .draw-sub {
+      display: block;
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    /* 欄外注釈パネル */
     .notes-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      font-size: 0.83rem;
-      line-height: 1.65;
-      color: #334155;
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 20px; font-size: 0.83rem; line-height: 1.65; color: #334155;
       box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
     .notes-title {
-      font-weight: 700;
-      font-size: 0.92rem;
-      color: #1e293b;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      font-weight: 700; font-size: 0.92rem; color: #1e293b; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
     }
     .notes-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;
     }
     .note-item dt { font-weight: 700; color: #1e3a8a; margin-bottom: 2px; }
     .note-item dd { margin: 0 0 8px 0; color: #475569; }
@@ -105,8 +118,8 @@
 
   <div class="container">
     <header>
-      <h1>NPB 自力確定クリンチナンバー解析</h1>
-      <p style="font-size: 0.85rem; color: var(--text-sub); margin-top: 4px;">全143試合制・直接対決（H2H）残日程を考慮した数理モデル</p>
+      <h1>NPB 自力確定クリンチナンバー＆対戦成績解析</h1>
+      <p style="font-size: 0.85rem; color: var(--text-sub); margin-top: 4px;">全143試合制・直接対決H2H逆算・動的過去日付対応</p>
     </header>
 
     <div class="control-panel">
@@ -120,6 +133,8 @@
       </div>
     </div>
 
+    <!-- 1. 順位表 & クリンチナンバー表（既存） -->
+    <div class="section-title">📊 順位表・クリンチナンバー（自力確定数）</div>
     <div class="table-wrapper">
       <table>
         <thead>
@@ -146,6 +161,20 @@
       </table>
     </div>
 
+    <!-- 2. 対戦成績表（カード別マトリクス・新規） -->
+    <div class="section-title">⚾ 対戦成績表（カード別・ホーム/ロード・交流戦）</div>
+    <div class="table-wrapper">
+      <table class="matrix-table" id="matrix-table">
+        <thead id="matrix-head">
+          <!-- JSで動的にヘッダー生成 -->
+        </thead>
+        <tbody id="matrix-body">
+          <tr><td colspan="15" style="padding: 24px;">データを読み込み中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 欄外注釈パネル -->
     <div class="notes-card">
       <div class="notes-title">
         <span>ℹ️</span> 項目および表示記号の解説
@@ -154,16 +183,16 @@
         <div class="note-item">
           <dl>
             <dt>CN / チャンピオンシップナンバー</dt>
-            <dd>リーグ優勝（1位）を確定させるために必要な勝利数です。首位以外のチームでも逆転優勝の可能性があれば算出されます。</dd>
+            <dd>リーグ優勝（1位）を自力確定させるために必要な最小勝利数です。</dd>
 
-            <dt>2nd(本拠) / 2位以上確定ナンバー</dt>
-            <dd>クライマックスシリーズ（CS）第1ステージの本拠地主催権（2位以上）を確定させるために必要な勝利数です。</dd>
-
-            <dt>3rd(CS) / Aクラス進出確定ナンバー</dt>
-            <dd>CS進出（3位以上）を確定させるために必要な勝利数です。</dd>
+            <dt>2nd(本拠) / 3rd(CS)</dt>
+            <dd>それぞれCS本拠地主催権（2位以上）、CS進出（3位以上）を自力確定させるための必要勝利数です。</dd>
 
             <dt>4th / 5th(最下位回避)</dt>
-            <dd>それぞれ4位以上、最下位脱出（5位以上）を確定させるための必要勝利数です。</dd>
+            <dd>それぞれ4位以上、最下位脱出（5位以上）を自力確定させるための必要勝利数です。</dd>
+
+            <dt>対戦成績表の（数値）</dt>
+            <dd>勝-敗の下に記載されている `(1)` などの括弧書きは、そのカードまたは条件における「引き分け数」を表します。</dd>
           </dl>
         </div>
 
@@ -172,14 +201,14 @@
             <dt><span class="badge badge-fixed">確定</span></dt>
             <dd>他チームが残り全勝しても自チームを逆転できない、数学的に順位が確定した状態です。</dd>
 
-            <dt><span class="badge badge-magic">12</span>（通常の数値）</dt>
-            <dd><strong>自力確定可能</strong>：残り試合数の範囲内で、自チームの勝利のみによって自力でその順位を確定できる必要勝利数です。</dd>
+            <dt><span class="badge badge-magic">13</span>（通常の数値）</dt>
+            <dd><strong>自力確定可能</strong>：残り試合数の範囲内で、自チームの勝利のみによって自力確定できる必要勝利数です。</dd>
 
             <dt><span class="badge badge-eliminated">◇14◇</span>（ひし形枠＋赤文字）</dt>
-            <dd><strong>自力確定消滅（可能性あり）</strong>：必要勝利数が残り試合数を超過している状態です。自チームの全勝に加えて上位チームの敗戦アシストが必要ですが、数学的な逆転可能性は残っています。</dd>
+            <dd><strong>自力確定消滅（可能性あり）</strong>：必要勝利数が残り試合数を超過している状態です。自チーム全勝に加え、上位チームの敗戦アシストが必要ですが、数学的な逆転可能性は残っています。</dd>
 
             <dt><span class="badge-dash">-</span>（ハイフン）</dt>
-            <dd><strong>完全消滅（エリミネーション）</strong>：相手チームが残り全敗し、自チームが残り全勝しても届かない、可能性が完全に消滅した状態です。</dd>
+            <dd><strong>完全消滅（エリミネーション）</strong>：相手チームが残り全敗し、自チームが残り全勝しても届かない状態です。</dd>
           </dl>
         </div>
       </div>
@@ -190,6 +219,21 @@
     let rawData = null;
     let currentLeague = 'central';
     let selectedDate = '';
+
+    const SHORT_NAMES = {
+      "阪神": "対神", "巨人": "対巨", "ＤｅＮＡ": "対デ",
+      "ヤクルト": "対ヤ", "中日": "対中", "広島": "対広",
+      "ソフトバンク": "対ソ", "日本ハム": "対日", "ロッテ": "対ロ",
+      "楽天": "対楽", "オリックス": "対オ", "西武": "対西"
+    };
+
+    const FULL_TEAM_NAMES = {
+      "阪神": "阪神タイガース", "巨人": "読売ジャイアンツ", "ＤｅＮＡ": "横浜DeNAベイスターズ",
+      "ヤクルト": "東京ヤクルトスワローズ", "中日": "中日ドラゴンズ", "広島": "広島東洋カープ",
+      "ソフトバンク": "福岡ソフトバンクホークス", "日本ハム": "北海道日本ハムファイターズ",
+      "ロッテ": "千葉ロッテマリーンズ", "楽天": "東北楽天ゴールデンイーグルス",
+      "オリックス": "オリックス・バファローズ", "西武": "埼玉西武ライオンズ"
+    };
 
     function renderBadge(val, remainingGames) {
       if (val === '確定') return `<span class="badge badge-fixed">確定</span>`;
@@ -202,7 +246,15 @@
       return `<span class="badge-dash">-</span>`;
     }
 
-    function renderTable() {
+    function formatRecord(w, l, d) {
+      let str = `${w}-${l}`;
+      if (d > 0) {
+        str += `<span class="draw-sub">(${d})</span>`;
+      }
+      return str;
+    }
+
+    function renderTables() {
       if (!rawData || !rawData.history) return;
 
       if (!rawData.history[selectedDate]) {
@@ -213,9 +265,10 @@
       }
 
       const list = rawData.history[selectedDate][currentLeague];
-      const tbody = document.getElementById('standings-body');
-      tbody.innerHTML = '';
-
+      
+      // 1. 順位・クリンチ表の描画
+      const tbodyStandings = document.getElementById('standings-body');
+      tbodyStandings.innerHTML = '';
       list.forEach(t => {
         const rem = t.remaining !== undefined ? t.remaining : (143 - t.games);
         const tr = document.createElement('tr');
@@ -227,15 +280,70 @@
           <td>${t.lose}</td>
           <td>${t.draw}</td>
           <td class="rem-cell">${rem}</td>
-          <td>${t.rate.toFixed(3)}</td>
-          <td>${t.diff}</td>
+          <td>${t.rate.toFixed(3).replace('0.', '.')}</td>
+          <td>${t.diff === 0 ? '--' : t.diff.toFixed(1)}</td>
           <td>${renderBadge(t.magic_1st, rem)}</td>
           <td>${renderBadge(t.magic_2nd, rem)}</td>
           <td>${renderBadge(t.magic_3rd, rem)}</td>
           <td>${renderBadge(t.magic_4th, rem)}</td>
           <td>${renderBadge(t.magic_5th, rem)}</td>
         `;
-        tbody.appendChild(tr);
+        tbodyStandings.appendChild(tr);
+      });
+
+      // 2. 対戦成績表（マトリクス）の描画
+      const theadMatrix = document.getElementById('matrix-head');
+      const tbodyMatrix = document.getElementById('matrix-body');
+      theadMatrix.innerHTML = '';
+      tbodyMatrix.innerHTML = '';
+
+      // ヘッダー作成
+      const leagueTeams = list.map(t => t.team);
+      let headHtml = `
+        <tr>
+          <th style="min-width: 140px; text-align: left; padding-left: 14px;">チーム</th>
+          <th>試合</th>
+          <th>勝利</th>
+          <th>敗北</th>
+          <th>引分</th>
+          <th>勝率</th>
+          <th>差</th>
+          <th>ホーム</th>
+          <th>ロード</th>
+      `;
+      leagueTeams.forEach(teamName => {
+        headHtml += `<th>${SHORT_NAMES[teamName] || teamName}</th>`;
+      });
+      headHtml += `<th>交流戦</th></tr>`;
+      theadMatrix.innerHTML = headHtml;
+
+      // 行データ作成
+      list.forEach(t => {
+        const tr = document.createElement('tr');
+        let rowHtml = `
+          <td class="team-col" style="padding-left: 14px;">${FULL_TEAM_NAMES[t.team] || t.team}</td>
+          <td>${t.games}</td>
+          <td>${t.win}</td>
+          <td>${t.lose}</td>
+          <td>${t.draw}</td>
+          <td>${t.rate.toFixed(3).replace('0.', '.')}</td>
+          <td>${t.diff === 0 ? '--' : t.diff.toFixed(1)}</td>
+          <td>${formatRecord(t.home.win, t.home.lose, t.home.draw)}</td>
+          <td>${formatRecord(t.away.win, t.away.lose, t.away.draw)}</td>
+        `;
+
+        leagueTeams.forEach(oppName => {
+          if (oppName === t.team) {
+            rowHtml += `<td class="matrix-self">***</td>`;
+          } else {
+            const h2h = t.h2h && t.h2h[oppName] ? t.h2h[oppName] : {win: 0, lose: 0, draw: 0};
+            rowHtml += `<td>${formatRecord(h2h.win, h2h.lose, h2h.draw)}</td>`;
+          }
+        });
+
+        rowHtml += `<td>${formatRecord(t.interleague.win, t.interleague.lose, t.interleague.draw)}</td>`;
+        tr.innerHTML = rowHtml;
+        tbodyMatrix.appendChild(tr);
       });
     }
 
@@ -243,7 +351,7 @@
       currentLeague = league;
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       event.target.classList.add('active');
-      renderTable();
+      renderTables();
     }
 
     async function init() {
@@ -260,10 +368,10 @@
 
         picker.addEventListener('change', (e) => {
           selectedDate = e.target.value;
-          renderTable();
+          renderTables();
         });
 
-        renderTable();
+        renderTables();
       } catch (err) {
         document.getElementById('standings-body').innerHTML = `<tr><td colspan="14" style="padding: 24px; color:red;">データ読み込みに失敗しました。</td></tr>`;
       }
