@@ -1,25 +1,27 @@
 import datetime
 import json
+import os
 import re
 import requests
 from bs4 import BeautifulSoup
 
-# ==========================================
-# 1. チーム基礎データ（直近80試合の得点・失点）
-# ==========================================
-TEAM_STATS = {
-    "阪神": {"runs_scored": 320, "runs_allowed": 260},
-    "広島": {"runs_scored": 310, "runs_allowed": 290},
-    "ＤｅＮＡ": {"runs_scored": 330, "runs_allowed": 310},
-    "巨人": {"runs_scored": 340, "runs_allowed": 280},
-    "ヤクルト": {"runs_scored": 290, "runs_allowed": 350},
-    "中日": {"runs_scored": 250, "runs_allowed": 280},
-    "ソフトバンク": {"runs_scored": 360, "runs_allowed": 240},
-    "日本ハム": {"runs_scored": 310, "runs_allowed": 290},
-    "ロッテ": {"runs_scored": 290, "runs_allowed": 300},
-    "楽天": {"runs_scored": 280, "runs_allowed": 320},
-    "オリックス": {"runs_scored": 270, "runs_allowed": 300},
-    "西武": {"runs_scored": 230, "runs_allowed": 340}
+DB_FILE = "db.json"
+
+# 球場別パークファクター（得点補正係数）
+PARK_FACTORS = {
+    "東京ドーム": 1.08,
+    "神宮": 1.12,
+    "横浜": 1.05,
+    "甲子園": 0.88,
+    "バンテリンドーム": 0.82,
+    "マツダスタジアム": 0.96,
+    "エスコンフィールド": 1.02,
+    "楽天モバイル": 0.98,
+    "ベルーナドーム": 0.95,
+    "ZOZOマリン": 0.92,
+    "京セラD大阪": 0.93,
+    "PayPayドーム": 1.04,
+    "みずほPayPay": 1.04
 }
 
 TEAM_NAME_MAP = {
@@ -29,23 +31,44 @@ TEAM_NAME_MAP = {
     "巨人": "巨人", "広島": "広島", "ヤクルト": "ヤクルト", "中日": "中日"
 }
 
-# ==========================================
-# 2. 先発投手FIPマスタ
-# ==========================================
-PITCHER_FIP = {
-    "才木": 2.25, "村上": 2.50, "戸郷": 2.65, "菅野": 2.80, "東": 2.30,
-    "有原": 2.80, "伊藤大": 2.60, "モイネロ": 2.10, "小島": 3.40, "早川": 3.10,
-    "宮城": 2.40, "今井": 2.70, "西野": 3.20, "種市": 3.15, "佐々木朗": 2.10,
-    "岸": 3.30, "則本": 3.40, "藤平": 2.90, "大津": 3.00, "スチュワート": 3.20,
-    "エスピノーザ": 3.10, "山下": 2.80, "田嶋": 3.30, "古謝": 3.45, "内": 3.50,
-    "カイケル": 3.30, "高橋宏": 1.95, "床田": 2.55, "大瀬良": 2.90, "唐川": 3.50,
-    "カスティーヨ": 3.40, "荘司": 3.20, "高橋礼": 3.60, "石川": 3.70
+# 球団本拠地マッピング
+TEAM_HOME_PARK = {
+    "巨人": "東京ドーム", "ヤクルト": "神宮", "ＤｅＮＡ": "横浜",
+    "阪神": "甲子園", "中日": "バンテリンドーム", "広島": "マツダスタジアム",
+    "日本ハム": "エスコンフィールド", "楽天": "楽天モバイル", "西武": "ベルーナドーム",
+    "ロッテ": "ZOZOマリン", "オリックス": "京セラD大阪", "ソフトバンク": "PayPayドーム"
 }
+
 DEFAULT_FIP = 3.50
 
-def get_pythagorean_win_rate(runs_scored, runs_allowed, exponent=2.0):
-    num = runs_scored ** exponent
-    den = (runs_scored ** exponent) + (runs_allowed ** exponent)
+def load_db():
+    if os.path.exists(DB_FILE):
+        with open(DB_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {"teams": {}, "pitchers": {}}
+
+def save_db(db):
+    with open(DB_FILE, "w", encoding="utf-8") as f:
+        json.dump(db, f, ensure_ascii=False, indent=2)
+
+def calculate_fip(stats):
+    """投球回、被本塁打、与四球、奪三振からFIPを算出"""
+    ip = stats.get("ip", 0)
+    if ip < 10.0:  # サンプルが極端に少ない場合はリーグ平均に回帰
+        return DEFAULT_FIP
+    hr = stats.get("hr", 0)
+    bb = stats.get("bb", 0)
+    so = stats.get("so", 0)
+    # FIP定数 = 3.10
+    fip_val = ((13 * hr) + (3 * bb) - (2 * so)) / ip + 3.10
+    return round(fip_val, 2)
+
+def get_pythagorean(rs, ra, pf=1.0):
+    """球場PFを加味したピタゴラス勝率（指数2.0）"""
+    adj_rs = rs * pf
+    adj_ra = ra / pf
+    num = adj_rs ** 2
+    den = (adj_rs ** 2) + (adj_ra ** 2)
     return num / den if den != 0 else 0.500
 
 def log5_matchup(p_a, p_b):
@@ -53,113 +76,87 @@ def log5_matchup(p_a, p_b):
     den = p_a + p_b - (2 * p_a * p_b)
     return num / den if den != 0 else 0.500
 
-def calculate_win_rate(home_team, away_team, home_starter, away_starter):
-    h_stat = TEAM_STATS.get(home_team, {"runs_scored": 300, "runs_allowed": 300})
-    a_stat = TEAM_STATS.get(away_team, {"runs_scored": 300, "runs_allowed": 300})
+def calculate_prediction(home_team, away_team, home_starter, away_starter, db):
+    # 1. チーム直近得失点と球場PF
+    h_team_stat = db["teams"].get(home_team, {"runs_scored": 300, "runs_allowed": 300})
+    a_team_stat = db["teams"].get(away_team, {"runs_scored": 300, "runs_allowed": 300})
+    
+    park_name = TEAM_HOME_PARK.get(home_team, "甲子園")
+    pf = PARK_FACTORS.get(park_name, 1.0)
 
-    p_h = get_pythagorean_win_rate(h_stat["runs_scored"], h_stat["runs_allowed"])
-    p_a = get_pythagorean_win_rate(a_stat["runs_scored"], a_stat["runs_allowed"])
+    p_home = get_pythagorean(h_team_stat["runs_scored"], h_team_stat["runs_allowed"], pf)
+    p_away = get_pythagorean(a_team_stat["runs_scored"], a_team_stat["runs_allowed"], 1.0 / pf)
 
-    base_win = log5_matchup(p_h, p_a)
+    base_win = log5_matchup(p_home, p_away)
 
-    fip_h = PITCHER_FIP.get(home_starter, DEFAULT_FIP)
-    fip_a = PITCHER_FIP.get(away_starter, DEFAULT_FIP)
-    fip_multiplier = (DEFAULT_FIP / fip_h) / (DEFAULT_FIP / fip_a)
+    # 2. 蓄積DBからの先発投手FIP算出
+    h_p_stat = db["pitchers"].get(home_starter, {})
+    a_p_stat = db["pitchers"].get(away_starter, {})
 
+    fip_h = calculate_fip(h_p_stat)
+    fip_a = calculate_fip(a_p_stat)
+
+    # FIPオッズ比補正
+    fip_mult = (DEFAULT_FIP / fip_h) / (DEFAULT_FIP / fip_a)
     base_odds = base_win / (1.0 - base_win)
-    adj_win = (base_odds * fip_multiplier) / (1.0 + (base_odds * fip_multiplier))
+    adj_win = (base_odds * fip_mult) / (1.0 + (base_odds * fip_mult))
 
+    # 3. ホーム球団に +3.5% 付与
     final_h = max(0.05, min(0.95, adj_win + 0.035))
     return round(final_h, 3), round(1.0 - final_h, 3)
 
-def get_starting_pitchers_from_game(game_id, headers):
-    """試合詳細の成績ページから各チームの『1番手登板投手（先発）』を取得"""
-    stats_url = f"https://baseball.yahoo.co.jp/npb/game/{game_id}/stats"
-    try:
-        res = requests.get(stats_url, headers=headers, timeout=5)
-        soup = BeautifulSoup(res.text, "html.parser")
-
-        # 投手成績テーブル（通常2つあり、1つ目がビジター、2つ目がホーム）
-        pitcher_tables = soup.find_all("table", class_=lambda c: c and "bb-scoreTable" in c)
-        
-        starters = []
-        for tbl in pitcher_tables:
-            # テーブルの最初のデータ行（先発投手）
-            tbody = tbl.find("tbody")
-            if tbody:
-                first_row = tbody.find("tr")
-                if first_row:
-                    player_link = first_row.find("a", href=re.compile(r"/npb/player/\d+"))
-                    if player_link:
-                        starters.append(player_link.text.strip())
-
-        if len(starters) == 2:
-            return starters[0], starters[1]
-
-        # 試合前（スタメン未反映時）の予告先発枠からフォールバック探索
-        top_url = f"https://baseball.yahoo.co.jp/npb/game/{game_id}/top"
-        res_top = requests.get(top_url, headers=headers, timeout=5)
-        soup_top = BeautifulSoup(res_top.text, "html.parser")
-        starter_spans = soup_top.select(".bb-head01__pitcher")
-        if len(starter_spans) >= 2:
-            return starter_spans[0].text.strip(), starter_spans[1].text.strip()
-
-    except Exception:
-        pass
-
-    return "未定", "未定"
-
-def scrape_matchups():
-    base_url = "https://baseball.yahoo.co.jp"
-    schedule_url = f"{base_url}/npb/schedule/"
+def scrape_today_matchups(db):
+    """本日の試合（ビジター/ホームの厳格分離）と予告先発の抽出"""
+    url = "https://baseball.yahoo.co.jp/npb/schedule/"
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-
     matchups = []
-    try:
-        res = requests.get(schedule_url, headers=headers, timeout=10)
-        res.encoding = "utf-8"
-        if res.status_code != 200:
-            return matchups
 
+    try:
+        res = requests.get(url, headers=headers, timeout=10)
+        res.encoding = "utf-8"
         soup = BeautifulSoup(res.text, "html.parser")
 
-        # 本日の日程枠（最初のブロック）を限定取得
         today_block = soup.find("section", class_="bb-schedule__day") or soup
-
         cards = today_block.find_all(["section", "li"], class_=lambda c: c and any(x in c for x in ["bb-score", "bb-schedule__item"]))
 
         for card in cards:
             link = card.find("a", href=re.compile(r"/npb/game/(\d+)/"))
             if not link:
                 continue
+            game_id = re.search(r"/npb/game/(\d+)/", link["href"]).group(1)
 
-            game_id_match = re.search(r"/npb/game/(\d+)/", link["href"])
-            if not game_id_match:
-                continue
-            game_id = game_id_match.group(1)
+            # 日本プロ野球のテーブル表記: 常に【左側/1番目がビジター】【右側/2番目がホーム】
+            team_nodes = card.select(".bb-score__team, .bb-splitBox__lead")
+            raw_teams = []
+            for n in team_nodes:
+                for k, v in TEAM_NAME_MAP.items():
+                    if k in n.text and v not in raw_teams:
+                        raw_teams.append(v)
 
-            # チーム名特定
-            teams = []
-            for k in TEAM_NAME_MAP.keys():
-                idx = card.text.find(k)
-                if idx != -1:
-                    teams.append((idx, TEAM_NAME_MAP[k]))
-            teams.sort(key=lambda x: x[0])
-
-            unique_teams = []
-            for _, t in teams:
-                if t not in unique_teams:
-                    unique_teams.append(t)
-
-            if len(unique_teams) < 2:
+            if len(raw_teams) < 2:
                 continue
 
-            away_team, home_team = unique_teams[0], unique_teams[1]
+            # 厳密に左＝ビジター、右＝ホーム
+            away_team = raw_teams[0]
+            home_team = raw_teams[1]
 
-            # 成績テーブルから「先発投手（1番手）」を抽出
-            away_starter, home_starter = get_starting_pitchers_from_game(game_id, headers)
+            # 試合詳細のトップから先発投手を特定
+            top_url = f"https://baseball.yahoo.co.jp/npb/game/{game_id}/top"
+            res_top = requests.get(top_url, headers=headers, timeout=5)
+            soup_top = BeautifulSoup(res_top.text, "html.parser")
 
-            home_win, away_win = calculate_win_rate(home_team, away_team, home_starter, away_starter)
+            pitcher_tags = soup_top.select(".bb-head01__pitcher")
+            away_starter, home_starter = "未定", "未定"
+            if len(pitcher_tags) >= 2:
+                away_starter = re.sub(r'[\s\d\(\)（）:：勝敗ＳH]', '', pitcher_tags[0].text).strip()
+                home_starter = re.sub(r'[\s\d\(\)（）:：勝敗ＳH]', '', pitcher_tags[1].text).strip()
+
+            # 新規投手が検知された場合は初期値をDBに自動登録
+            for p in [away_starter, home_starter]:
+                if p != "未定" and p not in db["pitchers"]:
+                    db["pitchers"][p] = {"ip": 30.0, "so": 25, "bb": 10, "hr": 3}
+
+            h_win, a_win = calculate_prediction(home_team, away_team, home_starter, away_starter, db)
 
             if not any(m["home_team"] == home_team and m["away_team"] == away_team for m in matchups):
                 matchups.append({
@@ -167,12 +164,12 @@ def scrape_matchups():
                     "away_team": away_team,
                     "home_starter": home_starter,
                     "away_starter": away_starter,
-                    "home_win_rate": home_win,
-                    "away_win_rate": away_win
+                    "home_win_rate": h_win,
+                    "away_win_rate": a_win
                 })
 
     except Exception as e:
-        print(f"取得エラー: {e}")
+        print(f"スクレイピングエラー: {e}")
 
     return matchups
 
@@ -180,13 +177,21 @@ def main():
     today_str = datetime.date.today().strftime("%Y-%m-%d")
     print(f"[{today_str}] 実行開始")
 
-    matchups = scrape_matchups()
-    output_data = {"date": today_str, "matchups": matchups}
+    db = load_db()
+    matchups = scrape_today_matchups(db)
+    
+    # 新規投手等が登録されたDBを再保存
+    save_db(db)
+
+    output_data = {
+        "date": today_str,
+        "matchups": matchups
+    }
 
     with open("prediction.json", "w", encoding="utf-8") as f:
         json.dump(output_data, f, ensure_ascii=False, indent=2)
 
-    print(f"完了: {len(matchups)} 件出力")
+    print(f"完了: {len(matchups)} カード出力、db.json更新完了")
 
 if __name__ == "__main__":
     main()
