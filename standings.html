@@ -14,11 +14,12 @@
       --border: #e2e8f0;
       --badge-fixed: #10b981;
       --badge-magic: #ef4444;
+      --badge-alert: #dc2626;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: var(--bg); color: var(--text-main); padding: 20px 12px 50px; }
-    .container { max-width: 960px; margin: 0 auto; }
+    .container { max-width: 1000px; margin: 0 auto; }
 
     header { text-align: center; margin-bottom: 24px; }
     header h1 { font-size: 1.5rem; font-weight: 800; color: #1e3a8a; }
@@ -45,24 +46,35 @@
       background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border);
       overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04);
     }
-    table { width: 100%; border-collapse: collapse; min-width: 760px; text-align: center; font-size: 0.88rem; }
+    table { width: 100%; border-collapse: collapse; min-width: 820px; text-align: center; font-size: 0.88rem; }
     th, td { padding: 12px 8px; border-bottom: 1px solid var(--border); }
     th { background-color: #f1f5f9; color: var(--text-sub); font-weight: 600; font-size: 0.82rem; }
     tr:last-child td { border-bottom: none; }
 
     .team-col { text-align: left; font-weight: 700; }
     .rank-cell { font-weight: 800; color: var(--text-sub); }
+    .rem-cell { font-weight: 700; color: #475569; background-color: #f8fafc; }
 
     .badge {
       display: inline-block; min-width: 32px; padding: 3px 8px; border-radius: 12px;
-      font-size: 0.78rem; font-weight: 700; text-align: center;
+      font-size: 0.8rem; font-weight: 700; text-align: center;
     }
     .badge-fixed { background-color: #d1fae5; color: #065f46; }
     .badge-magic { background-color: #fee2e2; color: #991b1b; }
+    
+    /* 自力消滅アラート（残り試合オーバー時）：◇枠・赤文字装飾 */
+    .badge-eliminated {
+      background-color: #fff1f2;
+      color: var(--badge-alert);
+      border: 1.5px dashed #f43f5e;
+      border-radius: 6px;
+      padding: 1px 6px;
+      font-weight: 800;
+    }
     .badge-dash { color: #94a3b8; font-weight: 500; }
 
-    .info-footer {
-      margin-top: 14px; font-size: 0.8rem; color: var(--text-sub); text-align: right;
+    .legend {
+      margin-top: 12px; font-size: 0.8rem; color: var(--text-sub); display: flex; gap: 16px; justify-content: flex-end;
     }
   </style>
 </head>
@@ -71,7 +83,7 @@
   <div class="container">
     <header>
       <h1>NPB 自力確定クリンチナンバー解析</h1>
-      <p style="font-size: 0.85rem; color: var(--text-sub); margin-top: 4px;">直接対決（H2H）残日程を考慮した数理モデル</p>
+      <p style="font-size: 0.85rem; color: var(--text-sub); margin-top: 4px;">全143試合制・直接対決H2H逆算・自力消滅アラート対応</p>
     </header>
 
     <div class="control-panel">
@@ -95,6 +107,7 @@
             <th>勝</th>
             <th>敗</th>
             <th>分</th>
+            <th>残</th>
             <th>勝率</th>
             <th>差</th>
             <th>CS(優勝)</th>
@@ -105,11 +118,17 @@
           </tr>
         </thead>
         <tbody id="standings-body">
-          <tr><td colspan="13" style="padding: 24px;">データを読み込み中...</td></tr>
+          <tr><td colspan="14" style="padding: 24px;">データを読み込み中...</td></tr>
         </tbody>
       </table>
     </div>
-    <div class="info-footer" id="status-info"></div>
+
+    <div class="legend">
+      <span><span class="badge badge-fixed">確定</span>：確定済</span>
+      <span><span class="badge badge-magic">12</span>：自力確定可能</span>
+      <span><span class="badge badge-eliminated">◇14◇</span>：自力消滅（可能性あり）</span>
+      <span><span class="badge-dash">-</span>：完全消滅</span>
+    </div>
   </div>
 
   <script>
@@ -117,16 +136,21 @@
     let currentLeague = 'central';
     let selectedDate = '';
 
-    function renderBadge(val) {
+    function renderBadge(val, remainingGames) {
       if (val === '確定') return `<span class="badge badge-fixed">確定</span>`;
-      if (typeof val === 'number') return `<span class="badge badge-magic">${val}</span>`;
+      if (typeof val === 'number') {
+        // 必要勝利数が残り試合数を超えている場合は「◇14◇」として強調
+        if (val > remainingGames) {
+          return `<span class="badge badge-eliminated">◇${val}◇</span>`;
+        }
+        return `<span class="badge badge-magic">${val}</span>`;
+      }
       return `<span class="badge-dash">-</span>`;
     }
 
     function renderTable() {
       if (!rawData || !rawData.history) return;
-      
-      // 選択日付が履歴にない場合は最も近い有効日付を選択
+
       if (!rawData.history[selectedDate]) {
         const dates = rawData.available_dates;
         const past = dates.filter(d => d <= selectedDate);
@@ -139,6 +163,7 @@
       tbody.innerHTML = '';
 
       list.forEach(t => {
+        const rem = t.remaining !== undefined ? t.remaining : (143 - t.games);
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td class="rank-cell">${t.rank}</td>
@@ -147,18 +172,17 @@
           <td>${t.win}</td>
           <td>${t.lose}</td>
           <td>${t.draw}</td>
+          <td class="rem-cell">${rem}</td>
           <td>${t.rate.toFixed(3)}</td>
           <td>${t.diff}</td>
-          <td>${renderBadge(t.magic_1st)}</td>
-          <td>${renderBadge(t.magic_2nd)}</td>
-          <td>${renderBadge(t.magic_3rd)}</td>
-          <td>${renderBadge(t.magic_4th)}</td>
-          <td>${renderBadge(t.magic_5th)}</td>
+          <td>${renderBadge(t.magic_1st, rem)}</td>
+          <td>${renderBadge(t.magic_2nd, rem)}</td>
+          <td>${renderBadge(t.magic_3rd, rem)}</td>
+          <td>${renderBadge(t.magic_4th, rem)}</td>
+          <td>${renderBadge(t.magic_5th, rem)}</td>
         `;
         tbody.appendChild(tr);
       });
-
-      document.getElementById('status-info').textContent = `表示中: ${selectedDate} 終了時点（全日程143試合・直接対決H2H逆算適用済）`;
     }
 
     function switchLeague(league) {
@@ -187,7 +211,7 @@
 
         renderTable();
       } catch (err) {
-        document.getElementById('standings-body').innerHTML = `<tr><td colspan="13" style="padding: 24px; color:red;">データ読み込みに失敗しました。</td></tr>`;
+        document.getElementById('standings-body').innerHTML = `<tr><td colspan="14" style="padding: 24px; color:red;">データ読み込みに失敗しました。</td></tr>`;
       }
     }
 
