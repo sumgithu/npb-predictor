@@ -63,7 +63,6 @@
     .badge-fixed { background-color: #d1fae5; color: #065f46; }
     .badge-magic { background-color: #fee2e2; color: #991b1b; }
     
-    /* 自力消滅アラート（残り試合オーバー時） */
     .badge-eliminated {
       background-color: #fff1f2;
       color: var(--badge-alert);
@@ -74,7 +73,6 @@
     }
     .badge-dash { color: #94a3b8; font-weight: 500; }
 
-    /* 注釈・凡例パネル */
     .notes-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -99,7 +97,6 @@
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 16px;
     }
-    .note-item dl { margin: 0; }
     .note-item dt { font-weight: 700; color: #1e3a8a; margin-bottom: 2px; }
     .note-item dd { margin: 0 0 8px 0; color: #475569; }
   </style>
@@ -136,7 +133,7 @@
             <th>残</th>
             <th>勝率</th>
             <th>差</th>
-            <th>CS(優勝)</th>
+            <th>CN</th>
             <th>2nd(本拠)</th>
             <th>3rd(CS)</th>
             <th>4th</th>
@@ -149,7 +146,6 @@
       </table>
     </div>
 
-    <!-- 欄外注釈パネル -->
     <div class="notes-card">
       <div class="notes-title">
         <span>ℹ️</span> 項目および表示記号の解説
@@ -157,8 +153,8 @@
       <div class="notes-grid">
         <div class="note-item">
           <dl>
-            <dt>CS(優勝) / チャンピオンシップナンバー</dt>
-            <dd>リーグ1位（優勝）を確定させるために必要な勝利数です。首位以外のチームでも逆転優勝の可能性があれば算出されます。</dd>
+            <dt>CN / チャンピオンシップナンバー</dt>
+            <dd>リーグ優勝（1位）を確定させるために必要な勝利数です。首位以外のチームでも逆転優勝の可能性があれば算出されます。</dd>
 
             <dt>2nd(本拠) / 2位以上確定ナンバー</dt>
             <dd>クライマックスシリーズ（CS）第1ステージの本拠地主催権（2位以上）を確定させるために必要な勝利数です。</dd>
@@ -180,7 +176,7 @@
             <dd><strong>自力確定可能</strong>：残り試合数の範囲内で、自チームの勝利のみによって自力でその順位を確定できる必要勝利数です。</dd>
 
             <dt><span class="badge badge-eliminated">◇14◇</span>（ひし形枠＋赤文字）</dt>
-            <dd><strong>自力確定消滅（可能性あり）</strong>：必要勝利数が残り試合数を超過している状態です。自チームの残り全勝に加えて、上位チームの敗戦アシスト（他力）が必要ですが、数学的な逆転可能性は残っています。</dd>
+            <dd><strong>自力確定消滅（可能性あり）</strong>：必要勝利数が残り試合数を超過している状態です。自チームの全勝に加えて上位チームの敗戦アシストが必要ですが、数学的な逆転可能性は残っています。</dd>
 
             <dt><span class="badge-dash">-</span>（ハイフン）</dt>
             <dd><strong>完全消滅（エリミネーション）</strong>：相手チームが残り全敗し、自チームが残り全勝しても届かない、可能性が完全に消滅した状態です。</dd>
@@ -198,7 +194,6 @@
     function renderBadge(val, remainingGames) {
       if (val === '確定') return `<span class="badge badge-fixed">確定</span>`;
       if (typeof val === 'number') {
-        // 必要勝利数が残り試合数を超えている場合は「◇14◇」としてアラート表示
         if (val > remainingGames) {
           return `<span class="badge badge-eliminated">◇${val}◇</span>`;
         }
