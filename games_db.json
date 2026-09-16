@@ -1,0 +1,41 @@
+{
+  "season": 2026,
+  "teams": {
+    "central": ["阪神", "巨人", "ＤｅＮＡ", "ヤクルト", "中日", "広島"],
+    "pacific": ["ソフトバンク", "日本ハム", "ロッテ", "楽天", "オリックス", "西武"]
+  },
+  "games": [
+    {
+      "date": "2026-09-15",
+      "home": "オリックス",
+      "away": "ソフトバンク",
+      "home_score": 1,
+      "away_score": 3,
+      "status": "finished"
+    },
+    {
+      "date": "2026-09-15",
+      "home": "ロッテ",
+      "away": "楽天",
+      "home_score": 4,
+      "away_score": 2,
+      "status": "finished"
+    },
+    {
+      "date": "2026-09-16",
+      "home": "楽天",
+      "away": "ロッテ",
+      "home_score": 3,
+      "away_score": 5,
+      "status": "finished"
+    },
+    {
+      "date": "2026-09-16",
+      "home": "ソフトバンク",
+      "away": "オリックス",
+      "home_score": 6,
+      "away_score": 2,
+      "status": "finished"
+    }
+  ]
+}
