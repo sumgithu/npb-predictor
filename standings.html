@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NPB クリンチナンバー＆対戦成績動的解析</title>
+  <title>NPB クリンチナンバー＆対戦成績・勝利確率解析</title>
   <style>
     :root {
       --bg: #f8fafc;
@@ -16,6 +16,8 @@
       --badge-magic: #ef4444;
       --badge-alert: #dc2626;
       --matrix-header: #3b82f6;
+      --bar-away: #dc2626;
+      --bar-home: #2563eb;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -28,7 +30,7 @@
     .control-panel {
       background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
       padding: 14px 20px; display: flex; flex-wrap: wrap; justify-content: space-between;
-      align-items: center; gap: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      align-items: center; gap: 12px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
     .date-select-box { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.95rem; }
     .date-select-box input {
@@ -44,14 +46,64 @@
     .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
     .section-title {
-      font-size: 1.1rem; font-weight: 800; color: #1e3a8a; margin: 28px 0 12px 4px;
+      font-size: 1.15rem; font-weight: 800; color: #1e3a8a; margin: 28px 0 14px 4px;
       display: flex; align-items: center; gap: 8px;
     }
+    .section-desc { font-size: 0.82rem; color: var(--text-sub); font-weight: 400; margin-left: 6px; }
 
+    /* --- 勝利確率カードグリッド --- */
+    .prediction-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .pred-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .pred-teams {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .team-box { width: 42%; }
+    .team-box.away { text-align: left; }
+    .team-box.home { text-align: right; }
+    .team-role { font-size: 0.72rem; color: var(--text-sub); font-weight: 600; }
+    .team-name { font-size: 1.1rem; font-weight: 800; color: var(--text-main); }
+    .starter-name { font-size: 0.78rem; color: var(--text-sub); margin-top: 2px; }
+    .vs-badge { font-size: 0.82rem; font-weight: 800; color: #94a3b8; }
+
+    .prob-values {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .val-away { color: var(--bar-away); }
+    .val-home { color: var(--bar-home); }
+
+    .prob-bar-container {
+      width: 100%;
+      height: 10px;
+      background-color: #e2e8f0;
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+    }
+    .bar-segment-away { background-color: var(--bar-away); height: 100%; transition: width 0.3s; }
+    .bar-segment-home { background-color: var(--bar-home); height: 100%; transition: width 0.3s; }
+
+    /* --- テーブル --- */
     .table-wrapper {
       background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border);
-      overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04);
-      margin-bottom: 20px;
+      overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04); margin-bottom: 24px;
     }
     table { width: 100%; border-collapse: collapse; min-width: 820px; text-align: center; font-size: 0.88rem; }
     th, td { padding: 12px 8px; border-bottom: 1px solid var(--border); }
@@ -62,7 +114,6 @@
     .rank-cell { font-weight: 800; color: var(--text-sub); }
     .rem-cell { font-weight: 700; color: #475569; background-color: #f8fafc; }
 
-    /* クリンチバッジ */
     .badge {
       display: inline-block; min-width: 32px; padding: 3px 8px; border-radius: 12px;
       font-size: 0.8rem; font-weight: 700; text-align: center;
@@ -75,41 +126,21 @@
     }
     .badge-dash { color: #94a3b8; font-weight: 500; }
 
-    /* 対戦成績表 (Matrix Table) のスタイル */
     .matrix-table th {
-      background-color: var(--matrix-header);
-      color: #ffffff;
-      font-weight: 700;
+      background-color: var(--matrix-header); color: #ffffff; font-weight: 700;
       border-right: 1px solid rgba(255,255,255,0.2);
     }
-    .matrix-table td {
-      font-size: 0.86rem;
-      border-right: 1px solid var(--border);
-    }
-    .matrix-self {
-      color: #94a3b8;
-      font-weight: bold;
-      background-color: #f8fafc;
-    }
-    .draw-sub {
-      display: block;
-      font-size: 0.75rem;
-      color: #64748b;
-    }
+    .matrix-table td { font-size: 0.86rem; border-right: 1px solid var(--border); }
+    .matrix-self { color: #94a3b8; font-weight: bold; background-color: #f8fafc; }
+    .draw-sub { display: block; font-size: 0.75rem; color: #64748b; }
 
-    /* 欄外注釈パネル */
     .notes-card {
       background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
       padding: 20px; font-size: 0.83rem; line-height: 1.65; color: #334155;
       box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
-    .notes-title {
-      font-weight: 700; font-size: 0.92rem; color: #1e293b; margin-bottom: 10px;
-      display: flex; align-items: center; gap: 6px;
-    }
-    .notes-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;
-    }
+    .notes-title { font-weight: 700; font-size: 0.92rem; color: #1e293b; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .notes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
     .note-item dt { font-weight: 700; color: #1e3a8a; margin-bottom: 2px; }
     .note-item dd { margin: 0 0 8px 0; color: #475569; }
   </style>
@@ -119,7 +150,7 @@
   <div class="container">
     <header>
       <h1>NPB 自力確定クリンチナンバー＆対戦成績解析</h1>
-      <p style="font-size: 0.85rem; color: var(--text-sub); margin-top: 4px;">全143試合制・直接対決H2H逆算・動的過去日付対応</p>
+      <p style="font-size: 0.85rem; color: var(--text-sub); margin-top: 4px;">全143試合制・直接対決H2H逆算・ベイジアンLog5法勝率予測</p>
     </header>
 
     <div class="control-panel">
@@ -133,7 +164,16 @@
       </div>
     </div>
 
-    <!-- 1. 順位表 & クリンチナンバー表（既存） -->
+    <!-- 1. NPB 次戦（当日）勝利確率パネル -->
+    <div class="section-title">
+      🎯 NPB 試合勝利確率
+      <span class="section-desc" id="pred-subtext">（事前予測・ピタゴラス勝率・Log5補正）</span>
+    </div>
+    <div class="prediction-grid" id="prediction-grid">
+      <!-- JSで動的にカード生成 -->
+    </div>
+
+    <!-- 2. 順位表 & クリンチナンバー表 -->
     <div class="section-title">📊 順位表・クリンチナンバー（自力確定数）</div>
     <div class="table-wrapper">
       <table>
@@ -161,13 +201,11 @@
       </table>
     </div>
 
-    <!-- 2. 対戦成績表（カード別マトリクス・新規） -->
+    <!-- 3. 対戦成績表（カード別マトリクス） -->
     <div class="section-title">⚾ 対戦成績表（カード別・ホーム/ロード・交流戦）</div>
     <div class="table-wrapper">
       <table class="matrix-table" id="matrix-table">
-        <thead id="matrix-head">
-          <!-- JSで動的にヘッダー生成 -->
-        </thead>
+        <thead id="matrix-head"></thead>
         <tbody id="matrix-body">
           <tr><td colspan="15" style="padding: 24px;">データを読み込み中...</td></tr>
         </tbody>
@@ -177,22 +215,19 @@
     <!-- 欄外注釈パネル -->
     <div class="notes-card">
       <div class="notes-title">
-        <span>ℹ️</span> 項目および表示記号の解説
+        <span>ℹ️</span> 項目および数理モデルの解説
       </div>
       <div class="notes-grid">
         <div class="note-item">
           <dl>
+            <dt>試合勝利確率（Log5法・ベイジアン事前分布）</dt>
+            <dd>前年（2025年）の通算得失点実績を事前分布としてベイズ収縮したピタゴラス期待勝率（指数1.83）に、ホーム球場優位性（オッズ比1.15）を加味して事前確率を算出しています。</dd>
+
             <dt>CN / チャンピオンシップナンバー</dt>
             <dd>リーグ優勝（1位）を自力確定させるために必要な最小勝利数です。</dd>
 
             <dt>2nd(本拠) / 3rd(CS)</dt>
-            <dd>それぞれCS本拠地主催権（2位以上）、CS進出（3位以上）を自力確定させるための必要勝利数です。</dd>
-
-            <dt>4th / 5th(最下位回避)</dt>
-            <dd>それぞれ4位以上、最下位脱出（5位以上）を自力確定させるための必要勝利数です。</dd>
-
-            <dt>対戦成績表の（数値）</dt>
-            <dd>勝-敗の下に記載されている `(1)` などの括弧書きは、そのカードまたは条件における「引き分け数」を表します。</dd>
+            <dd>それぞれCS第1ステージ本拠地主催権（2位以上）、CS進出（3位以上）を自力確定させるための必要勝利数です。</dd>
           </dl>
         </div>
 
@@ -201,11 +236,11 @@
             <dt><span class="badge badge-fixed">確定</span></dt>
             <dd>他チームが残り全勝しても自チームを逆転できない、数学的に順位が確定した状態です。</dd>
 
-            <dt><span class="badge badge-magic">13</span>（通常の数値）</dt>
+            <dt><span class="badge badge-magic">13</span>（通常数値）</dt>
             <dd><strong>自力確定可能</strong>：残り試合数の範囲内で、自チームの勝利のみによって自力確定できる必要勝利数です。</dd>
 
             <dt><span class="badge badge-eliminated">◇14◇</span>（ひし形枠＋赤文字）</dt>
-            <dd><strong>自力確定消滅（可能性あり）</strong>：必要勝利数が残り試合数を超過している状態です。自チーム全勝に加え、上位チームの敗戦アシストが必要ですが、数学的な逆転可能性は残っています。</dd>
+            <dd><strong>自力消滅（可能性あり）</strong>：必要勝利数が残り試合数を超過している状態です。自チーム全勝に加え、上位チームの敗戦アシストが必要ですが、数学的な逆転可能性は残っています。</dd>
 
             <dt><span class="badge-dash">-</span>（ハイフン）</dt>
             <dd><strong>完全消滅（エリミネーション）</strong>：相手チームが残り全敗し、自チームが残り全勝しても届かない状態です。</dd>
@@ -264,9 +299,53 @@
         document.getElementById('date-picker').value = selectedDate;
       }
 
-      const list = rawData.history[selectedDate][currentLeague];
-      
-      // 1. 順位・クリンチ表の描画
+      const dayData = rawData.history[selectedDate];
+      const list = dayData[currentLeague];
+
+      // 1. 試合勝利確率カードグリッド描画
+      const predGrid = document.getElementById('prediction-grid');
+      document.getElementById('pred-subtext').innerText = `（対象日: ${selectedDate} 事前予測）`;
+      predGrid.innerHTML = '';
+
+      const predictions = dayData.predictions || [];
+      // 選択中リーグに所属する試合を優先・フィルタ
+      const leagueTeamSet = new Set(list.map(t => t.team));
+      const filteredPreds = predictions.filter(p => leagueTeamSet.has(p.away) || leagueTeamSet.has(p.home));
+
+      if (filteredPreds.length === 0) {
+        predGrid.innerHTML = `<div style="grid-column: 1/-1; padding: 18px; text-align: center; color: #64748b; background: #fff; border-radius: 12px; border: 1px solid var(--border);">この日の該当リーグの試合はありません（移動日または予備日）。</div>`;
+      } else {
+        filteredPreds.forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'pred-card';
+          card.innerHTML = `
+            <div class="pred-teams">
+              <div class="team-box away">
+                <div class="team-role">ビジター</div>
+                <div class="team-name">${p.away}</div>
+                <div class="starter-name">先発: ${p.away_starter}</div>
+              </div>
+              <div class="vs-badge">VS</div>
+              <div class="team-box home">
+                <div class="team-role">ホーム</div>
+                <div class="team-name">${p.home}</div>
+                <div class="starter-name">先発: ${p.home_starter}</div>
+              </div>
+            </div>
+            <div class="prob-values">
+              <span class="val-away">${p.away_prob.toFixed(1)}%</span>
+              <span class="val-home">${p.home_prob.toFixed(1)}%</span>
+            </div>
+            <div class="prob-bar-container">
+              <div class="bar-segment-away" style="width: ${p.away_prob}%;"></div>
+              <div class="bar-segment-home" style="width: ${p.home_prob}%;"></div>
+            </div>
+          `;
+          predGrid.appendChild(card);
+        });
+      }
+
+      // 2. 順位表 & CN表描画
       const tbodyStandings = document.getElementById('standings-body');
       tbodyStandings.innerHTML = '';
       list.forEach(t => {
@@ -291,13 +370,12 @@
         tbodyStandings.appendChild(tr);
       });
 
-      // 2. 対戦成績表（マトリクス）の描画
+      // 3. 対戦成績表描画
       const theadMatrix = document.getElementById('matrix-head');
       const tbodyMatrix = document.getElementById('matrix-body');
       theadMatrix.innerHTML = '';
       tbodyMatrix.innerHTML = '';
 
-      // ヘッダー作成
       const leagueTeams = list.map(t => t.team);
       let headHtml = `
         <tr>
@@ -317,7 +395,6 @@
       headHtml += `<th>交流戦</th></tr>`;
       theadMatrix.innerHTML = headHtml;
 
-      // 行データ作成
       list.forEach(t => {
         const tr = document.createElement('tr');
         let rowHtml = `
