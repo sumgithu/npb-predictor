@@ -1,0 +1,30 @@
+{
+  "teams": {
+    "阪神": { "runs_scored": 320, "runs_allowed": 260, "games": 80 },
+    "広島": { "runs_scored": 310, "runs_allowed": 290, "games": 80 },
+    "ＤｅＮＡ": { "runs_scored": 330, "runs_allowed": 310, "games": 80 },
+    "巨人": { "runs_scored": 340, "runs_allowed": 280, "games": 80 },
+    "ヤクルト": { "runs_scored": 290, "runs_allowed": 350, "games": 80 },
+    "中日": { "runs_scored": 250, "runs_allowed": 280, "games": 80 },
+    "ソフトバンク": { "runs_scored": 360, "runs_allowed": 240, "games": 80 },
+    "日本ハム": { "runs_scored": 310, "runs_allowed": 290, "games": 80 },
+    "ロッテ": { "runs_scored": 290, "runs_allowed": 300, "games": 80 },
+    "楽天": { "runs_scored": 280, "runs_allowed": 320, "games": 80 },
+    "オリックス": { "runs_scored": 270, "runs_allowed": 300, "games": 80 },
+    "西武": { "runs_scored": 230, "runs_allowed": 340, "games": 80 }
+  },
+  "pitchers": {
+    "才木": { "ip": 140.0, "so": 125, "bb": 38, "hr": 6 },
+    "戸郷": { "ip": 150.0, "so": 135, "bb": 42, "hr": 9 },
+    "菅野": { "ip": 130.0, "so": 100, "bb": 20, "hr": 8 },
+    "東": { "ip": 145.0, "so": 120, "bb": 25, "hr": 7 },
+    "高橋宏": { "ip": 135.0, "so": 130, "bb": 28, "hr": 2 },
+    "モイネロ": { "ip": 140.0, "so": 138, "bb": 40, "hr": 8 },
+    "有原": { "ip": 155.0, "so": 115, "bb": 30, "hr": 11 },
+    "伊藤大": { "ip": 150.0, "so": 140, "bb": 32, "hr": 9 },
+    "宮城": { "ip": 125.0, "so": 120, "bb": 26, "hr": 6 },
+    "早川": { "ip": 140.0, "so": 130, "bb": 35, "hr": 12 },
+    "小島": { "ip": 145.0, "so": 110, "bb": 42, "hr": 13 },
+    "今井": { "ip": 140.0, "so": 150, "bb": 55, "hr": 7 }
+  }
+}
