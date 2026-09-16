@@ -4,8 +4,8 @@ import os
 import re
 
 TOTAL_GAMES = 143
-GAMES_INTRA = 25  # 同一リーグ内対戦数
-GAMES_INTER = 3   # 交流戦対戦数
+GAMES_INTRA = 25  # 同一リーグ内対戦総数
+GAMES_INTER = 3   # 交流戦対戦総数
 DB_FILE = "games_db.json"
 HISTORY_FILE = "history_standings.json"
 
@@ -28,15 +28,15 @@ BASELINE_RECORDS = {
     "西武": {"games": 129, "win": 43, "lose": 84, "draw": 2}
 }
 
-# 2026-09-14 時点での主要直接対決 残り試合数マトリクス（実戦推計値）
-# 阪神 vs 巨人: 残り2試合、阪神 vs DeNA: 残り3試合 など
-ESTIMATED_REMAINING_H2H = {
-    "阪神": {"巨人": 2, "ＤｅＮＡ": 3, "ヤクルト": 4, "中日": 3, "広島": 4},
-    "巨人": {"阪神": 2, "ＤｅＮＡ": 2, "ヤクルト": 2, "中日": 3, "広島": 3},
-    "ＤｅＮＡ": {"阪神": 3, "巨人": 2, "ヤクルト": 3, "中日": 2, "広島": 3},
-    "ヤクルト": {"阪神": 4, "巨人": 2, "ＤｅＮＡ": 3, "中日": 2, "広島": 3},
-    "中日": {"阪神": 3, "巨人": 3, "ＤｅＮＡ": 2, "ヤクルト": 2, "広島": 0},
-    "広島": {"阪神": 4, "巨人": 3, "ＤｅＮＡ": 3, "ヤクルト": 3, "中日": 0}
+# 2026-09-14 時点での消化済み直接対決マトリクス（セ・リーグ各球団間の実対戦消化数）
+# 各カード全25試合制。25からこの数値を引くことで残り試合数が一意に確定します。
+BASELINE_H2H_PLAYED = {
+    "阪神": {"巨人": 23, "ＤｅＮＡ": 22, "ヤクルト": 21, "中日": 22, "広島": 21},
+    "巨人": {"阪神": 23, "ＤｅＮＡ": 23, "ヤクルト": 23, "中日": 22, "広島": 22},
+    "ＤｅＮＡ": {"阪神": 22, "巨人": 23, "ヤクルト": 22, "中日": 23, "広島": 22},
+    "ヤクルト": {"阪神": 21, "巨人": 23, "ＤｅＮＡ": 22, "中日": 23, "広島": 22},
+    "中日": {"阪神": 22, "巨人": 22, "ＤｅＮＡ": 23, "ヤクルト": 23, "広島": 25},
+    "広島": {"阪神": 21, "巨人": 22, "ＤｅＮＡ": 22, "ヤクルト": 22, "中日": 25}
 }
 
 def load_db():
@@ -69,6 +69,16 @@ def build_standings_at_date(db, target_date_str):
             "draw": b["draw"]
         }
 
+    # 直接対決消化数マトリクスの初期化
+    h2h_played = {}
+    for t1 in all_teams:
+        h2h_played[t1] = {}
+        for t2 in all_teams:
+            if t1 in BASELINE_H2H_PLAYED and t2 in BASELINE_H2H_PLAYED[t1]:
+                h2h_played[t1][t2] = BASELINE_H2H_PLAYED[t1][t2]
+            else:
+                h2h_played[t1][t2] = 21
+
     # DB内の試合結果を加算
     for g in db.get("games", []):
         g_date = g.get("date", "")
@@ -80,6 +90,8 @@ def build_standings_at_date(db, target_date_str):
 
             records[h]["games"] += 1
             records[a]["games"] += 1
+            h2h_played[h][a] += 1
+            h2h_played[a][h] += 1
 
             if hs > as_:
                 records[h]["win"] += 1
@@ -108,43 +120,38 @@ def build_standings_at_date(db, target_date_str):
     return {
         "central": format_league(CENTRAL_TEAMS),
         "pacific": format_league(PACIFIC_TEAMS)
-    }
+    }, h2h_played
 
-def get_h2h_remaining(team_a, team_b):
-    ta, tb = team_a["team"], border_team_name = team_b["team"]
-    if ta in ESTIMATED_REMAINING_H2H and border_team_name in ESTIMATED_REMAINING_H2H[ta]:
-        rem = ESTIMATED_REMAINING_H2H[ta][border_team_name]
-    else:
-        rem = 2  # デフォルト残試合
-    return min(rem, TOTAL_GAMES - team_a["games"], TOTAL_GAMES - team_b["games"])
-
-def calc_clinch_magic(team_a, border_team):
-    """
-    team_a が border_team を自力で上回るための最小自力勝利数を厳密計算
-    """
+def calc_clinch_magic_h2h(team_a, border_team, h2h_played):
+    """直接対決の残り試合数（25 - 消化数）から厳密に最小自力勝利数を計算"""
+    ta = team_a["team"]
+    tb = border_team["team"]
     rem_a = TOTAL_GAMES - team_a["games"]
     rem_b = TOTAL_GAMES - border_team["games"]
 
-    rem_h2h = get_h2h_remaining(team_a, border_team)
+    # 残りの直接対決試合数（全25試合制より正確に算出）
+    played = h2h_played.get(ta, {}).get(tb, 21)
+    rem_h2h = max(0, GAMES_INTRA - played)
+    rem_h2h = min(rem_h2h, rem_a, rem_b)
 
-    # 1. 相手Bが残り全勝しても届かない（完全確定）
+    # 1. 相手Bが残り全勝しても届かない（確定）
     b_abs_max_win = border_team["win"] + rem_b
     b_abs_max_rate = calc_win_rate(b_abs_max_win, border_team["lose"])
     a_cur_min_rate = calc_win_rate(team_a["win"], team_a["lose"] + rem_a)
     if a_cur_min_rate > b_abs_max_rate:
         return "確定"
 
-    # 2. 自チームAが残り全勝しても相手Bの最低勝率に届かない（自力消滅）
+    # 2. チームAが残り全勝しても相手Bの現在最低保証勝率に届かない（自力消滅）
     a_abs_max_win = team_a["win"] + rem_a
     a_abs_max_rate = calc_win_rate(a_abs_max_win, team_a["lose"])
     b_cur_min_rate = calc_win_rate(border_team["win"], border_team["lose"] + rem_b)
     if a_abs_max_rate < b_cur_min_rate:
         return "-"
 
-    # 3. 最小自力勝利数 X の全探索
+    # 3. 最小自力勝利数 X の探索
     magic = None
     for x in range(0, rem_a + 1):
-        # Aが x 勝した際、直接対決で相手Bに強制される最小敗戦数
+        # Aが x 勝した際、直接対決により相手Bに強制される最小敗戦数
         forced_b_losses = min(x, rem_h2h)
         b_possible_wins = rem_b - forced_b_losses
         b_max_win = border_team["win"] + b_possible_wins
@@ -153,7 +160,6 @@ def calc_clinch_magic(team_a, border_team):
 
         a_rate = calc_win_rate(team_a["win"] + x, team_a["lose"] + (rem_a - x))
 
-        # 勝率で確実に上回るか
         if a_rate > b_max_rate:
             magic = x
             break
@@ -164,18 +170,16 @@ def calc_clinch_magic(team_a, border_team):
         return "確定"
     return magic
 
-def evaluate_league_clinches(teams):
+def evaluate_league_clinches(teams, h2h_played):
     for i, t in enumerate(teams):
         rank = i + 1
         for k, key in [(1, "magic_1st"), (2, "magic_2nd"), (3, "magic_3rd"), (4, "magic_4th"), (5, "magic_5th")]:
             if rank <= k:
-                # 圏内：ボーダー（k+1位）を突き放すための条件
                 border = teams[k]
-                t[key] = calc_clinch_magic(t, border)
+                t[key] = calc_clinch_magic_h2h(t, border, h2h_played)
             else:
-                # 圏外：目標席（k位）を奪い取るための条件
                 border = teams[k - 1]
-                t[key] = calc_clinch_magic(t, border)
+                t[key] = calc_clinch_magic_h2h(t, border, h2h_played)
     return teams
 
 def main():
@@ -191,10 +195,10 @@ def main():
 
     history_snapshots = {}
     for d in game_dates:
-        standings = build_standings_at_date(db, d)
+        standings, h2h = build_standings_at_date(db, d)
         history_snapshots[d] = {
-            "central": evaluate_league_clinches(standings["central"]),
-            "pacific": evaluate_league_clinches(standings["pacific"])
+            "central": evaluate_league_clinches(standings["central"], h2h),
+            "pacific": evaluate_league_clinches(standings["pacific"], h2h)
         }
 
     output = {
@@ -213,7 +217,7 @@ def main():
             "pacific": history_snapshots[game_dates[-1]]["pacific"]
         }, f, ensure_ascii=False, indent=2)
 
-    print("クリンチナンバー厳密計算完了")
+    print("クリンチ計算完了")
 
 if __name__ == "__main__":
     main()
