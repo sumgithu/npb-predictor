@@ -119,7 +119,7 @@
 
     function renderBadge(val) {
       if (val === '確定') return `<span class="badge badge-fixed">確定</span>`;
-      if (typeof val === 'number') return `<span class="badge badge-magic">M${val}</span>`;
+      if (typeof val === 'number') return `<span class="badge badge-magic">${val}</span>`;
       return `<span class="badge-dash">-</span>`;
     }
 
