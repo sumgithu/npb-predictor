@@ -2,12 +2,20 @@
   "date": "2026-09-16",
   "matchups": [
     {
-      "home_team": "ソフトバンク",
+      "home_team": "楽天",
       "away_team": "ロッテ",
-      "home_starter": "3回表",
-      "away_starter": "3回表",
-      "home_win_rate": 0.742,
-      "away_win_rate": 0.258
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "home_win_rate": 0.485,
+      "away_win_rate": 0.515
+    },
+    {
+      "home_team": "ソフトバンク",
+      "away_team": "オリックス",
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "home_win_rate": 0.77,
+      "away_win_rate": 0.23
     }
   ]
 }
