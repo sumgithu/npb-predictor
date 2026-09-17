@@ -1,6 +1,30 @@
 {
-  "date": "2026-09-16",
+  "date": "2026-09-17",
   "matchups": [
+    {
+      "home_team": "ヤクルト",
+      "away_team": "ＤｅＮＡ",
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "home_win_rate": 0.635,
+      "away_win_rate": 0.365
+    },
+    {
+      "home_team": "広島",
+      "away_team": "阪神",
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "home_win_rate": 0.387,
+      "away_win_rate": 0.613
+    },
+    {
+      "home_team": "西武",
+      "away_team": "日本ハム",
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "home_win_rate": 0.245,
+      "away_win_rate": 0.755
+    },
     {
       "home_team": "楽天",
       "away_team": "ロッテ",
