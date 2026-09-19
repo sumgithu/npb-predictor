@@ -186,6 +186,7 @@
 
       showStatus("GitHubより全データを同期中...", "");
       try {
+        // 1. games_db.json の読み込み
         const resDb = await fetch(`https://api.github.com/repos/${repo}/contents/games_db.json?t=${new Date().getTime()}`, {
           headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
         });
@@ -196,6 +197,7 @@
           currentDb = JSON.parse(decoded);
         }
 
+        // 2. 2016-2026プロ野球レギュラーシーズン結果.txt の取得
         const txtFilename = encodeURIComponent("2016-2026プロ野球レギュラーシーズン結果.txt");
         const resTxt = await fetch(`https://api.github.com/repos/${repo}/contents/${txtFilename}?t=${new Date().getTime()}`, {
           headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
@@ -213,7 +215,8 @@
             if (fallbackRes.ok) {
               const raw = await fallbackRes.text();
               parseTextSchedule(raw);
-              showStatus("同期完了", "success");
+              const totalDays = Object.keys(textScheduleMap).length;
+              showStatus(`完全同期完了 (テキストログから ${totalDays} 日分の日程を読み込みました)`, "success");
             } else {
               showStatus("テキストログ取得失敗", "error");
             }
@@ -230,18 +233,22 @@
 
     function parseTextSchedule(rawText) {
       textScheduleMap = {};
-      if (!rawText.includes("2026\n")) return;
-      const sec2026 = rawText.split("2026\n")[1];
-      let curDate = null;
+      // 改行コードの差異（CRLF / LF）を統一
+      const normalized = rawText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      
+      const secSplit = normalized.split(/\n2026\n/);
+      const sec2026 = secSplit.length > 1 ? secSplit[secSplit.length - 1] : normalized;
 
-      const lines = sec2026.split(/\r?\n/);
+      let curDate = null;
+      const lines = sec2026.split('\n');
+
       for (let rawLine of lines) {
         let line = rawLine.trim();
         if (!line) continue;
 
-        // 日付行検知: 例 "9/21（月）"
-        const dateMatch = line.match(/^(\d{1,2})\/(\d{1,2})(?:（[日月火水木金土]）)?\s*(.*)$/);
-        if (dateMatch) {
+        // 日付検知: 行頭が "9/19" または "9/19（土）" 形式
+        const dateMatch = line.match(/^(\d{1,2})\/(\d{1,2})(?:[\s\S]*?[（(][日月火水木金土][）)])?\s*(.*)$/);
+        if (dateMatch && parseInt(dateMatch[1], 10) <= 12 && parseInt(dateMatch[2], 10) <= 31) {
           const m = parseInt(dateMatch[1], 10);
           const d = parseInt(dateMatch[2], 10);
           curDate = `2026-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
@@ -254,7 +261,7 @@
 
         if (!curDate || line.includes("中止") || line.includes("ノーゲーム")) continue;
 
-        // 1. 消化済みスコア行 (例: 巨人 6 - 4 ヤクルト ...)
+        // 1. スコア確定試合 (例: 巨人 6 - 4 ヤクルト ...)
         const finM = line.match(/([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)/);
         if (finM) {
           const h = normalizeTeam(finM[1]);
@@ -275,13 +282,13 @@
           }
         }
 
-        // 2. 未消化予定行 (先発投手あり・なし両対応)
-        // 例: "中日   -   広島  バンテリンドーム 14:00 雨のちくもり"
-        // 例: "中日   -   広島  ... 先発：大野雄 先発：森下"
+        // 2. 未消化予定試合 (ホーム - ビジター 表記)
+        // 例: 巨人 - 中日 東京ドーム ... 先発：田中将 先発：中西
+        // 例: 中日 - 広島 バンテリンドーム ... (先発なし)
         const schedM = line.match(/([^\s\d]+)\s*-\s*([^\s\d]+)/);
         if (schedM) {
-          const h = normalizeTeam(schedM[1]); // 左側がホーム
-          const a = normalizeTeam(schedM[2]); // 右側がビジター
+          const h = normalizeTeam(schedM[1]);
+          const a = normalizeTeam(schedM[2]);
           if (TEAMS.includes(h) && TEAMS.includes(a)) {
             const starters = [...line.matchAll(/先発：([^\s]+)/g)].map(m => m[1]);
             const hStarter = starters[0] || "未定";
@@ -350,7 +357,6 @@
       const row = document.createElement('div');
       row.className = 'match-row';
 
-      // ビジター vs ホーム の初期選択設定
       const selAway = data ? data.away : "広島";
       const selHome = data ? data.home : "中日";
 
