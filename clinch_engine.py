@@ -22,6 +22,8 @@ TEAM_ALIASES = {
 }
 
 def normalize_team(name):
+    if not name:
+        return ""
     clean = name.strip()
     return TEAM_ALIASES.get(clean, clean)
 
@@ -30,11 +32,15 @@ def calc_win_rate(w, l):
     return (w / decided) if decided > 0 else 0.0
 
 def parse_year_games_from_text(raw_text, target_year):
-    """テキストファイルから指定年の試合結果を抽出"""
-    sec_key = f"{target_year}\n"
-    if sec_key not in raw_text:
+    normalized = raw_text.replace("\r\n", "\n").replace("\r", "\n")
+    sec_key = f"\n{target_year}\n"
+    if sec_key in normalized:
+        sec = normalized.split(sec_key)[-1]
+    elif normalized.startswith(f"{target_year}\n"):
+        sec = normalized.split(f"{target_year}\n")[-1]
+    else:
         return []
-    sec = raw_text.split(sec_key)[-1]
+
     next_years = [str(y) for y in range(target_year + 1, 2030)]
     for ny in next_years:
         if f"\n{ny}\n" in sec:
@@ -48,21 +54,25 @@ def parse_year_games_from_text(raw_text, target_year):
         line = line.strip()
         if not line:
             continue
-        date_m = re.match(r'^(\d{1,2})/(\d{1,2})', line)
+
+        date_m = line.match = re.match(r'^(\d{1,2})\/(\d{1,2})(?:[（(][日月火水木金土][）)])?\s*(.*)$', line)
         if date_m:
             m, d = int(date_m.group(1)), int(date_m.group(2))
             current_date = f"{target_year}-{m:02d}-{d:02d}"
-            line = re.sub(r'^\d{1,2}/\d{1,2}（[日月火水木金土]）\s*', '', line)
+            line = date_m.group(3).strip()
+            if not line:
+                continue
 
         if not current_date or "中止" in line or "ノーゲーム" in line:
             continue
 
-        match = re.search(r'([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)', line)
-        if match:
-            h = normalize_team(match.group(1))
-            hs = int(match.group(2))
-            as_ = int(match.group(3))
-            a = normalize_team(match.group(4))
+        # 1. 消化済みスコア行 (例: 巨人 6 - 4 ヤクルト 勝：内海 敗：デイビーズ)
+        match_fin = re.search(r'([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)', line)
+        if match_fin:
+            h = normalize_team(match_fin.group(1))
+            hs = int(match_fin.group(2))
+            as_ = int(match_fin.group(3))
+            a = normalize_team(match_fin.group(4))
             if h in all_teams and a in all_teams:
                 win_p = re.search(r'勝：([^\s]+)', line)
                 lose_p = re.search(r'敗：([^\s]+)', line)
@@ -72,11 +82,9 @@ def parse_year_games_from_text(raw_text, target_year):
                 lose_pitcher = lose_p.group(1) if lose_p else ""
 
                 if hs > as_:
-                    h_pitcher = win_pitcher
-                    a_pitcher = lose_pitcher
+                    h_pitcher, a_pitcher = win_pitcher, lose_pitcher
                 elif hs < as_:
-                    h_pitcher = lose_pitcher
-                    a_pitcher = win_pitcher
+                    h_pitcher, a_pitcher = lose_pitcher, win_pitcher
                 else:
                     h_pitcher = draw_p[0] if len(draw_p) > 0 else ""
                     a_pitcher = draw_p[1] if len(draw_p) > 1 else ""
@@ -89,25 +97,46 @@ def parse_year_games_from_text(raw_text, target_year):
                     "home_starter": h_pitcher, "away_starter": a_pitcher,
                     "status": "finished"
                 })
-        else:
-            # 予告先発行の抽出
-            vs_m = re.search(r'([^\s\d]+)\s+vs\s+([^\s\d]+)', line)
-            if vs_m:
-                a = normalize_team(vs_m.group(1))
-                h = normalize_team(vs_m.group(2))
-                if h in all_teams and a in all_teams:
-                    games.append({
-                        "date": current_date,
-                        "home": h, "away": a,
-                        "home_score": None, "away_score": None,
-                        "home_pitcher": "未定", "away_pitcher": "未定",
-                        "home_starter": "未定", "away_starter": "未定",
-                        "status": "scheduled"
-                    })
+            continue
+
+        # 2. 未消化予定試合 (ホーム - ビジター 表記)
+        match_sched = re.search(r'([^\s\d]+)\s*-\s*([^\s\d]+)', line)
+        if match_sched:
+            h = normalize_team(match_sched.group(1))
+            a = normalize_team(match_sched.group(2))
+            if h in all_teams and a in all_teams:
+                starters = re.findall(r'先発：([^\s]+)', line)
+                h_starter = starters[0] if len(starters) > 0 else "未定"
+                a_starter = starters[1] if len(starters) > 1 else "未定"
+
+                games.append({
+                    "date": current_date,
+                    "home": h, "away": a,
+                    "home_score": None, "away_score": None,
+                    "home_pitcher": h_starter, "away_pitcher": a_starter,
+                    "home_starter": h_starter, "away_starter": a_starter,
+                    "status": "scheduled"
+                })
+            continue
+
+        # 3. vs 表記
+        match_vs = re.search(r'([^\s\d]+)\s+vs\s+([^\s\d]+)', line, re.IGNORECASE)
+        if match_vs:
+            a = normalize_team(match_vs.group(1))
+            h = normalize_team(match_vs.group(2))
+            if h in all_teams and a in all_teams:
+                games.append({
+                    "date": current_date,
+                    "home": h, "away": a,
+                    "home_score": None, "away_score": None,
+                    "home_pitcher": "未定", "away_pitcher": "未定",
+                    "home_starter": "未定", "away_starter": "未定",
+                    "status": "scheduled"
+                })
+
     return games
 
 def load_all_games():
-    """テキストデータと手動入力DB(games_db.json)を統合"""
     games_2025 = []
     games_2026_base = []
 
@@ -117,7 +146,7 @@ def load_all_games():
         games_2025 = parse_year_games_from_text(raw_text, 2025)
         games_2026_base = parse_year_games_from_text(raw_text, 2026)
 
-    # 手入力された games_db.json があれば読み込んで上書きマージ
+    # 手入力 games_db.json があれば上書きマージ
     if os.path.exists(MANUAL_DB_FILE):
         try:
             with open(MANUAL_DB_FILE, "r", encoding="utf-8") as f:
@@ -125,7 +154,6 @@ def load_all_games():
             manual_games = manual_db.get("games", [])
             manual_dates = {g["date"] for g in manual_games}
 
-            # 手入力された日付は games_db.json のデータを優先
             merged_2026 = [g for g in games_2026_base if g["date"] not in manual_dates]
             merged_2026.extend(manual_games)
             merged_2026.sort(key=lambda x: x["date"])
@@ -142,9 +170,6 @@ def get_remaining_h2h(t1, t2, h2h_played, rem_1, rem_2):
     return max(0, min(max_games - played, rem_1, rem_2))
 
 def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
-    """
-    target_k: 1(CN/優勝), 2(2nd/本拠), 3(3rd/CS), 4(4th), 5(5th/最下位回避)
-    """
     ta = team_a["team"]
     rem_a = team_a["remaining"]
     a_max_win = team_a["win"] + rem_a
@@ -153,7 +178,6 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
 
     others = [ot for ot in all_teams if ot["team"] != ta]
 
-    # 1. 完全消滅判定 (Eliminated)
     guaranteed_higher = 0
     for ot in others:
         ot_min_rate = calc_win_rate(ot["win"], ot["lose"] + ot["remaining"])
@@ -163,7 +187,6 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
     if guaranteed_higher >= target_k:
         return "-"
 
-    # 2. 完全確定判定 (Clinched)
     threats = 0
     for ot in others:
         ot_max_rate = calc_win_rate(ot["win"] + ot["remaining"], ot["lose"])
@@ -173,7 +196,6 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
     if threats < target_k:
         return "確定"
 
-    # 3. クリンチナンバーの探索
     if target_k == 1:
         border = all_teams[1] if team_a["rank"] == 1 else all_teams[0]
     else:
@@ -183,7 +205,6 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
     rem_b = border["remaining"]
     rem_h2h = get_remaining_h2h(ta, tb, h2h_played, rem_a, rem_b)
 
-    # 自力確定探索 (0 〜 rem_a)
     magic = None
     for x in range(0, rem_a + 1):
         a_losses = rem_a - x
@@ -200,7 +221,6 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
     if magic is not None:
         return "確定" if magic == 0 else magic
 
-    # 4. 自力消滅だが可能性あり（他力アシストが必要なケース）
     b_abs_max_rate = calc_win_rate(border["win"] + rem_b, border["lose"])
     for x in range(rem_a + 1, rem_a + 40):
         a_rate = calc_win_rate(team_a["win"] + x, team_a["lose"])
@@ -210,9 +230,7 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
     return rem_a + 1
 
 def validate_and_assert_standings(teams):
-    """数学的不変則（確定・消滅の伝播、単調性）の検証"""
     keys = ["magic_1st", "magic_2nd", "magic_3rd", "magic_4th", "magic_5th"]
-
     for t in teams:
         confirmed = False
         for k in keys:
@@ -236,15 +254,11 @@ def validate_and_assert_standings(teams):
                     t[k] = last_val
                 else:
                     last_val = val
-
     return teams
 
-# -------------------------------------------------------------
-# ベイジアン・ピタゴラス & Log5法による予想勝率算出
-# -------------------------------------------------------------
 EXP_PYTHAGOREAN = 1.83
-PRIOR_WEIGHT_GAMES = 35.0  # 前年実績の重み（試合数換算）
-HOME_ODDS_ADVANTAGE = 1.15 # NPBホーム球場オッズ優位性
+PRIOR_WEIGHT_GAMES = 35.0
+HOME_ODDS_ADVANTAGE = 1.15
 
 def calc_pythagorean_rate(rs, ra):
     if rs <= 0 and ra <= 0:
@@ -267,14 +281,38 @@ def get_bayesian_team_strength(prior_stats, current_stats):
 
     return calc_pythagorean_rate(blended_rs, blended_ra)
 
-def calc_log5_matchup(p_away, p_home):
+# -------------------------------------------------------------
+# 予告先発投手の個人実績補正（ベイズ・オッズ調整）
+# -------------------------------------------------------------
+def get_pitcher_multiplier(pitcher_name, pitcher_stats):
+    if not pitcher_name or pitcher_name == "未定":
+        return 1.0
+    st = pitcher_stats.get(pitcher_name, {"win": 0, "lose": 0})
+    w, l = st["win"], st["lose"]
+    # 事前分布 (w0=3, l0=3) によるベイズ収縮
+    rate = (w + 3.0) / (w + l + 6.0)
+    odds = rate / (1.0 - rate)
+    # 影響度（約35%）を指数乗算
+    return math.pow(odds, 0.35)
+
+def calc_log5_matchup(p_away, p_home, away_pitcher, home_pitcher, pitcher_stats):
     denom = p_away + p_home - (2.0 * p_away * p_home)
     p_neutral_away = 0.5 if denom <= 0 else (p_away - (p_away * p_home)) / denom
     p_neutral_away = max(0.01, min(0.99, p_neutral_away))
 
+    # チーム基礎オッズ
     odds_away = p_neutral_away / (1.0 - p_neutral_away)
+
+    # 1. ホームアドバンテージ補正
     adj_odds_away = odds_away / HOME_ODDS_ADVANTAGE
-    final_p_away = adj_odds_away / (1.0 + adj_odds_away)
+
+    # 2. 先発投手補正（Away投手 vs Home投手の相対比）
+    m_away = get_pitcher_multiplier(away_pitcher, pitcher_stats)
+    m_home = get_pitcher_multiplier(home_pitcher, pitcher_stats)
+    pitcher_ratio = m_away / max(0.1, m_home)
+    final_odds_away = adj_odds_away * pitcher_ratio
+
+    final_p_away = final_odds_away / (1.0 + final_odds_away)
     final_p_home = 1.0 - final_p_away
 
     return round(final_p_away * 100.0, 1), round(final_p_home * 100.0, 1)
@@ -282,23 +320,43 @@ def calc_log5_matchup(p_away, p_home):
 def build_all_history_with_predictions(games_2025, games_2026):
     all_teams = CENTRAL_TEAMS + PACIFIC_TEAMS
 
-    # 2025年通算スタッツ（事前分布用）
+    # 1. 2025年通算スタッツ集計（事前分布用）
     prior_stats = {t: {"games": 0, "rs": 0, "ra": 0} for t in all_teams}
+    pitcher_stats = {}
+
     for g in games_2025:
         if g.get("status") == "finished":
             h, a = g["home"], g["away"]
+            hs, as_ = g["home_score"], g["away_score"]
             prior_stats[h]["games"] += 1
-            prior_stats[h]["rs"] += g["home_score"]
-            prior_stats[h]["ra"] += g["away_score"]
+            prior_stats[h]["rs"] += hs
+            prior_stats[h]["ra"] += as_
             prior_stats[a]["games"] += 1
-            prior_stats[a]["rs"] += g["away_score"]
-            prior_stats[a]["ra"] += g["home_score"]
+            prior_stats[a]["rs"] += as_
+            prior_stats[a]["ra"] += hs
 
+            # 投手実績集計
+            hp = g.get("home_pitcher")
+            ap = g.get("away_pitcher")
+            if hp:
+                if hp not in pitcher_stats: pitcher_stats[hp] = {"win": 0, "lose": 0}
+                if hs > as_: pitcher_stats[hp]["win"] += 1
+                elif hs < as_: pitcher_stats[hp]["lose"] += 1
+            if ap:
+                if ap not in pitcher_stats: pitcher_stats[ap] = {"win": 0, "lose": 0}
+                if as_ > hs: pitcher_stats[ap]["win"] += 1
+                elif as_ < hs: pitcher_stats[ap]["lose"] += 1
+
+    # 2. 2026年すべての試合日付（消化済み＋未消化予定日すべて）
     all_dates = sorted(list({g["date"] for g in games_2026}))
+    finished_dates = sorted(list({g["date"] for g in games_2026 if g.get("status") == "finished"}))
+    last_finished_date = finished_dates[-1] if finished_dates else all_dates[0]
+
     history_snapshots = {}
+    last_c_table = None
+    last_p_table = None
 
     for target_date in all_dates:
-        # 当該日終了時点の成績
         records = {t: {
             "team": t, "games": 0, "win": 0, "lose": 0, "draw": 0, "rs": 0, "ra": 0,
             "home": {"win": 0, "lose": 0, "draw": 0},
@@ -310,7 +368,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
         h2h_played = {t1: {t2: 0 for t2 in all_teams} for t1 in all_teams}
         h2h_details = {t1: {t2: {"win": 0, "lose": 0, "draw": 0} for t2 in all_teams} for t1 in all_teams}
 
-        # 過去〜当日までのスタッツ集計
+        # target_date 開始前・終了時点のスタッツ集計（finished のみ）
         for g in games_2026:
             if g.get("status") != "finished":
                 continue
@@ -318,6 +376,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
             hs, as_ = g["home_score"], g["away_score"]
             g_date = g["date"]
 
+            # 事前スタッツ
             if g_date < target_date:
                 pre_records[h]["games"] += 1
                 pre_records[h]["rs"] += hs
@@ -326,6 +385,17 @@ def build_all_history_with_predictions(games_2025, games_2026):
                 pre_records[a]["rs"] += as_
                 pre_records[a]["ra"] += hs
 
+                hp, ap = g.get("home_pitcher"), g.get("away_pitcher")
+                if hp:
+                    if hp not in pitcher_stats: pitcher_stats[hp] = {"win": 0, "lose": 0}
+                    if hs > as_: pitcher_stats[hp]["win"] += 1
+                    elif hs < as_: pitcher_stats[hp]["lose"] += 1
+                if ap:
+                    if ap not in pitcher_stats: pitcher_stats[ap] = {"win": 0, "lose": 0}
+                    if as_ > hs: pitcher_stats[ap]["win"] += 1
+                    elif as_ < hs: pitcher_stats[ap]["lose"] += 1
+
+            # 終了時点スタッツ
             if g_date <= target_date:
                 records[h]["games"] += 1
                 records[a]["games"] += 1
@@ -354,7 +424,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
                     records[h]["lose"] += 1
                     records[h]["home"]["lose"] += 1
                     h2h_details[a][h]["win"] += 1
-                    h2h_details[h][a]["lose"] += 1
+                    h2h_details[a][h]["lose"] += 1
                     if is_inter:
                         records[a]["interleague"]["win"] += 1
                         records[h]["interleague"]["lose"] += 1
@@ -369,80 +439,95 @@ def build_all_history_with_predictions(games_2025, games_2026):
                         records[h]["interleague"]["draw"] += 1
                         records[a]["interleague"]["draw"] += 1
 
-        # 当該日の予想勝利確率カードの生成
+        # 順位表・CN計算
+        if target_date <= last_finished_date:
+            def format_league(league_teams):
+                table = []
+                for t in league_teams:
+                    r = records[t]
+                    r["remaining"] = TOTAL_GAMES - r["games"]
+                    r["rate"] = calc_win_rate(r["win"], r["lose"])
+                    r["h2h"] = {opp: h2h_details[t][opp] for opp in league_teams}
+                    table.append(r)
+                table.sort(key=lambda x: (x["rate"], x["win"]), reverse=True)
+                top_w, top_l = table[0]["win"], table[0]["lose"]
+                for idx, t in enumerate(table):
+                    t["rank"] = idx + 1
+                    diff = ((top_w - t["win"]) + (t["lose"] - top_l)) / 2.0
+                    t["diff"] = max(0.0, diff) if idx > 0 else 0.0
+                return table
+
+            c_table = format_league(CENTRAL_TEAMS)
+            p_table = format_league(PACIFIC_TEAMS)
+
+            for t in c_table:
+                t["magic_1st"] = evaluate_clinch_target(t, 1, c_table, h2h_played)
+                t["magic_2nd"] = evaluate_clinch_target(t, 2, c_table, h2h_played)
+                t["magic_3rd"] = evaluate_clinch_target(t, 3, c_table, h2h_played)
+                t["magic_4th"] = evaluate_clinch_target(t, 4, c_table, h2h_played)
+                t["magic_5th"] = evaluate_clinch_target(t, 5, c_table, h2h_played)
+
+            for t in p_table:
+                t["magic_1st"] = evaluate_clinch_target(t, 1, p_table, h2h_played)
+                t["magic_2nd"] = evaluate_clinch_target(t, 2, p_table, h2h_played)
+                t["magic_3rd"] = evaluate_clinch_target(t, 3, p_table, h2h_played)
+                t["magic_4th"] = evaluate_clinch_target(t, 4, p_table, h2h_played)
+                t["magic_5th"] = evaluate_clinch_target(t, 5, p_table, h2h_played)
+
+            c_table = validate_and_assert_standings(c_table)
+            p_table = validate_and_assert_standings(p_table)
+
+            last_c_table = c_table
+            last_p_table = p_table
+        else:
+            # 未来の日程では、直近確定済みの順位表・CNを保持
+            c_table = last_c_table
+            p_table = last_p_table
+
+        # 当該日に行われる/予定されている各カードの勝率予測（先発投手補正入り）
         day_predictions = []
         for g in games_2026:
             if g["date"] == target_date:
                 h, a = g["home"], g["away"]
                 p_away = get_bayesian_team_strength(prior_stats[a], pre_records[a])
                 p_home = get_bayesian_team_strength(prior_stats[h], pre_records[h])
-                prob_away, prob_home = calc_log5_matchup(p_away, p_home)
+
+                h_start = g.get("home_starter") or g.get("home_pitcher") or "未定"
+                a_start = g.get("away_starter") or g.get("away_pitcher") or "未定"
+
+                # 予告先発補正をオッズに適用して勝率算出
+                prob_away, prob_home = calc_log5_matchup(p_away, p_home, a_start, h_start, pitcher_stats)
 
                 hs, as_ = g.get("home_score"), g.get("away_score")
                 is_fin = (g.get("status") == "finished" and hs is not None and as_ is not None)
 
                 if is_fin:
                     if hs > as_:
-                        h_label = f"勝利: {g.get('home_pitcher', '')}" if g.get('home_pitcher') else "勝利"
-                        a_label = f"敗戦: {g.get('away_pitcher', '')}" if g.get('away_pitcher') else "敗戦"
+                        h_label = f"勝利: {h_start}" if h_start != "未定" else "勝利"
+                        a_label = f"敗戦: {a_start}" if a_start != "未定" else "敗戦"
                     elif hs < as_:
-                        h_label = f"敗戦: {g.get('home_pitcher', '')}" if g.get('home_pitcher') else "敗戦"
-                        a_label = f"勝利: {g.get('away_pitcher', '')}" if g.get('away_pitcher') else "勝利"
+                        h_label = f"敗戦: {h_start}" if h_start != "未定" else "敗戦"
+                        a_label = f"勝利: {a_start}" if a_start != "未定" else "勝利"
                     else:
-                        h_label = f"引分: {g.get('home_pitcher', '')}" if g.get('home_pitcher') else "引分"
-                        a_label = f"引分: {g.get('away_pitcher', '')}" if g.get('away_pitcher') else "引分"
+                        h_label = f"引分: {h_start}" if h_start != "未定" else "引分"
+                        a_label = f"引分: {a_start}" if a_start != "未定" else "引分"
                 else:
-                    # 予定試合・予告先発
-                    h_start = g.get("home_starter") or g.get("home_pitcher") or "未定"
-                    a_start = g.get("away_starter") or g.get("away_pitcher") or "未定"
                     h_label = f"先発: {h_start}"
                     a_label = f"先発: {a_start}"
 
                 day_predictions.append({
                     "away": a,
                     "home": h,
+                    "away_starter": a_start,
+                    "home_starter": h_start,
                     "away_status_text": a_label,
                     "home_status_text": h_label,
                     "away_prob": prob_away,
                     "home_prob": prob_home,
+                    "actual_away_score": as_,
+                    "actual_home_score": hs,
                     "is_finished": is_fin
                 })
-
-        def format_league(league_teams):
-            table = []
-            for t in league_teams:
-                r = records[t]
-                r["remaining"] = TOTAL_GAMES - r["games"]
-                r["rate"] = calc_win_rate(r["win"], r["lose"])
-                r["h2h"] = {opp: h2h_details[t][opp] for opp in league_teams}
-                table.append(r)
-            table.sort(key=lambda x: (x["rate"], x["win"]), reverse=True)
-            top_w, top_l = table[0]["win"], table[0]["lose"]
-            for idx, t in enumerate(table):
-                t["rank"] = idx + 1
-                diff = ((top_w - t["win"]) + (t["lose"] - top_l)) / 2.0
-                t["diff"] = max(0.0, diff) if idx > 0 else 0.0
-            return table
-
-        c_table = format_league(CENTRAL_TEAMS)
-        p_table = format_league(PACIFIC_TEAMS)
-
-        for t in c_table:
-            t["magic_1st"] = evaluate_clinch_target(t, 1, c_table, h2h_played)
-            t["magic_2nd"] = evaluate_clinch_target(t, 2, c_table, h2h_played)
-            t["magic_3rd"] = evaluate_clinch_target(t, 3, c_table, h2h_played)
-            t["magic_4th"] = evaluate_clinch_target(t, 4, c_table, h2h_played)
-            t["magic_5th"] = evaluate_clinch_target(t, 5, c_table, h2h_played)
-
-        for t in p_table:
-            t["magic_1st"] = evaluate_clinch_target(t, 1, p_table, h2h_played)
-            t["magic_2nd"] = evaluate_clinch_target(t, 2, p_table, h2h_played)
-            t["magic_3rd"] = evaluate_clinch_target(t, 3, p_table, h2h_played)
-            t["magic_4th"] = evaluate_clinch_target(t, 4, p_table, h2h_played)
-            t["magic_5th"] = evaluate_clinch_target(t, 5, p_table, h2h_played)
-
-        c_table = validate_and_assert_standings(c_table)
-        p_table = validate_and_assert_standings(p_table)
 
         history_snapshots[target_date] = {
             "central": c_table,
@@ -450,17 +535,24 @@ def build_all_history_with_predictions(games_2025, games_2026):
             "predictions": day_predictions
         }
 
-    return all_dates, history_snapshots
+    # デフォルト最新日は「直近確定日」の翌日、なければ最終確定日
+    default_latest = last_finished_date
+    for d in all_dates:
+        if d > last_finished_date:
+            default_latest = d
+            break
+
+    return all_dates, default_latest, history_snapshots
 
 def main():
     games_2025, games_2026 = load_all_games()
     print(f"2025年 試合データ: {len(games_2025)} 試合（事前分布）")
-    print(f"2026年 試合データ: {len(games_2026)} 試合（手動入力DBマージ後）")
+    print(f"2026年 試合データ: {len(games_2026)} 試合（全日程・予告先発含む）")
 
-    dates, history = build_all_history_with_predictions(games_2025, games_2026)
+    dates, default_latest, history = build_all_history_with_predictions(games_2025, games_2026)
 
     output = {
-        "latest_date": dates[-1],
+        "latest_date": default_latest,
         "available_dates": dates,
         "history": history
     }
@@ -468,7 +560,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"処理完了：最新対象日 {dates[-1]} (全 {len(dates)} 日分の履歴スナップショット出力完了)")
+    print(f"全日程開放完了：{dates[0]} 〜 {dates[-1]} (デフォルト表示日: {default_latest})")
 
 if __name__ == "__main__":
     main()
