@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NPB 試合結果・予告先発 手動入力管理</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-sub: #64748b;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --border: #e2e8f0;
+      --danger: #ef4444;
+      --success: #10b981;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text-main); padding: 24px 16px 80px; }
+    .container { max-width: 900px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 24px; }
+    header h1 { font-size: 1.5rem; font-weight: 800; color: #1e3a8a; }
+    header p { font-size: 0.85rem; color: var(--text-sub); margin-top: 4px; }
+
+    .card {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 20px;
+    }
+
+    /* 設定エリア */
+    .config-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 0.82rem; font-weight: 700; color: #334155; }
+    .form-group input, .form-group select {
+      padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);
+      font-size: 0.9rem; outline: none; background: #fff;
+    }
+
+    /* 試合フォームリスト */
+    .match-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 40px 1fr 2fr 40px;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background: #f1f5f9;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .match-team { display: flex; flex-direction: column; gap: 4px; }
+    .match-team span.label { font-size: 0.72rem; color: var(--text-sub); font-weight: 600; }
+    .match-team select { padding: 6px; font-weight: 700; border-radius: 6px; border: 1px solid var(--border); }
+    .match-team input.pitcher { padding: 4px 8px; font-size: 0.8rem; border-radius: 6px; border: 1px solid var(--border); }
+    .score-input { width: 100%; text-align: center; font-size: 1.2rem; font-weight: 800; padding: 6px 0; border-radius: 6px; border: 1px solid var(--border); }
+    .vs-text { text-align: center; font-size: 0.85rem; font-weight: 800; color: #94a3b8; }
+    .btn-del {
+      background: none; border: none; color: var(--danger); font-size: 1.2rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+
+    .btn-add {
+      width: 100%; padding: 10px; border: 1.5px dashed #cbd5e1; border-radius: 8px;
+      background: transparent; color: var(--text-sub); font-weight: 700; cursor: pointer;
+      margin-bottom: 20px; transition: 0.2s;
+    }
+    .btn-add:hover { background: #f8fafc; border-color: var(--primary); color: var(--primary); }
+
+    .actions { display: flex; justify-content: space-between; align-items: center; }
+    .btn-save {
+      background: var(--primary); color: #fff; border: none; padding: 12px 28px;
+      border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s;
+    }
+    .btn-save:hover { background: var(--primary-hover); }
+
+    .status-msg { font-size: 0.9rem; font-weight: 700; }
+    .status-msg.success { color: var(--success); }
+    .status-msg.error { color: var(--danger); }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>NPB 試合結果・先発投手 手動管理</h1>
+      <p>日付を選択し、スコアまたは先発投手名を入力してデータベースを更新します</p>
+    </header>
+
+    <!-- 1. GitHub 連携設定（初回のみ入力・ブラウザ保存） -->
+    <div class="card">
+      <div class="config-grid">
+        <div class="form-group">
+          <label>リポジトリ名 (例: username/npb-analyzer)</label>
+          <input type="text" id="repo-name" placeholder="user/repo">
+        </div>
+        <div class="form-group">
+          <label>GitHub Personal Access Token (repo権限)</label>
+          <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
+        </div>
+      </div>
+      <div style="font-size: 0.75rem; color: var(--text-sub);">
+        ※ トークンはブラウザのローカルストレージにのみ保持され、外部サーバーには送信されません。
+      </div>
+    </div>
+
+    <!-- 2. 日付選択 -->
+    <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+      <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
+        <label style="font-size: 1rem;">入力対象日:</label>
+        <input type="date" id="target-date" style="font-size: 1rem; font-weight: 700; padding: 6px 12px;">
+      </div>
+      <button class="btn-add" style="width: auto; margin: 0; padding: 6px 16px;" onclick="loadDateFromRemote()">既存データを再読込</button>
+    </div>
+
+    <!-- 3. 対戦カード・スコア入力エリア -->
+    <div class="card">
+      <div id="matches-container">
+        <!-- JSで試合行を生成 -->
+      </div>
+      <button class="btn-add" onclick="addMatchRow()">＋ 対戦カードを追加</button>
+
+      <div class="actions">
+        <div id="status-msg" class="status-msg"></div>
+        <button class="btn-save" onclick="saveToGitHub()">データベースを更新保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const TEAMS = ["阪神", "巨人", "ＤｅＮＡ", "ヤクルト", "中日", "広島", "ソフトバンク", "日本ハム", "ロッテ", "楽天", "オリックス", "西武"];
+    let currentDb = { season: 2026, games: [] };
+    let fileSha = "";
+
+    const repoInput = document.getElementById('repo-name');
+    const tokenInput = document.getElementById('gh-token');
+    const dateInput = document.getElementById('target-date');
+    const statusMsg = document.getElementById('status-msg');
+
+    // 初期化
+    window.addEventListener('DOMContentLoaded', () => {
+      repoInput.value = localStorage.getItem('npb_admin_repo') || '';
+      tokenInput.value = localStorage.getItem('npb_admin_token') || '';
+      
+      const today = new Date().toISOString().split('T')[0];
+      dateInput.value = today;
+
+      repoInput.addEventListener('change', () => localStorage.setItem('npb_admin_repo', repoInput.value.trim()));
+      tokenInput.addEventListener('change', () => localStorage.setItem('npb_admin_token', tokenInput.value.trim()));
+      dateInput.addEventListener('change', () => loadDateForm());
+
+      loadRemoteDb();
+    });
+
+    async function loadRemoteDb() {
+      const repo = repoInput.value.trim();
+      const token = tokenInput.value.trim();
+      if (!repo || !token) {
+        showStatus("リポジトリ名とGitHubトークンを入力してください", "error");
+        return;
+      }
+
+      showStatus("データベース読込中...", "");
+      try {
+        const res = await fetch(`https://api.github.com/repos/${repo}/contents/games_db.json`, {
+          headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          fileSha = data.sha;
+          const decoded = decodeURIComponent(escape(atob(data.content)));
+          currentDb = JSON.parse(decoded);
+          showStatus("読込完了", "success");
+          loadDateForm();
+        } else if (res.status === 404) {
+          currentDb = { season: 2026, games: [] };
+          showStatus("games_db.json を新規作成します", "success");
+          loadDateForm();
+        } else {
+          showStatus("データ読込エラー: " + res.statusText, "error");
+        }
+      } catch (e) {
+        showStatus("ネットワークエラー", "error");
+      }
+    }
+
+    function loadDateFromRemote() {
+      loadRemoteDb();
+    }
+
+    function loadDateForm() {
+      const date = dateInput.value;
+      const container = document.getElementById('matches-container');
+      container.innerHTML = '';
+
+      // 該当日の試合を抽出
+      const dayGames = currentDb.games.filter(g => g.date === date);
+
+      if (dayGames.length > 0) {
+        dayGames.forEach(g => addMatchRow(g));
+      } else {
+        // 未登録の場合はデフォルトで3試合分枠を生成
+        for (let i = 0; i < 3; i++) {
+          addMatchRow();
+        }
+      }
+    }
+
+    function addMatchRow(data = null) {
+      const container = document.getElementById('matches-container');
+      const row = document.createElement('div');
+      row.className = 'match-row';
+
+      const awayOptions = TEAMS.map(t => `<option value="${t}" ${data && data.away === t ? 'selected' : ''}>${t}</option>`).join('');
+      const homeOptions = TEAMS.map(t => `<option value="${t}" ${data && data.home === t ? 'selected' : ''}>${t}</option>`).join('');
+
+      row.innerHTML = `
+        <div class="match-team">
+          <span class="label">ビジター</span>
+          <select class="away-team">${awayOptions}</select>
+          <input type="text" class="pitcher away-pitcher" placeholder="先発/敗戦投手" value="${data ? (data.away_starter || data.away_pitcher || '') : ''}">
+        </div>
+
+        <input type="number" class="score-input away-score" placeholder="点" min="0" max="30" value="${data && data.away_score !== null && data.away_score !== undefined ? data.away_score : ''}">
+
+        <div class="vs-text">VS</div>
+
+        <input type="number" class="score-input home-score" placeholder="点" min="0" max="30" value="${data && data.home_score !== null && data.home_score !== undefined ? data.home_score : ''}">
+
+        <div class="match-team">
+          <span class="label">ホーム</span>
+          <select class="home-team">${homeOptions}</select>
+          <input type="text" class="pitcher home-pitcher" placeholder="先発/勝利投手" value="${data ? (data.home_starter || data.home_pitcher || '') : ''}">
+        </div>
+
+        <button class="btn-del" title="削除" onclick="this.parentElement.remove()">✕</button>
+      `;
+      container.appendChild(row);
+    }
+
+    async function saveToGitHub() {
+      const repo = repoInput.value.trim();
+      const token = tokenInput.value.trim();
+      const date = dateInput.value;
+
+      if (!repo || !token || !date) {
+        showStatus("必須項目が不足しています", "error");
+        return;
+      }
+
+      // 入力内容をオブジェクト化
+      const rows = document.querySelectorAll('.match-row');
+      const newDayGames = [];
+
+      for (const row of rows) {
+        const away = row.querySelector('.away-team').value;
+        const home = row.querySelector('.home-team').value;
+        const awayScoreStr = row.querySelector('.away-score').value.trim();
+        const homeScoreStr = row.querySelector('.home-score').value.trim();
+        const awayPitcher = row.querySelector('.away-pitcher').value.trim();
+        const homePitcher = row.querySelector('.home-pitcher').value.trim();
+
+        if (away === home) continue; // 同一チーム対決は除外
+
+        const isFinished = (awayScoreStr !== "" && homeScoreStr !== "");
+        newDayGames.append({
+          date: date,
+          home: home,
+          away: away,
+          home_score: isFinished ? parseInt(homeScoreStr, 10) : null,
+          away_score: isFinished ? parseInt(awayScoreStr, 10) : null,
+          home_starter: homePitcher || "未定",
+          away_starter: awayPitcher || "未定",
+          home_pitcher: homePitcher,
+          away_pitcher: awayPitcher,
+          status: isFinished ? "finished" : "scheduled"
+        });
+      }
+
+      // 同一日付の古いレコードを全削除し、新しいレコードで置換（上書き）
+      currentDb.games = currentDb.games.filter(g => g.date !== date);
+      currentDb.games.push(...newDayGames);
+      // 日付順にソート
+      currentDb.games.sort((a, b) => a.date.localeCompare(b.date));
+
+      showStatus("GitHubへ保存中...", "");
+
+      // GitHub Contents API で games_db.json を直接コミット
+      const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(currentDb, null, 2))));
+      const payload = {
+        message: `Update matches for ${date} via admin UI`,
+        content: contentBase64,
+        sha: fileSha || undefined
+      };
+
+      try {
+        const res = await fetch(`https://api.github.com/repos/${repo}/contents/games_db.json`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `token ${token}`,
+            Accept: 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          const resData = await res.json();
+          fileSha = resData.content.sha;
+          showStatus(`保存完了！ (${date} のデータを更新しました)`, "success");
+        } else {
+          const err = await res.json();
+          showStatus(`保存失敗: ${err.message}`, "error");
+        }
+      } catch (e) {
+        showStatus("ネットワークエラーで保存できませんでした", "error");
+      }
+    }
+
+    function showStatus(text, type) {
+      statusMsg.className = `status-msg ${type}`;
+      statusMsg.innerText = text;
+    }
+  </script>
+</body>
+</html>
