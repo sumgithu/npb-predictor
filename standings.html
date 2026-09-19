@@ -144,9 +144,9 @@
     .clinch-subtable th { background: #f8fafc; font-size: 0.8rem; padding: 6px 4px; color: #475569; }
     .clinch-subtable td { padding: 8px 4px; border-bottom: 1px solid #f1f5f9; }
 
-    /* 5. 画像1枚目：優勝ラインテーブル */
+    /* 5. 画像1枚目：優勝ラインテーブル (勝率横並び比較) */
     .line-grid-table { min-width: 700px; }
-    .team-banner { font-size: 1.1rem; font-weight: 800; color: #fff; padding: 10px; border-radius: 6px 6px 0 0; }
+    .team-banner { font-size: 1.1rem; font-weight: 800; color: #fff; padding: 10px; }
     .banner-hanshin { background: #eab308; }
     .banner-kyojin { background: #ea580c; }
     .banner-dena { background: #0284c7; }
@@ -232,17 +232,17 @@
       </div>
     </div>
 
-    <!-- 4. 画像3枚目：球団別 優勝決定日確率テーブル (決定可能性が生じる前の試合から開始) -->
+    <!-- 4. 画像3枚目：優勝決定日確率テーブル (9/30以前の0%日は除外) -->
     <div class="section-title">
       📅 優勝決定日確率テーブル
       <span class="section-desc">（決定可能性が生じる日程から表示・対戦カード・開催地・見込勝率）</span>
     </div>
     <div class="clinch-schedule-grid" id="clinch-schedule-container"></div>
 
-    <!-- 5. 画像1枚目：優勝ラインテーブル（勝敗パターングリッド） -->
+    <!-- 5. 画像1枚目：優勝ラインテーブル (同等勝率横並び比較) -->
     <div class="section-title">
       🏁 優勝ラインテーブル
-      <span class="section-desc">（残り試合勝敗パターン・最終勝率一覧表）</span>
+      <span class="section-desc">（同等勝率横並び比較・残り試合勝敗パターン一覧表）</span>
     </div>
     <div class="table-wrapper">
       <table class="line-grid-table" id="line-grid-table">
@@ -326,13 +326,15 @@
       const dayData = rawData.history[selectedDate];
       const list = dayData[currentLeague];
 
-      // 1. 順位表 & CN表
+      // 1. 順位表 & CN表 (巨人のCS確率確定時100%保証)
       const tbodyStandings = document.getElementById('standings-body');
       tbodyStandings.innerHTML = '';
       list.forEach(t => {
         const rem = t.remaining !== undefined ? t.remaining : (143 - t.games);
         const champP = t.champ_prob !== undefined ? t.champ_prob : 0;
-        const csP = t.cs_prob !== undefined ? t.cs_prob : 0;
+        // 3rd(CS)が「確定」ならシミュレーション結果によらず100%と表示
+        const csP = (t.magic_3rd === '確定') ? 100 : (t.cs_prob !== undefined ? t.cs_prob : 0);
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td class="rank-cell">${t.rank}</td>
@@ -399,7 +401,7 @@
         });
       }
 
-      // 3. 画像2枚目：最終順位可能性早見表
+      // 3. 画像2枚目：最終順位可能性早見表 (自力昇格可能/昇格可能性ありの正確な判定)
       const rankHead = document.getElementById('rank-matrix-head');
       const rankBody = document.getElementById('rank-matrix-body');
       rankHead.innerHTML = '';
@@ -420,14 +422,21 @@
         for (let r = 1; r <= 6; r++) {
           let trHtml = `<tr><td style="font-weight:800; padding:0 8px;">${r}</td>`;
           leagueTeams.forEach(t => {
-            const curRank = list.find(item => item.team === t).rank;
+            const teamObj = list.find(item => item.team === t);
+            const curRank = teamObj.rank;
             const prob = (rankMat[t] && rankMat[t][r] !== undefined) ? rankMat[t][r] : 0;
             let cellClass = "";
 
             if (r === curRank) {
               cellClass = "cell-current-rank";
             } else if (r < curRank) {
-              cellClass = prob > 0 ? (prob > 30 ? "cell-can-climb" : "cell-potential") : "";
+              if (prob > 0) {
+                // 自力昇格可能（自力クリンチ有効）か、他力必須（◇自力消滅◇）かを厳密判定
+                const mKey = r === 1 ? "magic_1st" : (r === 2 ? "magic_2nd" : "magic_3rd");
+                const mVal = teamObj[mKey];
+                const canClimbBySelf = (typeof mVal === "number" && mVal <= teamObj.remaining);
+                cellClass = canClimbBySelf ? "cell-can-climb" : "cell-potential";
+              }
             } else {
               cellClass = prob > 0 ? "cell-drop" : "";
             }
@@ -440,7 +449,7 @@
         }
       }
 
-      // 4. 画像3枚目：優勝決定日確率テーブル (可能性が生じる前試合から表示)
+      // 4. 画像3枚目：優勝決定日確率テーブル (9/30以前の0%日は除外してスッキリ表示)
       const clinchContainer = document.getElementById('clinch-schedule-container');
       clinchContainer.innerHTML = '';
 
@@ -487,7 +496,7 @@
         });
       }
 
-      // 5. 画像1枚目：優勝ラインテーブル
+      // 5. 画像1枚目：優勝ラインテーブル (同等勝率横並び比較)
       const lineHead = document.getElementById('line-grid-head');
       const lineBody = document.getElementById('line-grid-body');
       lineHead.innerHTML = '';
@@ -495,17 +504,17 @@
 
       if (rawData.simulation) {
         const gridKey = currentLeague === 'central' ? 'central_lines_grid' : 'pacific_lines_grid';
-        const gridTeams = rawData.simulation[gridKey] || [];
+        const gridData = rawData.simulation[gridKey];
 
-        if (gridTeams.length >= 2) {
+        if (gridData && gridData.headers) {
           const bannerClasses = ["banner-hanshin", "banner-kyojin", "banner-dena"];
           let topTh = `<tr>`;
           let subTh = `<tr>`;
           let colsTh = `<tr>`;
 
-          gridTeams.forEach((gt, idx) => {
-            topTh += `<th colspan="3" class="team-banner ${bannerClasses[idx] || 'banner-kyojin'}">${gt.team}</th>`;
-            subTh += `<th colspan="3" class="banner-sub">残り試合: ${gt.remaining}（現在${gt.current_w}勝${gt.current_l}敗）</th>`;
+          gridData.headers.forEach((h, idx) => {
+            topTh += `<th colspan="3" class="team-banner ${bannerClasses[idx] || 'banner-kyojin'}">${h.team}</th>`;
+            subTh += `<th colspan="3" class="banner-sub">残り試合: ${h.remaining}（現在${h.current_w}勝${h.current_l}敗）</th>`;
             colsTh += `<th>勝</th><th>敗</th><th>勝率</th>`;
           });
           topTh += `</tr>`;
@@ -513,29 +522,28 @@
           colsTh += `</tr>`;
           lineHead.innerHTML = topTh + subTh + colsTh;
 
-          const maxRows = Math.max(...gridTeams.map(g => g.patterns.length));
-          for (let r = 0; r < maxRows; r++) {
-            let rowHtml = `<tr>`;
-            gridTeams.forEach(gt => {
-              if (r < gt.patterns.length) {
-                const p = gt.patterns[r];
-                const isLine = (p.rate >= 0.540 && p.rate <= 0.550);
-                rowHtml += `
-                  <td class="${isLine ? 'line-highlight' : ''}">${p.w}</td>
-                  <td class="${isLine ? 'line-highlight' : ''}">${p.l}</td>
-                  <td class="${isLine ? 'line-highlight' : ''}">${p.rate_str}</td>
+          // 行ごとの同等勝率横並び描画
+          gridData.rows.forEach(r => {
+            let trHtml = `<tr>`;
+            r.forEach(cell => {
+              if (cell) {
+                const isHighlight = (cell.rate >= 0.540 && cell.rate <= 0.550);
+                trHtml += `
+                  <td class="${isHighlight ? 'line-highlight' : ''}">${cell.w}</td>
+                  <td class="${isHighlight ? 'line-highlight' : ''}">${cell.l}</td>
+                  <td class="${isHighlight ? 'line-highlight' : ''}">${cell.rate_str}</td>
                 `;
               } else {
-                rowHtml += `<td></td><td></td><td></td>`;
+                trHtml += `<td></td><td></td><td></td>`;
               }
             });
-            rowHtml += `</tr>`;
-            lineBody.innerHTML += rowHtml;
-          }
+            trHtml += `</tr>`;
+            lineBody.innerHTML += trHtml;
+          });
         }
       }
 
-      // 6. 対戦成績表
+      // 6. 対戦成績表描画
       const theadMatrix = document.getElementById('matrix-head');
       const tbodyMatrix = document.getElementById('matrix-body');
       theadMatrix.innerHTML = '';
