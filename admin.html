@@ -165,7 +165,6 @@
       repoInput.addEventListener('change', () => localStorage.setItem('npb_admin_repo', repoInput.value.trim()));
       tokenInput.addEventListener('change', () => localStorage.setItem('npb_admin_token', tokenInput.value.trim()));
       
-      // カレンダー変更時に即座にカードを切り替え
       dateInput.addEventListener('change', () => loadDateForm());
       dateInput.addEventListener('input', () => loadDateForm());
 
@@ -208,7 +207,8 @@
           const txtData = await resTxt.json();
           const decodedTxt = decodeURIComponent(escape(atob(txtData.content)));
           parseTextSchedule(decodedTxt);
-          showStatus("同期完了（テキストログ＆DB読み込み成功）", "success");
+          const totalDays = Object.keys(textScheduleMap).length;
+          showStatus(`完全同期完了 (テキストログから ${totalDays} 日分の日程を読み込みました)`, "success");
         } else {
           try {
             const fallbackRes = await fetch(`2016-2026プロ野球レギュラーシーズン結果.txt?t=${new Date().getTime()}`);
@@ -230,6 +230,7 @@
       }
     }
 
+    // 複数行にわたる対戦ブロックを確実に追従するパース処理
     function parseTextSchedule(rawText) {
       textScheduleMap = {};
       if (!rawText.includes("2026\n")) return;
@@ -237,16 +238,22 @@
       let curDate = null;
 
       const lines = sec2026.split(/\r?\n/);
-      for (let line of lines) {
-        line = line.trim();
+      for (let rawLine of lines) {
+        let line = rawLine.trim();
         if (!line) continue;
 
-        const dateM = line.match(/^(\d{1,2})\/(\d{1,2})/);
-        if (dateM) {
-          const m = parseInt(dateM[1], 10);
-          const d = parseInt(dateM[2], 10);
+        // 日付行検知: 例 "9/22（火）" または 行頭に "9/22"
+        const dateMatch = line.match(/^(\d{1,2})\/(\d{1,2})(?:（[日月火水木金土]）)?\s*(.*)$/);
+        if (dateMatch) {
+          const m = parseInt(dateMatch[1], 10);
+          const d = parseInt(dateMatch[2], 10);
           curDate = `2026-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-          line = line.replace(/^\d{1,2}\/\d{1,2}（[日月火水木金土]）\s*/, '');
+          if (!textScheduleMap[curDate]) {
+            textScheduleMap[curDate] = [];
+          }
+          // 日付の後に同一行で試合が続いている場合、その部分を line として処理
+          line = dateMatch[3].trim();
+          if (!line) continue;
         }
 
         if (!curDate || line.includes("中止") || line.includes("ノーゲーム")) continue;
@@ -262,19 +269,19 @@
             const hs = parseInt(finM[2], 10);
             const as_ = parseInt(finM[3], 10);
 
-            if (!textScheduleMap[curDate]) textScheduleMap[curDate] = [];
             textScheduleMap[curDate].push({
               home: h, away: a,
               home_score: hs, away_score: as_,
               home_pitcher: hs > as_ ? (winP ? winP[1] : '') : (loseP ? loseP[1] : ''),
               away_pitcher: as_ > hs ? (winP ? winP[1] : '') : (loseP ? loseP[1] : '')
             });
+            continue;
           }
-          continue;
         }
 
         // 2. 未消化予定行 (例: 巨人   -   中日 ... 先発：田中将 先発：中西)
-        const schedM = line.match(/([^\s\d]+)\s+-\s+([^\s\d]+)/);
+        // ホーム - ビジター 表記
+        const schedM = line.match(/([^\s\d]+)\s*-\s*([^\s\d]+)/);
         if (schedM) {
           const h = normalizeTeam(schedM[1]);
           const a = normalizeTeam(schedM[2]);
@@ -283,12 +290,27 @@
             const hStarter = starters[0] || "未定";
             const aStarter = starters[1] || "未定";
 
-            if (!textScheduleMap[curDate]) textScheduleMap[curDate] = [];
             textScheduleMap[curDate].push({
               home: h, away: a,
               home_score: null, away_score: null,
               home_starter: hStarter, away_starter: aStarter,
               home_pitcher: hStarter, away_pitcher: aStarter
+            });
+            continue;
+          }
+        }
+
+        // 3. vs 表記
+        const vsM = line.match(/([^\s\d]+)\s+vs\s+([^\s\d]+)/i);
+        if (vsM) {
+          const a = normalizeTeam(vsM[1]);
+          const h = normalizeTeam(vsM[2]);
+          if (TEAMS.includes(h) && TEAMS.includes(a)) {
+            textScheduleMap[curDate].push({
+              home: h, away: a,
+              home_score: null, away_score: null,
+              home_starter: "未定", away_starter: "未定",
+              home_pitcher: "未定", away_pitcher: "未定"
             });
           }
         }
@@ -300,7 +322,7 @@
       const container = document.getElementById('matches-container');
       container.innerHTML = '';
 
-      // 1. games_db.json 内に手入力保存された該当日のデータがあれば最優先
+      // 1. games_db.json 内にすでに手入力保存されたデータがある場合
       const manualGames = (currentDb.games || []).filter(g => g.date === date);
       if (manualGames.length > 0) {
         manualGames.forEach(g => addMatchRow(g));
@@ -314,15 +336,21 @@
         return;
       }
 
-      // 3. どちらにも該当データがない場合のみ、デフォルト3カードを展開
-      const defaultPairs = [["中日", "巨人"], ["ヤクルト", "ＤｅＮＡ"], ["広島", "阪神"]];
-      defaultPairs.forEach(pair => {
-        addMatchRow({ away: pair[0], home: pair[1] });
-      });
+      // 3. 該当日にカードが存在しない場合（移動日等）
+      const emptyNotice = document.createElement('div');
+      emptyNotice.style.cssText = "padding: 16px; text-align: center; color: #64748b; font-weight: 600;";
+      emptyNotice.innerText = `この日（${date}）の公式対戦日程はありません。「＋ 対戦カードを追加」から手動作成できます。`;
+      container.appendChild(emptyNotice);
     }
 
     function addMatchRow(data = null) {
       const container = document.getElementById('matches-container');
+      
+      // 空欄通知があれば削除
+      if (container.children.length === 1 && container.children[0].tagName === 'DIV' && !container.children[0].classList.contains('match-row')) {
+        container.innerHTML = '';
+      }
+
       const row = document.createElement('div');
       row.className = 'match-row';
 
