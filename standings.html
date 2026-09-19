@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NPB クリンチナンバー＆対戦成績・予想勝利確率解析</title>
+  <title>プロ野球チャンピョンシップナンバー＆対戦成績解析 | マジックナンバー・優勝確率・CSクリンチ</title>
+  <meta name="description" content="プロ野球（NPB）セ・パ両リーグの自力優勝チャンピョンシップナンバー（クリンチナンバー）、マジックナンバー、全143試合完走モンテカルロシミュレーションによる優勝確率およびCS進出確率、残試合数別優勝ラインをリアルタイム解析。">
+  <meta name="keywords" content="プロ野球,チャンピョンシップナンバー,クリンチナンバー,マジックナンバー,優勝確率,CS進出確率,順位表,対戦成績,ピタゴラス勝率,Log5法">
   <style>
     :root {
       --bg: #f8fafc;
@@ -16,8 +18,8 @@
       --badge-magic: #ef4444;
       --badge-alert: #dc2626;
       --matrix-header: #3b82f6;
-      --bar-away: #dc2626;
       --bar-home: #2563eb;
+      --bar-away: #dc2626;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -25,7 +27,8 @@
     .container { max-width: 1100px; margin: 0 auto; }
 
     header { text-align: center; margin-bottom: 24px; }
-    header h1 { font-size: 1.5rem; font-weight: 800; color: #1e3a8a; }
+    header h1 { font-size: 1.55rem; font-weight: 800; color: #1e3a8a; }
+    header p { font-size: 0.85rem; color: var(--text-sub); margin-top: 4px; }
     
     .control-panel {
       background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
@@ -51,6 +54,7 @@
     }
     .section-desc { font-size: 0.82rem; color: var(--text-sub); font-weight: 400; margin-left: 6px; }
 
+    /* 予想勝利確率カードグリッド (左: ホーム, 右: ビジター) */
     .prediction-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -71,8 +75,8 @@
       margin-bottom: 12px;
     }
     .team-box { width: 44%; }
-    .team-box.away { text-align: left; }
-    .team-box.home { text-align: right; }
+    .team-box.home { text-align: left; }
+    .team-box.away { text-align: right; }
     .team-role { font-size: 0.72rem; color: var(--text-sub); font-weight: 600; }
     .team-name { font-size: 1.1rem; font-weight: 800; color: var(--text-main); }
     .starter-name {
@@ -92,8 +96,8 @@
       font-weight: 800;
       margin-bottom: 6px;
     }
-    .val-away { color: var(--bar-away); }
     .val-home { color: var(--bar-home); }
+    .val-away { color: var(--bar-away); }
 
     .prob-bar-container {
       width: 100%;
@@ -103,9 +107,10 @@
       overflow: hidden;
       display: flex;
     }
-    .bar-segment-away { background-color: var(--bar-away); height: 100%; transition: width 0.3s; }
     .bar-segment-home { background-color: var(--bar-home); height: 100%; transition: width 0.3s; }
+    .bar-segment-away { background-color: var(--bar-away); height: 100%; transition: width 0.3s; }
 
+    /* テーブル共通 */
     .table-wrapper {
       background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border);
       overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04); margin-bottom: 24px;
@@ -118,6 +123,9 @@
     .team-col { text-align: left; font-weight: 700; }
     .rank-cell { font-weight: 800; color: var(--text-sub); }
     .rem-cell { font-weight: 700; color: #475569; background-color: #f8fafc; }
+
+    .prob-cell { font-weight: 800; color: #1e3a8a; }
+    .prob-high { color: #dc2626; font-weight: 800; }
 
     .badge {
       display: inline-block; min-width: 32px; padding: 3px 8px; border-radius: 12px;
@@ -154,8 +162,8 @@
 
   <div class="container">
     <header>
-      <h1>NPB 自力確定クリンチナンバー＆対戦成績解析</h1>
-      <p style="font-size: 0.85rem; color: var(--text-sub); margin-top: 4px;">全143試合制・直接対決H2H逆算・ベイジアンLog5法予想勝利確率</p>
+      <h1>プロ野球チャンピョンシップナンバー＆対戦成績解析</h1>
+      <p>マジックナンバー・143試合完走優勝確率・CS進出確率・対戦成績完全解析</p>
     </header>
 
     <div class="control-panel">
@@ -169,15 +177,8 @@
       </div>
     </div>
 
-    <!-- 1. NPB 予想勝利確率パネル -->
-    <div class="section-title">
-      🎯 NPB 予想勝利確率
-      <span class="section-desc" id="pred-subtext">（予告先発・ピタゴラス勝率・Log5補正）</span>
-    </div>
-    <div class="prediction-grid" id="prediction-grid"></div>
-
-    <!-- 2. 順位表 & クリンチナンバー表 -->
-    <div class="section-title">📊 順位表・クリンチナンバー（自力確定数）</div>
+    <!-- 1. 順位表 & クリンチナンバー表 (最上部配置) -->
+    <div class="section-title">📊 順位表・チャンピョンシップナンバー（自力確定数）＆優勝確率</div>
     <div class="table-wrapper">
       <table>
         <thead>
@@ -194,8 +195,8 @@
             <th>CN</th>
             <th>2nd(本拠)</th>
             <th>3rd(CS)</th>
-            <th>4th</th>
-            <th>5th(最下位回避)</th>
+            <th>優勝確率</th>
+            <th>CS確率</th>
           </tr>
         </thead>
         <tbody id="standings-body">
@@ -204,7 +205,46 @@
       </table>
     </div>
 
-    <!-- 3. 対戦成績表（カード別マトリクス） -->
+    <!-- 2. NPB 予想勝利確率パネル (順位表の下に配置 / 左: ホーム, 右: ビジター) -->
+    <div class="section-title">
+      🎯 NPB 予想勝利確率
+      <span class="section-desc" id="pred-subtext">（左: ホーム vs 右: ビジター / 予告先発・ピタゴラス勝率・Log5補正）</span>
+    </div>
+    <div class="prediction-grid" id="prediction-grid"></div>
+
+    <!-- 3. 日別 優勝確率推移テーブル (日程シミュレーション) -->
+    <div class="section-title">📈 日別 優勝確率推移テーブル（今後10日間の日程進行予測）</div>
+    <div class="table-wrapper">
+      <table id="timeline-table">
+        <thead id="timeline-head"></thead>
+        <tbody id="timeline-body">
+          <tr><td colspan="12" style="padding: 20px;">シミュレーションデータを計算中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 4. 残試合数別 優勝ラインテーブル -->
+    <div class="section-title">🏁 残試合数別 優勝ラインテーブル（首位5割走行時の必要勝利数・勝率）</div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>順位</th>
+            <th style="text-align:left;">球団</th>
+            <th>現在勝数</th>
+            <th>残り試合</th>
+            <th>優勝必要勝数（目安）</th>
+            <th>必要勝率（目安）</th>
+            <th>状況</th>
+          </tr>
+        </thead>
+        <tbody id="lines-body">
+          <tr><td colspan="7" style="padding: 20px;">優勝ラインを算出中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 5. 対戦成績表（カード別マトリクス） -->
     <div class="section-title">⚾ 対戦成績表（カード別・ホーム/ロード・交流戦）</div>
     <div class="table-wrapper">
       <table class="matrix-table" id="matrix-table">
@@ -215,7 +255,7 @@
       </table>
     </div>
 
-    <!-- 欄外注釈パネル -->
+    <!-- 欄外解説パネル -->
     <div class="notes-card">
       <div class="notes-title">
         <span>ℹ️</span> 項目および数理モデルの解説
@@ -223,14 +263,11 @@
       <div class="notes-grid">
         <div class="note-item">
           <dl>
-            <dt>予想勝利確率（Log5法・予告先発補正）</dt>
-            <dd>前年（2025年）の得失点を事前分布としてベイズ収縮したピタゴラス期待勝率に、ホーム優位性（オッズ1.15倍）および予告先発投手の実力補正（通算勝敗オッズ比^0.35）を乗算して事前確率を算出しています。</dd>
+            <dt>予想勝利確率（左: ホーム vs 右: ビジター）</dt>
+            <dd>前年（2025年）の通算得失点実績を事前分布としてベイズ収縮したピタゴラス期待勝率（指数1.83）に、ホーム球場優位性（オッズ1.15倍）および予告先発投手の実力補正を乗算して事前確率を算出しています。</dd>
 
-            <dt>過去試合と予告先発の表示</dt>
-            <dd>終了した試合には「勝利: 〇〇」「敗戦: 〇〇」、未消化の試合には「先発: 〇〇」と表示されます。</dd>
-
-            <dt>CN / チャンピオンシップナンバー</dt>
-            <dd>リーグ優勝（1位）を自力確定させるために必要な最小勝利数です。</dd>
+            <dt>優勝確率・CS進出確率（モンテカルロ法）</dt>
+            <dd>未消化・未決定の全日程を143試合完走まで毎日開催されると仮定し、先発未定ベースのLog5確率を用いて2,000回のシーズン完走シミュレーションを行い、最終順位の到達確率を算出しています。</dd>
           </dl>
         </div>
 
@@ -240,13 +277,10 @@
             <dd>他チームが残り全勝しても自チームを逆転できない、数学的に順位が確定した状態です。</dd>
 
             <dt><span class="badge badge-magic">13</span>（通常数値）</dt>
-            <dd><strong>自力確定可能</strong>：残り試合数の範囲内で、自チームの勝利のみによって自力確定できる必要勝利数です。</dd>
+            <dd><strong>自力確定可能</strong>：残り試合数の範囲内で、自チームの勝利のみによって自力確定できる必要勝利数（マジックナンバー）です。</dd>
 
             <dt><span class="badge badge-eliminated">◇14◇</span>（ひし形枠＋赤文字）</dt>
-            <dd><strong>自力消滅（可能性あり）</strong>：必要勝利数が残り試合数を超過している状態です。自チーム全勝に加え、上位チームの敗戦アシストが必要です。</dd>
-
-            <dt><span class="badge-dash">-</span>（ハイフン）</dt>
-            <dd><strong>完全消滅（エリミネーション）</strong>：相手チームが残り全敗し、自チームが残り全勝しても届かない状態です。</dd>
+            <dd><strong>自力消滅（可能性あり）</strong>：自チーム全勝に加え、上位チームの敗戦アシストが必要ですが、数学的な逆転可能性は残っています。</dd>
           </dl>
         </div>
       </div>
@@ -311,58 +345,13 @@
       const dayData = rawData.history[selectedDate];
       const list = dayData[currentLeague];
 
-      // 1. 予想勝利確率カードグリッド描画
-      const predGrid = document.getElementById('prediction-grid');
-      const predictions = dayData.predictions || [];
-      const hasFinished = predictions.some(p => p.is_finished);
-      
-      document.getElementById('pred-subtext').innerText = hasFinished 
-        ? `（対象日: ${selectedDate} 試合結果）` 
-        : `（対象日: ${selectedDate} 予告先発予想）`;
-
-      predGrid.innerHTML = '';
-
-      const leagueTeamSet = new Set(list.map(t => t.team));
-      const filteredPreds = predictions.filter(p => leagueTeamSet.has(p.away) || leagueTeamSet.has(p.home));
-
-      if (filteredPreds.length === 0) {
-        predGrid.innerHTML = `<div style="grid-column: 1/-1; padding: 18px; text-align: center; color: #64748b; background: #fff; border-radius: 12px; border: 1px solid var(--border);">この日の該当リーグの試合はありません（移動日または予備日）。</div>`;
-      } else {
-        filteredPreds.forEach(p => {
-          const card = document.createElement('div');
-          card.className = 'pred-card';
-          card.innerHTML = `
-            <div class="pred-teams">
-              <div class="team-box away">
-                <div class="team-role">ビジター</div>
-                <div class="team-name">${p.away}</div>
-                <div class="${getPitcherClass(p.away_status_text)}">${p.away_status_text}</div>
-              </div>
-              <div class="vs-badge">VS</div>
-              <div class="team-box home">
-                <div class="team-role">ホーム</div>
-                <div class="team-name">${p.home}</div>
-                <div class="${getPitcherClass(p.home_status_text)}">${p.home_status_text}</div>
-              </div>
-            </div>
-            <div class="prob-values">
-              <span class="val-away">${p.away_prob.toFixed(1)}%</span>
-              <span class="val-home">${p.home_prob.toFixed(1)}%</span>
-            </div>
-            <div class="prob-bar-container">
-              <div class="bar-segment-away" style="width: ${p.away_prob}%;"></div>
-              <div class="bar-segment-home" style="width: ${p.home_prob}%;"></div>
-            </div>
-          `;
-          predGrid.appendChild(card);
-        });
-      }
-
-      // 2. 順位表 & CN表描画
+      // 1. 順位表 & CN表 & 優勝確率描画 (最上部)
       const tbodyStandings = document.getElementById('standings-body');
       tbodyStandings.innerHTML = '';
       list.forEach(t => {
         const rem = t.remaining !== undefined ? t.remaining : (143 - t.games);
+        const champP = t.champ_prob !== undefined ? t.champ_prob : 0.0;
+        const csP = t.cs_prob !== undefined ? t.cs_prob : 0.0;
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td class="rank-cell">${t.rank}</td>
@@ -377,13 +366,109 @@
           <td>${renderBadge(t.magic_1st, rem)}</td>
           <td>${renderBadge(t.magic_2nd, rem)}</td>
           <td>${renderBadge(t.magic_3rd, rem)}</td>
-          <td>${renderBadge(t.magic_4th, rem)}</td>
-          <td>${renderBadge(t.magic_5th, rem)}</td>
+          <td class="prob-cell ${champP > 50 ? 'prob-high' : ''}">${champP.toFixed(1)}%</td>
+          <td class="prob-cell">${csP.toFixed(1)}%</td>
         `;
         tbodyStandings.appendChild(tr);
       });
 
-      // 3. 対戦成績表描画
+      // 2. 予想勝利確率カードグリッド描画 (順位表の下 / 左: ホーム, 右: ビジター)
+      const predGrid = document.getElementById('prediction-grid');
+      const predictions = dayData.predictions || [];
+      const hasFinished = predictions.some(p => p.is_finished);
+      
+      document.getElementById('pred-subtext').innerText = hasFinished 
+        ? `（対象日: ${selectedDate} 試合結果）` 
+        : `（対象日: ${selectedDate} 予告先発予想）`;
+
+      predGrid.innerHTML = '';
+      const leagueTeamSet = new Set(list.map(t => t.team));
+      const filteredPreds = predictions.filter(p => leagueTeamSet.has(p.home) || leagueTeamSet.has(p.away));
+
+      if (filteredPreds.length === 0) {
+        predGrid.innerHTML = `<div style="grid-column: 1/-1; padding: 18px; text-align: center; color: #64748b; background: #fff; border-radius: 12px; border: 1px solid var(--border);">この日の該当リーグの試合はありません（移動日または予備日）。</div>`;
+      } else {
+        filteredPreds.forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'pred-card';
+          card.innerHTML = `
+            <div class="pred-teams">
+              <div class="team-box home">
+                <div class="team-role">ホーム</div>
+                <div class="team-name">${p.home}</div>
+                <div class="${getPitcherClass(p.home_status_text)}">${p.home_status_text}</div>
+              </div>
+              <div class="vs-badge">VS</div>
+              <div class="team-box away">
+                <div class="team-role">ビジター</div>
+                <div class="team-name">${p.away}</div>
+                <div class="${getPitcherClass(p.away_status_text)}">${p.away_status_text}</div>
+              </div>
+            </div>
+            <div class="prob-values">
+              <span class="val-home">${p.home_prob.toFixed(1)}%</span>
+              <span class="val-away">${p.away_prob.toFixed(1)}%</span>
+            </div>
+            <div class="prob-bar-container">
+              <div class="bar-segment-home" style="width: ${p.home_prob}%;"></div>
+              <div class="bar-segment-away" style="width: ${p.away_prob}%;"></div>
+            </div>
+          `;
+          predGrid.appendChild(card);
+        });
+      }
+
+      // 3. 日別優勝確率推移テーブル描画
+      const theadTime = document.getElementById('timeline-head');
+      const tbodyTime = document.getElementById('timeline-body');
+      theadTime.innerHTML = '';
+      tbodyTime.innerHTML = '';
+
+      if (rawData.simulation && rawData.simulation.daily_timeline) {
+        const timeline = rawData.simulation.daily_timeline;
+        const leagueTeams = list.map(t => t.team);
+        
+        let thHtml = `<tr><th>日付</th>`;
+        leagueTeams.forEach(t => { thHtml += `<th>${t}</th>`; });
+        thHtml += `</tr>`;
+        theadTime.innerHTML = thHtml;
+
+        timeline.forEach(row => {
+          const tMap = row[currentLeague];
+          let trHtml = `<tr><td>${row.date}</td>`;
+          leagueTeams.forEach(t => {
+            const p = tMap[t] || 0.0;
+            trHtml += `<td class="prob-cell ${p > 50 ? 'prob-high' : ''}">${p.toFixed(1)}%</td>`;
+          });
+          trHtml += `</tr>`;
+          tbodyTime.innerHTML += trHtml;
+        });
+      }
+
+      // 4. 残試合数別優勝ラインテーブル描画
+      const tbodyLines = document.getElementById('lines-body');
+      tbodyLines.innerHTML = '';
+      const linesKey = currentLeague === 'central' ? 'central_lines' : 'pacific_lines';
+
+      if (rawData.simulation && rawData.simulation[linesKey]) {
+        const linesData = rawData.simulation[linesKey];
+        linesData.forEach(l => {
+          const tr = document.createElement('tr');
+          const isElim = l.needed_wins_pace500 > l.remaining;
+          tr.innerHTML = `
+            <td class="rank-cell">${l.rank}</td>
+            <td class="team-col">${l.team}</td>
+            <td>${l.current_w}勝</td>
+            <td class="rem-cell">${l.remaining}</td>
+            <td style="font-weight:700;">${l.needed_wins_pace500}勝</td>
+            <td style="font-weight:700;">.${(l.needed_rate_pace500 * 1000).toFixed(0)}</td>
+            <td>${isElim ? '<span class="badge badge-eliminated">他力必須</span>' : '<span class="badge badge-fixed">射程圏</span>'}</td>
+          `;
+          tbodyLines.appendChild(tr);
+        });
+      }
+
+      // 5. 対戦成績表描画
       const theadMatrix = document.getElementById('matrix-head');
       const tbodyMatrix = document.getElementById('matrix-body');
       theadMatrix.innerHTML = '';
