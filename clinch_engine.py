@@ -55,7 +55,7 @@ def parse_year_games_from_text(raw_text, target_year):
         if not line:
             continue
 
-        date_m = line.match = re.match(r'^(\d{1,2})\/(\d{1,2})(?:[（(][日月火水木金土][）)])?\s*(.*)$', line)
+        date_m = re.match(r'^(\d{1,2})\/(\d{1,2})(?:[（(][日月火水木金土][）)])?\s*(.*)$', line)
         if date_m:
             m, d = int(date_m.group(1)), int(date_m.group(2))
             current_date = f"{target_year}-{m:02d}-{d:02d}"
@@ -281,18 +281,13 @@ def get_bayesian_team_strength(prior_stats, current_stats):
 
     return calc_pythagorean_rate(blended_rs, blended_ra)
 
-# -------------------------------------------------------------
-# 予告先発投手の個人実績補正（ベイズ・オッズ調整）
-# -------------------------------------------------------------
 def get_pitcher_multiplier(pitcher_name, pitcher_stats):
     if not pitcher_name or pitcher_name == "未定":
         return 1.0
     st = pitcher_stats.get(pitcher_name, {"win": 0, "lose": 0})
     w, l = st["win"], st["lose"]
-    # 事前分布 (w0=3, l0=3) によるベイズ収縮
     rate = (w + 3.0) / (w + l + 6.0)
     odds = rate / (1.0 - rate)
-    # 影響度（約35%）を指数乗算
     return math.pow(odds, 0.35)
 
 def calc_log5_matchup(p_away, p_home, away_pitcher, home_pitcher, pitcher_stats):
@@ -300,13 +295,9 @@ def calc_log5_matchup(p_away, p_home, away_pitcher, home_pitcher, pitcher_stats)
     p_neutral_away = 0.5 if denom <= 0 else (p_away - (p_away * p_home)) / denom
     p_neutral_away = max(0.01, min(0.99, p_neutral_away))
 
-    # チーム基礎オッズ
     odds_away = p_neutral_away / (1.0 - p_neutral_away)
-
-    # 1. ホームアドバンテージ補正
     adj_odds_away = odds_away / HOME_ODDS_ADVANTAGE
 
-    # 2. 先発投手補正（Away投手 vs Home投手の相対比）
     m_away = get_pitcher_multiplier(away_pitcher, pitcher_stats)
     m_home = get_pitcher_multiplier(home_pitcher, pitcher_stats)
     pitcher_ratio = m_away / max(0.1, m_home)
@@ -320,7 +311,6 @@ def calc_log5_matchup(p_away, p_home, away_pitcher, home_pitcher, pitcher_stats)
 def build_all_history_with_predictions(games_2025, games_2026):
     all_teams = CENTRAL_TEAMS + PACIFIC_TEAMS
 
-    # 1. 2025年通算スタッツ集計（事前分布用）
     prior_stats = {t: {"games": 0, "rs": 0, "ra": 0} for t in all_teams}
     pitcher_stats = {}
 
@@ -335,7 +325,6 @@ def build_all_history_with_predictions(games_2025, games_2026):
             prior_stats[a]["rs"] += as_
             prior_stats[a]["ra"] += hs
 
-            # 投手実績集計
             hp = g.get("home_pitcher")
             ap = g.get("away_pitcher")
             if hp:
@@ -347,7 +336,6 @@ def build_all_history_with_predictions(games_2025, games_2026):
                 if as_ > hs: pitcher_stats[ap]["win"] += 1
                 elif as_ < hs: pitcher_stats[ap]["lose"] += 1
 
-    # 2. 2026年すべての試合日付（消化済み＋未消化予定日すべて）
     all_dates = sorted(list({g["date"] for g in games_2026}))
     finished_dates = sorted(list({g["date"] for g in games_2026 if g.get("status") == "finished"}))
     last_finished_date = finished_dates[-1] if finished_dates else all_dates[0]
@@ -368,7 +356,6 @@ def build_all_history_with_predictions(games_2025, games_2026):
         h2h_played = {t1: {t2: 0 for t2 in all_teams} for t1 in all_teams}
         h2h_details = {t1: {t2: {"win": 0, "lose": 0, "draw": 0} for t2 in all_teams} for t1 in all_teams}
 
-        # target_date 開始前・終了時点のスタッツ集計（finished のみ）
         for g in games_2026:
             if g.get("status") != "finished":
                 continue
@@ -376,7 +363,6 @@ def build_all_history_with_predictions(games_2025, games_2026):
             hs, as_ = g["home_score"], g["away_score"]
             g_date = g["date"]
 
-            # 事前スタッツ
             if g_date < target_date:
                 pre_records[h]["games"] += 1
                 pre_records[h]["rs"] += hs
@@ -395,7 +381,6 @@ def build_all_history_with_predictions(games_2025, games_2026):
                     if as_ > hs: pitcher_stats[ap]["win"] += 1
                     elif as_ < hs: pitcher_stats[ap]["lose"] += 1
 
-            # 終了時点スタッツ
             if g_date <= target_date:
                 records[h]["games"] += 1
                 records[a]["games"] += 1
@@ -424,7 +409,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
                     records[h]["lose"] += 1
                     records[h]["home"]["lose"] += 1
                     h2h_details[a][h]["win"] += 1
-                    h2h_details[a][h]["lose"] += 1
+                    h2h_details[h][a]["lose"] += 1
                     if is_inter:
                         records[a]["interleague"]["win"] += 1
                         records[h]["interleague"]["lose"] += 1
@@ -439,7 +424,6 @@ def build_all_history_with_predictions(games_2025, games_2026):
                         records[h]["interleague"]["draw"] += 1
                         records[a]["interleague"]["draw"] += 1
 
-        # 順位表・CN計算
         if target_date <= last_finished_date:
             def format_league(league_teams):
                 table = []
@@ -480,11 +464,9 @@ def build_all_history_with_predictions(games_2025, games_2026):
             last_c_table = c_table
             last_p_table = p_table
         else:
-            # 未来の日程では、直近確定済みの順位表・CNを保持
             c_table = last_c_table
             p_table = last_p_table
 
-        # 当該日に行われる/予定されている各カードの勝率予測（先発投手補正入り）
         day_predictions = []
         for g in games_2026:
             if g["date"] == target_date:
@@ -495,7 +477,6 @@ def build_all_history_with_predictions(games_2025, games_2026):
                 h_start = g.get("home_starter") or g.get("home_pitcher") or "未定"
                 a_start = g.get("away_starter") or g.get("away_pitcher") or "未定"
 
-                # 予告先発補正をオッズに適用して勝率算出
                 prob_away, prob_home = calc_log5_matchup(p_away, p_home, a_start, h_start, pitcher_stats)
 
                 hs, as_ = g.get("home_score"), g.get("away_score")
@@ -535,7 +516,6 @@ def build_all_history_with_predictions(games_2025, games_2026):
             "predictions": day_predictions
         }
 
-    # デフォルト最新日は「直近確定日」の翌日、なければ最終確定日
     default_latest = last_finished_date
     for d in all_dates:
         if d > last_finished_date:
