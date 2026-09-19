@@ -51,7 +51,6 @@
     }
     .section-desc { font-size: 0.82rem; color: var(--text-sub); font-weight: 400; margin-left: 6px; }
 
-    /* 予想勝利確率カードグリッド */
     .prediction-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -77,13 +76,13 @@
     .team-role { font-size: 0.72rem; color: var(--text-sub); font-weight: 600; }
     .team-name { font-size: 1.1rem; font-weight: 800; color: var(--text-main); }
     .starter-name {
-      font-size: 0.8rem;
-      font-weight: 600;
+      font-size: 0.82rem;
+      font-weight: 700;
       color: #334155;
       margin-top: 2px;
     }
-    .starter-name.win-label { color: #16a34a; font-weight: 700; }
-    .starter-name.lose-label { color: #dc2626; font-weight: 700; }
+    .starter-name.win-label { color: #16a34a; }
+    .starter-name.lose-label { color: #dc2626; }
     .vs-badge { font-size: 0.82rem; font-weight: 800; color: #94a3b8; }
 
     .prob-values {
@@ -107,7 +106,6 @@
     .bar-segment-away { background-color: var(--bar-away); height: 100%; transition: width 0.3s; }
     .bar-segment-home { background-color: var(--bar-home); height: 100%; transition: width 0.3s; }
 
-    /* テーブル */
     .table-wrapper {
       background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border);
       overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04); margin-bottom: 24px;
@@ -174,7 +172,7 @@
     <!-- 1. NPB 予想勝利確率パネル -->
     <div class="section-title">
       🎯 NPB 予想勝利確率
-      <span class="section-desc" id="pred-subtext">（事前予測・ピタゴラス勝率・Log5補正）</span>
+      <span class="section-desc" id="pred-subtext">（予告先発・ピタゴラス勝率・Log5補正）</span>
     </div>
     <div class="prediction-grid" id="prediction-grid"></div>
 
@@ -225,11 +223,11 @@
       <div class="notes-grid">
         <div class="note-item">
           <dl>
-            <dt>予想勝利確率（Log5法・ベイジアン事前分布）</dt>
-            <dd>前年（2025年）の通算得失点実績を事前分布としてベイズ収縮したピタゴラス期待勝率（指数1.83）に、ホーム球場優位性（オッズ比1.15）を加味して事前確率を算出しています。</dd>
+            <dt>予想勝利確率（Log5法・予告先発補正）</dt>
+            <dd>前年（2025年）の得失点を事前分布としてベイズ収縮したピタゴラス期待勝率に、ホーム優位性（オッズ1.15倍）および予告先発投手の実力補正（通算勝敗オッズ比^0.35）を乗算して事前確率を算出しています。</dd>
 
             <dt>過去試合と予告先発の表示</dt>
-            <dd>過去の試合カードには勝敗結果（「勝利: 〇〇」「敗戦: 〇〇」）を表示し、未来・未試合のカードには「先発: 〇〇」と表示されます。</dd>
+            <dd>終了した試合には「勝利: 〇〇」「敗戦: 〇〇」、未消化の試合には「先発: 〇〇」と表示されます。</dd>
 
             <dt>CN / チャンピオンシップナンバー</dt>
             <dd>リーグ優勝（1位）を自力確定させるために必要な最小勝利数です。</dd>
@@ -245,7 +243,7 @@
             <dd><strong>自力確定可能</strong>：残り試合数の範囲内で、自チームの勝利のみによって自力確定できる必要勝利数です。</dd>
 
             <dt><span class="badge badge-eliminated">◇14◇</span>（ひし形枠＋赤文字）</dt>
-            <dd><strong>自力消滅（可能性あり）</strong>：必要勝利数が残り試合数を超過している状態です。自チーム全勝に加え、上位チームの敗戦アシストが必要ですが、数学的な逆転可能性は残っています。</dd>
+            <dd><strong>自力消滅（可能性あり）</strong>：必要勝利数が残り試合数を超過している状態です。自チーム全勝に加え、上位チームの敗戦アシストが必要です。</dd>
 
             <dt><span class="badge-dash">-</span>（ハイフン）</dt>
             <dd><strong>完全消滅（エリミネーション）</strong>：相手チームが残り全敗し、自チームが残り全勝しても届かない状態です。</dd>
@@ -315,11 +313,15 @@
 
       // 1. 予想勝利確率カードグリッド描画
       const predGrid = document.getElementById('prediction-grid');
-      const isNextDay = (selectedDate === '2026-09-17');
-      document.getElementById('pred-subtext').innerText = isNextDay ? `（翌日 2026-09-17 予告先発予想）` : `（対象日: ${selectedDate} 事前予測）`;
+      const predictions = dayData.predictions || [];
+      const hasFinished = predictions.some(p => p.is_finished);
+      
+      document.getElementById('pred-subtext').innerText = hasFinished 
+        ? `（対象日: ${selectedDate} 試合結果）` 
+        : `（対象日: ${selectedDate} 予告先発予想）`;
+
       predGrid.innerHTML = '';
 
-      const predictions = dayData.predictions || [];
       const leagueTeamSet = new Set(list.map(t => t.team));
       const filteredPreds = predictions.filter(p => leagueTeamSet.has(p.away) || leagueTeamSet.has(p.home));
 
@@ -450,8 +452,7 @@
         const dates = rawData.available_dates;
         const picker = document.getElementById('date-picker');
         picker.min = dates[0];
-        picker.max = dates[dates.length - 1];
-        // デフォルト表示を最新（9/16または9/17）に設定
+        picker.max = dates[dates.length - 1]; // シーズン最終予定日（10月以降）まで全開放
         picker.value = rawData.latest_date;
         selectedDate = rawData.latest_date;
 
