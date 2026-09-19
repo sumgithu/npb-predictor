@@ -186,7 +186,6 @@
 
       showStatus("GitHubより全データを同期中...", "");
       try {
-        // 1. games_db.json の読み込み
         const resDb = await fetch(`https://api.github.com/repos/${repo}/contents/games_db.json?t=${new Date().getTime()}`, {
           headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
         });
@@ -197,7 +196,6 @@
           currentDb = JSON.parse(decoded);
         }
 
-        // 2. 2016-2026プロ野球レギュラーシーズン結果.txt の取得
         const txtFilename = encodeURIComponent("2016-2026プロ野球レギュラーシーズン結果.txt");
         const resTxt = await fetch(`https://api.github.com/repos/${repo}/contents/${txtFilename}?t=${new Date().getTime()}`, {
           headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
@@ -230,7 +228,6 @@
       }
     }
 
-    // 複数行にわたる対戦ブロックを確実に追従するパース処理
     function parseTextSchedule(rawText) {
       textScheduleMap = {};
       if (!rawText.includes("2026\n")) return;
@@ -242,7 +239,7 @@
         let line = rawLine.trim();
         if (!line) continue;
 
-        // 日付行検知: 例 "9/22（火）" または 行頭に "9/22"
+        // 日付行検知: 例 "9/21（月）"
         const dateMatch = line.match(/^(\d{1,2})\/(\d{1,2})(?:（[日月火水木金土]）)?\s*(.*)$/);
         if (dateMatch) {
           const m = parseInt(dateMatch[1], 10);
@@ -251,7 +248,6 @@
           if (!textScheduleMap[curDate]) {
             textScheduleMap[curDate] = [];
           }
-          // 日付の後に同一行で試合が続いている場合、その部分を line として処理
           line = dateMatch[3].trim();
           if (!line) continue;
         }
@@ -279,12 +275,13 @@
           }
         }
 
-        // 2. 未消化予定行 (例: 巨人   -   中日 ... 先発：田中将 先発：中西)
-        // ホーム - ビジター 表記
+        // 2. 未消化予定行 (先発投手あり・なし両対応)
+        // 例: "中日   -   広島  バンテリンドーム 14:00 雨のちくもり"
+        // 例: "中日   -   広島  ... 先発：大野雄 先発：森下"
         const schedM = line.match(/([^\s\d]+)\s*-\s*([^\s\d]+)/);
         if (schedM) {
-          const h = normalizeTeam(schedM[1]);
-          const a = normalizeTeam(schedM[2]);
+          const h = normalizeTeam(schedM[1]); // 左側がホーム
+          const a = normalizeTeam(schedM[2]); // 右側がビジター
           if (TEAMS.includes(h) && TEAMS.includes(a)) {
             const starters = [...line.matchAll(/先発：([^\s]+)/g)].map(m => m[1]);
             const hStarter = starters[0] || "未定";
@@ -300,7 +297,7 @@
           }
         }
 
-        // 3. vs 表記
+        // 3. vs 表記 (例: 広島 vs 阪神)
         const vsM = line.match(/([^\s\d]+)\s+vs\s+([^\s\d]+)/i);
         if (vsM) {
           const a = normalizeTeam(vsM[1]);
@@ -322,7 +319,7 @@
       const container = document.getElementById('matches-container');
       container.innerHTML = '';
 
-      // 1. games_db.json 内にすでに手入力保存されたデータがある場合
+      // 1. games_db.json 内に手入力保存された該当日のデータがあれば最優先
       const manualGames = (currentDb.games || []).filter(g => g.date === date);
       if (manualGames.length > 0) {
         manualGames.forEach(g => addMatchRow(g));
@@ -346,7 +343,6 @@
     function addMatchRow(data = null) {
       const container = document.getElementById('matches-container');
       
-      // 空欄通知があれば削除
       if (container.children.length === 1 && container.children[0].tagName === 'DIV' && !container.children[0].classList.contains('match-row')) {
         container.innerHTML = '';
       }
@@ -354,8 +350,9 @@
       const row = document.createElement('div');
       row.className = 'match-row';
 
-      const selAway = data ? data.away : "中日";
-      const selHome = data ? data.home : "巨人";
+      // ビジター vs ホーム の初期選択設定
+      const selAway = data ? data.away : "広島";
+      const selHome = data ? data.home : "中日";
 
       const awayOptions = TEAMS.map(t => `<option value="${t}" ${selAway === t ? 'selected' : ''}>${t}</option>`).join('');
       const homeOptions = TEAMS.map(t => `<option value="${t}" ${selHome === t ? 'selected' : ''}>${t}</option>`).join('');
