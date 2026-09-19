@@ -6,8 +6,8 @@ import random
 import re
 
 TOTAL_GAMES = 143
-GAMES_INTRA = 25  # 同一リーグ内対戦総数
-GAMES_INTER = 3   # 交流戦対戦総数
+GAMES_INTRA = 25
+GAMES_INTER = 3
 HISTORY_FILE = "history_standings.json"
 MANUAL_DB_FILE = "games_db.json"
 TEXT_LOG_FILE = "2016-2026プロ野球レギュラーシーズン結果.txt"
@@ -309,37 +309,40 @@ def calc_log5_matchup(p_away, p_home, away_pitcher, home_pitcher, pitcher_stats)
     return round(final_p_away * 100.0, 1), round(final_p_home * 100.0, 1)
 
 # -------------------------------------------------------------
-# モンテカルロ・シミュレーションによる優勝確率・日程補完計算
+# 143試合完走・全順位着地確率＆優勝決定日確率シミュレーション
 # -------------------------------------------------------------
-def simulate_championship_probabilities(league_teams, current_standings, remaining_matches, prior_stats, pre_records):
-    """
-    先発情報なしの基本Log5勝率を用いて143試合完走までのモンテカルロシミュレーションを実行
-    """
-    NUM_SIMS = 2000
-    championship_wins = {t: 0 for t in league_teams}
-    cs_qualifications = {t: 0 for t in league_teams}
+def simulate_full_season_probabilities(league_teams, current_standings, remaining_matches, prior_stats, pre_records):
+    NUM_SIMS = 3000
+    rank_counts = {t: {r: 0 for r in range(1, 7)} for t in league_teams}
+    clinch_date_counts = {t: {} for t in league_teams}
 
-    # ベース勝率キャッシュ
+    # ベース対戦勝率キャッシュ
     base_probs = {}
-    for i, t1 in enumerate(league_teams):
+    for t1 in league_teams:
         for t2 in league_teams:
             if t1 != t2:
                 p1 = get_bayesian_team_strength(prior_stats[t1], pre_records[t1])
                 p2 = get_bayesian_team_strength(prior_stats[t2], pre_records[t2])
-                # t2(Away) vs t1(Home)
                 pa, ph = calc_log5_matchup(p2, p1, "未定", "未定", {})
-                base_probs[(t1, t2)] = ph / 100.0  # t1(Home)の勝率
+                base_probs[(t1, t2)] = ph / 100.0
 
     base_wins = {t["team"]: t["win"] for t in current_standings}
     base_loses = {t["team"]: t["lose"] for t in current_standings}
 
+    # 日付昇順でソート
+    sorted_matches = sorted(remaining_matches, key=lambda x: x["date"])
+
     for _ in range(NUM_SIMS):
         sim_w = dict(base_wins)
         sim_l = dict(base_loses)
+        clinched_day = {t: None for t in league_teams}
 
-        for match in remaining_matches:
+        # 1試合ずつシミュレーション
+        for match in sorted_matches:
             h, a = match["home"], match["away"]
+            m_date = match["date"]
             p_home = base_probs.get((h, a), 0.535)
+
             if random.random() < p_home:
                 sim_w[h] += 1
                 sim_l[a] += 1
@@ -347,41 +350,57 @@ def simulate_championship_probabilities(league_teams, current_standings, remaini
                 sim_w[a] += 1
                 sim_l[h] += 1
 
-        sim_rates = []
-        for t in league_teams:
-            dec = sim_w[t] + sim_l[t]
-            rate = sim_w[t] / dec if dec > 0 else 0.0
-            sim_rates.append((t, rate, sim_w[t]))
+            # 暫定首位が自力優勝確定条件を満たした日を記録
+            sim_rates = sorted([(t, sim_w[t] / (sim_w[t] + sim_l[t]), sim_w[t]) for t in league_teams],
+                               key=lambda x: (x[1], x[2]), reverse=True)
+            leader = sim_rates[0][0]
+            second = sim_rates[1][0]
+            # 2位の最大勝利数を首位の現在勝利数が上回った場合
+            rem_2nd = TOTAL_GAMES - (sim_w[second] + sim_l[second])
+            if sim_w[leader] > sim_w[second] + rem_2nd and clinched_day[leader] is None:
+                clinched_day[leader] = m_date
 
-        # 勝率順ソート
-        sim_rates.sort(key=lambda x: (x[1], x[2]), reverse=True)
-        championship_wins[sim_rates[0][0]] += 1
-        for rank in range(min(3, len(sim_rates))):
-            cs_qualifications[sim_rates[rank][0]] += 1
+        sim_rates = sorted([(t, sim_w[t] / (sim_w[t] + sim_l[t]), sim_w[t]) for t in league_teams],
+                           key=lambda x: (x[1], x[2]), reverse=True)
 
-    championship_probs = {t: round((championship_wins[t] / NUM_SIMS) * 100.0, 1) for t in league_teams}
-    cs_probs = {t: round((cs_qualifications[t] / NUM_SIMS) * 100.0, 1) for t in league_teams}
-    return championship_probs, cs_probs
+        champ = sim_rates[0][0]
+        # 決定日が途中で確定しなかった場合は最終試合日
+        c_date = clinched_day[champ] or sorted_matches[-1]["date"]
+        clinch_date_counts[champ][c_date] = clinch_date_counts[champ].get(c_date, 0) + 1
+
+        for idx, item in enumerate(sim_rates):
+            rank_counts[item[0]][idx + 1] += 1
+
+    # 最終順位可能性早見表データ (各チームの1位〜6位到達確率%)
+    final_rank_matrix = {t: {r: round((rank_counts[t][r] / NUM_SIMS) * 100) for r in range(1, 7)} for t in league_teams}
+
+    # 各球団の日別優勝決定確率（%）
+    clinch_date_probs = {}
+    for t in league_teams:
+        c_map = {}
+        for d, count in clinch_date_counts[t].items():
+            c_map[d] = round((count / NUM_SIMS) * 100)
+        clinch_date_probs[t] = c_map
+
+    return final_rank_matrix, clinch_date_probs
 
 def generate_future_calendar_matches(league_teams, current_standings, registered_future_games, start_date_str):
-    """
-    143試合に満たないカードを特定し、入力済み日程以降に毎日1試合ずつ順次開催されるとして補完
-    """
     current_played = {t["team"]: t["games"] for t in current_standings}
     remaining_games_needed = {t: TOTAL_GAMES - current_played[t] for t in league_teams}
 
-    # すでに登録されている未来試合
     sim_matches = list(registered_future_games)
     for g in sim_matches:
         remaining_games_needed[g["home"]] -= 1
         remaining_games_needed[g["away"]] -= 1
 
-    # 143試合を満たすよう未定カードを生成
-    start_dt = datetime.datetime.strptime(start_date_str, "%Y-%m-%d") + datetime.timedelta(days=1)
+    last_dt = datetime.datetime.strptime(start_date_str, "%Y-%m-%d")
+    if sim_matches:
+        max_d_str = max(g["date"] for g in sim_matches)
+        last_dt = max(last_dt, datetime.datetime.strptime(max_d_str, "%Y-%m-%d"))
+
+    next_dt = last_dt + datetime.timedelta(days=1)
     auto_matches = []
-    
-    # 不足分をペアリングして毎日開催枠として補完
-    teams_with_rem = [t for t in league_teams if remaining_games_needed[t] > 0]
+
     while any(remaining_games_needed[t] > 0 for t in league_teams):
         available = sorted([t for t in league_teams if remaining_games_needed[t] > 0], 
                            key=lambda x: remaining_games_needed[x], reverse=True)
@@ -392,16 +411,49 @@ def generate_future_calendar_matches(league_teams, current_standings, registered
         remaining_games_needed[h] -= 1
         remaining_games_needed[a] -= 1
         auto_matches.append({
-            "date": start_dt.strftime("%Y-%m-%d"),
+            "date": next_dt.strftime("%Y-%m-%d"),
             "home": h, "away": a,
             "home_score": None, "away_score": None,
             "home_starter": "未定", "away_starter": "未定",
             "home_pitcher": "未定", "away_pitcher": "未定",
             "status": "scheduled"
         })
-        start_dt += datetime.timedelta(days=1)
+        next_dt += datetime.timedelta(days=1)
 
     return sim_matches + auto_matches
+
+# -------------------------------------------------------------
+# 画像1枚目準拠：優勝ラインテーブル構築（残り試合勝敗マトリクス）
+# -------------------------------------------------------------
+def build_championship_grid_lines(top_teams_standings):
+    """
+    上位3チームの残り全試合における（勝・敗・勝率）パターングリッドを作成
+    """
+    grid_data = []
+    for t in top_teams_standings[:3]:
+        rem = t["remaining"]
+        cur_w = t["win"]
+        cur_l = t["lose"]
+        patterns = []
+        for w in range(rem, -1, -1):
+            l = rem - w
+            final_w = cur_w + w
+            final_l = cur_l + l
+            rate = calc_win_rate(final_w, final_l)
+            patterns.append({
+                "w": w,
+                "l": l,
+                "rate": round(rate, 3),
+                "rate_str": f".{round(rate * 1000):03d}"
+            })
+        grid_data.append({
+            "team": t["team"],
+            "remaining": rem,
+            "current_w": cur_w,
+            "current_l": cur_l,
+            "patterns": patterns
+        })
+    return grid_data
 
 def build_all_history_with_predictions(games_2025, games_2026):
     all_teams = CENTRAL_TEAMS + PACIFIC_TEAMS
@@ -504,10 +556,10 @@ def build_all_history_with_predictions(games_2025, games_2026):
                     records[h]["lose"] += 1
                     records[h]["home"]["lose"] += 1
                     h2h_details[a][h]["win"] += 1
-                    h2h_details[h][a]["lose"] += 1
+                    h2h_details[a][h]["lose"] += 1
                     if is_inter:
                         records[a]["interleague"]["win"] += 1
-                        records[h]["interleague"]["lose"] += 1
+                        records[a]["interleague"]["lose"] += 1
                 else:
                     records[h]["draw"] += 1
                     records[h]["home"]["draw"] += 1
@@ -562,7 +614,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
             c_table = last_c_table
             p_table = last_p_table
 
-        # 予想勝利確率カードの生成 (左: ホーム, 右: ビジター)
+        # 予想勝利確率カード (左: ホーム, 右: ビジター)
         day_predictions = []
         for g in games_2026:
             if g["date"] == target_date:
@@ -612,9 +664,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
             "predictions": day_predictions
         }
 
-    # -------------------------------------------------------------
-    # 最終優勝確率 & 日別推移テーブル & 優勝ラインテーブルの構築
-    # -------------------------------------------------------------
+    # 143試合全補完シミュレーション
     future_registered = [g for g in games_2026 if g["date"] > last_finished_date]
     future_c_matches = generate_future_calendar_matches(CENTRAL_TEAMS, last_c_table, 
                                                         [g for g in future_registered if g["home"] in CENTRAL_TEAMS], 
@@ -623,59 +673,53 @@ def build_all_history_with_predictions(games_2025, games_2026):
                                                         [g for g in future_registered if g["home"] in PACIFIC_TEAMS], 
                                                         last_finished_date)
 
-    # 1. 最終優勝確率（最新時点からのシミュレーション）
-    c_champ_prob, c_cs_prob = simulate_championship_probabilities(CENTRAL_TEAMS, last_c_table, future_c_matches, prior_stats, pre_records)
-    p_champ_prob, p_cs_prob = simulate_championship_probabilities(PACIFIC_TEAMS, last_p_table, future_p_matches, prior_stats, pre_records)
+    # 1. 最終順位可能性早見表 & 優勝決定日確率テーブル
+    c_rank_matrix, c_clinch_dates = simulate_full_season_probabilities(CENTRAL_TEAMS, last_c_table, future_c_matches, prior_stats, pre_records)
+    p_rank_matrix, p_clinch_dates = simulate_full_season_probabilities(PACIFIC_TEAMS, last_p_table, future_p_matches, prior_stats, pre_records)
 
-    def attach_probs(table, champ_map, cs_map):
+    def attach_probs(table, rank_mat):
         for t in table:
-            t["champ_prob"] = champ_map.get(t["team"], 0.0)
-            t["cs_prob"] = cs_map.get(t["team"], 0.0)
+            probs = rank_mat.get(t["team"], {})
+            t["champ_prob"] = probs.get(1, 0)
+            t["cs_prob"] = probs.get(1, 0) + probs.get(2, 0) + probs.get(3, 0)
         return table
 
-    last_c_table = attach_probs(last_c_table, c_champ_prob, c_cs_prob)
-    last_p_table = attach_probs(last_p_table, p_champ_prob, p_cs_prob)
+    last_c_table = attach_probs(last_c_table, c_rank_matrix)
+    last_p_table = attach_probs(last_p_table, p_rank_matrix)
 
-    # 2. 日別優勝確率推移テーブル
-    timeline_dates = sorted(list({g["date"] for g in future_c_matches + future_p_matches}))[:10] # 今後10日分
-    daily_timeline = []
-    
-    cur_sim_c_matches = list(future_c_matches)
-    cur_sim_p_matches = list(future_p_matches)
+    # 2. 画像3枚目準拠：球団別優勝決定日確率リストの生成 (対戦カード・開催地・見込勝率)
+    def build_team_clinch_schedule(team_name, future_matches, clinch_date_map):
+        schedule = []
+        team_matches = [m for m in future_matches if m["home"] == team_name or m["away"] == team_name]
+        for m in team_matches:
+            d = m["date"]
+            is_home = (m["home"] == team_name)
+            opp = m["away"] if is_home else m["home"]
+            ground = "本拠地" if is_home else "ビジター"
+            prob = clinch_date_map.get(d, 0)
+            
+            p_opp = get_bayesian_team_strength(prior_stats[opp], pre_records[opp])
+            p_self = get_bayesian_team_strength(prior_stats[team_name], pre_records[team_name])
+            if is_home:
+                _, p_win = calc_log5_matchup(p_opp, p_self, "未定", "未定", {})
+            else:
+                p_win, _ = calc_log5_matchup(p_self, p_opp, "未定", "未定", {})
 
-    for d in timeline_dates:
-        cur_sim_c_matches = [m for m in cur_sim_c_matches if m["date"] >= d]
-        cur_sim_p_matches = [m for m in cur_sim_p_matches if m["date"] >= d]
-        day_c_champ, _ = simulate_championship_probabilities(CENTRAL_TEAMS, last_c_table, cur_sim_c_matches, prior_stats, pre_records)
-        day_p_champ, _ = simulate_championship_probabilities(PACIFIC_TEAMS, last_p_table, cur_sim_p_matches, prior_stats, pre_records)
-        daily_timeline.append({
-            "date": d,
-            "central": day_c_champ,
-            "pacific": day_p_champ
-        })
-
-    # 3. 残り試合数別優勝ラインテーブル（必要勝率・勝利数マトリクス）
-    def build_championship_lines(table):
-        lines = []
-        top_team = table[0]
-        for t in table:
-            rem = t["remaining"]
-            # 優勝ボーダー想定ライン: 首位が残り5割ペースで走った場合の必要勝利数
-            top_projected_w = top_team["win"] + round(top_team["remaining"] * 0.5)
-            needed_w = max(0, min(rem, top_projected_w - t["win"] + 1))
-            needed_rate = calc_win_rate(needed_w, rem - needed_w)
-            lines.append({
-                "team": t["team"],
-                "rank": t["rank"],
-                "remaining": rem,
-                "current_w": t["win"],
-                "needed_wins_pace500": needed_w,
-                "needed_rate_pace500": round(needed_rate, 3)
+            schedule.append({
+                "date": d[5:],
+                "opp": opp,
+                "ground": ground,
+                "clinch_prob": prob,
+                "win_expect": int(round(p_win))
             })
-        return lines
+        return schedule
 
-    c_lines = build_championship_lines(last_c_table)
-    p_lines = build_championship_lines(last_p_table)
+    c_clinch_schedules = {t: build_team_clinch_schedule(t, future_c_matches, c_clinch_dates.get(t, {})) for t in CENTRAL_TEAMS}
+    p_clinch_schedules = {t: build_team_clinch_schedule(t, future_p_matches, p_clinch_dates.get(t, {})) for t in PACIFIC_TEAMS}
+
+    # 3. 画像1枚目準拠：上位3球団の優勝ライングリッド
+    c_lines_grid = build_championship_grid_lines(last_c_table)
+    p_lines_grid = build_championship_grid_lines(last_p_table)
 
     default_latest = last_finished_date
     for d in all_dates:
@@ -683,11 +727,13 @@ def build_all_history_with_predictions(games_2025, games_2026):
             default_latest = d
             break
 
-    # 全てのスナップショットにシミュレーションデータを添付
     simulation_payload = {
-        "daily_timeline": daily_timeline,
-        "central_lines": c_lines,
-        "pacific_lines": p_lines
+        "central_rank_matrix": c_rank_matrix,
+        "pacific_rank_matrix": p_rank_matrix,
+        "central_clinch_schedules": c_clinch_schedules,
+        "pacific_clinch_schedules": p_clinch_schedules,
+        "central_lines_grid": c_lines_grid,
+        "pacific_lines_grid": p_lines_grid
     }
 
     return all_dates, default_latest, history_snapshots, simulation_payload
@@ -706,7 +752,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"全日程開放＆優勝確率シミュレーション完了：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション完了：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
