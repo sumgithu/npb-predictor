@@ -143257,25 +143257,25 @@
         "1": 0,
         "2": 0,
         "3": 0,
-        "4": 66,
+        "4": 64,
         "5": 29,
-        "6": 5
+        "6": 6
       },
       "中日": {
         "1": 0,
         "2": 0,
         "3": 0,
         "4": 29,
-        "5": 54,
+        "5": 53,
         "6": 18
       },
       "広島": {
         "1": 0,
         "2": 0,
         "3": 0,
-        "4": 5,
-        "5": 17,
-        "6": 77
+        "4": 7,
+        "5": 18,
+        "6": 76
       }
     },
     "pacific_rank_matrix": {
@@ -143299,8 +143299,8 @@
         "1": 0,
         "2": 0,
         "3": 0,
-        "4": 51,
-        "5": 49,
+        "4": 50,
+        "5": 50,
         "6": 0
       },
       "楽天": {
@@ -143315,8 +143315,8 @@
         "1": 0,
         "2": 0,
         "3": 0,
-        "4": 49,
-        "5": 51,
+        "4": 50,
+        "5": 50,
         "6": 0
       },
       "西武": {
@@ -143342,7 +143342,7 @@
           "date": "10/3",
           "raw_date": "2026-10-03",
           "opp": "広島",
-          "ground": "敵地",
+          "ground": "マツダS",
           "clinch_prob": 2,
           "win_expect": 64
         },
@@ -143351,7 +143351,7 @@
           "raw_date": "2026-10-04",
           "opp": "ＤｅＮＡ",
           "ground": "敵地",
-          "clinch_prob": 3,
+          "clinch_prob": 2,
           "win_expect": 51
         },
         {
@@ -143375,16 +143375,24 @@
           "raw_date": "2026-10-07",
           "opp": "巨人",
           "ground": "甲子園",
-          "clinch_prob": 15,
+          "clinch_prob": 16,
           "win_expect": 58
         }
       ],
       "巨人": [
         {
+          "date": "10/1",
+          "raw_date": "2026-10-01",
+          "opp": "阪神",
+          "ground": "敵地",
+          "clinch_prob": 0,
+          "win_expect": 42
+        },
+        {
           "date": "10/2",
           "raw_date": "2026-10-02",
           "opp": "ヤクルト",
-          "ground": "敵地",
+          "ground": "神宮",
           "clinch_prob": 0,
           "win_expect": 60
         },
@@ -143401,51 +143409,11 @@
           "raw_date": "2026-10-07",
           "opp": "阪神",
           "ground": "敵地",
-          "clinch_prob": 9,
+          "clinch_prob": 8,
           "win_expect": 42
         }
       ],
       "ＤｅＮＡ": [
-        {
-          "date": "9/23",
-          "raw_date": "2026-09-23",
-          "opp": "中日",
-          "ground": "横浜",
-          "clinch_prob": 0,
-          "win_expect": 60
-        },
-        {
-          "date": "9/25",
-          "raw_date": "2026-09-25",
-          "opp": "阪神",
-          "ground": "横浜",
-          "clinch_prob": 0,
-          "win_expect": 49
-        },
-        {
-          "date": "9/26",
-          "raw_date": "2026-09-26",
-          "opp": "阪神",
-          "ground": "横浜",
-          "clinch_prob": 0,
-          "win_expect": 49
-        },
-        {
-          "date": "9/27",
-          "raw_date": "2026-09-27",
-          "opp": "広島",
-          "ground": "横浜",
-          "clinch_prob": 0,
-          "win_expect": 66
-        },
-        {
-          "date": "9/28",
-          "raw_date": "2026-09-28",
-          "opp": "広島",
-          "ground": "横浜",
-          "clinch_prob": 0,
-          "win_expect": 66
-        },
         {
           "date": "10/3",
           "raw_date": "2026-10-03",
@@ -143472,38 +143440,6 @@
         }
       ],
       "ヤクルト": [
-        {
-          "date": "9/26",
-          "raw_date": "2026-09-26",
-          "opp": "中日",
-          "ground": "本拠地",
-          "clinch_prob": 0,
-          "win_expect": 46
-        },
-        {
-          "date": "9/27",
-          "raw_date": "2026-09-27",
-          "opp": "巨人",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 33
-        },
-        {
-          "date": "9/29",
-          "raw_date": "2026-09-29",
-          "opp": "阪神",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 29
-        },
-        {
-          "date": "9/30",
-          "raw_date": "2026-09-30",
-          "opp": "阪神",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 29
-        },
         {
           "date": "10/2",
           "raw_date": "2026-10-02",
@@ -143539,50 +143475,10 @@
       ],
       "中日": [
         {
-          "date": "9/21",
-          "raw_date": "2026-09-21",
-          "opp": "広島",
-          "ground": "本拠地",
-          "clinch_prob": 0,
-          "win_expect": 59
-        },
-        {
-          "date": "9/22",
-          "raw_date": "2026-09-22",
-          "opp": "ＤｅＮＡ",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 40
-        },
-        {
-          "date": "9/23",
-          "raw_date": "2026-09-23",
-          "opp": "ＤｅＮＡ",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 40
-        },
-        {
-          "date": "9/25",
-          "raw_date": "2026-09-25",
-          "opp": "ヤクルト",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 54
-        },
-        {
-          "date": "9/26",
-          "raw_date": "2026-09-26",
-          "opp": "ヤクルト",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 54
-        },
-        {
           "date": "10/1",
           "raw_date": "2026-10-01",
           "opp": "広島",
-          "ground": "敵地",
+          "ground": "マツダS",
           "clinch_prob": 0,
           "win_expect": 52
         },
@@ -143590,7 +143486,7 @@
           "date": "10/3",
           "raw_date": "2026-10-03",
           "opp": "ヤクルト",
-          "ground": "敵地",
+          "ground": "神宮",
           "clinch_prob": 0,
           "win_expect": 54
         },
@@ -143604,22 +143500,6 @@
         }
       ],
       "広島": [
-        {
-          "date": "9/28",
-          "raw_date": "2026-09-28",
-          "opp": "ＤｅＮＡ",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 34
-        },
-        {
-          "date": "9/29",
-          "raw_date": "2026-09-29",
-          "opp": "巨人",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 34
-        },
         {
           "date": "10/1",
           "raw_date": "2026-10-01",
@@ -143640,7 +143520,7 @@
           "date": "10/4",
           "raw_date": "2026-10-04",
           "opp": "ヤクルト",
-          "ground": "敵地",
+          "ground": "神宮",
           "clinch_prob": 0,
           "win_expect": 48
         },
@@ -143673,14 +143553,6 @@
     "pacific_clinch_schedules": {
       "ソフトバンク": [
         {
-          "date": "9/21",
-          "raw_date": "2026-09-21",
-          "opp": "楽天",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 73
-        },
-        {
           "date": "9/22",
           "raw_date": "2026-09-22",
           "opp": "西武",
@@ -143701,7 +143573,7 @@
           "raw_date": "2026-09-25",
           "opp": "オリックス",
           "ground": "敵地",
-          "clinch_prob": 18,
+          "clinch_prob": 17,
           "win_expect": 72
         },
         {
@@ -143709,7 +143581,7 @@
           "raw_date": "2026-09-26",
           "opp": "楽天",
           "ground": "本拠地",
-          "clinch_prob": 11,
+          "clinch_prob": 12,
           "win_expect": 78
         },
         {
@@ -143733,7 +143605,7 @@
           "raw_date": "2026-10-02",
           "opp": "ロッテ",
           "ground": "敵地",
-          "clinch_prob": 0,
+          "clinch_prob": 1,
           "win_expect": 72
         },
         {
@@ -143746,54 +143618,6 @@
         }
       ],
       "日本ハム": [
-        {
-          "date": "9/22",
-          "raw_date": "2026-09-22",
-          "opp": "楽天",
-          "ground": "本拠地",
-          "clinch_prob": 0,
-          "win_expect": 69
-        },
-        {
-          "date": "9/23",
-          "raw_date": "2026-09-23",
-          "opp": "楽天",
-          "ground": "本拠地",
-          "clinch_prob": 0,
-          "win_expect": 69
-        },
-        {
-          "date": "9/24",
-          "raw_date": "2026-09-24",
-          "opp": "楽天",
-          "ground": "本拠地",
-          "clinch_prob": 0,
-          "win_expect": 69
-        },
-        {
-          "date": "9/26",
-          "raw_date": "2026-09-26",
-          "opp": "オリックス",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 61
-        },
-        {
-          "date": "9/27",
-          "raw_date": "2026-09-27",
-          "opp": "ロッテ",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 61
-        },
-        {
-          "date": "9/28",
-          "raw_date": "2026-09-28",
-          "opp": "ロッテ",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 61
-        },
         {
           "date": "10/1",
           "raw_date": "2026-10-01",
@@ -143812,38 +143636,6 @@
         }
       ],
       "ロッテ": [
-        {
-          "date": "9/27",
-          "raw_date": "2026-09-27",
-          "opp": "日本ハム",
-          "ground": "本拠地",
-          "clinch_prob": 0,
-          "win_expect": 39
-        },
-        {
-          "date": "9/28",
-          "raw_date": "2026-09-28",
-          "opp": "日本ハム",
-          "ground": "本拠地",
-          "clinch_prob": 0,
-          "win_expect": 39
-        },
-        {
-          "date": "9/29",
-          "raw_date": "2026-09-29",
-          "opp": "楽天",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 48
-        },
-        {
-          "date": "9/30",
-          "raw_date": "2026-09-30",
-          "opp": "楽天",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 48
-        },
         {
           "date": "10/1",
           "raw_date": "2026-10-01",
@@ -143879,46 +143671,6 @@
       ],
       "楽天": [
         {
-          "date": "9/26",
-          "raw_date": "2026-09-26",
-          "opp": "ソフトバンク",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 22
-        },
-        {
-          "date": "9/27",
-          "raw_date": "2026-09-27",
-          "opp": "西武",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 36
-        },
-        {
-          "date": "9/28",
-          "raw_date": "2026-09-28",
-          "opp": "西武",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 36
-        },
-        {
-          "date": "9/29",
-          "raw_date": "2026-09-29",
-          "opp": "ロッテ",
-          "ground": "本拠地",
-          "clinch_prob": 0,
-          "win_expect": 52
-        },
-        {
-          "date": "9/30",
-          "raw_date": "2026-09-30",
-          "opp": "ロッテ",
-          "ground": "本拠地",
-          "clinch_prob": 0,
-          "win_expect": 52
-        },
-        {
           "date": "10/1",
           "raw_date": "2026-10-01",
           "opp": "ソフトバンク",
@@ -143945,62 +143697,6 @@
       ],
       "オリックス": [
         {
-          "date": "9/21",
-          "raw_date": "2026-09-21",
-          "opp": "日本ハム",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 32
-        },
-        {
-          "date": "9/22",
-          "raw_date": "2026-09-22",
-          "opp": "ロッテ",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 47
-        },
-        {
-          "date": "9/23",
-          "raw_date": "2026-09-23",
-          "opp": "ロッテ",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 47
-        },
-        {
-          "date": "9/25",
-          "raw_date": "2026-09-25",
-          "opp": "ソフトバンク",
-          "ground": "本拠地",
-          "clinch_prob": 0,
-          "win_expect": 28
-        },
-        {
-          "date": "9/26",
-          "raw_date": "2026-09-26",
-          "opp": "日本ハム",
-          "ground": "本拠地",
-          "clinch_prob": 0,
-          "win_expect": 39
-        },
-        {
-          "date": "9/27",
-          "raw_date": "2026-09-27",
-          "opp": "ソフトバンク",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 23
-        },
-        {
-          "date": "9/29",
-          "raw_date": "2026-09-29",
-          "opp": "西武",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 37
-        },
-        {
           "date": "10/3",
           "raw_date": "2026-10-03",
           "opp": "楽天",
@@ -144011,62 +143707,6 @@
       ],
       "西武": [
         {
-          "date": "9/22",
-          "raw_date": "2026-09-22",
-          "opp": "ソフトバンク",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 31
-        },
-        {
-          "date": "9/23",
-          "raw_date": "2026-09-23",
-          "opp": "ソフトバンク",
-          "ground": "敵地",
-          "clinch_prob": 0,
-          "win_expect": 31
-        },
-        {
-          "date": "9/25",
-          "raw_date": "2026-09-25",
-          "opp": "ロッテ",
-          "ground": "本拠地",
-          "clinch_prob": 0,
-          "win_expect": 63
-        },
-        {
-          "date": "9/26",
-          "raw_date": "2026-09-26",
-          "opp": "ロッテ",
-          "ground": "本拠地",
-          "clinch_prob": 0,
-          "win_expect": 63
-        },
-        {
-          "date": "9/27",
-          "raw_date": "2026-09-27",
-          "opp": "楽天",
-          "ground": "本拠地",
-          "clinch_prob": 0,
-          "win_expect": 64
-        },
-        {
-          "date": "9/28",
-          "raw_date": "2026-09-28",
-          "opp": "楽天",
-          "ground": "本拠地",
-          "clinch_prob": 0,
-          "win_expect": 64
-        },
-        {
-          "date": "9/29",
-          "raw_date": "2026-09-29",
-          "opp": "オリックス",
-          "ground": "本拠地",
-          "clinch_prob": 0,
-          "win_expect": 63
-        },
-        {
           "date": "10/5",
           "raw_date": "2026-10-05",
           "opp": "日本ハム",
@@ -144076,19 +143716,39 @@
         }
       ]
     },
-    "central_lines_grid": [
-      {
-        "team": "阪神",
-        "remaining": 14,
-        "current_w": 71,
-        "current_l": 57,
-        "patterns": [
+    "central_lines_grid": {
+      "headers": [
+        {
+          "team": "阪神",
+          "remaining": 14,
+          "current_w": 71,
+          "current_l": 57
+        },
+        {
+          "team": "巨人",
+          "remaining": 11,
+          "current_w": 72,
+          "current_l": 58
+        },
+        {
+          "team": "ＤｅＮＡ",
+          "remaining": 11,
+          "current_w": 65,
+          "current_l": 64
+        }
+      ],
+      "rows": [
+        [
           {
             "w": 14,
             "l": 0,
             "rate": 0.599,
             "rate_str": ".599"
           },
+          null,
+          null
+        ],
+        [
           {
             "w": 13,
             "l": 1,
@@ -144096,96 +143756,19 @@
             "rate_str": ".592"
           },
           {
-            "w": 12,
-            "l": 2,
-            "rate": 0.585,
-            "rate_str": ".585"
-          },
-          {
-            "w": 11,
-            "l": 3,
-            "rate": 0.577,
-            "rate_str": ".577"
-          },
-          {
-            "w": 10,
-            "l": 4,
-            "rate": 0.57,
-            "rate_str": ".570"
-          },
-          {
-            "w": 9,
-            "l": 5,
-            "rate": 0.563,
-            "rate_str": ".563"
-          },
-          {
-            "w": 8,
-            "l": 6,
-            "rate": 0.556,
-            "rate_str": ".556"
-          },
-          {
-            "w": 7,
-            "l": 7,
-            "rate": 0.549,
-            "rate_str": ".549"
-          },
-          {
-            "w": 6,
-            "l": 8,
-            "rate": 0.542,
-            "rate_str": ".542"
-          },
-          {
-            "w": 5,
-            "l": 9,
-            "rate": 0.535,
-            "rate_str": ".535"
-          },
-          {
-            "w": 4,
-            "l": 10,
-            "rate": 0.528,
-            "rate_str": ".528"
-          },
-          {
-            "w": 3,
-            "l": 11,
-            "rate": 0.521,
-            "rate_str": ".521"
-          },
-          {
-            "w": 2,
-            "l": 12,
-            "rate": 0.514,
-            "rate_str": ".514"
-          },
-          {
-            "w": 1,
-            "l": 13,
-            "rate": 0.507,
-            "rate_str": ".507"
-          },
-          {
-            "w": 0,
-            "l": 14,
-            "rate": 0.5,
-            "rate_str": ".500"
-          }
-        ]
-      },
-      {
-        "team": "巨人",
-        "remaining": 11,
-        "current_w": 72,
-        "current_l": 58,
-        "patterns": [
-          {
             "w": 11,
             "l": 0,
             "rate": 0.589,
             "rate_str": ".589"
+          },
+          null
+        ],
+        [
+          {
+            "w": 12,
+            "l": 2,
+            "rate": 0.585,
+            "rate_str": ".585"
           },
           {
             "w": 10,
@@ -144193,11 +143776,29 @@
             "rate": 0.582,
             "rate_str": ".582"
           },
+          null
+        ],
+        [
+          {
+            "w": 11,
+            "l": 3,
+            "rate": 0.577,
+            "rate_str": ".577"
+          },
           {
             "w": 9,
             "l": 2,
             "rate": 0.574,
             "rate_str": ".574"
+          },
+          null
+        ],
+        [
+          {
+            "w": 10,
+            "l": 4,
+            "rate": 0.57,
+            "rate_str": ".570"
           },
           {
             "w": 8,
@@ -144205,11 +143806,29 @@
             "rate": 0.567,
             "rate_str": ".567"
           },
+          null
+        ],
+        [
+          {
+            "w": 9,
+            "l": 5,
+            "rate": 0.563,
+            "rate_str": ".563"
+          },
           {
             "w": 7,
             "l": 4,
             "rate": 0.56,
             "rate_str": ".560"
+          },
+          null
+        ],
+        [
+          {
+            "w": 8,
+            "l": 6,
+            "rate": 0.556,
+            "rate_str": ".556"
           },
           {
             "w": 6,
@@ -144217,12 +143836,40 @@
             "rate": 0.553,
             "rate_str": ".553"
           },
+          null
+        ],
+        [
+          {
+            "w": 7,
+            "l": 7,
+            "rate": 0.549,
+            "rate_str": ".549"
+          },
           {
             "w": 5,
             "l": 6,
             "rate": 0.546,
             "rate_str": ".546"
           },
+          null
+        ],
+        [
+          {
+            "w": 6,
+            "l": 8,
+            "rate": 0.542,
+            "rate_str": ".542"
+          },
+          null,
+          {
+            "w": 11,
+            "l": 0,
+            "rate": 0.543,
+            "rate_str": ".543"
+          }
+        ],
+        [
+          null,
           {
             "w": 4,
             "l": 7,
@@ -144230,16 +143877,58 @@
             "rate_str": ".539"
           },
           {
+            "w": 10,
+            "l": 1,
+            "rate": 0.536,
+            "rate_str": ".536"
+          }
+        ],
+        [
+          {
+            "w": 5,
+            "l": 9,
+            "rate": 0.535,
+            "rate_str": ".535"
+          },
+          {
             "w": 3,
             "l": 8,
             "rate": 0.532,
             "rate_str": ".532"
           },
+          null
+        ],
+        [
+          {
+            "w": 4,
+            "l": 10,
+            "rate": 0.528,
+            "rate_str": ".528"
+          },
+          null,
+          {
+            "w": 9,
+            "l": 2,
+            "rate": 0.529,
+            "rate_str": ".529"
+          }
+        ],
+        [
+          null,
           {
             "w": 2,
             "l": 9,
             "rate": 0.525,
             "rate_str": ".525"
+          },
+          null
+        ],
+        [
+          {
+            "w": 3,
+            "l": 11,
+            "rate": 0.521,
+            "rate_str": ".521"
           },
           {
             "w": 1,
@@ -144248,85 +143937,105 @@
             "rate_str": ".518"
           },
           {
-            "w": 0,
-            "l": 11,
-            "rate": 0.511,
-            "rate_str": ".511"
-          }
-        ]
-      },
-      {
-        "team": "ＤｅＮＡ",
-        "remaining": 11,
-        "current_w": 65,
-        "current_l": 64,
-        "patterns": [
-          {
-            "w": 11,
-            "l": 0,
-            "rate": 0.543,
-            "rate_str": ".543"
-          },
-          {
-            "w": 10,
-            "l": 1,
-            "rate": 0.536,
-            "rate_str": ".536"
-          },
-          {
-            "w": 9,
-            "l": 2,
-            "rate": 0.529,
-            "rate_str": ".529"
-          },
-          {
             "w": 8,
             "l": 3,
             "rate": 0.521,
             "rate_str": ".521"
+          }
+        ],
+        [
+          {
+            "w": 2,
+            "l": 12,
+            "rate": 0.514,
+            "rate_str": ".514"
+          },
+          {
+            "w": 0,
+            "l": 11,
+            "rate": 0.511,
+            "rate_str": ".511"
           },
           {
             "w": 7,
             "l": 4,
             "rate": 0.514,
             "rate_str": ".514"
+          }
+        ],
+        [
+          {
+            "w": 1,
+            "l": 13,
+            "rate": 0.507,
+            "rate_str": ".507"
           },
+          null,
           {
             "w": 6,
             "l": 5,
             "rate": 0.507,
             "rate_str": ".507"
+          }
+        ],
+        [
+          {
+            "w": 0,
+            "l": 14,
+            "rate": 0.5,
+            "rate_str": ".500"
           },
+          null,
           {
             "w": 5,
             "l": 6,
             "rate": 0.5,
             "rate_str": ".500"
-          },
+          }
+        ],
+        [
+          null,
+          null,
           {
             "w": 4,
             "l": 7,
             "rate": 0.493,
             "rate_str": ".493"
-          },
+          }
+        ],
+        [
+          null,
+          null,
           {
             "w": 3,
             "l": 8,
             "rate": 0.486,
             "rate_str": ".486"
-          },
+          }
+        ],
+        [
+          null,
+          null,
           {
             "w": 2,
             "l": 9,
             "rate": 0.479,
             "rate_str": ".479"
-          },
+          }
+        ],
+        [
+          null,
+          null,
           {
             "w": 1,
             "l": 10,
             "rate": 0.471,
             "rate_str": ".471"
-          },
+          }
+        ],
+        [
+          null,
+          null,
           {
             "w": 0,
             "l": 11,
@@ -144334,69 +144043,121 @@
             "rate_str": ".464"
           }
         ]
-      }
-    ],
-    "pacific_lines_grid": [
-      {
-        "team": "ソフトバンク",
-        "remaining": 10,
-        "current_w": 84,
-        "current_l": 46,
-        "patterns": [
+      ]
+    },
+    "pacific_lines_grid": {
+      "headers": [
+        {
+          "team": "ソフトバンク",
+          "remaining": 10,
+          "current_w": 84,
+          "current_l": 46
+        },
+        {
+          "team": "西武",
+          "remaining": 10,
+          "current_w": 74,
+          "current_l": 55
+        },
+        {
+          "team": "日本ハム",
+          "remaining": 10,
+          "current_w": 73,
+          "current_l": 57
+        }
+      ],
+      "rows": [
+        [
           {
             "w": 10,
             "l": 0,
             "rate": 0.671,
             "rate_str": ".671"
           },
+          null,
+          null
+        ],
+        [
           {
             "w": 9,
             "l": 1,
             "rate": 0.664,
             "rate_str": ".664"
           },
+          null,
+          null
+        ],
+        [
           {
             "w": 8,
             "l": 2,
             "rate": 0.657,
             "rate_str": ".657"
           },
+          null,
+          null
+        ],
+        [
           {
             "w": 7,
             "l": 3,
             "rate": 0.65,
             "rate_str": ".650"
           },
+          null,
+          null
+        ],
+        [
           {
             "w": 6,
             "l": 4,
             "rate": 0.643,
             "rate_str": ".643"
           },
+          null,
+          null
+        ],
+        [
           {
             "w": 5,
             "l": 5,
             "rate": 0.636,
             "rate_str": ".636"
           },
+          null,
+          null
+        ],
+        [
           {
             "w": 4,
             "l": 6,
             "rate": 0.629,
             "rate_str": ".629"
           },
+          null,
+          null
+        ],
+        [
           {
             "w": 3,
             "l": 7,
             "rate": 0.621,
             "rate_str": ".621"
           },
+          null,
+          null
+        ],
+        [
           {
             "w": 2,
             "l": 8,
             "rate": 0.614,
             "rate_str": ".614"
           },
+          null,
+          null
+        ],
+        [
           {
             "w": 1,
             "l": 9,
@@ -144404,24 +144165,19 @@
             "rate_str": ".607"
           },
           {
-            "w": 0,
-            "l": 10,
-            "rate": 0.6,
-            "rate_str": ".600"
-          }
-        ]
-      },
-      {
-        "team": "西武",
-        "remaining": 10,
-        "current_w": 74,
-        "current_l": 55,
-        "patterns": [
-          {
             "w": 10,
             "l": 0,
             "rate": 0.604,
             "rate_str": ".604"
+          },
+          null
+        ],
+        [
+          {
+            "w": 0,
+            "l": 10,
+            "rate": 0.6,
+            "rate_str": ".600"
           },
           {
             "w": 9,
@@ -144429,6 +144185,10 @@
             "rate": 0.597,
             "rate_str": ".597"
           },
+          null
+        ],
+        [
+          null,
           {
             "w": 8,
             "l": 2,
@@ -144436,11 +144196,29 @@
             "rate_str": ".590"
           },
           {
+            "w": 10,
+            "l": 0,
+            "rate": 0.593,
+            "rate_str": ".593"
+          }
+        ],
+        [
+          null,
+          {
             "w": 7,
             "l": 3,
             "rate": 0.583,
             "rate_str": ".583"
           },
+          {
+            "w": 9,
+            "l": 1,
+            "rate": 0.586,
+            "rate_str": ".586"
+          }
+        ],
+        [
+          null,
           {
             "w": 6,
             "l": 4,
@@ -144448,11 +144226,29 @@
             "rate_str": ".576"
           },
           {
+            "w": 8,
+            "l": 2,
+            "rate": 0.579,
+            "rate_str": ".579"
+          }
+        ],
+        [
+          null,
+          {
             "w": 5,
             "l": 5,
             "rate": 0.568,
             "rate_str": ".568"
           },
+          {
+            "w": 7,
+            "l": 3,
+            "rate": 0.571,
+            "rate_str": ".571"
+          }
+        ],
+        [
+          null,
           {
             "w": 4,
             "l": 6,
@@ -144460,11 +144256,29 @@
             "rate_str": ".561"
           },
           {
+            "w": 6,
+            "l": 4,
+            "rate": 0.564,
+            "rate_str": ".564"
+          }
+        ],
+        [
+          null,
+          {
             "w": 3,
             "l": 7,
             "rate": 0.554,
             "rate_str": ".554"
           },
+          {
+            "w": 5,
+            "l": 5,
+            "rate": 0.557,
+            "rate_str": ".557"
+          }
+        ],
+        [
+          null,
           {
             "w": 2,
             "l": 8,
@@ -144472,85 +144286,55 @@
             "rate_str": ".547"
           },
           {
+            "w": 4,
+            "l": 6,
+            "rate": 0.55,
+            "rate_str": ".550"
+          }
+        ],
+        [
+          null,
+          {
             "w": 1,
             "l": 9,
             "rate": 0.54,
             "rate_str": ".540"
           },
           {
-            "w": 0,
-            "l": 10,
-            "rate": 0.532,
-            "rate_str": ".532"
-          }
-        ]
-      },
-      {
-        "team": "日本ハム",
-        "remaining": 10,
-        "current_w": 73,
-        "current_l": 57,
-        "patterns": [
-          {
-            "w": 10,
-            "l": 0,
-            "rate": 0.593,
-            "rate_str": ".593"
-          },
-          {
-            "w": 9,
-            "l": 1,
-            "rate": 0.586,
-            "rate_str": ".586"
-          },
-          {
-            "w": 8,
-            "l": 2,
-            "rate": 0.579,
-            "rate_str": ".579"
-          },
-          {
-            "w": 7,
-            "l": 3,
-            "rate": 0.571,
-            "rate_str": ".571"
-          },
-          {
-            "w": 6,
-            "l": 4,
-            "rate": 0.564,
-            "rate_str": ".564"
-          },
-          {
-            "w": 5,
-            "l": 5,
-            "rate": 0.557,
-            "rate_str": ".557"
-          },
-          {
-            "w": 4,
-            "l": 6,
-            "rate": 0.55,
-            "rate_str": ".550"
-          },
-          {
             "w": 3,
             "l": 7,
             "rate": 0.543,
             "rate_str": ".543"
-          },
+          }
+        ],
+        [
+          null,
+          null,
           {
             "w": 2,
             "l": 8,
             "rate": 0.536,
             "rate_str": ".536"
+          }
+        ],
+        [
+          null,
+          {
+            "w": 0,
+            "l": 10,
+            "rate": 0.532,
+            "rate_str": ".532"
           },
           {
             "w": 1,
             "l": 9,
             "rate": 0.529,
             "rate_str": ".529"
-          },
+          }
+        ],
+        [
+          null,
+          null,
           {
             "w": 0,
             "l": 10,
@@ -144558,7 +144342,7 @@
             "rate_str": ".521"
           }
         ]
-      }
-    ]
+      ]
+    }
   }
 }
