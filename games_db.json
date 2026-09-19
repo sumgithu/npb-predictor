@@ -50,6 +50,78 @@
       "home_score": 6,
       "away_score": 2,
       "status": "finished"
+    },
+    {
+      "date": "2026-09-19",
+      "home": "巨人",
+      "away": "中日",
+      "home_score": 14,
+      "away_score": 1,
+      "home_starter": "田中将",
+      "away_starter": "中西",
+      "home_pitcher": "田中将",
+      "away_pitcher": "中西",
+      "status": "finished"
+    },
+    {
+      "date": "2026-09-19",
+      "home": "ＤｅＮＡ",
+      "away": "ヤクルト",
+      "home_score": 5,
+      "away_score": 3,
+      "home_starter": "尾形",
+      "away_starter": "高梨",
+      "home_pitcher": "尾形",
+      "away_pitcher": "高梨",
+      "status": "finished"
+    },
+    {
+      "date": "2026-09-19",
+      "home": "阪神",
+      "away": "広島",
+      "home_score": 1,
+      "away_score": 5,
+      "home_starter": "村上",
+      "away_starter": "栗林",
+      "home_pitcher": "村上",
+      "away_pitcher": "栗林",
+      "status": "finished"
+    },
+    {
+      "date": "2026-09-19",
+      "home": "日本ハム",
+      "away": "オリックス",
+      "home_score": 4,
+      "away_score": 7,
+      "home_starter": "伊藤",
+      "away_starter": "エスピノーザ",
+      "home_pitcher": "伊藤",
+      "away_pitcher": "エスピノーザ",
+      "status": "finished"
+    },
+    {
+      "date": "2026-09-19",
+      "home": "楽天",
+      "away": "ソフトバンク",
+      "home_score": 5,
+      "away_score": 2,
+      "home_starter": "早川",
+      "away_starter": "前田悠",
+      "home_pitcher": "早川",
+      "away_pitcher": "前田悠",
+      "status": "finished"
+    },
+    {
+      "date": "2026-09-19",
+      "home": "ロッテ",
+      "away": "西武",
+      "home_score": 2,
+      "away_score": 4,
+      "home_starter": "高野脩",
+      "away_starter": "隅田",
+      "home_pitcher": "高野脩",
+      "away_pitcher": "隅田",
+      "status": "finished"
     }
   ]
 }
