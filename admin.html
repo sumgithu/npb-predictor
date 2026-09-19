@@ -87,7 +87,7 @@
   <div class="container">
     <header>
       <h1>NPB 試合結果・先発投手 手動管理</h1>
-      <p>日付を選択すると、予定カード・予告先発がテキストログから自動展開されます。</p>
+      <p>日付を選択すると、テキストログ内の予定カード・予告先発が直接自動展開されます。</p>
     </header>
 
     <div class="card">
@@ -102,7 +102,7 @@
         </div>
       </div>
       <div style="font-size: 0.75rem; color: var(--text-sub);">
-        ※ トークンはブラウザにのみ保存され、安全にGitHubと直接通信します。
+        ※ トークンはブラウザにのみ保存され、GitHub APIと安全に直接通信します。
       </div>
     </div>
 
@@ -135,12 +135,13 @@
     };
 
     function normalizeTeam(t) {
+      if (!t) return "";
       const clean = t.trim();
       return TEAM_ALIASES[clean] || clean;
     }
 
     let currentDb = { season: 2026, games: [] };
-    let textScheduleMap = {}; // 日付ごとの予定試合リスト
+    let textScheduleMap = {};
     let fileSha = "";
 
     const repoInput = document.getElementById('repo-name');
@@ -170,7 +171,7 @@
         return;
       }
 
-      showStatus("テキストログ＆データベース同期中...", "");
+      showStatus("GitHubより全データを同期中...", "");
       try {
         // 1. games_db.json の読み込み
         const resDb = await fetch(`https://api.github.com/repos/${repo}/contents/games_db.json?t=${new Date().getTime()}`, {
@@ -183,19 +184,36 @@
           currentDb = JSON.parse(decoded);
         }
 
-        // 2. 2016-2026プロ野球レギュラーシーズン結果.txt の読み込みと予定パース
-        try {
-          const resTxt = await fetch(`2016-2026プロ野球レギュラーシーズン結果.txt?t=${new Date().getTime()}`);
-          if (resTxt.ok) {
-            const rawText = await resTxt.text();
-            parseTextSchedule(rawText);
-          }
-        } catch (_) {}
+        // 2. 2016-2026プロ野球レギュラーシーズン結果.txt をGitHub API経由で直接取得（404・エンコード問題回避）
+        const txtFilename = encodeURIComponent("2016-2026プロ野球レギュラーシーズン結果.txt");
+        const resTxt = await fetch(`https://api.github.com/repos/${repo}/contents/${txtFilename}?t=${new Date().getTime()}`, {
+          headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+        });
 
-        showStatus("同期完了", "success");
+        if (resTxt.ok) {
+          const txtData = await resTxt.json();
+          const decodedTxt = decodeURIComponent(escape(atob(txtData.content)));
+          parseTextSchedule(decodedTxt);
+          showStatus("テキストログ＆DBの完全同期完了", "success");
+        } else {
+          // 通常の静的ファイルパスからのフォールバック試行
+          try {
+            const fallbackRes = await fetch(`2016-2026プロ野球レギュラーシーズン結果.txt?t=${new Date().getTime()}`);
+            if (fallbackRes.ok) {
+              const raw = await fallbackRes.text();
+              parseTextSchedule(raw);
+              showStatus("テキストログ同期完了", "success");
+            } else {
+              showStatus("テキストログ取得失敗(ステータス: " + resTxt.status + ")", "error");
+            }
+          } catch (_) {
+            showStatus("テキストログの取得に失敗しました", "error");
+          }
+        }
+
         loadDateForm();
       } catch (e) {
-        showStatus("データ同期エラー", "error");
+        showStatus("通信同期エラー: " + e.message, "error");
       }
     }
 
@@ -205,9 +223,10 @@
       const sec2026 = rawText.split("2026\n")[1];
       let curDate = null;
 
-      sec2026.split(/\r?\n/).forEach(line => {
+      const lines = sec2026.split(/\r?\n/);
+      for (let line of lines) {
         line = line.trim();
-        if (!line) return;
+        if (!line) continue;
 
         const dateM = line.match(/^(\d{1,2})\/(\d{1,2})/);
         if (dateM) {
@@ -217,9 +236,9 @@
           line = line.replace(/^\d{1,2}\/\d{1,2}（[日月火水木金土]）\s*/, '');
         }
 
-        if (!curDate || line.includes("中止") || line.includes("ノーゲーム")) return;
+        if (!curDate || line.includes("中止") || line.includes("ノーゲーム")) continue;
 
-        // 試合結果行 (例: 巨人 6 - 4 ヤクルト 勝：内海 敗：デイビーズ)
+        // 消化済みスコア行 (例: 巨人 6 - 4 ヤクルト ...)
         const finM = line.match(/([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)/);
         if (finM) {
           const h = normalizeTeam(finM[1]);
@@ -238,10 +257,11 @@
               away_pitcher: as_ > hs ? (winP ? winP[1] : '') : (loseP ? loseP[1] : '')
             });
           }
-          return;
+          continue;
         }
 
-        // 未消化予定行 (例: 巨人   -   中日 ... 先発：田中将 先発：中西)
+        // 未消化予定行 (例: 巨人 - 中日 ... 先発：田中将 先発：中西)
+        // ホーム - ビジター 表記に対応
         const schedM = line.match(/([^\s\d]+)\s+-\s+([^\s\d]+)/);
         if (schedM) {
           const h = normalizeTeam(schedM[1]);
@@ -260,7 +280,7 @@
             });
           }
         }
-      });
+      }
     }
 
     function loadDateForm() {
@@ -268,22 +288,22 @@
       const container = document.getElementById('matches-container');
       container.innerHTML = '';
 
-      // 1. 手動保存済みの games_db.json にデータがあれば最優先表示
+      // 1. games_db.json 内にすでに手入力保存されたデータがある場合
       const manualGames = (currentDb.games || []).filter(g => g.date === date);
       if (manualGames.length > 0) {
         manualGames.forEach(g => addMatchRow(g));
         return;
       }
 
-      // 2. テキストログからパースされた予定対戦カード（9/19の6試合など）を表示
+      // 2. テキストログから読み込まれた該当日の対戦予定カード
       const schedGames = textScheduleMap[date] || [];
       if (schedGames.length > 0) {
         schedGames.forEach(g => addMatchRow(g));
         return;
       }
 
-      // 3. どちらにもない場合は空欄カードを3つ展開
-      const defaultPairs = [["巨人", "阪神"], ["ヤクルト", "ＤｅＮＡ"], ["中日", "広島"]];
+      // 3. どちらにも該当カードがない場合のみ、デフォルトカードを展開
+      const defaultPairs = [["中日", "巨人"], ["ヤクルト", "ＤｅＮＡ"], ["広島", "阪神"]];
       defaultPairs.forEach(pair => {
         addMatchRow({ away: pair[0], home: pair[1] });
       });
@@ -294,8 +314,8 @@
       const row = document.createElement('div');
       row.className = 'match-row';
 
-      const selAway = data ? data.away : "巨人";
-      const selHome = data ? data.home : "阪神";
+      const selAway = data ? data.away : "中日";
+      const selHome = data ? data.home : "巨人";
 
       const awayOptions = TEAMS.map(t => `<option value="${t}" ${selAway === t ? 'selected' : ''}>${t}</option>`).join('');
       const homeOptions = TEAMS.map(t => `<option value="${t}" ${selHome === t ? 'selected' : ''}>${t}</option>`).join('');
