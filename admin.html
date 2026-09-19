@@ -63,6 +63,12 @@
       cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
 
+    .btn-action {
+      padding: 8px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s;
+      border: 1px solid var(--border); background: #fff; color: var(--text-main);
+    }
+    .btn-action:hover { background: #f1f5f9; border-color: var(--primary); color: var(--primary); }
+
     .btn-add {
       width: 100%; padding: 12px; border: 1.5px dashed #cbd5e1; border-radius: 8px;
       background: transparent; color: var(--text-sub); font-weight: 700; cursor: pointer;
@@ -111,16 +117,16 @@
         <label style="font-size: 1rem;">入力対象日:</label>
         <input type="date" id="target-date" style="font-size: 1rem; font-weight: 700; padding: 6px 12px;">
       </div>
-      <button class="btn-add" style="width: auto; margin: 0; padding: 8px 18px;" onclick="loadRemoteDb()">データを再読込</button>
+      <button type="button" class="btn-action" onclick="onReloadClick()">データを再読込</button>
     </div>
 
     <div class="card">
       <div id="matches-container"></div>
-      <button class="btn-add" onclick="addMatchRow()">＋ 対戦カードを追加</button>
+      <button type="button" class="btn-add" onclick="addMatchRow()">＋ 対戦カードを追加</button>
 
       <div class="actions">
         <div id="status-msg" class="status-msg"></div>
-        <button class="btn-save" onclick="saveToGitHub()">データベースを更新保存</button>
+        <button type="button" class="btn-save" onclick="saveToGitHub()">データベースを更新保存</button>
       </div>
     </div>
   </div>
@@ -158,10 +164,18 @@
 
       repoInput.addEventListener('change', () => localStorage.setItem('npb_admin_repo', repoInput.value.trim()));
       tokenInput.addEventListener('change', () => localStorage.setItem('npb_admin_token', tokenInput.value.trim()));
+      
+      // カレンダー変更時に即座にカードを切り替え
       dateInput.addEventListener('change', () => loadDateForm());
+      dateInput.addEventListener('input', () => loadDateForm());
 
       loadRemoteDb();
     });
+
+    async function onReloadClick() {
+      await loadRemoteDb();
+      loadDateForm();
+    }
 
     async function loadRemoteDb() {
       const repo = repoInput.value.trim();
@@ -184,7 +198,7 @@
           currentDb = JSON.parse(decoded);
         }
 
-        // 2. 2016-2026プロ野球レギュラーシーズン結果.txt をGitHub API経由で直接取得（404・エンコード問題回避）
+        // 2. 2016-2026プロ野球レギュラーシーズン結果.txt の取得
         const txtFilename = encodeURIComponent("2016-2026プロ野球レギュラーシーズン結果.txt");
         const resTxt = await fetch(`https://api.github.com/repos/${repo}/contents/${txtFilename}?t=${new Date().getTime()}`, {
           headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
@@ -194,20 +208,19 @@
           const txtData = await resTxt.json();
           const decodedTxt = decodeURIComponent(escape(atob(txtData.content)));
           parseTextSchedule(decodedTxt);
-          showStatus("テキストログ＆DBの完全同期完了", "success");
+          showStatus("同期完了（テキストログ＆DB読み込み成功）", "success");
         } else {
-          // 通常の静的ファイルパスからのフォールバック試行
           try {
             const fallbackRes = await fetch(`2016-2026プロ野球レギュラーシーズン結果.txt?t=${new Date().getTime()}`);
             if (fallbackRes.ok) {
               const raw = await fallbackRes.text();
               parseTextSchedule(raw);
-              showStatus("テキストログ同期完了", "success");
+              showStatus("同期完了", "success");
             } else {
-              showStatus("テキストログ取得失敗(ステータス: " + resTxt.status + ")", "error");
+              showStatus("テキストログ取得失敗", "error");
             }
           } catch (_) {
-            showStatus("テキストログの取得に失敗しました", "error");
+            showStatus("テキストログ取得エラー", "error");
           }
         }
 
@@ -238,7 +251,7 @@
 
         if (!curDate || line.includes("中止") || line.includes("ノーゲーム")) continue;
 
-        // 消化済みスコア行 (例: 巨人 6 - 4 ヤクルト ...)
+        // 1. 消化済みスコア行 (例: 巨人 6 - 4 ヤクルト ...)
         const finM = line.match(/([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)/);
         if (finM) {
           const h = normalizeTeam(finM[1]);
@@ -260,8 +273,7 @@
           continue;
         }
 
-        // 未消化予定行 (例: 巨人 - 中日 ... 先発：田中将 先発：中西)
-        // ホーム - ビジター 表記に対応
+        // 2. 未消化予定行 (例: 巨人   -   中日 ... 先発：田中将 先発：中西)
         const schedM = line.match(/([^\s\d]+)\s+-\s+([^\s\d]+)/);
         if (schedM) {
           const h = normalizeTeam(schedM[1]);
@@ -288,21 +300,21 @@
       const container = document.getElementById('matches-container');
       container.innerHTML = '';
 
-      // 1. games_db.json 内にすでに手入力保存されたデータがある場合
+      // 1. games_db.json 内に手入力保存された該当日のデータがあれば最優先
       const manualGames = (currentDb.games || []).filter(g => g.date === date);
       if (manualGames.length > 0) {
         manualGames.forEach(g => addMatchRow(g));
         return;
       }
 
-      // 2. テキストログから読み込まれた該当日の対戦予定カード
+      // 2. テキストログから読み込まれた該当日の対戦カード
       const schedGames = textScheduleMap[date] || [];
       if (schedGames.length > 0) {
         schedGames.forEach(g => addMatchRow(g));
         return;
       }
 
-      // 3. どちらにも該当カードがない場合のみ、デフォルトカードを展開
+      // 3. どちらにも該当データがない場合のみ、デフォルト3カードを展開
       const defaultPairs = [["中日", "巨人"], ["ヤクルト", "ＤｅＮＡ"], ["広島", "阪神"]];
       defaultPairs.forEach(pair => {
         addMatchRow({ away: pair[0], home: pair[1] });
@@ -344,7 +356,7 @@
           <input type="text" class="pitcher home-pitcher" placeholder="先発/勝利投手" value="${homePitcher}">
         </div>
 
-        <button class="btn-del" title="削除" onclick="this.parentElement.remove()">✕</button>
+        <button type="button" class="btn-del" title="削除" onclick="this.parentElement.remove()">✕</button>
       `;
       container.appendChild(row);
     }
