@@ -38,7 +38,6 @@
       font-size: 0.9rem; outline: none; background: #fff;
     }
 
-    /* 対戦カード行 */
     .match-row {
       display: grid;
       grid-template-columns: 2.2fr 1fr 30px 1fr 2.2fr 40px;
@@ -88,10 +87,9 @@
   <div class="container">
     <header>
       <h1>NPB 試合結果・先発投手 手動管理</h1>
-      <p>日付を選択すると、その日の対戦カードが自動展開されます。スコア・投手を入力して保存してください。</p>
+      <p>日付を選択すると、予定カード・予告先発がテキストログから自動展開されます。</p>
     </header>
 
-    <!-- 1. GitHub 連携設定 -->
     <div class="card">
       <div class="config-grid">
         <div class="form-group">
@@ -104,11 +102,10 @@
         </div>
       </div>
       <div style="font-size: 0.75rem; color: var(--text-sub);">
-        ※ トークンはブラウザのローカルストレージにのみ保存され、外部には送信されません。
+        ※ トークンはブラウザにのみ保存され、安全にGitHubと直接通信します。
       </div>
     </div>
 
-    <!-- 2. 日付選択エリア -->
     <div class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
       <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
         <label style="font-size: 1rem;">入力対象日:</label>
@@ -117,7 +114,6 @@
       <button class="btn-add" style="width: auto; margin: 0; padding: 8px 18px;" onclick="loadRemoteDb()">データを再読込</button>
     </div>
 
-    <!-- 3. 入力カードリスト -->
     <div class="card">
       <div id="matches-container"></div>
       <button class="btn-add" onclick="addMatchRow()">＋ 対戦カードを追加</button>
@@ -131,8 +127,20 @@
 
   <script>
     const TEAMS = ["阪神", "巨人", "ＤｅＮＡ", "ヤクルト", "中日", "広島", "ソフトバンク", "日本ハム", "ロッテ", "楽天", "オリックス", "西武"];
+    const TEAM_ALIASES = {
+      "DeNA": "ＤｅＮＡ", "横浜": "ＤｅＮＡ", "ソフトバンク": "ソフトバンク",
+      "ロッテ": "ロッテ", "楽天": "楽天", "オリックス": "オリックス",
+      "日本ハム": "日本ハム", "西武": "西武", "阪神": "阪神",
+      "巨人": "巨人", "広島": "広島", "ヤクルト": "ヤクルト", "中日": "中日"
+    };
+
+    function normalizeTeam(t) {
+      const clean = t.trim();
+      return TEAM_ALIASES[clean] || clean;
+    }
+
     let currentDb = { season: 2026, games: [] };
-    let historyDb = null;
+    let textScheduleMap = {}; // 日付ごとの予定試合リスト
     let fileSha = "";
 
     const repoInput = document.getElementById('repo-name');
@@ -162,7 +170,7 @@
         return;
       }
 
-      showStatus("データベース同期中...", "");
+      showStatus("テキストログ＆データベース同期中...", "");
       try {
         // 1. games_db.json の読み込み
         const resDb = await fetch(`https://api.github.com/repos/${repo}/contents/games_db.json?t=${new Date().getTime()}`, {
@@ -175,11 +183,12 @@
           currentDb = JSON.parse(decoded);
         }
 
-        // 2. history_standings.json の読み込み（予定カードの参照用）
+        // 2. 2016-2026プロ野球レギュラーシーズン結果.txt の読み込みと予定パース
         try {
-          const resHist = await fetch(`history_standings.json?t=${new Date().getTime()}`);
-          if (resHist.ok) {
-            historyDb = await resHist.json();
+          const resTxt = await fetch(`2016-2026プロ野球レギュラーシーズン結果.txt?t=${new Date().getTime()}`);
+          if (resTxt.ok) {
+            const rawText = await resTxt.text();
+            parseTextSchedule(rawText);
           }
         } catch (_) {}
 
@@ -190,38 +199,90 @@
       }
     }
 
+    function parseTextSchedule(rawText) {
+      textScheduleMap = {};
+      if (!rawText.includes("2026\n")) return;
+      const sec2026 = rawText.split("2026\n")[1];
+      let curDate = null;
+
+      sec2026.split(/\r?\n/).forEach(line => {
+        line = line.trim();
+        if (!line) return;
+
+        const dateM = line.match(/^(\d{1,2})\/(\d{1,2})/);
+        if (dateM) {
+          const m = parseInt(dateM[1], 10);
+          const d = parseInt(dateM[2], 10);
+          curDate = `2026-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          line = line.replace(/^\d{1,2}\/\d{1,2}（[日月火水木金土]）\s*/, '');
+        }
+
+        if (!curDate || line.includes("中止") || line.includes("ノーゲーム")) return;
+
+        // 試合結果行 (例: 巨人 6 - 4 ヤクルト 勝：内海 敗：デイビーズ)
+        const finM = line.match(/([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)/);
+        if (finM) {
+          const h = normalizeTeam(finM[1]);
+          const a = normalizeTeam(finM[4]);
+          if (TEAMS.includes(h) && TEAMS.includes(a)) {
+            const winP = line.match(/勝：([^\s]+)/);
+            const loseP = line.match(/敗：([^\s]+)/);
+            const hs = parseInt(finM[2], 10);
+            const as_ = parseInt(finM[3], 10);
+
+            if (!textScheduleMap[curDate]) textScheduleMap[curDate] = [];
+            textScheduleMap[curDate].push({
+              home: h, away: a,
+              home_score: hs, away_score: as_,
+              home_pitcher: hs > as_ ? (winP ? winP[1] : '') : (loseP ? loseP[1] : ''),
+              away_pitcher: as_ > hs ? (winP ? winP[1] : '') : (loseP ? loseP[1] : '')
+            });
+          }
+          return;
+        }
+
+        // 未消化予定行 (例: 巨人   -   中日 ... 先発：田中将 先発：中西)
+        const schedM = line.match(/([^\s\d]+)\s+-\s+([^\s\d]+)/);
+        if (schedM) {
+          const h = normalizeTeam(schedM[1]);
+          const a = normalizeTeam(schedM[2]);
+          if (TEAMS.includes(h) && TEAMS.includes(a)) {
+            const starters = [...line.matchAll(/先発：([^\s]+)/g)].map(m => m[1]);
+            const hStarter = starters[0] || "未定";
+            const aStarter = starters[1] || "未定";
+
+            if (!textScheduleMap[curDate]) textScheduleMap[curDate] = [];
+            textScheduleMap[curDate].push({
+              home: h, away: a,
+              home_score: null, away_score: null,
+              home_starter: hStarter, away_starter: aStarter,
+              home_pitcher: hStarter, away_pitcher: aStarter
+            });
+          }
+        }
+      });
+    }
+
     function loadDateForm() {
       const date = dateInput.value;
       const container = document.getElementById('matches-container');
       container.innerHTML = '';
 
-      // 優先順位1: 手動入力 games_db.json に保存されている該当日の試合
+      // 1. 手動保存済みの games_db.json にデータがあれば最優先表示
       const manualGames = (currentDb.games || []).filter(g => g.date === date);
-
       if (manualGames.length > 0) {
         manualGames.forEach(g => addMatchRow(g));
         return;
       }
 
-      // 優先順位2: history_standings.json に記録されている該当日の予測カード/試合
-      if (historyDb && historyDb.history && historyDb.history[date] && historyDb.history[date].predictions) {
-        const histPreds = historyDb.history[date].predictions;
-        if (histPreds.length > 0) {
-          histPreds.forEach(p => {
-            addMatchRow({
-              away: p.away,
-              home: p.home,
-              away_score: p.actual_away_score !== undefined ? p.actual_away_score : '',
-              home_score: p.actual_home_score !== undefined ? p.actual_home_score : '',
-              away_starter: p.away_starter || '',
-              home_starter: p.home_starter || ''
-            });
-          });
-          return;
-        }
+      // 2. テキストログからパースされた予定対戦カード（9/19の6試合など）を表示
+      const schedGames = textScheduleMap[date] || [];
+      if (schedGames.length > 0) {
+        schedGames.forEach(g => addMatchRow(g));
+        return;
       }
 
-      // 優先順位3: データがない場合は空欄カードを2チーム被らない形で生成
+      // 3. どちらにもない場合は空欄カードを3つ展開
       const defaultPairs = [["巨人", "阪神"], ["ヤクルト", "ＤｅＮＡ"], ["中日", "広島"]];
       defaultPairs.forEach(pair => {
         addMatchRow({ away: pair[0], home: pair[1] });
@@ -289,7 +350,7 @@
         const awayPitcher = row.querySelector('.away-pitcher').value.trim();
         const homePitcher = row.querySelector('.home-pitcher').value.trim();
 
-        if (away === home) continue; // 同一球団対戦は無視
+        if (away === home) continue;
 
         const isFinished = (awayScoreStr !== "" && homeScoreStr !== "");
         newDayGames.push({
@@ -306,7 +367,6 @@
         });
       }
 
-      // 同一日付の古いデータを削除し、常に最新の入力内容で全置換
       currentDb.games = (currentDb.games || []).filter(g => g.date !== date);
       currentDb.games.push(...newDayGames);
       currentDb.games.sort((a, b) => a.date.localeCompare(b.date));
