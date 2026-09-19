@@ -136,12 +136,15 @@
     .clinch-card {
       background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 18px;
     }
-    .clinch-card h3 { font-size: 1.15rem; font-weight: 800; color: #1e3a8a; margin-bottom: 12px; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; }
-    .clinch-subtable { width: 100%; min-width: unset; font-size: 0.85rem; }
-    .clinch-subtable th { background: #f8fafc; font-size: 0.78rem; padding: 6px 4px; }
-    .clinch-subtable td { padding: 8px 4px; }
+    .clinch-card h3 {
+      font-size: 1.15rem; font-weight: 800; color: #166534; margin-bottom: 12px;
+      border-bottom: 2px solid #e2e8f0; padding-bottom: 6px;
+    }
+    .clinch-subtable { width: 100%; min-width: unset; font-size: 0.88rem; }
+    .clinch-subtable th { background: #f8fafc; font-size: 0.8rem; padding: 6px 4px; color: #475569; }
+    .clinch-subtable td { padding: 8px 4px; border-bottom: 1px solid #f1f5f9; }
 
-    /* 5. 画像1枚目：優勝ラインテーブル（勝敗パターングリッド） */
+    /* 5. 画像1枚目：優勝ラインテーブル */
     .line-grid-table { min-width: 700px; }
     .team-banner { font-size: 1.1rem; font-weight: 800; color: #fff; padding: 10px; border-radius: 6px 6px 0 0; }
     .banner-hanshin { background: #eab308; }
@@ -229,10 +232,10 @@
       </div>
     </div>
 
-    <!-- 4. 画像3枚目：球団別 優勝決定日確率テーブル -->
+    <!-- 4. 画像3枚目：球団別 優勝決定日確率テーブル (決定可能性が生じる前の試合から開始) -->
     <div class="section-title">
       📅 優勝決定日確率テーブル
-      <span class="section-desc">（日別決定確率・対戦カード・開催地・見込勝率）</span>
+      <span class="section-desc">（決定可能性が生じる日程から表示・対戦カード・開催地・見込勝率）</span>
     </div>
     <div class="clinch-schedule-grid" id="clinch-schedule-container"></div>
 
@@ -323,7 +326,7 @@
       const dayData = rawData.history[selectedDate];
       const list = dayData[currentLeague];
 
-      // 1. 順位表 & CN表描画
+      // 1. 順位表 & CN表
       const tbodyStandings = document.getElementById('standings-body');
       tbodyStandings.innerHTML = '';
       list.forEach(t => {
@@ -350,7 +353,7 @@
         tbodyStandings.appendChild(tr);
       });
 
-      // 2. 予想勝利確率カードグリッド描画 (左: ホーム, 右: ビジター)
+      // 2. 予想勝利確率カードグリッド (左: ホーム, 右: ビジター)
       const predGrid = document.getElementById('prediction-grid');
       const predictions = dayData.predictions || [];
       const hasFinished = predictions.some(p => p.is_finished);
@@ -437,7 +440,7 @@
         }
       }
 
-      // 4. 画像3枚目：優勝決定日確率テーブル
+      // 4. 画像3枚目：優勝決定日確率テーブル (可能性が生じる前試合から表示)
       const clinchContainer = document.getElementById('clinch-schedule-container');
       clinchContainer.innerHTML = '';
 
@@ -453,7 +456,7 @@
           const card = document.createElement('div');
           card.className = 'clinch-card';
           let rowsHtml = '';
-          tSched.slice(0, 8).forEach(item => {
+          tSched.forEach(item => {
             rowsHtml += `
               <tr>
                 <td>${item.date}</td>
@@ -484,7 +487,7 @@
         });
       }
 
-      // 5. 画像1枚目：優勝ラインテーブル（勝敗パターングリッド）
+      // 5. 画像1枚目：優勝ラインテーブル
       const lineHead = document.getElementById('line-grid-head');
       const lineBody = document.getElementById('line-grid-body');
       lineHead.innerHTML = '';
@@ -532,7 +535,7 @@
         }
       }
 
-      // 6. 対戦成績表描画
+      // 6. 対戦成績表
       const theadMatrix = document.getElementById('matrix-head');
       const tbodyMatrix = document.getElementById('matrix-body');
       theadMatrix.innerHTML = '';
