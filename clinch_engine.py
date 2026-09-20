@@ -10,7 +10,7 @@ GAMES_INTRA = 25
 GAMES_INTER = 3
 HISTORY_FILE = "history_standings.json"
 MANUAL_DB_FILE = "games_db.json"
-TEXT_LOG_FILE = "2016-2026プロ野球レギュラーシーズン結果.txt"
+TEXT_LOG_FILE = "npb_games_clean.csv"
 
 CENTRAL_TEAMS = ["阪神", "巨人", "ＤｅＮＡ", "ヤクルト", "中日", "広島"]
 PACIFIC_TEAMS = ["ソフトバンク", "日本ハム", "ロッテ", "楽天", "オリックス", "西武"]
