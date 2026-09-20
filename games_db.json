@@ -139,61 +139,49 @@
       "date": "2026-09-20",
       "home": "中日",
       "away": "広島",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 6,
+      "away_score": 5,
       "home_starter": "大野",
       "away_starter": "森",
       "home_pitcher": "大野",
       "away_pitcher": "森",
-      "status": "scheduled"
+      "status": "finished"
     },
     {
       "date": "2026-09-20",
       "home": "阪神",
       "away": "ＤｅＮＡ",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 3,
+      "away_score": 0,
       "home_starter": "才木",
       "away_starter": "竹田",
       "home_pitcher": "才木",
       "away_pitcher": "竹田",
-      "status": "scheduled"
+      "status": "finished"
     },
     {
       "date": "2026-09-20",
       "home": "日本ハム",
       "away": "オリックス",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 6,
+      "away_score": 9,
       "home_starter": "未定",
       "away_starter": "未定",
       "home_pitcher": "未定",
       "away_pitcher": "未定",
-      "status": "scheduled"
+      "status": "finished"
     },
     {
       "date": "2026-09-20",
       "home": "楽天",
       "away": "ソフトバンク",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 5,
+      "away_score": 3,
       "home_starter": "未定",
       "away_starter": "未定",
       "home_pitcher": "未定",
       "away_pitcher": "未定",
-      "status": "scheduled"
-    },
-    {
-      "date": "2026-09-20",
-      "home": "ロッテ",
-      "away": "西武",
-      "home_score": null,
-      "away_score": null,
-      "home_starter": "未定",
-      "away_starter": "未定",
-      "home_pitcher": "未定",
-      "away_pitcher": "未定",
-      "status": "scheduled"
+      "status": "finished"
     }
   ]
 }
