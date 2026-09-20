@@ -1,10 +1,18 @@
-name: NPB Daily Clinch and History Pipeline
+name: NPB Predictor Engine Run
 
 on:
   schedule:
-    # 毎日 日本時間 22:30 (UTC 13:30) に自動実行
-    - cron: '30 13 * * *'
-  workflow_dispatch:
+    # 毎日定期実行（日本時間 6:00, 22:00, 23:30）
+    - cron: '0 21 * * *'
+    - cron: '0 13 * * *'
+    - cron: '30 14 * * *'
+  workflow_dispatch: # 手動実行トリガー
+  push:
+    paths:
+      - '2016-2026プロ野球レギュラーシーズン結果.txt'
+      - 'games_db.json'
+      - 'clinch_engine.py'
+      - 'convert_log.py'
 
 permissions:
   contents: write
@@ -14,26 +22,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: リポジトリをチェックアウト
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Python環境のセットアップ
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.10'
 
-      - name: ライブラリのインストール
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests beautifulsoup4
+      - name: Convert Raw Log to Clean CSV
+        run: python convert_log.py
 
-      - name: クリンチエンジン実行
-        run: |
-          python clinch_engine.py
+      - name: Run Clinch Engine
+        run: python clinch_engine.py
 
-      - name: 変更を自動コミット＆プッシュ
+      - name: Commit and Push changes
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add -A
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Update games DB and clinch history: $(date +'%Y-%m-%d %H:%M:%S')" && git push)
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add npb_games_clean.csv history_standings.json games_db.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto update standings and clean CSV [skip ci]" && git push)
