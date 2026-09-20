@@ -127,13 +127,13 @@
       "date": "2026-09-20",
       "home": "巨人",
       "away": "ヤクルト",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 3,
+      "away_score": 2,
       "home_starter": "小笠原",
       "away_starter": "高橋",
       "home_pitcher": "小笠原",
       "away_pitcher": "高橋",
-      "status": "scheduled"
+      "status": "finished"
     },
     {
       "date": "2026-09-20",
