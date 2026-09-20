@@ -143,7 +143,6 @@ def load_all_games():
         games_2025 = parse_year_games_from_text(raw_text, 2025)
         games_2026_base = parse_year_games_from_text(raw_text, 2026)
 
-    # games_db.json が存在する場合、登録日付のカードはテキスト由来を破棄して完全に手動DB側で置換する
     if os.path.exists(MANUAL_DB_FILE):
         try:
             with open(MANUAL_DB_FILE, "r", encoding="utf-8") as f:
@@ -370,6 +369,7 @@ def simulate_full_season_probabilities(league_teams, current_standings, remainin
                     sim_w[a] += 1
                     sim_l[h] += 1
 
+            # 各日終了時点で「数学的に逆転不可能（自力・他力優勝決定）」になったかを厳密に判定
             sim_rates = sorted([(t, sim_w[t] / (sim_w[t] + sim_l[t]), sim_w[t]) for t in league_teams],
                                key=lambda x: (x[1], x[2]), reverse=True)
             leader = sim_rates[0][0]
@@ -383,8 +383,10 @@ def simulate_full_season_probabilities(league_teams, current_standings, remainin
                            key=lambda x: (x[1], x[2]), reverse=True)
 
         champ = sim_rates[0][0]
-        c_date = clinched_day[champ] or (sorted_dates[-1] if sorted_dates else "2026-10-04")
-        clinch_date_counts[champ][c_date] = clinch_date_counts[champ].get(c_date, 0) + 1
+        # 数学的に決まった日のみカウント（最終日に未確定分を一括合算しない）
+        c_date = clinched_day[champ]
+        if c_date is not None:
+            clinch_date_counts[champ][c_date] = clinch_date_counts[champ].get(c_date, 0) + 1
 
         for idx, item in enumerate(sim_rates):
             rank_counts[item[0]][idx + 1] += 1
@@ -631,7 +633,6 @@ def build_all_history_with_predictions(games_2025, games_2026):
             c_table = last_c_table
             p_table = last_p_table
 
-        # 当該日のカード展開（重複防止のため同カードは最新の登録を優先）
         day_predictions = []
         processed_pairs = set()
 
@@ -719,6 +720,9 @@ def build_all_history_with_predictions(games_2025, games_2026):
     last_c_table = attach_probs(last_c_table, c_rank_matrix)
     last_p_table = attach_probs(last_p_table, p_rank_matrix)
 
+    # -------------------------------------------------------------
+    # 決定日確率テーブル（実在日程の範囲内で実際に決定した確率のみ表示）
+    # -------------------------------------------------------------
     def build_filtered_clinch_schedule(team_name, future_matches, clinch_date_map, champ_prob):
         all_future_dates = sorted(list({m["date"] for m in future_matches}))
         all_rows = []
@@ -774,7 +778,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
             val = item["clinch_prob_val"]
             cum += val
             item["clinch_prob_str"] = format_prob_sig1(val)
-            item["cum_prob_str"] = format_prob_sig1(min(champ_prob, cum))
+            item["cum_prob_str"] = format_prob_sig1(cum)
 
         return trimmed
 
@@ -809,7 +813,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了（手動DB完全同期）：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
