@@ -2,280 +2,557 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NPB Predictor - 管理画面</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>NPB 試合結果・先発 手動管理画面</title>
   <style>
     :root {
       --bg: #f8fafc;
       --card-bg: #ffffff;
-      --text: #0f172a;
+      --text-main: #0f172a;
+      --text-sub: #64748b;
       --primary: #2563eb;
+      --primary-hover: #1d4ed8;
       --border: #e2e8f0;
       --danger: #ef4444;
       --success: #10b981;
+      --home-color: #1d4ed8;
+      --away-color: #b91c1c;
     }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding: 16px;
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text-main); padding: 20px 12px 60px; }
+    .container { max-width: 900px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 24px; }
+    header h1 { font-size: 1.4rem; font-weight: 800; color: #1e3a8a; }
+    header p { font-size: 0.85rem; color: var(--text-sub); margin-top: 4px; }
+
+    .card {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 16px;
     }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
+
+    .config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 8px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 0.82rem; font-weight: 700; color: #334155; }
+    .form-group input, .form-group select {
+      padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
+      font-size: 0.95rem; outline: none; background: #fff;
     }
-    h1 {
-      font-size: 1.5rem;
-      margin-bottom: 16px;
+
+    .date-panel {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
     }
-    .auth-box, .game-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    .date-panel .date-box { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .date-panel input[type="date"] { font-size: 1.05rem; font-weight: 700; padding: 6px 12px; }
+
+    .btn-action {
+      padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s;
+      border: 1px solid var(--border); background: #fff; color: var(--text-main); font-size: 0.9rem;
     }
-    .form-group {
-      margin-bottom: 12px;
+    .btn-action:hover { background: #f1f5f9; border-color: var(--primary); color: var(--primary); }
+
+    /* 試合カード */
+    .match-card {
+      background: #f8fafc; border: 1px solid var(--border); border-radius: 10px;
+      padding: 14px 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px;
     }
-    label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 4px;
+    .match-card.is-cancelled { background: #f1f5f9; opacity: 0.6; }
+
+    .card-top {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;
     }
-    input[type="text"], input[type="password"] {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 8px 12px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
+    .chk-cancel-box { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 700; color: var(--danger); cursor: pointer; }
+    .chk-cancel-box input { width: 18px; height: 18px; cursor: pointer; }
+    .btn-del { background: none; border: none; color: #94a3b8; font-size: 1.25rem; cursor: pointer; }
+    .btn-del:hover { color: var(--danger); }
+
+    .vs-row {
+      display: grid; grid-template-columns: 1fr 65px 30px 65px 1fr;
+      align-items: center; gap: 8px;
     }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      font-weight: bold;
-      margin-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 8px;
-    }
-    .teams-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      gap: 12px;
-    }
-    .team-block {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      flex: 1;
-    }
+    .team-select-box { display: flex; flex-direction: column; gap: 4px; }
+    .team-select-box span { font-size: 0.75rem; font-weight: 700; }
+    .team-select-box span.home-lbl { color: var(--home-color); }
+    .team-select-box span.away-lbl { color: var(--away-color); text-align: right; }
+    .team-select-box select { width: 100%; padding: 8px; font-weight: 700; border-radius: 6px; border: 1px solid var(--border); font-size: 0.95rem; }
+
     .score-input {
-      width: 60px !important;
-      height: 42px !important;
-      font-size: 1.25rem !important;
-      text-align: center;
-      font-weight: bold;
-      border: 1px solid var(--border);
-      border-radius: 6px;
+      width: 100%; height: 44px; text-align: center; font-size: 1.35rem; font-weight: 800;
+      border-radius: 6px; border: 1px solid var(--border); background: #fff;
+    }
+    .score-input:disabled { background: #e2e8f0; color: #94a3b8; }
+    .vs-text { text-align: center; font-size: 0.9rem; font-weight: 800; color: #94a3b8; }
+
+    .pitcher-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
     }
     .pitcher-input {
-      width: 100%;
-      max-width: 120px;
-      font-size: 0.85rem;
-      text-align: center;
-      padding: 4px;
+      width: 100%; padding: 8px 10px; font-size: 0.85rem; border-radius: 6px; border: 1px solid var(--border);
     }
-    .canceled-label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.9rem;
-      color: var(--danger);
-      margin-top: 12px;
-      justify-content: center;
+
+    .btn-add {
+      width: 100%; padding: 12px; border: 1.5px dashed #cbd5e1; border-radius: 8px;
+      background: transparent; color: var(--text-sub); font-weight: 700; cursor: pointer;
+      margin-bottom: 16px; transition: 0.2s; font-size: 0.95rem;
     }
-    .btn {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
+    .btn-add:hover { background: #f1f5f9; border-color: var(--primary); color: var(--primary); }
+
+    .btn-save {
+      width: 100%; background: var(--primary); color: #fff; border: none; padding: 14px 20px;
+      border-radius: 8px; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: 0.2s;
     }
-    .btn:disabled {
-      background: #94a3b8;
-    }
-    #status-msg {
-      margin-top: 12px;
-      padding: 8px;
-      border-radius: 6px;
-      display: none;
-    }
+    .btn-save:hover { background: var(--primary-hover); }
+
+    .status-msg { font-size: 0.92rem; font-weight: 700; text-align: center; margin-bottom: 8px; }
+    .status-msg.success { color: var(--success); }
+    .status-msg.error { color: var(--danger); }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>NPB 試合結果・先発 手動管理画面</h1>
 
-    <div class="auth-box">
-      <div class="form-group">
-        <label>GitHub Personal Access Token (PAT):</label>
-        <input type="password" id="gh-token" placeholder="ghp_...">
+  <div class="container">
+    <header>
+      <h1>NPB 試合結果・先発 手動管理画面</h1>
+      <p>日々の試合結果・予告先発・雨天中止を暫定入力しGitHubへ即時反映します</p>
+    </header>
+
+    <div class="card">
+      <div class="config-grid">
+        <div class="form-group">
+          <label>リポジトリ名</label>
+          <input type="text" id="repo-name" value="sumgithu/npb-predictor">
+        </div>
+        <div class="form-group">
+          <label>GitHub Personal Access Token (repo権限)</label>
+          <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
+        </div>
       </div>
-      <div class="form-group">
-        <label>リポジトリ (自動補正機能付き):</label>
-        <input type="text" id="gh-repo" value="sumgithu/npb-predictor">
-      </div>
-      <button class="btn" onclick="loadRemoteData()">データを読み込む</button>
     </div>
 
-    <div id="games-container"></div>
-    <button id="save-btn" class="btn" style="display:none;" onclick="saveData()">GitHubにコミット保存</button>
-    <div id="status-msg"></div>
+    <div class="card date-panel">
+      <div class="date-box">
+        <label>入力対象日:</label>
+        <input type="date" id="target-date">
+      </div>
+      <button type="button" class="btn-action" onclick="onReloadClick()">日程を再読込</button>
+    </div>
+
+    <div class="card">
+      <div id="matches-container"></div>
+      <button type="button" class="btn-add" onclick="addMatchCard()">＋ 対戦カードを追加</button>
+
+      <div id="status-msg" class="status-msg"></div>
+      <button type="button" class="btn-save" onclick="saveToGitHub()">データベースを更新保存</button>
+    </div>
   </div>
 
   <script>
-    let currentDb = {};
-    const FILE_PATH = "games_db.json";
+    const TEAMS = ["阪神", "巨人", "ＤｅＮＡ", "ヤクルト", "中日", "広島", "ソフトバンク", "日本ハム", "ロッテ", "楽天", "オリックス", "西武"];
+    const TEAM_ALIASES = {
+      "DeNA": "ＤｅＮＡ", "横浜": "ＤｅＮＡ", "ソフトバンク": "ソフトバンク",
+      "ロッテ": "ロッテ", "楽天": "楽天", "オリックス": "オリックス",
+      "日本ハム": "日本ハム", "西武": "西武", "阪神": "阪神",
+      "巨人": "巨人", "広島": "広島", "ヤクルト": "ヤクルト", "中日": "中日"
+    };
 
-    function cleanRepo(repo) {
-      return repo.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, '');
+    function normalizeTeam(t) {
+      if (!t) return "";
+      const clean = t.trim();
+      return TEAM_ALIASES[clean] || clean;
     }
 
-    async function loadRemoteData() {
-      const token = document.getElementById("gh-token").value.trim();
-      const repo = cleanRepo(document.getElementById("gh-repo").value);
+    let gamesDbList = [];
+    let textScheduleMap = {};
+    let fileSha = "";
+
+    const repoInput = document.getElementById('repo-name');
+    const tokenInput = document.getElementById('gh-token');
+    const dateInput = document.getElementById('target-date');
+    const statusMsg = document.getElementById('status-msg');
+
+    window.addEventListener('DOMContentLoaded', () => {
+      let savedRepo = localStorage.getItem('npb_admin_repo') || 'sumgithu/npb-predictor';
+      if (savedRepo === 'sumgithu/npb-predict') savedRepo = 'sumgithu/npb-predictor';
+      repoInput.value = savedRepo;
+      tokenInput.value = localStorage.getItem('npb_admin_token') || '';
+
+      // JST本日を取得
+      const today = new Date().toISOString().split('T')[0];
+      dateInput.value = today;
+
+      repoInput.addEventListener('change', () => {
+        let val = repoInput.value.trim();
+        if (val === 'sumgithu/npb-predict') val = 'sumgithu/npb-predictor';
+        repoInput.value = val;
+        localStorage.setItem('npb_admin_repo', val);
+      });
+      tokenInput.addEventListener('change', () => localStorage.setItem('npb_admin_token', tokenInput.value.trim()));
       
-      try {
-        const res = await fetch(`https://api.github.com/repos/${repo}/contents/${FILE_PATH}`, {
-          headers: token ? { Authorization: `token ${token}` } : {}
-        });
-        if (res.ok) {
-          const json = await res.json();
-          currentDb = JSON.parse(decodeURIComponent(escape(atob(json.content))));
-        } else {
-          currentDb = JSON.parse(localStorage.getItem("npb_games_db_override") || "{}");
-        }
-        renderGames();
-        document.getElementById("save-btn").style.display = "block";
-      } catch (e) {
-        showStatus("データ取得失敗: " + e.message, true);
-      }
+      dateInput.addEventListener('change', () => renderDateMatches());
+      dateInput.addEventListener('input', () => renderDateMatches());
+
+      loadAllSources();
+    });
+
+    async function onReloadClick() {
+      await loadAllSources();
+      renderDateMatches();
     }
 
-    function renderGames() {
-      const container = document.getElementById("games-container");
-      container.innerHTML = "";
+    async function loadAllSources() {
+      let repo = repoInput.value.trim();
+      if (repo === 'sumgithu/npb-predict') repo = 'sumgithu/npb-predictor';
+      repoInput.value = repo;
 
-      // 編集対象の直近/未消化カードを生成
-      const keys = Object.keys(currentDb);
-      if (keys.length === 0) {
-        container.innerHTML = "<p>登録済みのカードはありません。新規追加または連携をお待ちください。</p>";
+      const token = tokenInput.value.trim();
+      if (!repo || !token) {
+        showStatus("リポジトリ名とGitHubトークンを入力してください", "error");
         return;
       }
 
-      keys.forEach(gid => {
-        const g = currentDb[gid];
-        const card = document.createElement("div");
-        card.className = "game-card";
-        card.innerHTML = `
-          <div class="card-header">
-            <span>${g.date || ""}</span>
-            <span>ID: ${gid}</span>
-          </div>
-          <div class="teams-row">
-            <div class="team-block">
-              <strong>${g.home} (ホーム)</strong>
-              <input type="text" class="score-input" id="hs_${gid}" value="${g.home_score !== null && g.home_score !== undefined ? g.home_score : ''}">
-              <input type="text" class="pitcher-input" id="hp_${gid}" placeholder="予告先発" value="${g.home_pitcher || ''}">
-            </div>
-            <div style="font-weight:bold; font-size:1.2rem;">vs</div>
-            <div class="team-block">
-              <strong>${g.away} (ビジター)</strong>
-              <input type="text" class="score-input" id="as_${gid}" value="${g.away_score !== null && g.away_score !== undefined ? g.away_score : ''}">
-              <input type="text" class="pitcher-input" id="ap_${gid}" placeholder="予告先発" value="${g.away_pitcher || ''}">
-            </div>
-          </div>
-          <label class="canceled-label">
-            <input type="checkbox" id="cn_${gid}" ${g.canceled ? 'checked' : ''}> 雨天等中止
-          </label>
-        `;
-        container.appendChild(card);
-      });
+      showStatus("GitHubよりデータを同期中...", "");
+      try {
+        // 1. games_db.json の読み込み
+        const resDb = await fetch(`https://api.github.com/repos/${repo}/contents/games_db.json?t=${Date.now()}`, {
+          headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+        });
+
+        if (resDb.ok) {
+          const data = await resDb.json();
+          fileSha = data.sha;
+          const decoded = decodeURIComponent(escape(atob(data.content)));
+          const parsed = JSON.parse(decoded);
+          // games配列を確実に抽出（ルートが配列の場合とオブジェクトの場合の両方に対応）
+          if (Array.isArray(parsed)) {
+            gamesDbList = parsed;
+          } else if (parsed && Array.isArray(parsed.games)) {
+            gamesDbList = parsed.games;
+          } else {
+            gamesDbList = [];
+          }
+        }
+
+        // 2. マスターテキストの読み込み
+        const txtFilename = encodeURIComponent("2016-2026プロ野球レギュラーシーズン結果.txt");
+        const resTxt = await fetch(`https://api.github.com/repos/${repo}/contents/${txtFilename}?t=${Date.now()}`, {
+          headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+        });
+
+        if (resTxt.ok) {
+          const txtData = await resTxt.json();
+          const decodedTxt = decodeURIComponent(escape(atob(txtData.content)));
+          parseMasterText(decodedTxt);
+          showStatus("完全同期完了", "success");
+        } else {
+          showStatus("手動DB同期完了（テキストログはローカルキャッシュを使用）", "success");
+        }
+
+        renderDateMatches();
+      } catch (e) {
+        showStatus("同期通信エラー: " + e.message, "error");
+      }
     }
 
-    async function saveData() {
-      const token = document.getElementById("gh-token").value.trim();
-      const repo = cleanRepo(document.getElementById("gh-repo").value);
-      if (!token) return alert("GitHub Tokenを入力してください");
+    function parseMasterText(rawText) {
+      textScheduleMap = {};
+      const normalized = rawText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      const secSplit = normalized.split(/\n2026\n/);
+      const sec2026 = secSplit.length > 1 ? secSplit[secSplit.length - 1] : normalized;
 
-      // 反映
-      Object.keys(currentDb).forEach(gid => {
-        const hs = document.getElementById(`hs_${gid}`).value.trim();
-        const as = document.getElementById(`as_${gid}`).value.trim();
-        currentDb[gid].home_score = hs !== "" ? parseInt(hs, 10) : null;
-        currentDb[gid].away_score = as !== "" ? parseInt(as, 10) : null;
-        currentDb[gid].home_pitcher = document.getElementById(`hp_${gid}`).value.trim();
-        currentDb[gid].away_pitcher = document.getElementById(`ap_${gid}`).value.trim();
-        currentDb[gid].canceled = document.getElementById(`cn_${gid}`).checked;
-      });
+      let curDate = null;
+      const lines = sec2026.split('\n');
 
-      // 即時ローカル反映 (即時プレビュー用)
-      localStorage.setItem("npb_games_db_override", JSON.stringify(currentDb));
+      for (let rawLine of lines) {
+        let line = rawLine.trim();
+        if (!line) continue;
 
-      // 409 Conflict防止・リトライ付きコミット
-      showStatus("コミット中...", false);
-      const retries = 3;
-      for (let i = 0; i < retries; i++) {
-        try {
-          const fileRes = await fetch(`https://api.github.com/repos/${repo}/contents/${FILE_PATH}`, {
-            headers: { Authorization: `token ${token}` }
-          });
-          const fileData = await fileRes.json();
-          const currentSha = fileData.sha;
-
-          const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/${FILE_PATH}`, {
-            method: "PUT",
-            headers: {
-              Authorization: `token ${token}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              message: `Update games_db.json [manual update: ${new Date().toISOString()}]`,
-              content: btoa(unescape(encodeURIComponent(JSON.stringify(currentDb, null, 2)))),
-              sha: currentSha
-            })
-          });
-
-          if (putRes.ok) {
-            showStatus("保存＆コミットが正常に完了しました！", false);
-            return;
-          }
-          if (putRes.status === 409) {
-            console.warn(`Conflict. Retrying ${i + 1}/${retries}...`);
-            await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+        // CSV形式
+        const csvParts = line.split(',').map(s => s.trim());
+        if (csvParts.length >= 6 && /^\d{4}-\d{2}-\d{2}$/.test(csvParts[0])) {
+          const d = csvParts[0];
+          const h = normalizeTeam(csvParts[1]);
+          const a = normalizeTeam(csvParts[2]);
+          if (TEAMS.includes(h) && TEAMS.includes(a)) {
+            if (!textScheduleMap[d]) textScheduleMap[d] = [];
+            const isCancelled = (csvParts[3] === "" || csvParts[7] === "1");
+            textScheduleMap[d].push({
+              home: h, away: a,
+              home_score: isCancelled ? null : (csvParts[3] !== "" ? parseInt(csvParts[3], 10) : null),
+              away_score: isCancelled ? null : (csvParts[4] !== "" ? parseInt(csvParts[4], 10) : null),
+              home_starter: csvParts[5] || "未定", away_starter: csvParts[5] || "未定",
+              home_pitcher: csvParts[5] || "", away_pitcher: csvParts[5] || "",
+              status: isCancelled ? "cancelled" : (csvParts[3] !== "" ? "finished" : "scheduled")
+            });
             continue;
           }
-          throw new Error(putRes.statusText);
-        } catch (e) {
-          if (i === retries - 1) showStatus("保存エラー: " + e.message, true);
+        }
+
+        // 通常テキスト形式
+        const dateMatch = line.match(/^(\d{1,2})\/(\d{1,2})(?:[\s\S]*?[（(][日月火水木金土][）)])?\s*(.*)$/);
+        if (dateMatch && parseInt(dateMatch[1], 10) <= 12 && parseInt(dateMatch[2], 10) <= 31) {
+          const m = parseInt(dateMatch[1], 10);
+          const d = parseInt(dateMatch[2], 10);
+          curDate = `2026-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          if (!textScheduleMap[curDate]) textScheduleMap[curDate] = [];
+          line = dateMatch[3].trim();
+          if (!line) continue;
+        }
+
+        if (!curDate) continue;
+
+        if (line.includes("中止") || line.includes("ノーゲーム")) {
+          const canM = line.match(/([^\s\d]+)\s*(?:中止|ノーゲーム)\s*([^\s\d]+)/);
+          if (canM) {
+            const h = normalizeTeam(canM[1]);
+            const a = normalizeTeam(canM[2]);
+            if (TEAMS.includes(h) && TEAMS.includes(a)) {
+              textScheduleMap[curDate].push({
+                home: h, away: a,
+                home_score: null, away_score: null,
+                home_starter: "未定", away_starter: "未定",
+                home_pitcher: "未定", away_pitcher: "未定",
+                status: "cancelled"
+              });
+            }
+          }
+          continue;
+        }
+
+        const finM = line.match(/([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)/);
+        if (finM) {
+          const h = normalizeTeam(finM[1]);
+          const a = normalizeTeam(finM[4]);
+          if (TEAMS.includes(h) && TEAMS.includes(a)) {
+            textScheduleMap[curDate].push({
+              home: h, away: a,
+              home_score: parseInt(finM[2], 10), away_score: parseInt(finM[3], 10),
+              home_pitcher: "", away_pitcher: "",
+              home_starter: "未定", away_starter: "未定",
+              status: "finished"
+            });
+            continue;
+          }
+        }
+
+        const schedM = line.match(/([^\s\d]+)\s*-\s*([^\s\d]+)/);
+        if (schedM) {
+          const h = normalizeTeam(schedM[1]);
+          const a = normalizeTeam(schedM[2]);
+          if (TEAMS.includes(h) && TEAMS.includes(a)) {
+            const starters = [...line.matchAll(/先発：([^\s]+)/g)].map(m => m[1]);
+            textScheduleMap[curDate].push({
+              home: h, away: a,
+              home_score: null, away_score: null,
+              home_starter: starters[0] || "未定", away_starter: starters[1] || "未定",
+              home_pitcher: starters[0] || "", away_pitcher: starters[1] || "",
+              status: "scheduled"
+            });
+            continue;
+          }
         }
       }
     }
 
-    function showStatus(text, isError) {
-      const el = document.getElementById("status-msg");
-      el.style.display = "block";
-      el.style.background = isError ? "#fee2e2" : "#d1fae5";
-      el.style.color = isError ? "#991b1b" : "#065f46";
-      el.textContent = text;
+    function renderDateMatches() {
+      const date = dateInput.value;
+      const container = document.getElementById('matches-container');
+      container.innerHTML = '';
+
+      // 1. 手動管理DBに対象日付のデータがあるか
+      const manualDayGames = gamesDbList.filter(g => g && g.date === date);
+      if (manualDayGames.length > 0) {
+        manualDayGames.forEach(g => addMatchCard(g));
+        return;
+      }
+
+      // 2. なければマスターテキスト側の日程を展開
+      const masterGames = textScheduleMap[date] || [];
+      if (masterGames.length > 0) {
+        masterGames.forEach(g => addMatchCard(g));
+        return;
+      }
+
+      const emptyNotice = document.createElement('div');
+      emptyNotice.style.cssText = "padding: 24px; text-align: center; color: #64748b; font-weight: 700;";
+      emptyNotice.innerText = `この日（${date}）の登録日程はありません。「＋ 対戦カードを追加」から作成できます。`;
+      container.appendChild(emptyNotice);
+    }
+
+    function toggleCancelRow(chk) {
+      const card = chk.closest('.match-card');
+      const scoreInputs = card.querySelectorAll('.score-input');
+
+      if (chk.checked) {
+        card.classList.add('is-cancelled');
+        scoreInputs.forEach(input => {
+          input.value = '';
+          input.disabled = true;
+        });
+      } else {
+        card.classList.remove('is-cancelled');
+        scoreInputs.forEach(input => input.disabled = false);
+      }
+    }
+
+    function addMatchCard(data = null) {
+      const container = document.getElementById('matches-container');
+      
+      if (container.children.length === 1 && container.children[0].tagName === 'DIV' && !container.children[0].classList.contains('match-card')) {
+        container.innerHTML = '';
+      }
+
+      const isCancelled = data && data.status === "cancelled";
+      const card = document.createElement('div');
+      card.className = `match-card ${isCancelled ? 'is-cancelled' : ''}`;
+
+      const selHome = data && data.home ? normalizeTeam(data.home) : "巨人";
+      const selAway = data && data.away ? normalizeTeam(data.away) : "ヤクルト";
+
+      const homeOptions = TEAMS.map(t => `<option value="${t}" ${selHome === t ? 'selected' : ''}>${t}</option>`).join('');
+      const awayOptions = TEAMS.map(t => `<option value="${t}" ${selAway === t ? 'selected' : ''}>${t}</option>`).join('');
+
+      const homeScore = data && data.home_score !== null && data.home_score !== undefined ? data.home_score : '';
+      const awayScore = data && data.away_score !== null && data.away_score !== undefined ? data.away_score : '';
+      const homePitcher = data ? (data.home_starter || data.home_pitcher || '') : '';
+      const awayPitcher = data ? (data.away_starter || data.away_pitcher || '') : '';
+
+      card.innerHTML = `
+        <div class="card-top">
+          <label class="chk-cancel-box">
+            <input type="checkbox" class="chk-cancel" onchange="toggleCancelRow(this)" ${isCancelled ? 'checked' : ''}>
+            <span>雨天等中止</span>
+          </label>
+          <button type="button" class="btn-del" title="削除" onclick="this.closest('.match-card').remove()">✕</button>
+        </div>
+
+        <div class="vs-row">
+          <div class="team-select-box">
+            <span class="home-lbl">ホーム</span>
+            <select class="home-team">${homeOptions}</select>
+          </div>
+
+          <input type="number" class="score-input home-score" placeholder="点" min="0" max="35" value="${homeScore}" ${isCancelled ? 'disabled' : ''}>
+
+          <div class="vs-text">VS</div>
+
+          <input type="number" class="score-input away-score" placeholder="点" min="0" max="35" value="${awayScore}" ${isCancelled ? 'disabled' : ''}>
+
+          <div class="team-select-box">
+            <span class="away-lbl">ビジター</span>
+            <select class="away-team">${awayOptions}</select>
+          </div>
+        </div>
+
+        <div class="pitcher-row">
+          <input type="text" class="pitcher-input home-pitcher" placeholder="ホーム予告先発 / 勝利投手" value="${homePitcher}">
+          <input type="text" class="pitcher-input away-pitcher" placeholder="ビジター予告先発 / 敗戦投手" value="${awayPitcher}">
+        </div>
+      `;
+      container.appendChild(card);
+    }
+
+    async function saveToGitHub() {
+      let repo = repoInput.value.trim();
+      if (repo === 'sumgithu/npb-predict') repo = 'sumgithu/npb-predictor';
+      repoInput.value = repo;
+      localStorage.setItem('npb_admin_repo', repo);
+
+      const token = tokenInput.value.trim();
+      const date = dateInput.value;
+
+      if (!repo || !token || !date) {
+        showStatus("リポジトリ名とGitHubトークンを入力してください", "error");
+        return;
+      }
+
+      const cards = document.querySelectorAll('.match-card');
+      const newDayGames = [];
+
+      for (const card of cards) {
+        const home = card.querySelector('.home-team').value;
+        const away = card.querySelector('.away-team').value;
+        const homeScoreStr = card.querySelector('.home-score').value.trim();
+        const awayScoreStr = card.querySelector('.away-score').value.trim();
+        const homePitcher = card.querySelector('.home-pitcher').value.trim();
+        const awayPitcher = card.querySelector('.away-pitcher').value.trim();
+        const isCancelled = card.querySelector('.chk-cancel').checked;
+
+        if (away === home) continue;
+
+        let status = "scheduled";
+        let hs = null;
+        let as_ = null;
+
+        if (isCancelled) {
+          status = "cancelled";
+        } else if (awayScoreStr !== "" && homeScoreStr !== "") {
+          status = "finished";
+          hs = parseInt(homeScoreStr, 10);
+          as_ = parseInt(awayScoreStr, 10);
+        }
+
+        newDayGames.push({
+          date: date,
+          home: home,
+          away: away,
+          home_score: hs,
+          away_score: as_,
+          home_starter: homePitcher || "未定",
+          away_starter: awayPitcher || "未定",
+          home_pitcher: homePitcher,
+          away_pitcher: awayPitcher,
+          status: status
+        });
+      }
+
+      // 既存リストから当日分を除去し、今回保存分を追加
+      gamesDbList = gamesDbList.filter(g => g && g.date !== date);
+      gamesDbList.push(...newDayGames);
+      gamesDbList.sort((a, b) => a.date.localeCompare(b.date));
+
+      showStatus("GitHubへ保存中...", "");
+
+      const payloadObj = {
+        season: 2026,
+        games: gamesDbList
+      };
+
+      const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(payloadObj, null, 2))));
+      const payload = {
+        message: `Update results/starters for ${date} via admin UI`,
+        content: contentBase64,
+        sha: fileSha || undefined
+      };
+
+      try {
+        const res = await fetch(`https://api.github.com/repos/${repo}/contents/games_db.json`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `token ${token}`,
+            Accept: 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          const resData = await res.json();
+          fileSha = resData.content.sha;
+          showStatus(`保存完了！ (${date} のデータを更新しました。Actionsが自動実行されます)`, "success");
+        } else {
+          const err = await res.json();
+          showStatus(`保存失敗: ${err.message}`, "error");
+        }
+      } catch (e) {
+        showStatus("通信エラーで保存できませんでした", "error");
+      }
+    }
+
+    function showStatus(text, type) {
+      statusMsg.className = `status-msg ${type}`;
+      statusMsg.innerText = text;
     }
   </script>
 </body>
