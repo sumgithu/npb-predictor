@@ -131056,9 +131056,7 @@
           "magic_2nd": 5,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 33,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "巨人",
@@ -131123,9 +131121,7 @@
           "magic_2nd": 3,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 67,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ＤｅＮＡ",
@@ -131190,9 +131186,7 @@
           "magic_2nd": 29,
           "magic_3rd": 3,
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ヤクルト",
@@ -131257,9 +131251,7 @@
           "magic_2nd": "-",
           "magic_3rd": 28,
           "magic_4th": 10,
-          "magic_5th": 10,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 10
         },
         {
           "team": "中日",
@@ -131324,9 +131316,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": 8,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 8
         },
         {
           "team": "広島",
@@ -131391,9 +131381,7 @@
           "magic_2nd": "-",
           "magic_3rd": 33,
           "magic_4th": 14,
-          "magic_5th": 13,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 13
         }
       ],
       "pacific": [
@@ -131460,9 +131448,7 @@
           "magic_2nd": "確定",
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 100,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "西武",
@@ -131527,9 +131513,7 @@
           "magic_2nd": 8,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "日本ハム",
@@ -131594,9 +131578,7 @@
           "magic_2nd": 16,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "オリックス",
@@ -131661,9 +131643,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": "確定"
         },
         {
           "team": "ロッテ",
@@ -131728,9 +131708,7 @@
           "magic_2nd": "-",
           "magic_3rd": 36,
           "magic_4th": 12,
-          "magic_5th": 3,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 3
         },
         {
           "team": "楽天",
@@ -131795,9 +131773,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": "-",
-          "magic_5th": 38,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 38
         }
       ],
       "predictions": [
@@ -131933,9 +131909,7 @@
           "magic_2nd": 5,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 33,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "巨人",
@@ -132000,9 +131974,7 @@
           "magic_2nd": 3,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 67,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ＤｅＮＡ",
@@ -132067,9 +132039,7 @@
           "magic_2nd": 29,
           "magic_3rd": 3,
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ヤクルト",
@@ -132134,9 +132104,7 @@
           "magic_2nd": "-",
           "magic_3rd": 28,
           "magic_4th": 10,
-          "magic_5th": 10,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 10
         },
         {
           "team": "中日",
@@ -132201,9 +132169,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": 8,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 8
         },
         {
           "team": "広島",
@@ -132268,9 +132234,7 @@
           "magic_2nd": "-",
           "magic_3rd": 33,
           "magic_4th": 14,
-          "magic_5th": 13,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 13
         }
       ],
       "pacific": [
@@ -132337,9 +132301,7 @@
           "magic_2nd": "確定",
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 100,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "西武",
@@ -132404,9 +132366,7 @@
           "magic_2nd": 8,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "日本ハム",
@@ -132471,9 +132431,7 @@
           "magic_2nd": 16,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "オリックス",
@@ -132538,9 +132496,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": "確定"
         },
         {
           "team": "ロッテ",
@@ -132605,9 +132561,7 @@
           "magic_2nd": "-",
           "magic_3rd": 36,
           "magic_4th": 12,
-          "magic_5th": 3,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 3
         },
         {
           "team": "楽天",
@@ -132672,9 +132626,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": "-",
-          "magic_5th": 38,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 38
         }
       ],
       "predictions": [
@@ -132810,9 +132762,7 @@
           "magic_2nd": 5,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 33,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "巨人",
@@ -132877,9 +132827,7 @@
           "magic_2nd": 3,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 67,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ＤｅＮＡ",
@@ -132944,9 +132892,7 @@
           "magic_2nd": 29,
           "magic_3rd": 3,
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ヤクルト",
@@ -133011,9 +132957,7 @@
           "magic_2nd": "-",
           "magic_3rd": 28,
           "magic_4th": 10,
-          "magic_5th": 10,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 10
         },
         {
           "team": "中日",
@@ -133078,9 +133022,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": 8,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 8
         },
         {
           "team": "広島",
@@ -133145,9 +133087,7 @@
           "magic_2nd": "-",
           "magic_3rd": 33,
           "magic_4th": 14,
-          "magic_5th": 13,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 13
         }
       ],
       "pacific": [
@@ -133214,9 +133154,7 @@
           "magic_2nd": "確定",
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 100,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "西武",
@@ -133281,9 +133219,7 @@
           "magic_2nd": 8,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "日本ハム",
@@ -133348,9 +133284,7 @@
           "magic_2nd": 16,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "オリックス",
@@ -133415,9 +133349,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": "確定"
         },
         {
           "team": "ロッテ",
@@ -133482,9 +133414,7 @@
           "magic_2nd": "-",
           "magic_3rd": 36,
           "magic_4th": 12,
-          "magic_5th": 3,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 3
         },
         {
           "team": "楽天",
@@ -133549,9 +133479,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": "-",
-          "magic_5th": 38,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 38
         }
       ],
       "predictions": [
@@ -133700,9 +133628,7 @@
           "magic_2nd": 5,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 33,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "巨人",
@@ -133767,9 +133693,7 @@
           "magic_2nd": 3,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 67,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ＤｅＮＡ",
@@ -133834,9 +133758,7 @@
           "magic_2nd": 29,
           "magic_3rd": 3,
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ヤクルト",
@@ -133901,9 +133823,7 @@
           "magic_2nd": "-",
           "magic_3rd": 28,
           "magic_4th": 10,
-          "magic_5th": 10,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 10
         },
         {
           "team": "中日",
@@ -133968,9 +133888,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": 8,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 8
         },
         {
           "team": "広島",
@@ -134035,9 +133953,7 @@
           "magic_2nd": "-",
           "magic_3rd": 33,
           "magic_4th": 14,
-          "magic_5th": 13,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 13
         }
       ],
       "pacific": [
@@ -134104,9 +134020,7 @@
           "magic_2nd": "確定",
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 100,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "西武",
@@ -134171,9 +134085,7 @@
           "magic_2nd": 8,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "日本ハム",
@@ -134238,9 +134150,7 @@
           "magic_2nd": 16,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "オリックス",
@@ -134305,9 +134215,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": "確定"
         },
         {
           "team": "ロッテ",
@@ -134372,9 +134280,7 @@
           "magic_2nd": "-",
           "magic_3rd": 36,
           "magic_4th": 12,
-          "magic_5th": 3,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 3
         },
         {
           "team": "楽天",
@@ -134439,9 +134345,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": "-",
-          "magic_5th": 38,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 38
         }
       ],
       "predictions": [
@@ -134590,9 +134494,7 @@
           "magic_2nd": 5,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 33,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "巨人",
@@ -134657,9 +134559,7 @@
           "magic_2nd": 3,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 67,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ＤｅＮＡ",
@@ -134724,9 +134624,7 @@
           "magic_2nd": 29,
           "magic_3rd": 3,
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ヤクルト",
@@ -134791,9 +134689,7 @@
           "magic_2nd": "-",
           "magic_3rd": 28,
           "magic_4th": 10,
-          "magic_5th": 10,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 10
         },
         {
           "team": "中日",
@@ -134858,9 +134754,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": 8,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 8
         },
         {
           "team": "広島",
@@ -134925,9 +134819,7 @@
           "magic_2nd": "-",
           "magic_3rd": 33,
           "magic_4th": 14,
-          "magic_5th": 13,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 13
         }
       ],
       "pacific": [
@@ -134994,9 +134886,7 @@
           "magic_2nd": "確定",
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 100,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "西武",
@@ -135061,9 +134951,7 @@
           "magic_2nd": 8,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "日本ハム",
@@ -135128,9 +135016,7 @@
           "magic_2nd": 16,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "オリックス",
@@ -135195,9 +135081,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": "確定"
         },
         {
           "team": "ロッテ",
@@ -135262,9 +135146,7 @@
           "magic_2nd": "-",
           "magic_3rd": 36,
           "magic_4th": 12,
-          "magic_5th": 3,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 3
         },
         {
           "team": "楽天",
@@ -135329,9 +135211,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": "-",
-          "magic_5th": 38,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 38
         }
       ],
       "predictions": [
@@ -135428,9 +135308,7 @@
           "magic_2nd": 5,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 33,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "巨人",
@@ -135495,9 +135373,7 @@
           "magic_2nd": 3,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 67,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ＤｅＮＡ",
@@ -135562,9 +135438,7 @@
           "magic_2nd": 29,
           "magic_3rd": 3,
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ヤクルト",
@@ -135629,9 +135503,7 @@
           "magic_2nd": "-",
           "magic_3rd": 28,
           "magic_4th": 10,
-          "magic_5th": 10,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 10
         },
         {
           "team": "中日",
@@ -135696,9 +135568,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": 8,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 8
         },
         {
           "team": "広島",
@@ -135763,9 +135633,7 @@
           "magic_2nd": "-",
           "magic_3rd": 33,
           "magic_4th": 14,
-          "magic_5th": 13,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 13
         }
       ],
       "pacific": [
@@ -135832,9 +135700,7 @@
           "magic_2nd": "確定",
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 100,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "西武",
@@ -135899,9 +135765,7 @@
           "magic_2nd": 8,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "日本ハム",
@@ -135966,9 +135830,7 @@
           "magic_2nd": 16,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "オリックス",
@@ -136033,9 +135895,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": "確定"
         },
         {
           "team": "ロッテ",
@@ -136100,9 +135960,7 @@
           "magic_2nd": "-",
           "magic_3rd": 36,
           "magic_4th": 12,
-          "magic_5th": 3,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 3
         },
         {
           "team": "楽天",
@@ -136167,9 +136025,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": "-",
-          "magic_5th": 38,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 38
         }
       ],
       "predictions": [
@@ -136305,9 +136161,7 @@
           "magic_2nd": 5,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 33,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "巨人",
@@ -136372,9 +136226,7 @@
           "magic_2nd": 3,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 67,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ＤｅＮＡ",
@@ -136439,9 +136291,7 @@
           "magic_2nd": 29,
           "magic_3rd": 3,
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ヤクルト",
@@ -136506,9 +136356,7 @@
           "magic_2nd": "-",
           "magic_3rd": 28,
           "magic_4th": 10,
-          "magic_5th": 10,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 10
         },
         {
           "team": "中日",
@@ -136573,9 +136421,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": 8,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 8
         },
         {
           "team": "広島",
@@ -136640,9 +136486,7 @@
           "magic_2nd": "-",
           "magic_3rd": 33,
           "magic_4th": 14,
-          "magic_5th": 13,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 13
         }
       ],
       "pacific": [
@@ -136709,9 +136553,7 @@
           "magic_2nd": "確定",
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 100,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "西武",
@@ -136776,9 +136618,7 @@
           "magic_2nd": 8,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "日本ハム",
@@ -136843,9 +136683,7 @@
           "magic_2nd": 16,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "オリックス",
@@ -136910,9 +136748,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": "確定"
         },
         {
           "team": "ロッテ",
@@ -136977,9 +136813,7 @@
           "magic_2nd": "-",
           "magic_3rd": 36,
           "magic_4th": 12,
-          "magic_5th": 3,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 3
         },
         {
           "team": "楽天",
@@ -137044,9 +136878,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": "-",
-          "magic_5th": 38,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 38
         }
       ],
       "predictions": [
@@ -137182,9 +137014,7 @@
           "magic_2nd": 5,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 33,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "巨人",
@@ -137249,9 +137079,7 @@
           "magic_2nd": 3,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 67,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ＤｅＮＡ",
@@ -137316,9 +137144,7 @@
           "magic_2nd": 29,
           "magic_3rd": 3,
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ヤクルト",
@@ -137383,9 +137209,7 @@
           "magic_2nd": "-",
           "magic_3rd": 28,
           "magic_4th": 10,
-          "magic_5th": 10,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 10
         },
         {
           "team": "中日",
@@ -137450,9 +137274,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": 8,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 8
         },
         {
           "team": "広島",
@@ -137517,9 +137339,7 @@
           "magic_2nd": "-",
           "magic_3rd": 33,
           "magic_4th": 14,
-          "magic_5th": 13,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 13
         }
       ],
       "pacific": [
@@ -137586,9 +137406,7 @@
           "magic_2nd": "確定",
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 100,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "西武",
@@ -137653,9 +137471,7 @@
           "magic_2nd": 8,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "日本ハム",
@@ -137720,9 +137536,7 @@
           "magic_2nd": 16,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "オリックス",
@@ -137787,9 +137601,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": "確定"
         },
         {
           "team": "ロッテ",
@@ -137854,9 +137666,7 @@
           "magic_2nd": "-",
           "magic_3rd": 36,
           "magic_4th": 12,
-          "magic_5th": 3,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 3
         },
         {
           "team": "楽天",
@@ -137921,9 +137731,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": "-",
-          "magic_5th": 38,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 38
         }
       ],
       "predictions": [
@@ -138059,9 +137867,7 @@
           "magic_2nd": 5,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 33,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "巨人",
@@ -138126,9 +137932,7 @@
           "magic_2nd": 3,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 67,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ＤｅＮＡ",
@@ -138193,9 +137997,7 @@
           "magic_2nd": 29,
           "magic_3rd": 3,
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ヤクルト",
@@ -138260,9 +138062,7 @@
           "magic_2nd": "-",
           "magic_3rd": 28,
           "magic_4th": 10,
-          "magic_5th": 10,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 10
         },
         {
           "team": "中日",
@@ -138327,9 +138127,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": 8,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 8
         },
         {
           "team": "広島",
@@ -138394,9 +138192,7 @@
           "magic_2nd": "-",
           "magic_3rd": 33,
           "magic_4th": 14,
-          "magic_5th": 13,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 13
         }
       ],
       "pacific": [
@@ -138463,9 +138259,7 @@
           "magic_2nd": "確定",
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 100,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "西武",
@@ -138530,9 +138324,7 @@
           "magic_2nd": 8,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "日本ハム",
@@ -138597,9 +138389,7 @@
           "magic_2nd": 16,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "オリックス",
@@ -138664,9 +138454,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": "確定"
         },
         {
           "team": "ロッテ",
@@ -138731,9 +138519,7 @@
           "magic_2nd": "-",
           "magic_3rd": 36,
           "magic_4th": 12,
-          "magic_5th": 3,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 3
         },
         {
           "team": "楽天",
@@ -138798,9 +138584,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": "-",
-          "magic_5th": 38,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 38
         }
       ],
       "predictions": [
@@ -138910,9 +138694,7 @@
           "magic_2nd": 5,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 33,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "巨人",
@@ -138977,9 +138759,7 @@
           "magic_2nd": 3,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 67,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ＤｅＮＡ",
@@ -139044,9 +138824,7 @@
           "magic_2nd": 29,
           "magic_3rd": 3,
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ヤクルト",
@@ -139111,9 +138889,7 @@
           "magic_2nd": "-",
           "magic_3rd": 28,
           "magic_4th": 10,
-          "magic_5th": 10,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 10
         },
         {
           "team": "中日",
@@ -139178,9 +138954,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": 8,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 8
         },
         {
           "team": "広島",
@@ -139245,9 +139019,7 @@
           "magic_2nd": "-",
           "magic_3rd": 33,
           "magic_4th": 14,
-          "magic_5th": 13,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 13
         }
       ],
       "pacific": [
@@ -139314,9 +139086,7 @@
           "magic_2nd": "確定",
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 100,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "西武",
@@ -139381,9 +139151,7 @@
           "magic_2nd": 8,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "日本ハム",
@@ -139448,9 +139216,7 @@
           "magic_2nd": 16,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "オリックス",
@@ -139515,9 +139281,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": "確定"
         },
         {
           "team": "ロッテ",
@@ -139582,9 +139346,7 @@
           "magic_2nd": "-",
           "magic_3rd": 36,
           "magic_4th": 12,
-          "magic_5th": 3,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 3
         },
         {
           "team": "楽天",
@@ -139649,9 +139411,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": "-",
-          "magic_5th": 38,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 38
         }
       ],
       "predictions": [
@@ -139774,9 +139534,7 @@
           "magic_2nd": 5,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 33,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "巨人",
@@ -139841,9 +139599,7 @@
           "magic_2nd": 3,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 67,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ＤｅＮＡ",
@@ -139908,9 +139664,7 @@
           "magic_2nd": 29,
           "magic_3rd": 3,
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ヤクルト",
@@ -139975,9 +139729,7 @@
           "magic_2nd": "-",
           "magic_3rd": 28,
           "magic_4th": 10,
-          "magic_5th": 10,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 10
         },
         {
           "team": "中日",
@@ -140042,9 +139794,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": 8,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 8
         },
         {
           "team": "広島",
@@ -140109,9 +139859,7 @@
           "magic_2nd": "-",
           "magic_3rd": 33,
           "magic_4th": 14,
-          "magic_5th": 13,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 13
         }
       ],
       "pacific": [
@@ -140178,9 +139926,7 @@
           "magic_2nd": "確定",
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 100,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "西武",
@@ -140245,9 +139991,7 @@
           "magic_2nd": 8,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "日本ハム",
@@ -140312,9 +140056,7 @@
           "magic_2nd": 16,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "オリックス",
@@ -140379,9 +140121,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": "確定"
         },
         {
           "team": "ロッテ",
@@ -140446,9 +140186,7 @@
           "magic_2nd": "-",
           "magic_3rd": 36,
           "magic_4th": 12,
-          "magic_5th": 3,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 3
         },
         {
           "team": "楽天",
@@ -140513,9 +140251,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": "-",
-          "magic_5th": 38,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 38
         }
       ],
       "predictions": [
@@ -140612,9 +140348,7 @@
           "magic_2nd": 5,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 33,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "巨人",
@@ -140679,9 +140413,7 @@
           "magic_2nd": 3,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 67,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ＤｅＮＡ",
@@ -140746,9 +140478,7 @@
           "magic_2nd": 29,
           "magic_3rd": 3,
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ヤクルト",
@@ -140813,9 +140543,7 @@
           "magic_2nd": "-",
           "magic_3rd": 28,
           "magic_4th": 10,
-          "magic_5th": 10,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 10
         },
         {
           "team": "中日",
@@ -140880,9 +140608,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": 8,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 8
         },
         {
           "team": "広島",
@@ -140947,9 +140673,7 @@
           "magic_2nd": "-",
           "magic_3rd": 33,
           "magic_4th": 14,
-          "magic_5th": 13,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 13
         }
       ],
       "pacific": [
@@ -141016,9 +140740,7 @@
           "magic_2nd": "確定",
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 100,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "西武",
@@ -141083,9 +140805,7 @@
           "magic_2nd": 8,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "日本ハム",
@@ -141150,9 +140870,7 @@
           "magic_2nd": 16,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "オリックス",
@@ -141217,9 +140935,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": "確定"
         },
         {
           "team": "ロッテ",
@@ -141284,9 +141000,7 @@
           "magic_2nd": "-",
           "magic_3rd": 36,
           "magic_4th": 12,
-          "magic_5th": 3,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 3
         },
         {
           "team": "楽天",
@@ -141351,9 +141065,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": "-",
-          "magic_5th": 38,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 38
         }
       ],
       "predictions": [
@@ -141476,9 +141188,7 @@
           "magic_2nd": 5,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 33,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "巨人",
@@ -141543,9 +141253,7 @@
           "magic_2nd": 3,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 67,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ＤｅＮＡ",
@@ -141610,9 +141318,7 @@
           "magic_2nd": 29,
           "magic_3rd": 3,
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ヤクルト",
@@ -141677,9 +141383,7 @@
           "magic_2nd": "-",
           "magic_3rd": 28,
           "magic_4th": 10,
-          "magic_5th": 10,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 10
         },
         {
           "team": "中日",
@@ -141744,9 +141448,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": 8,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 8
         },
         {
           "team": "広島",
@@ -141811,9 +141513,7 @@
           "magic_2nd": "-",
           "magic_3rd": 33,
           "magic_4th": 14,
-          "magic_5th": 13,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 13
         }
       ],
       "pacific": [
@@ -141880,9 +141580,7 @@
           "magic_2nd": "確定",
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 100,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "西武",
@@ -141947,9 +141645,7 @@
           "magic_2nd": 8,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "日本ハム",
@@ -142014,9 +141710,7 @@
           "magic_2nd": 16,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "オリックス",
@@ -142081,9 +141775,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": "確定"
         },
         {
           "team": "ロッテ",
@@ -142148,9 +141840,7 @@
           "magic_2nd": "-",
           "magic_3rd": 36,
           "magic_4th": 12,
-          "magic_5th": 3,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 3
         },
         {
           "team": "楽天",
@@ -142215,9 +141905,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": "-",
-          "magic_5th": 38,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 38
         }
       ],
       "predictions": [
@@ -142314,9 +142002,7 @@
           "magic_2nd": 5,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 33,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "巨人",
@@ -142381,9 +142067,7 @@
           "magic_2nd": 3,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 67,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ＤｅＮＡ",
@@ -142448,9 +142132,7 @@
           "magic_2nd": 29,
           "magic_3rd": 3,
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "ヤクルト",
@@ -142515,9 +142197,7 @@
           "magic_2nd": "-",
           "magic_3rd": 28,
           "magic_4th": 10,
-          "magic_5th": 10,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 10
         },
         {
           "team": "中日",
@@ -142582,9 +142262,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": 8,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 8
         },
         {
           "team": "広島",
@@ -142649,9 +142327,7 @@
           "magic_2nd": "-",
           "magic_3rd": 33,
           "magic_4th": 14,
-          "magic_5th": 13,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 13
         }
       ],
       "pacific": [
@@ -142718,9 +142394,7 @@
           "magic_2nd": "確定",
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 100,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "西武",
@@ -142785,9 +142459,7 @@
           "magic_2nd": 8,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "日本ハム",
@@ -142852,9 +142524,7 @@
           "magic_2nd": 16,
           "magic_3rd": "確定",
           "magic_4th": "確定",
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 100
+          "magic_5th": "確定"
         },
         {
           "team": "オリックス",
@@ -142919,9 +142589,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": 14,
-          "magic_5th": "確定",
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": "確定"
         },
         {
           "team": "ロッテ",
@@ -142986,9 +142654,7 @@
           "magic_2nd": "-",
           "magic_3rd": 36,
           "magic_4th": 12,
-          "magic_5th": 3,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 3
         },
         {
           "team": "楽天",
@@ -143053,9 +142719,7 @@
           "magic_2nd": "-",
           "magic_3rd": "-",
           "magic_4th": "-",
-          "magic_5th": 38,
-          "champ_prob": 0,
-          "cs_prob": 0
+          "magic_5th": 38
         }
       ],
       "predictions": [
@@ -144024,7 +143688,7 @@
         "1": 0,
         "2": 0,
         "3": 0,
-        "4": 1,
+        "4": 2,
         "5": 8,
         "6": 90
       }
@@ -144040,8 +143704,8 @@
       },
       "日本ハム": {
         "1": 0,
-        "2": 27,
-        "3": 73,
+        "2": 26,
+        "3": 74,
         "4": 0,
         "5": 0,
         "6": 0
@@ -144072,8 +143736,8 @@
       },
       "西武": {
         "1": 0,
-        "2": 73,
-        "3": 27,
+        "2": 74,
+        "3": 26,
         "4": 0,
         "5": 0,
         "6": 0
@@ -144082,34 +143746,24 @@
     "central_clinch_schedules": {
       "阪神": [
         {
-          "date": "10/2",
-          "raw_date": "2026-10-02",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.06,
-          "win_expect": "-",
-          "clinch_prob_str": "0.06%",
-          "cum_prob_str": "0.06%"
-        },
-        {
           "date": "10/3",
           "raw_date": "2026-10-03",
           "opp": "広島",
           "ground": "敵地",
-          "clinch_prob_val": 0.32,
+          "clinch_prob_val": 0.7000000000000001,
           "win_expect": "67",
-          "clinch_prob_str": "0.3%",
-          "cum_prob_str": "0.4%"
+          "clinch_prob_str": "0.7%",
+          "cum_prob_str": "0.7%"
         },
         {
           "date": "10/4",
           "raw_date": "2026-10-04",
           "opp": "ＤｅＮＡ",
           "ground": "敵地",
-          "clinch_prob_val": 0.44,
+          "clinch_prob_val": 0.48,
           "win_expect": "41",
-          "clinch_prob_str": "0.4%",
-          "cum_prob_str": "0.8%"
+          "clinch_prob_str": "0.5%",
+          "cum_prob_str": "1%"
         }
       ],
       "巨人": [
@@ -144118,40 +143772,40 @@
           "raw_date": "2026-10-01",
           "opp": "阪神",
           "ground": "敵地",
-          "clinch_prob_val": 0.18,
+          "clinch_prob_val": 0.06,
           "win_expect": "52",
-          "clinch_prob_str": "0.2%",
-          "cum_prob_str": "0.2%"
+          "clinch_prob_str": "0.06%",
+          "cum_prob_str": "0.06%"
         },
         {
           "date": "10/2",
           "raw_date": "2026-10-02",
           "opp": "ヤクルト",
           "ground": "神宮",
-          "clinch_prob_val": 0.76,
+          "clinch_prob_val": 0.7000000000000001,
           "win_expect": "74",
-          "clinch_prob_str": "0.8%",
-          "cum_prob_str": "0.9%"
+          "clinch_prob_str": "0.7%",
+          "cum_prob_str": "0.8%"
         },
         {
           "date": "10/3",
           "raw_date": "2026-10-03",
           "opp": "ＤｅＮＡ",
           "ground": "東京D",
-          "clinch_prob_val": 3.08,
+          "clinch_prob_val": 2.68,
           "win_expect": "53",
           "clinch_prob_str": "3%",
-          "cum_prob_str": "4%"
+          "cum_prob_str": "3%"
         },
         {
           "date": "10/4",
           "raw_date": "2026-10-04",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 4.06,
+          "clinch_prob_val": 3.74,
           "win_expect": "-",
           "clinch_prob_str": "4%",
-          "cum_prob_str": "8%"
+          "cum_prob_str": "7%"
         }
       ],
       "ＤｅＮＡ": [
@@ -144480,7 +144134,7 @@
           "raw_date": "2026-09-23",
           "opp": "西武",
           "ground": "敵地",
-          "clinch_prob_val": 55.92,
+          "clinch_prob_val": 55.60000000000001,
           "win_expect": "80",
           "clinch_prob_str": "56%",
           "cum_prob_str": "56%"
@@ -144490,29 +144144,29 @@
           "raw_date": "2026-09-24",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 3.9,
+          "clinch_prob_val": 4.92,
           "win_expect": "-",
-          "clinch_prob_str": "4%",
-          "cum_prob_str": "60%"
+          "clinch_prob_str": "5%",
+          "cum_prob_str": "61%"
         },
         {
           "date": "9/25",
           "raw_date": "2026-09-25",
           "opp": "オリックス",
           "ground": "敵地",
-          "clinch_prob_val": 19.139999999999997,
+          "clinch_prob_val": 19.18,
           "win_expect": "84",
           "clinch_prob_str": "19%",
-          "cum_prob_str": "79%"
+          "cum_prob_str": "80%"
         },
         {
           "date": "9/26",
           "raw_date": "2026-09-26",
           "opp": "楽天",
           "ground": "敵地",
-          "clinch_prob_val": 13.54,
+          "clinch_prob_val": 12.520000000000001,
           "win_expect": "82",
-          "clinch_prob_str": "14%",
+          "clinch_prob_str": "13%",
           "cum_prob_str": "92%"
         },
         {
@@ -144520,9 +144174,9 @@
           "raw_date": "2026-09-27",
           "opp": "オリックス",
           "ground": "敵地",
-          "clinch_prob_val": 5.28,
+          "clinch_prob_val": 5.7,
           "win_expect": "88",
-          "clinch_prob_str": "5%",
+          "clinch_prob_str": "6%",
           "cum_prob_str": "98%"
         },
         {
@@ -144530,9 +144184,9 @@
           "raw_date": "2026-09-28",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 0.7000000000000001,
+          "clinch_prob_val": 0.48,
           "win_expect": "-",
-          "clinch_prob_str": "0.7%",
+          "clinch_prob_str": "0.5%",
           "cum_prob_str": "98%"
         },
         {
@@ -144560,9 +144214,9 @@
           "raw_date": "2026-10-01",
           "opp": "楽天",
           "ground": "敵地",
-          "clinch_prob_val": 0.54,
+          "clinch_prob_val": 0.66,
           "win_expect": "78",
-          "clinch_prob_str": "0.5%",
+          "clinch_prob_str": "0.7%",
           "cum_prob_str": "99%"
         },
         {
@@ -144570,9 +144224,9 @@
           "raw_date": "2026-10-02",
           "opp": "ロッテ",
           "ground": "敵地",
-          "clinch_prob_val": 0.48,
+          "clinch_prob_val": 0.36,
           "win_expect": "79",
-          "clinch_prob_str": "0.5%",
+          "clinch_prob_str": "0.4%",
           "cum_prob_str": "100%"
         },
         {
@@ -144580,9 +144234,9 @@
           "raw_date": "2026-10-03",
           "opp": "ロッテ",
           "ground": "敵地",
-          "clinch_prob_val": 0.1,
+          "clinch_prob_val": 0.08,
           "win_expect": "79",
-          "clinch_prob_str": "0.1%",
+          "clinch_prob_str": "0.08%",
           "cum_prob_str": "100%"
         }
       ],
