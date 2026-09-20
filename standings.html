@@ -86,10 +86,7 @@
     }
     .badge-dash { color: #94a3b8; font-weight: 500; }
 
-    /* 2. 予想勝率カード */
-    #pred-section {
-      display: block;
-    }
+    /* 2. 予想勝利確率／試合結果カード共通 */
     .prediction-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 28px;
     }
@@ -97,20 +94,32 @@
       background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
       padding: 16px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
-    .pred-teams { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .pred-teams { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .team-box { width: 44%; }
     .team-box.home { text-align: left; }
     .team-box.away { text-align: right; }
     .team-role { font-size: 0.72rem; color: var(--text-sub); font-weight: 600; }
-    .team-name { font-size: 1.1rem; font-weight: 800; color: var(--text-main); }
+    .team-name { font-size: 1.15rem; font-weight: 800; color: var(--text-main); }
     .starter-name { font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-top: 2px; }
     .vs-badge { font-size: 0.82rem; font-weight: 800; color: #94a3b8; }
+    
+    /* 予想確率表示 */
     .prob-values { display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 800; margin-bottom: 6px; }
     .val-home { color: var(--bar-home); }
     .val-away { color: var(--bar-away); }
     .prob-bar-container { width: 100%; height: 10px; background-color: #e2e8f0; border-radius: 6px; overflow: hidden; display: flex; }
     .bar-segment-home { background-color: var(--bar-home); height: 100%; transition: width 0.3s; }
     .bar-segment-away { background-color: var(--bar-away); height: 100%; transition: width 0.3s; }
+
+    /* 過去試合結果（スコア表示） */
+    .score-result-box {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 4px; padding-top: 8px; border-top: 1px dashed #e2e8f0;
+    }
+    .score-val { font-size: 1.55rem; font-weight: 800; color: #0f172a; }
+    .score-val.winner { color: #16a34a; }
+    .score-val.loser { color: #64748b; }
+    .score-divider { font-size: 0.95rem; font-weight: 800; color: #94a3b8; }
 
     /* 3. 最終順位可能性早見表 */
     .rank-matrix-table { min-width: 480px; max-width: 600px; margin: 0 auto; }
@@ -219,11 +228,11 @@
       </table>
     </div>
 
-    <!-- 2. 予想勝利確率カード (過去の試合終了日には非表示) -->
+    <!-- 2. 予想勝利確率／試合結果カード（過去日はスコアのみ表示） -->
     <div id="pred-section">
-      <div class="section-title">
-        🎯 NPB 予想勝利確率
-        <span class="section-desc">（左: ホーム vs 右: ビジター / 予告先発・直近試合加重ピタゴラス・Log5補正）</span>
+      <div class="section-title" id="pred-header-title">
+        <span id="pred-header-icon">🎯</span> <span id="pred-header-text">NPB 予想勝利確率</span>
+        <span class="section-desc" id="pred-subtext">（左: ホーム vs 右: ビジター）</span>
       </div>
       <div class="prediction-grid" id="prediction-grid"></div>
     </div>
@@ -399,27 +408,63 @@
         tbodyStandings.appendChild(tr);
       });
 
-      // 2. 予想勝利確率カードグリッド（過去の試合終了日には非表示）
-      const predSection = document.getElementById('pred-section');
+      // 2. 予想勝利確率／試合結果カードグリッド
       const predGrid = document.getElementById('prediction-grid');
       const predictions = dayData.predictions || [];
       const hasFinished = predictions.some(p => p.is_finished);
 
-      // 過去の試合結果が入力されている日付は表示をなくす
-      if (hasFinished || predictions.length === 0) {
-        predSection.style.display = 'none';
-      } else {
-        predSection.style.display = 'block';
-        predGrid.innerHTML = '';
-        const leagueTeamSet = new Set(list.map(t => t.team));
-        const filteredPreds = predictions.filter(p => leagueTeamSet.has(p.home) || leagueTeamSet.has(p.away));
+      const headerIcon = document.getElementById('pred-header-icon');
+      const headerText = document.getElementById('pred-header-text');
+      const headerSub = document.getElementById('pred-subtext');
 
-        if (filteredPreds.length === 0) {
-          predGrid.innerHTML = `<div style="grid-column: 1/-1; padding: 18px; text-align: center; color: #64748b; background: #fff; border-radius: 12px; border: 1px solid var(--border);">この日の該当リーグの試合予定はありません。</div>`;
-        } else {
-          filteredPreds.forEach(p => {
-            const card = document.createElement('div');
-            card.className = 'pred-card';
+      if (hasFinished) {
+        headerIcon.innerText = '⚾';
+        headerText.innerText = '試合結果';
+        headerSub.innerText = `（対象日: ${selectedDate} 試合結果 / 左: ホーム vs 右: ビジター）`;
+      } else {
+        headerIcon.innerText = '🎯';
+        headerText.innerText = 'NPB 予想勝利確率';
+        headerSub.innerText = `（対象日: ${selectedDate} 予告先発予想 / 左: ホーム vs 右: ビジター）`;
+      }
+
+      predGrid.innerHTML = '';
+      const leagueTeamSet = new Set(list.map(t => t.team));
+      const filteredPreds = predictions.filter(p => leagueTeamSet.has(p.home) || leagueTeamSet.has(p.away));
+
+      if (filteredPreds.length === 0) {
+        predGrid.innerHTML = `<div style="grid-column: 1/-1; padding: 18px; text-align: center; color: #64748b; background: #fff; border-radius: 12px; border: 1px solid var(--border);">この日の該当リーグの試合予定・結果はありません。</div>`;
+      } else {
+        filteredPreds.forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'pred-card';
+
+          if (p.is_finished && p.actual_home_score !== null && p.actual_away_score !== null) {
+            // 過去日：スコア・勝敗のみを表示するカード
+            const hs = p.actual_home_score;
+            const as_ = p.actual_away_score;
+            const isHomeWin = hs > as_;
+            const isAwayWin = as_ > hs;
+
+            card.innerHTML = `
+              <div class="pred-teams">
+                <div class="team-box home">
+                  <div class="team-role">ホーム ${isHomeWin ? '<span style="color:#16a34a; font-weight:800;">(勝)</span>' : (isAwayWin ? '<span style="color:#64748b;">(敗)</span>' : '(分)')}</div>
+                  <div class="team-name">${p.home}</div>
+                </div>
+                <div class="vs-badge">VS</div>
+                <div class="team-box away">
+                  <div class="team-role">${isAwayWin ? '<span style="color:#16a34a; font-weight:800;">(勝)</span>' : (isHomeWin ? '<span style="color:#64748b;">(敗)</span>' : '(分)')} ビジター</div>
+                  <div class="team-name">${p.away}</div>
+                </div>
+              </div>
+              <div class="score-result-box">
+                <span class="score-val ${isHomeWin ? 'winner' : 'loser'}">${hs}</span>
+                <span class="score-divider">-</span>
+                <span class="score-val ${isAwayWin ? 'winner' : 'loser'}">${as_}</span>
+              </div>
+            `;
+          } else {
+            // 未来日・試合前：予想確率カード
             card.innerHTML = `
               <div class="pred-teams">
                 <div class="team-box home">
@@ -443,9 +488,9 @@
                 <div class="bar-segment-away" style="width: ${p.away_prob}%;"></div>
               </div>
             `;
-            predGrid.appendChild(card);
-          });
-        }
+          }
+          predGrid.appendChild(card);
+        });
       }
 
       // 3. 最終順位可能性早見表
