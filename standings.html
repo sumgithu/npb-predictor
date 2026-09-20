@@ -376,7 +376,10 @@
       }
 
       const dayData = rawData.history[selectedDate];
+      if (!dayData) return;
+
       const list = dayData[currentLeague];
+      if (!list) return;
 
       // 1. 順位表 & CN表
       const tbodyStandings = document.getElementById('standings-body');
@@ -511,7 +514,7 @@
           let trHtml = `<tr><td style="font-weight:800; padding:0 8px;">${r}</td>`;
           leagueTeams.forEach(t => {
             const teamObj = list.find(item => item.team === t);
-            const curRank = teamObj.rank;
+            const curRank = teamObj ? teamObj.rank : 0;
             const prob = (rankMat[t] && rankMat[t][r] !== undefined) ? rankMat[t][r] : 0;
             let cellClass = "";
 
@@ -520,8 +523,8 @@
             } else if (r < curRank) {
               if (prob > 0) {
                 const mKey = r === 1 ? "magic_1st" : (r === 2 ? "magic_2nd" : "magic_3rd");
-                const mVal = teamObj[mKey];
-                const canClimbBySelf = (typeof mVal === "number" && mVal <= teamObj.remaining);
+                const mVal = teamObj ? teamObj[mKey] : "-";
+                const canClimbBySelf = (typeof mVal === "number" && teamObj && mVal <= teamObj.remaining);
                 cellClass = canClimbBySelf ? "cell-can-climb" : "cell-potential";
               }
             } else {
@@ -693,28 +696,25 @@
       renderTables();
     }
 
-async function init() {
+    async function init() {
       try {
         const res = await fetch(`history_standings.json?t=${new Date().getTime()}`);
         rawData = await res.json();
 
-        const dates = rawData.available_dates;
+        const dates = rawData.available_dates || [];
         const picker = document.getElementById('date-picker');
-        picker.min = dates[0];
-        picker.max = dates[dates.length - 1];
+        if (dates.length > 0) {
+          picker.min = dates[0];
+          picker.max = dates[dates.length - 1];
+        }
 
-        // 端末の現在日付（YYYY-MM-DD）を取得
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const todayStr = `${year}-${month}-${day}`;
-
-        // 本日の日付がデータ内にあれば本日、なければデータの latest_date を採用
-        if (dates.includes(todayStr)) {
-          selectedDate = todayStr;
-        } else {
+        // 2026年9月21日（当日）を最優先で初期選択
+        if (dates.includes("2026-09-21")) {
+          selectedDate = "2026-09-21";
+        } else if (rawData.latest_date) {
           selectedDate = rawData.latest_date;
+        } else {
+          selectedDate = dates[dates.length - 1];
         }
 
         picker.value = selectedDate;
@@ -731,3 +731,6 @@ async function init() {
     }
 
     init();
+  </script>
+</body>
+</html>
