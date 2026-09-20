@@ -828,8 +828,14 @@ def main():
     games_2025, games_2026 = load_all_games()
     dates, default_latest, history, sim_data = build_all_history_with_predictions(games_2025, games_2026)
 
+    # 実行時の日本時間当日を取得
+    jst_today = (datetime.datetime.utcnow() + datetime.timedelta(hours=9)).strftime("%Y-%m-%d")
+    
+    # 本日の日付がデータ内に存在すれば初期表示日に設定、なければ直近の終了日
+    initial_display_date = jst_today if jst_today in dates else default_latest
+
     output = {
-        "latest_date": default_latest,
+        "latest_date": initial_display_date,
         "available_dates": dates,
         "history": history,
         "simulation": sim_data
@@ -838,7 +844,4 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了（当日試合数完全同期）：{dates[0]} 〜 {dates[-1]}")
-
-if __name__ == "__main__":
-    main()
+    print(f"解析＆シミュレーション更新完了（初期表示日: {initial_display_date}）：{dates[0]} 〜 {dates[-1]}")
