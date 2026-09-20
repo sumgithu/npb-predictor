@@ -693,7 +693,7 @@
       renderTables();
     }
 
-    async function init() {
+async function init() {
       try {
         const res = await fetch(`history_standings.json?t=${new Date().getTime()}`);
         rawData = await res.json();
@@ -702,8 +702,22 @@
         const picker = document.getElementById('date-picker');
         picker.min = dates[0];
         picker.max = dates[dates.length - 1];
-        picker.value = rawData.latest_date;
-        selectedDate = rawData.latest_date;
+
+        // 端末の現在日付（YYYY-MM-DD）を取得
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const todayStr = `${year}-${month}-${day}`;
+
+        // 本日の日付がデータ内にあれば本日、なければデータの latest_date を採用
+        if (dates.includes(todayStr)) {
+          selectedDate = todayStr;
+        } else {
+          selectedDate = rawData.latest_date;
+        }
+
+        picker.value = selectedDate;
 
         picker.addEventListener('change', (e) => {
           selectedDate = e.target.value;
@@ -717,6 +731,3 @@
     }
 
     init();
-  </script>
-</body>
-</html>
