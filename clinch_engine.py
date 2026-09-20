@@ -143,7 +143,7 @@ def load_all_games():
         games_2025 = parse_year_games_from_text(raw_text, 2025)
         games_2026_base = parse_year_games_from_text(raw_text, 2026)
 
-    # 手入力 games_db.json があれば上書きマージ
+    # games_db.json が存在する場合、登録日付のカードはテキスト由来を破棄して完全に手動DB側で置換する
     if os.path.exists(MANUAL_DB_FILE):
         try:
             with open(MANUAL_DB_FILE, "r", encoding="utf-8") as f:
@@ -153,7 +153,7 @@ def load_all_games():
 
             merged_2026 = [g for g in games_2026_base if g["date"] not in manual_dates]
             merged_2026.extend(manual_games)
-            merged_2026.sort(key=lambda x: x["date"])
+            merged_2026.sort(key=lambda x: (x["date"], x.get("status") == "finished"))
             return games_2025, merged_2026
         except Exception as e:
             print(f"games_db.json 読込警告: {e}")
@@ -576,7 +576,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
                     h2h_details[a][h]["lose"] += 1
                     if is_inter:
                         records[a]["interleague"]["win"] += 1
-                        records[a]["interleague"]["lose"] += 1
+                        records[h]["interleague"]["lose"] += 1
                 else:
                     records[h]["draw"] += 1
                     records[h]["home"]["draw"] += 1
@@ -631,18 +631,24 @@ def build_all_history_with_predictions(games_2025, games_2026):
             c_table = last_c_table
             p_table = last_p_table
 
+        # 当該日のカード展開（重複防止のため同カードは最新の登録を優先）
         day_predictions = []
-        for g in games_2026:
+        processed_pairs = set()
+
+        for g in reversed(games_2026):
             if g["date"] == target_date:
-                # 中止カードはスキップ
+                h, a = g["home"], g["away"]
+                pair_key = (h, a)
+                if pair_key in processed_pairs:
+                    continue
+                processed_pairs.add(pair_key)
+
                 if g.get("status") == "cancelled":
                     continue
 
-                h, a = g["home"], g["away"]
                 p_away = get_rolling_recent_strength(team_match_histories_before_today[a], prior_stats[a])
                 p_home = get_rolling_recent_strength(team_match_histories_before_today[h], prior_stats[h])
 
-                # 予告先発投手の名前を確実に取得
                 h_start = g.get("home_starter") or g.get("home_pitcher") or ""
                 a_start = g.get("away_starter") or g.get("away_pitcher") or ""
                 h_start = h_start.strip() if h_start else "未定"
@@ -680,6 +686,8 @@ def build_all_history_with_predictions(games_2025, games_2026):
                     "actual_away_score": as_,
                     "is_finished": is_fin
                 })
+
+        day_predictions.reverse()
 
         history_snapshots[target_date] = {
             "central": c_table,
@@ -801,7 +809,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"予告先発・実日程解析完了：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了（手動DB完全同期）：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
