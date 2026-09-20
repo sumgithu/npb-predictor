@@ -143207,8 +143207,8 @@
     "central_rank_matrix": {
       "阪神": {
         "1": 31,
-        "2": 67,
-        "3": 2,
+        "2": 66,
+        "3": 3,
         "4": 0,
         "5": 0,
         "6": 0
@@ -143223,8 +143223,8 @@
       },
       "ＤｅＮＡ": {
         "1": 0,
-        "2": 2,
-        "3": 98,
+        "2": 3,
+        "3": 97,
         "4": 0,
         "5": 0,
         "6": 0
@@ -143265,8 +143265,8 @@
       },
       "日本ハム": {
         "1": 0,
-        "2": 57,
-        "3": 43,
+        "2": 58,
+        "3": 42,
         "4": 0,
         "5": 0,
         "6": 0
@@ -143275,8 +143275,8 @@
         "1": 0,
         "2": 0,
         "3": 0,
-        "4": 68,
-        "5": 32,
+        "4": 67,
+        "5": 33,
         "6": 0
       },
       "楽天": {
@@ -143291,14 +143291,14 @@
         "1": 0,
         "2": 0,
         "3": 0,
-        "4": 32,
-        "5": 68,
+        "4": 33,
+        "5": 67,
         "6": 0
       },
       "西武": {
         "1": 0,
-        "2": 43,
-        "3": 57,
+        "2": 42,
+        "3": 58,
         "4": 0,
         "5": 0,
         "6": 0
@@ -143307,33 +143307,43 @@
     "central_clinch_schedules": {
       "阪神": [
         {
+          "date": "10/2",
+          "raw_date": "2026-10-02",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 0.02,
+          "win_expect": "-",
+          "clinch_prob_str": "0.02%",
+          "cum_prob_str": "0.02%"
+        },
+        {
           "date": "10/3",
           "raw_date": "2026-10-03",
           "opp": "広島",
           "ground": "マツダS",
-          "clinch_prob_val": 0.1,
+          "clinch_prob_val": 0.18,
           "win_expect": "66",
-          "clinch_prob_str": "0.1%",
-          "cum_prob_str": "0.1%"
+          "clinch_prob_str": "0.2%",
+          "cum_prob_str": "0.2%"
         },
         {
           "date": "10/4",
           "raw_date": "2026-10-04",
           "opp": "ＤｅＮＡ",
           "ground": "敵地",
-          "clinch_prob_val": 0.2,
+          "clinch_prob_val": 0.36,
           "win_expect": "38",
-          "clinch_prob_str": "0.2%",
-          "cum_prob_str": "0.3%"
+          "clinch_prob_str": "0.4%",
+          "cum_prob_str": "0.6%"
         },
         {
           "date": "10/5",
           "raw_date": "2026-10-05",
           "opp": "広島",
           "ground": "甲子園",
-          "clinch_prob_val": 0.8999999999999999,
+          "clinch_prob_val": 0.6,
           "win_expect": "72",
-          "clinch_prob_str": "0.9%",
+          "clinch_prob_str": "0.6%",
           "cum_prob_str": "1%"
         },
         {
@@ -143341,7 +143351,7 @@
           "raw_date": "2026-10-06",
           "opp": "広島",
           "ground": "甲子園",
-          "clinch_prob_val": 1.8599999999999999,
+          "clinch_prob_val": 2.06,
           "win_expect": "72",
           "clinch_prob_str": "2%",
           "cum_prob_str": "3%"
@@ -143351,10 +143361,10 @@
           "raw_date": "2026-10-07",
           "opp": "巨人",
           "ground": "甲子園",
-          "clinch_prob_val": 6.2,
+          "clinch_prob_val": 6.279999999999999,
           "win_expect": "48",
           "clinch_prob_str": "6%",
-          "cum_prob_str": "9%"
+          "cum_prob_str": "10%"
         },
         {
           "date": "10/8",
@@ -143364,16 +143374,16 @@
           "clinch_prob_val": 0.0,
           "win_expect": "-",
           "clinch_prob_str": "-",
-          "cum_prob_str": "9%"
+          "cum_prob_str": "10%"
         },
         {
           "date": "10/9",
           "raw_date": "2026-10-09",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 21.38,
+          "clinch_prob_val": 21.560000000000002,
           "win_expect": "-",
-          "clinch_prob_str": "21%",
+          "clinch_prob_str": "22%",
           "cum_prob_str": "31%"
         }
       ],
@@ -143383,17 +143393,17 @@
           "raw_date": "2026-10-01",
           "opp": "阪神",
           "ground": "敵地",
-          "clinch_prob_val": 0.52,
+          "clinch_prob_val": 0.8200000000000001,
           "win_expect": "52",
-          "clinch_prob_str": "0.5%",
-          "cum_prob_str": "0.5%"
+          "clinch_prob_str": "0.8%",
+          "cum_prob_str": "0.8%"
         },
         {
           "date": "10/2",
           "raw_date": "2026-10-02",
           "opp": "ヤクルト",
           "ground": "神宮",
-          "clinch_prob_val": 1.76,
+          "clinch_prob_val": 1.6400000000000001,
           "win_expect": "74",
           "clinch_prob_str": "2%",
           "cum_prob_str": "2%"
@@ -143403,7 +143413,7 @@
           "raw_date": "2026-10-03",
           "opp": "ＤｅＮＡ",
           "ground": "東京D",
-          "clinch_prob_val": 5.800000000000001,
+          "clinch_prob_val": 5.680000000000001,
           "win_expect": "50",
           "clinch_prob_str": "6%",
           "cum_prob_str": "8%"
@@ -143413,7 +143423,7 @@
           "raw_date": "2026-10-04",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 5.58,
+          "clinch_prob_val": 6.08,
           "win_expect": "-",
           "clinch_prob_str": "6%",
           "cum_prob_str": "14%"
@@ -143423,27 +143433,27 @@
           "raw_date": "2026-10-05",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 3.2199999999999998,
+          "clinch_prob_val": 3.74,
           "win_expect": "-",
-          "clinch_prob_str": "3%",
-          "cum_prob_str": "17%"
+          "clinch_prob_str": "4%",
+          "cum_prob_str": "18%"
         },
         {
           "date": "10/6",
           "raw_date": "2026-10-06",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 3.8600000000000003,
+          "clinch_prob_val": 3.6799999999999997,
           "win_expect": "-",
           "clinch_prob_str": "4%",
-          "cum_prob_str": "21%"
+          "cum_prob_str": "22%"
         },
         {
           "date": "10/7",
           "raw_date": "2026-10-07",
           "opp": "阪神",
           "ground": "敵地",
-          "clinch_prob_val": 16.8,
+          "clinch_prob_val": 16.86,
           "win_expect": "52",
           "clinch_prob_str": "17%",
           "cum_prob_str": "31%"
@@ -143463,91 +143473,21 @@
           "raw_date": "2026-10-09",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 31.78,
+          "clinch_prob_val": 30.36,
           "win_expect": "-",
-          "clinch_prob_str": "32%",
+          "clinch_prob_str": "30%",
           "cum_prob_str": "31%"
         }
       ],
       "ＤｅＮＡ": [
         {
-          "date": "9/23",
-          "raw_date": "2026-09-23",
-          "opp": "中日",
-          "ground": "横浜",
-          "clinch_prob_val": 0.0,
-          "win_expect": "70",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/25",
-          "raw_date": "2026-09-25",
-          "opp": "阪神",
-          "ground": "横浜",
-          "clinch_prob_val": 0.0,
-          "win_expect": "62",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/26",
-          "raw_date": "2026-09-26",
-          "opp": "阪神",
-          "ground": "横浜",
-          "clinch_prob_val": 0.0,
-          "win_expect": "62",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/27",
-          "raw_date": "2026-09-27",
-          "opp": "広島",
-          "ground": "横浜",
-          "clinch_prob_val": 0.0,
-          "win_expect": "78",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/28",
-          "raw_date": "2026-09-28",
-          "opp": "広島",
-          "ground": "横浜",
-          "clinch_prob_val": 0.0,
-          "win_expect": "78",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/3",
-          "raw_date": "2026-10-03",
-          "opp": "巨人",
-          "ground": "敵地",
-          "clinch_prob_val": 0.0,
-          "win_expect": "50",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/4",
-          "raw_date": "2026-10-04",
-          "opp": "阪神",
-          "ground": "横浜",
-          "clinch_prob_val": 0.0,
-          "win_expect": "62",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/8",
-          "raw_date": "2026-10-08",
-          "opp": "ヤクルト",
-          "ground": "横浜",
-          "clinch_prob_val": 0.0,
-          "win_expect": "81",
-          "clinch_prob_str": "-",
+          "date": "10/9",
+          "raw_date": "2026-10-09",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 0.04,
+          "win_expect": "-",
+          "clinch_prob_str": "0.04%",
           "cum_prob_str": "-"
         }
       ],
@@ -143805,7 +143745,7 @@
           "raw_date": "2026-09-22",
           "opp": "西武",
           "ground": "敵地",
-          "clinch_prob_val": 40.88,
+          "clinch_prob_val": 40.660000000000004,
           "win_expect": "81",
           "clinch_prob_str": "41%",
           "cum_prob_str": "41%"
@@ -143815,7 +143755,7 @@
           "raw_date": "2026-09-23",
           "opp": "西武",
           "ground": "敵地",
-          "clinch_prob_val": 39.28,
+          "clinch_prob_val": 39.32,
           "win_expect": "81",
           "clinch_prob_str": "39%",
           "cum_prob_str": "80%"
@@ -143825,27 +143765,27 @@
           "raw_date": "2026-09-24",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 0.4,
+          "clinch_prob_val": 0.44,
           "win_expect": "-",
           "clinch_prob_str": "0.4%",
-          "cum_prob_str": "81%"
+          "cum_prob_str": "80%"
         },
         {
           "date": "9/25",
           "raw_date": "2026-09-25",
           "opp": "オリックス",
           "ground": "敵地",
-          "clinch_prob_val": 12.78,
+          "clinch_prob_val": 13.120000000000001,
           "win_expect": "86",
           "clinch_prob_str": "13%",
-          "cum_prob_str": "93%"
+          "cum_prob_str": "94%"
         },
         {
           "date": "9/26",
           "raw_date": "2026-09-26",
           "opp": "楽天",
           "ground": "敵地",
-          "clinch_prob_val": 4.82,
+          "clinch_prob_val": 4.760000000000001,
           "win_expect": "84",
           "clinch_prob_str": "5%",
           "cum_prob_str": "98%"
@@ -143855,9 +143795,9 @@
           "raw_date": "2026-09-27",
           "opp": "オリックス",
           "ground": "敵地",
-          "clinch_prob_val": 1.52,
+          "clinch_prob_val": 1.34,
           "win_expect": "89",
-          "clinch_prob_str": "2%",
+          "clinch_prob_str": "1%",
           "cum_prob_str": "100%"
         },
         {
@@ -143865,9 +143805,9 @@
           "raw_date": "2026-09-28",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 0.06,
+          "clinch_prob_val": 0.13999999999999999,
           "win_expect": "-",
-          "clinch_prob_str": "0.06%",
+          "clinch_prob_str": "0.1%",
           "cum_prob_str": "100%"
         },
         {
@@ -143875,9 +143815,9 @@
           "raw_date": "2026-09-29",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 0.08,
+          "clinch_prob_val": 0.0,
           "win_expect": "-",
-          "clinch_prob_str": "0.08%",
+          "clinch_prob_str": "-",
           "cum_prob_str": "100%"
         },
         {
@@ -143895,7 +143835,7 @@
           "raw_date": "2026-10-01",
           "opp": "楽天",
           "ground": "敵地",
-          "clinch_prob_val": 0.1,
+          "clinch_prob_val": 0.13999999999999999,
           "win_expect": "80",
           "clinch_prob_str": "0.1%",
           "cum_prob_str": "100%"
@@ -143905,9 +143845,19 @@
           "raw_date": "2026-10-02",
           "opp": "ロッテ",
           "ground": "敵地",
-          "clinch_prob_val": 0.08,
+          "clinch_prob_val": 0.04,
           "win_expect": "80",
-          "clinch_prob_str": "0.08%",
+          "clinch_prob_str": "0.04%",
+          "cum_prob_str": "100%"
+        },
+        {
+          "date": "10/3",
+          "raw_date": "2026-10-03",
+          "opp": "ロッテ",
+          "ground": "敵地",
+          "clinch_prob_val": 0.04,
+          "win_expect": "80",
+          "clinch_prob_str": "0.04%",
           "cum_prob_str": "100%"
         }
       ],
