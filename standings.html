@@ -144,7 +144,7 @@
     .clinch-subtable th { background: #f8fafc; font-size: 0.8rem; padding: 6px 4px; color: #475569; }
     .clinch-subtable td { padding: 8px 4px; border-bottom: 1px solid #f1f5f9; }
 
-    /* 5. 画像1枚目：優勝ラインテーブル (勝率横並び比較) */
+    /* 5. 画像1枚目：優勝ラインテーブル */
     .line-grid-table { min-width: 700px; }
     .team-banner { font-size: 1.1rem; font-weight: 800; color: #fff; padding: 10px; }
     .banner-hanshin { background: #eab308; }
@@ -158,6 +158,17 @@
     .matrix-table td { font-size: 0.86rem; border-right: 1px solid var(--border); }
     .matrix-self { color: #94a3b8; font-weight: bold; background-color: #f8fafc; }
     .draw-sub { display: block; font-size: 0.75rem; color: #64748b; }
+
+    /* 7. 注釈パネル */
+    .notes-card {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 24px; font-size: 0.84rem; line-height: 1.7; color: #334155;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-top: 12px;
+    }
+    .notes-title { font-weight: 800; font-size: 0.98rem; color: #1e293b; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .notes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    .note-item dt { font-weight: 800; color: #1e3a8a; margin-bottom: 3px; font-size: 0.88rem; }
+    .note-item dd { margin: 0 0 12px 0; color: #475569; }
   </style>
 </head>
 <body>
@@ -210,7 +221,7 @@
     <!-- 2. 予想勝利確率カード (順位表直下 / 左: ホーム, 右: ビジター) -->
     <div class="section-title">
       🎯 NPB 予想勝利確率
-      <span class="section-desc" id="pred-subtext">（左: ホーム vs 右: ビジター / 予告先発・ピタゴラス勝率・Log5補正）</span>
+      <span class="section-desc" id="pred-subtext">（左: ホーム vs 右: ビジター / 予告先発・直近80試合ローリングピタゴラス・Log5補正）</span>
     </div>
     <div class="prediction-grid" id="prediction-grid"></div>
 
@@ -232,7 +243,7 @@
       </div>
     </div>
 
-    <!-- 4. 画像3枚目：優勝決定日確率テーブル (9/30以前の0%日は除外) -->
+    <!-- 4. 画像3枚目：優勝決定日確率テーブル -->
     <div class="section-title">
       📅 優勝決定日確率テーブル
       <span class="section-desc">（決定可能性が生じる日程から表示・対戦カード・開催地・見込勝率）</span>
@@ -260,6 +271,43 @@
           <tr><td colspan="15" style="padding: 24px;">データを読み込み中...</td></tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- 7. 欄外注釈パネル（復活） -->
+    <div class="notes-card">
+      <div class="notes-title">
+        <span>ℹ️</span> 項目および数理モデルの解説
+      </div>
+      <div class="notes-grid">
+        <div class="note-item">
+          <dl>
+            <dt>予想勝利確率（左: ホーム vs 右: ビジター）</dt>
+            <dd>最新のチーム状態を精緻に反映するため、直近80試合の得失点実績に線形時間加重を適用したピタゴラス期待勝率（指数1.83）を採用。これにNPBホームアドバンテージ（オッズ1.15倍）および予告先発投手の個人成績ベイズ補正を乗算し、Log5方程式により1試合ごとの勝率を算出しています。</dd>
+
+            <dt>全143試合完走モンテカルロ・シミュレーション</dt>
+            <dd>未確定の全日程について、毎日順次試合が開催されるものと仮定して3,000回のシーズン完走シミュレーションを実行。最終順位への到達確率（早見表）および日別の優勝決定確率を導き出しています。</dd>
+
+            <dt>CN（チャンピョンシップナンバー）</dt>
+            <dd>首位チームが自力でリーグ優勝（1位）を確定させるために必要な最小勝利数（マジックナンバー）です。</dd>
+          </dl>
+        </div>
+
+        <div class="note-item">
+          <dl>
+            <dt><span class="badge badge-fixed">確定</span></dt>
+            <dd>他チームが残り全勝しても自チームを逆転できない、数学的に順位が確定した状態です（CS確率等も100%確定となります）。</dd>
+
+            <dt><span class="badge badge-magic">13</span>（通常数値）</dt>
+            <dd><strong>自力確定可能</strong>：残り試合数の範囲内で、自チームの勝利のみによって自力確定できる必要勝利数です。</dd>
+
+            <dt><span class="badge badge-eliminated">◇14◇</span>（ひし形枠＋赤文字）</dt>
+            <dd><strong>自力消滅（可能性あり）</strong>：残り試合数以上の勝利が必要な状態です。自チーム全勝に加え、上位チームの敗戦アシスト（他力）が必要ですが、数学的な逆転可能性は残っています。</dd>
+
+            <dt><span class="badge-dash">-</span>（ハイフン）</dt>
+            <dd><strong>完全消滅（エリミネーション）</strong>：相手チームが残り全敗し、自チームが残り全勝しても届かない状態です。</dd>
+          </dl>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -326,13 +374,12 @@
       const dayData = rawData.history[selectedDate];
       const list = dayData[currentLeague];
 
-      // 1. 順位表 & CN表 (巨人のCS確率確定時100%保証)
+      // 1. 順位表 & CN表
       const tbodyStandings = document.getElementById('standings-body');
       tbodyStandings.innerHTML = '';
       list.forEach(t => {
         const rem = t.remaining !== undefined ? t.remaining : (143 - t.games);
         const champP = t.champ_prob !== undefined ? t.champ_prob : 0;
-        // 3rd(CS)が「確定」ならシミュレーション結果によらず100%と表示
         const csP = (t.magic_3rd === '確定') ? 100 : (t.cs_prob !== undefined ? t.cs_prob : 0);
 
         const tr = document.createElement('tr');
@@ -401,7 +448,7 @@
         });
       }
 
-      // 3. 画像2枚目：最終順位可能性早見表 (自力昇格可能/昇格可能性ありの正確な判定)
+      // 3. 画像2枚目：最終順位可能性早見表
       const rankHead = document.getElementById('rank-matrix-head');
       const rankBody = document.getElementById('rank-matrix-body');
       rankHead.innerHTML = '';
@@ -431,7 +478,6 @@
               cellClass = "cell-current-rank";
             } else if (r < curRank) {
               if (prob > 0) {
-                // 自力昇格可能（自力クリンチ有効）か、他力必須（◇自力消滅◇）かを厳密判定
                 const mKey = r === 1 ? "magic_1st" : (r === 2 ? "magic_2nd" : "magic_3rd");
                 const mVal = teamObj[mKey];
                 const canClimbBySelf = (typeof mVal === "number" && mVal <= teamObj.remaining);
@@ -449,7 +495,7 @@
         }
       }
 
-      // 4. 画像3枚目：優勝決定日確率テーブル (9/30以前の0%日は除外してスッキリ表示)
+      // 4. 画像3枚目：優勝決定日確率テーブル
       const clinchContainer = document.getElementById('clinch-schedule-container');
       clinchContainer.innerHTML = '';
 
@@ -522,7 +568,6 @@
           colsTh += `</tr>`;
           lineHead.innerHTML = topTh + subTh + colsTh;
 
-          // 行ごとの同等勝率横並び描画
           gridData.rows.forEach(r => {
             let trHtml = `<tr>`;
             r.forEach(cell => {
