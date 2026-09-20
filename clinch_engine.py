@@ -56,7 +56,7 @@ def parse_year_games_from_text(raw_text, target_year):
         if not line:
             continue
 
-        # 1. CSV形式
+        # 1. カンマ区切り（CSV形式）への対応
         csv_parts = [p.strip() for p in line.split(',')]
         if len(csv_parts) >= 6 and re.match(r'^\d{4}-\d{2}-\d{2}$', csv_parts[0]):
             c_date, h_raw, a_raw = csv_parts[0], csv_parts[1], csv_parts[2]
@@ -84,7 +84,7 @@ def parse_year_games_from_text(raw_text, target_year):
                     })
                 continue
 
-        # 2. 通常テキスト形式
+        # 2. テキスト形式（日付行の検出: 例 9/20（日）など）
         date_m = re.match(r'^(\d{1,2})\/(\d{1,2})(?:[（(][日月火水木金土][）)])?\s*(.*)$', line)
         if date_m:
             m, d = int(date_m.group(1)), int(date_m.group(2))
@@ -96,6 +96,7 @@ def parse_year_games_from_text(raw_text, target_year):
         if not current_date:
             continue
 
+        # 中止行の検出
         if "中止" in line or "ノーゲーム" in line:
             match_can = re.search(r'([^\s\d]+)\s*(?:中止|ノーゲーム)\s*([^\s\d]+)', line)
             if match_can:
@@ -111,6 +112,7 @@ def parse_year_games_from_text(raw_text, target_year):
                     })
             continue
 
+        # 試合終了行の検出（スコア・勝敗投手・天気の抽出）
         match_fin = re.search(r'([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)', line)
         if match_fin:
             h = normalize_team(match_fin.group(1))
@@ -118,9 +120,9 @@ def parse_year_games_from_text(raw_text, target_year):
             as_ = int(match_fin.group(3))
             a = normalize_team(match_fin.group(4))
             if h in all_teams and a in all_teams:
-                win_p = re.search(r'勝：([^\s]+)', line)
-                lose_p = re.search(r'敗：([^\s]+)', line)
-                draw_p = re.findall(r'分：([^\s]+)', line)
+                win_p = re.search(r'勝(?:利)?[:：]\s*([^\s,，]+)', line)
+                lose_p = re.search(r'敗(?:戦)?[:：]\s*([^\s,，]+)', line)
+                draw_p = re.findall(r'分[:：]\s*([^\s,，]+)', line)
 
                 win_pitcher = win_p.group(1) if win_p else ""
                 lose_pitcher = lose_p.group(1) if lose_p else ""
@@ -142,12 +144,13 @@ def parse_year_games_from_text(raw_text, target_year):
                 })
             continue
 
+        # 予告先発・予定行の検出
         match_sched = re.search(r'([^\s\d]+)\s*-\s*([^\s\d]+)', line)
         if match_sched:
             h = normalize_team(match_sched.group(1))
             a = normalize_team(match_sched.group(2))
             if h in all_teams and a in all_teams:
-                starters = re.findall(r'先発：([^\s]+)', line)
+                starters = re.findall(r'先発[:：]\s*([^\s,，]+)', line)
                 h_starter = starters[0] if len(starters) > 0 else "未定"
                 a_starter = starters[1] if len(starters) > 1 else "未定"
 
@@ -166,16 +169,15 @@ def load_all_games():
     games_2025 = []
     games_2026_master = []
 
-    # マスターテキストファイルの読み込み（存在しない場合は npb_games_clean.csv をフォールバック参照）
-    active_master_file = TEXT_LOG_FILE if os.path.exists(TEXT_LOG_FILE) else "npb_games_clean.csv"
-    if os.path.exists(active_master_file):
-        with open(active_master_file, "r", encoding="utf-8") as f:
+    # マスターテキストファイルの読み込み
+    if os.path.exists(TEXT_LOG_FILE):
+        with open(TEXT_LOG_FILE, "r", encoding="utf-8") as f:
             raw_text = f.read()
         games_2025 = parse_year_games_from_text(raw_text, 2025)
         games_2026_master = parse_year_games_from_text(raw_text, 2026)
 
-    # 手動暫定DB（games_db.json）とのマージ処理
-    # 原則：テキストをマスターとしつつ、直近の日付で手動側にスコアや予告先発が入っていれば手動で上書き結合
+    # 手動暫定DB（games_db.json）との差分マージ
+    # 原則：テキストがマスター。直近の日付で手動側にスコア等があれば上書き結合
     if os.path.exists(MANUAL_DB_FILE):
         try:
             with open(MANUAL_DB_FILE, "r", encoding="utf-8") as f:
@@ -188,7 +190,6 @@ def load_all_games():
             else:
                 manual_games = []
 
-            # 暫定入力カードを (date, home, away) をキーにして辞書化
             manual_map = {}
             for mg in manual_games:
                 if not mg or "date" not in mg or "home" not in mg or "away" not in mg:
@@ -206,13 +207,11 @@ def load_all_games():
             for mg_orig in games_2026_master:
                 k = (mg_orig["date"], mg_orig["home"], mg_orig["away"])
                 if k in manual_map:
-                    # 手動暫定側に入力がある場合は手動側で上書き
                     merged_2026.append(manual_map[k])
                     applied_keys.add(k)
                 else:
                     merged_2026.append(mg_orig)
 
-            # テキスト日程表にまだ載っていない追加カードがあれば末尾に追加
             for k, mg in manual_map.items():
                 if k not in applied_keys:
                     merged_2026.append(mg)
@@ -851,7 +850,6 @@ def build_all_history_with_predictions(games_2025, games_2026):
         "pacific_lines_grid": p_lines_grid
     }
 
-    # JST本日を取得
     jst_today = (datetime.datetime.utcnow() + datetime.timedelta(hours=9)).strftime("%Y-%m-%d")
     default_display_date = jst_today if jst_today in all_dates else last_eval_date
 
@@ -871,7 +869,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了（マスター優先・暫定差分マージ適用）：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了（マスターテキスト優先結合）：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
