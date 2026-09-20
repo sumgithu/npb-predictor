@@ -40,13 +40,11 @@
       font-size: 0.9rem; outline: none; background: #fff;
     }
 
-    /* 対戦カード行（PCレイアウト） */
     .match-row {
-      display: grid;
-      grid-template-columns: 2fr 75px 28px 75px 2fr 60px 32px;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 14px 12px;
       background: #f8fafc;
       border: 1px solid var(--border);
       border-radius: 10px;
@@ -56,63 +54,49 @@
       background: #f1f5f9;
       opacity: 0.65;
     }
+    .mobile-card-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 6px;
+    }
+    .mobile-vs-row {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 60px 24px 60px 1fr;
+      align-items: center;
+      gap: 6px;
+    }
+    .mobile-pitcher-row {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
     .match-team { display: flex; flex-direction: column; gap: 4px; }
     .match-team span.label { font-size: 0.72rem; font-weight: 700; }
     .match-team span.label.home-lbl { color: var(--home-color); }
-    .match-team span.label.away-lbl { color: var(--away-color); }
-    .match-team select { padding: 6px 8px; font-weight: 700; border-radius: 6px; border: 1px solid var(--border); font-size: 0.9rem; }
-    .match-team input.pitcher { padding: 5px 8px; font-size: 0.82rem; border-radius: 6px; border: 1px solid var(--border); }
+    .match-team span.label.away-lbl { color: var(--away-color); text-align: right; }
+    .match-team select { width: 100%; padding: 6px 8px; font-weight: 700; border-radius: 6px; border: 1px solid var(--border); font-size: 0.95rem; }
+    .pitcher { width: 100%; padding: 6px 8px; font-size: 0.82rem; border-radius: 6px; border: 1px solid var(--border); }
     
     .score-input {
-      width: 100%; min-width: 50px; text-align: center; font-size: 1.25rem; font-weight: 800;
-      padding: 6px 0; border-radius: 6px; border: 1px solid var(--border); background: #fff;
+      width: 100%; height: 42px; text-align: center; font-size: 1.3rem; font-weight: 800;
+      border-radius: 6px; border: 1px solid var(--border); background: #fff;
     }
     .score-input:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
-    
     .vs-text { text-align: center; font-size: 0.85rem; font-weight: 800; color: #94a3b8; }
     
     .cancel-box {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      font-size: 0.72rem; font-weight: 700; color: #64748b; gap: 2px; cursor: pointer;
+      display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #64748b; cursor: pointer;
     }
-    .cancel-box input { cursor: pointer; width: 16px; height: 16px; }
+    .cancel-box input { cursor: pointer; width: 18px; height: 18px; }
 
     .btn-del {
       background: none; border: none; color: var(--danger); font-size: 1.25rem;
       cursor: pointer; display: flex; align-items: center; justify-content: center;
-    }
-
-    /* スマホ・モバイル最適化レイアウト（768px以下） */
-    @media (max-width: 768px) {
-      .match-row {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        padding: 14px 12px;
-      }
-      .mobile-card-header {
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #e2e8f0;
-        padding-bottom: 6px;
-      }
-      .mobile-vs-row {
-        width: 100%;
-        display: grid;
-        grid-template-columns: 1fr 56px 20px 56px 1fr;
-        align-items: center;
-        gap: 6px;
-      }
-      .mobile-pitcher-row {
-        width: 100%;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-      .match-team select { width: 100%; font-size: 0.95rem; }
-      .score-input { height: 42px; font-size: 1.3rem; }
     }
 
     .btn-action {
@@ -135,7 +119,7 @@
     }
     .btn-save:hover { background: var(--primary-hover); }
 
-    .status-msg { font-size: 0.88rem; font-weight: 700; text-align: center; }
+    .status-msg { font-size: 0.9rem; font-weight: 700; text-align: center; }
     .status-msg.success { color: var(--success); }
     .status-msg.error { color: var(--danger); }
   </style>
@@ -152,7 +136,7 @@
       <div class="config-grid">
         <div class="form-group">
           <label>リポジトリ名 (例: username/repository)</label>
-          <input type="text" id="repo-name" placeholder="user/repo">
+          <input type="text" id="repo-name" placeholder="sumgithu/npb-predictor">
         </div>
         <div class="form-group">
           <label>GitHub Personal Access Token (repo権限)</label>
@@ -208,13 +192,20 @@
     const statusMsg = document.getElementById('status-msg');
 
     window.addEventListener('DOMContentLoaded', () => {
-      repoInput.value = localStorage.getItem('npb_admin_repo') || '';
+      let savedRepo = localStorage.getItem('npb_admin_repo') || 'sumgithu/npb-predictor';
+      if (savedRepo === 'sumgithu/npb-predict') savedRepo = 'sumgithu/npb-predictor';
+      repoInput.value = savedRepo;
       tokenInput.value = localStorage.getItem('npb_admin_token') || '';
 
       const today = new Date().toISOString().split('T')[0];
       dateInput.value = today;
 
-      repoInput.addEventListener('change', () => localStorage.setItem('npb_admin_repo', repoInput.value.trim()));
+      repoInput.addEventListener('change', () => {
+        let val = repoInput.value.trim();
+        if (val === 'sumgithu/npb-predict') val = 'sumgithu/npb-predictor';
+        repoInput.value = val;
+        localStorage.setItem('npb_admin_repo', val);
+      });
       tokenInput.addEventListener('change', () => localStorage.setItem('npb_admin_token', tokenInput.value.trim()));
       
       dateInput.addEventListener('change', () => loadDateForm());
@@ -229,7 +220,10 @@
     }
 
     async function loadRemoteDb() {
-      const repo = repoInput.value.trim();
+      let repo = repoInput.value.trim();
+      if (repo === 'sumgithu/npb-predict') repo = 'sumgithu/npb-predictor';
+      repoInput.value = repo;
+
       const token = tokenInput.value.trim();
       if (!repo || !token) {
         showStatus("リポジトリ名とGitHubトークンを入力してください", "error");
@@ -259,15 +253,6 @@
           parseTextSchedule(decodedTxt);
           const totalDays = Object.keys(textScheduleMap).length;
           showStatus(`完全同期完了 (テキストログから ${totalDays} 日分の日程を読み込みました)`, "success");
-        } else {
-          try {
-            const fallbackRes = await fetch(`2016-2026プロ野球レギュラーシーズン結果.txt?t=${new Date().getTime()}`);
-            if (fallbackRes.ok) {
-              const raw = await fallbackRes.text();
-              parseTextSchedule(raw);
-              showStatus("同期完了", "success");
-            }
-          } catch (_) {}
         }
 
         loadDateForm();
@@ -425,15 +410,12 @@
       const homePitcher = data ? (data.home_starter || data.home_pitcher || '') : '';
       const awayPitcher = data ? (data.away_starter || data.away_pitcher || '') : '';
 
-      // PC・スマホ兼用（画面幅に応じてCSSで整列）
       row.innerHTML = `
         <div class="mobile-card-header">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <label class="cancel-box" style="flex-direction:row; gap:4px;">
-              <input type="checkbox" class="chk-cancel" onchange="toggleCancelRow(this)" ${isCancelled ? 'checked' : ''}>
-              <span>雨天中止</span>
-            </label>
-          </div>
+          <label class="cancel-box">
+            <input type="checkbox" class="chk-cancel" onchange="toggleCancelRow(this)" ${isCancelled ? 'checked' : ''}>
+            <span>雨天中止</span>
+          </label>
           <button type="button" class="btn-del" title="削除" onclick="this.closest('.match-row').remove()">✕</button>
         </div>
 
@@ -449,7 +431,7 @@
 
           <input type="number" class="score-input away-score" placeholder="点" min="0" max="35" value="${awayScore}" ${isCancelled ? 'disabled' : ''}>
 
-          <div class="match-team" style="text-align:right;">
+          <div class="match-team">
             <span class="label away-lbl">ビジター</span>
             <select class="away-team">${awayOptions}</select>
           </div>
@@ -464,12 +446,16 @@
     }
 
     async function saveToGitHub() {
-      const repo = repoInput.value.trim();
+      let repo = repoInput.value.trim();
+      if (repo === 'sumgithu/npb-predict') repo = 'sumgithu/npb-predictor';
+      repoInput.value = repo;
+      localStorage.setItem('npb_admin_repo', repo);
+
       const token = tokenInput.value.trim();
       const date = dateInput.value;
 
       if (!repo || !token || !date) {
-        showStatus("必須項目が不足しています", "error");
+        showStatus("リポジトリ名とGitHubトークンを入力してください", "error");
         return;
       }
 
@@ -521,7 +507,7 @@
 
       const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(currentDb, null, 2))));
       const payload = {
-        message: `Update results/schedule for ${date} via responsive admin UI`,
+        message: `Update results for ${date} via admin UI`,
         content: contentBase64,
         sha: fileSha || undefined
       };
@@ -540,7 +526,7 @@
         if (res.ok) {
           const resData = await res.json();
           fileSha = resData.content.sha;
-          showStatus(`保存完了！ (${date} のデータを更新しました)`, "success");
+          showStatus(`保存完了！ (${date} のデータを更新しました。GitHub Actionsが自動実行されます)`, "success");
         } else {
           const err = await res.json();
           showStatus(`保存失敗: ${err.message}`, "error");
