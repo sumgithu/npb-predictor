@@ -130999,8 +130999,8 @@
           "win": 72,
           "lose": 57,
           "draw": 1,
-          "rs": 468,
-          "ra": 400,
+          "rs": 472,
+          "ra": 401,
           "home": {
             "win": 33,
             "lose": 31,
@@ -131057,7 +131057,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 31,
+          "champ_prob": 32,
           "cs_prob": 100
         },
         {
@@ -131124,7 +131124,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 69,
+          "champ_prob": 68,
           "cs_prob": 100
         },
         {
@@ -131133,8 +131133,8 @@
           "win": 65,
           "lose": 65,
           "draw": 3,
-          "rs": 512,
-          "ra": 476,
+          "rs": 513,
+          "ra": 480,
           "home": {
             "win": 34,
             "lose": 27,
@@ -131836,8 +131836,8 @@
           "away_status_text": "敗戦: 竹田",
           "home_prob": 57.9,
           "away_prob": 42.1,
-          "actual_home_score": 4,
-          "actual_away_score": 0,
+          "actual_home_score": 8,
+          "actual_away_score": 1,
           "is_finished": true
         },
         {
@@ -131876,8 +131876,8 @@
           "win": 72,
           "lose": 57,
           "draw": 1,
-          "rs": 468,
-          "ra": 400,
+          "rs": 472,
+          "ra": 401,
           "home": {
             "win": 33,
             "lose": 31,
@@ -131934,7 +131934,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 31,
+          "champ_prob": 32,
           "cs_prob": 100
         },
         {
@@ -132001,7 +132001,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 69,
+          "champ_prob": 68,
           "cs_prob": 100
         },
         {
@@ -132010,8 +132010,8 @@
           "win": 65,
           "lose": 65,
           "draw": 3,
-          "rs": 512,
-          "ra": 476,
+          "rs": 513,
+          "ra": 480,
           "home": {
             "win": 34,
             "lose": 27,
@@ -132698,8 +132698,8 @@
           "away_starter": "平良",
           "home_status_text": "先発: ルーカス",
           "away_status_text": "先発: 平良",
-          "home_prob": 25.7,
-          "away_prob": 74.3,
+          "home_prob": 27.2,
+          "away_prob": 72.8,
           "actual_home_score": null,
           "actual_away_score": null,
           "is_finished": false
@@ -132753,8 +132753,8 @@
           "win": 72,
           "lose": 57,
           "draw": 1,
-          "rs": 468,
-          "ra": 400,
+          "rs": 472,
+          "ra": 401,
           "home": {
             "win": 33,
             "lose": 31,
@@ -132811,7 +132811,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 31,
+          "champ_prob": 32,
           "cs_prob": 100
         },
         {
@@ -132878,7 +132878,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 69,
+          "champ_prob": 68,
           "cs_prob": 100
         },
         {
@@ -132887,8 +132887,8 @@
           "win": 65,
           "lose": 65,
           "draw": 3,
-          "rs": 512,
-          "ra": 476,
+          "rs": 513,
+          "ra": 480,
           "home": {
             "win": 34,
             "lose": 27,
@@ -133562,8 +133562,8 @@
           "away_starter": "未定",
           "home_status_text": "先発: 未定",
           "away_status_text": "先発: 未定",
-          "home_prob": 31.3,
-          "away_prob": 68.7,
+          "home_prob": 30.7,
+          "away_prob": 69.3,
           "actual_home_score": null,
           "actual_away_score": null,
           "is_finished": false
@@ -133575,8 +133575,8 @@
           "away_starter": "未定",
           "home_status_text": "先発: 未定",
           "away_status_text": "先発: 未定",
-          "home_prob": 67.8,
-          "away_prob": 32.2,
+          "home_prob": 66.9,
+          "away_prob": 33.1,
           "actual_home_score": null,
           "actual_away_score": null,
           "is_finished": false
@@ -133643,8 +133643,8 @@
           "win": 72,
           "lose": 57,
           "draw": 1,
-          "rs": 468,
-          "ra": 400,
+          "rs": 472,
+          "ra": 401,
           "home": {
             "win": 33,
             "lose": 31,
@@ -133701,7 +133701,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 31,
+          "champ_prob": 32,
           "cs_prob": 100
         },
         {
@@ -133768,7 +133768,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 69,
+          "champ_prob": 68,
           "cs_prob": 100
         },
         {
@@ -133777,8 +133777,8 @@
           "win": 65,
           "lose": 65,
           "draw": 3,
-          "rs": 512,
-          "ra": 476,
+          "rs": 513,
+          "ra": 480,
           "home": {
             "win": 34,
             "lose": 27,
@@ -134452,8 +134452,8 @@
           "away_starter": "未定",
           "home_status_text": "先発: 未定",
           "away_status_text": "先発: 未定",
-          "home_prob": 31.3,
-          "away_prob": 68.7,
+          "home_prob": 30.7,
+          "away_prob": 69.3,
           "actual_home_score": null,
           "actual_away_score": null,
           "is_finished": false
@@ -134465,8 +134465,8 @@
           "away_starter": "未定",
           "home_status_text": "先発: 未定",
           "away_status_text": "先発: 未定",
-          "home_prob": 67.8,
-          "away_prob": 32.2,
+          "home_prob": 66.9,
+          "away_prob": 33.1,
           "actual_home_score": null,
           "actual_away_score": null,
           "is_finished": false
@@ -134533,8 +134533,8 @@
           "win": 72,
           "lose": 57,
           "draw": 1,
-          "rs": 468,
-          "ra": 400,
+          "rs": 472,
+          "ra": 401,
           "home": {
             "win": 33,
             "lose": 31,
@@ -134591,7 +134591,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 31,
+          "champ_prob": 32,
           "cs_prob": 100
         },
         {
@@ -134658,7 +134658,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 69,
+          "champ_prob": 68,
           "cs_prob": 100
         },
         {
@@ -134667,8 +134667,8 @@
           "win": 65,
           "lose": 65,
           "draw": 3,
-          "rs": 512,
-          "ra": 476,
+          "rs": 513,
+          "ra": 480,
           "home": {
             "win": 34,
             "lose": 27,
@@ -135371,8 +135371,8 @@
           "win": 72,
           "lose": 57,
           "draw": 1,
-          "rs": 468,
-          "ra": 400,
+          "rs": 472,
+          "ra": 401,
           "home": {
             "win": 33,
             "lose": 31,
@@ -135429,7 +135429,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 31,
+          "champ_prob": 32,
           "cs_prob": 100
         },
         {
@@ -135496,7 +135496,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 69,
+          "champ_prob": 68,
           "cs_prob": 100
         },
         {
@@ -135505,8 +135505,8 @@
           "win": 65,
           "lose": 65,
           "draw": 3,
-          "rs": 512,
-          "ra": 476,
+          "rs": 513,
+          "ra": 480,
           "home": {
             "win": 34,
             "lose": 27,
@@ -136193,8 +136193,8 @@
           "away_starter": "未定",
           "home_status_text": "先発: 未定",
           "away_status_text": "先発: 未定",
-          "home_prob": 61.1,
-          "away_prob": 38.9,
+          "home_prob": 59.3,
+          "away_prob": 40.7,
           "actual_home_score": null,
           "actual_away_score": null,
           "is_finished": false
@@ -136248,8 +136248,8 @@
           "win": 72,
           "lose": 57,
           "draw": 1,
-          "rs": 468,
-          "ra": 400,
+          "rs": 472,
+          "ra": 401,
           "home": {
             "win": 33,
             "lose": 31,
@@ -136306,7 +136306,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 31,
+          "champ_prob": 32,
           "cs_prob": 100
         },
         {
@@ -136373,7 +136373,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 69,
+          "champ_prob": 68,
           "cs_prob": 100
         },
         {
@@ -136382,8 +136382,8 @@
           "win": 65,
           "lose": 65,
           "draw": 3,
-          "rs": 512,
-          "ra": 476,
+          "rs": 513,
+          "ra": 480,
           "home": {
             "win": 34,
             "lose": 27,
@@ -137070,8 +137070,8 @@
           "away_starter": "未定",
           "home_status_text": "先発: 未定",
           "away_status_text": "先発: 未定",
-          "home_prob": 61.1,
-          "away_prob": 38.9,
+          "home_prob": 59.3,
+          "away_prob": 40.7,
           "actual_home_score": null,
           "actual_away_score": null,
           "is_finished": false
@@ -137125,8 +137125,8 @@
           "win": 72,
           "lose": 57,
           "draw": 1,
-          "rs": 468,
-          "ra": 400,
+          "rs": 472,
+          "ra": 401,
           "home": {
             "win": 33,
             "lose": 31,
@@ -137183,7 +137183,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 31,
+          "champ_prob": 32,
           "cs_prob": 100
         },
         {
@@ -137250,7 +137250,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 69,
+          "champ_prob": 68,
           "cs_prob": 100
         },
         {
@@ -137259,8 +137259,8 @@
           "win": 65,
           "lose": 65,
           "draw": 3,
-          "rs": 512,
-          "ra": 476,
+          "rs": 513,
+          "ra": 480,
           "home": {
             "win": 34,
             "lose": 27,
@@ -137947,8 +137947,8 @@
           "away_starter": "未定",
           "home_status_text": "先発: 未定",
           "away_status_text": "先発: 未定",
-          "home_prob": 78.2,
-          "away_prob": 21.8,
+          "home_prob": 77.5,
+          "away_prob": 22.5,
           "actual_home_score": null,
           "actual_away_score": null,
           "is_finished": false
@@ -138002,8 +138002,8 @@
           "win": 72,
           "lose": 57,
           "draw": 1,
-          "rs": 468,
-          "ra": 400,
+          "rs": 472,
+          "ra": 401,
           "home": {
             "win": 33,
             "lose": 31,
@@ -138060,7 +138060,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 31,
+          "champ_prob": 32,
           "cs_prob": 100
         },
         {
@@ -138127,7 +138127,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 69,
+          "champ_prob": 68,
           "cs_prob": 100
         },
         {
@@ -138136,8 +138136,8 @@
           "win": 65,
           "lose": 65,
           "draw": 3,
-          "rs": 512,
-          "ra": 476,
+          "rs": 513,
+          "ra": 480,
           "home": {
             "win": 34,
             "lose": 27,
@@ -138811,8 +138811,8 @@
           "away_starter": "未定",
           "home_status_text": "先発: 未定",
           "away_status_text": "先発: 未定",
-          "home_prob": 78.2,
-          "away_prob": 21.8,
+          "home_prob": 77.5,
+          "away_prob": 22.5,
           "actual_home_score": null,
           "actual_away_score": null,
           "is_finished": false
@@ -138853,8 +138853,8 @@
           "win": 72,
           "lose": 57,
           "draw": 1,
-          "rs": 468,
-          "ra": 400,
+          "rs": 472,
+          "ra": 401,
           "home": {
             "win": 33,
             "lose": 31,
@@ -138911,7 +138911,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 31,
+          "champ_prob": 32,
           "cs_prob": 100
         },
         {
@@ -138978,7 +138978,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 69,
+          "champ_prob": 68,
           "cs_prob": 100
         },
         {
@@ -138987,8 +138987,8 @@
           "win": 65,
           "lose": 65,
           "draw": 3,
-          "rs": 512,
-          "ra": 476,
+          "rs": 513,
+          "ra": 480,
           "home": {
             "win": 34,
             "lose": 27,
@@ -139675,8 +139675,8 @@
           "away_starter": "未定",
           "home_status_text": "先発: 未定",
           "away_status_text": "先発: 未定",
-          "home_prob": 74.3,
-          "away_prob": 25.7,
+          "home_prob": 75.0,
+          "away_prob": 25.0,
           "actual_home_score": null,
           "actual_away_score": null,
           "is_finished": false
@@ -139717,8 +139717,8 @@
           "win": 72,
           "lose": 57,
           "draw": 1,
-          "rs": 468,
-          "ra": 400,
+          "rs": 472,
+          "ra": 401,
           "home": {
             "win": 33,
             "lose": 31,
@@ -139775,7 +139775,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 31,
+          "champ_prob": 32,
           "cs_prob": 100
         },
         {
@@ -139842,7 +139842,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 69,
+          "champ_prob": 68,
           "cs_prob": 100
         },
         {
@@ -139851,8 +139851,8 @@
           "win": 65,
           "lose": 65,
           "draw": 3,
-          "rs": 512,
-          "ra": 476,
+          "rs": 513,
+          "ra": 480,
           "home": {
             "win": 34,
             "lose": 27,
@@ -140526,8 +140526,8 @@
           "away_starter": "未定",
           "home_status_text": "先発: 未定",
           "away_status_text": "先発: 未定",
-          "home_prob": 74.3,
-          "away_prob": 25.7,
+          "home_prob": 75.0,
+          "away_prob": 25.0,
           "actual_home_score": null,
           "actual_away_score": null,
           "is_finished": false
@@ -140555,8 +140555,8 @@
           "win": 72,
           "lose": 57,
           "draw": 1,
-          "rs": 468,
-          "ra": 400,
+          "rs": 472,
+          "ra": 401,
           "home": {
             "win": 33,
             "lose": 31,
@@ -140613,7 +140613,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 31,
+          "champ_prob": 32,
           "cs_prob": 100
         },
         {
@@ -140680,7 +140680,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 69,
+          "champ_prob": 68,
           "cs_prob": 100
         },
         {
@@ -140689,8 +140689,8 @@
           "win": 65,
           "lose": 65,
           "draw": 3,
-          "rs": 512,
-          "ra": 476,
+          "rs": 513,
+          "ra": 480,
           "home": {
             "win": 34,
             "lose": 27,
@@ -141364,8 +141364,8 @@
           "away_starter": "未定",
           "home_status_text": "先発: 未定",
           "away_status_text": "先発: 未定",
-          "home_prob": 47.5,
-          "away_prob": 52.5,
+          "home_prob": 48.3,
+          "away_prob": 51.7,
           "actual_home_score": null,
           "actual_away_score": null,
           "is_finished": false
@@ -141419,8 +141419,8 @@
           "win": 72,
           "lose": 57,
           "draw": 1,
-          "rs": 468,
-          "ra": 400,
+          "rs": 472,
+          "ra": 401,
           "home": {
             "win": 33,
             "lose": 31,
@@ -141477,7 +141477,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 31,
+          "champ_prob": 32,
           "cs_prob": 100
         },
         {
@@ -141544,7 +141544,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 69,
+          "champ_prob": 68,
           "cs_prob": 100
         },
         {
@@ -141553,8 +141553,8 @@
           "win": 65,
           "lose": 65,
           "draw": 3,
-          "rs": 512,
-          "ra": 476,
+          "rs": 513,
+          "ra": 480,
           "home": {
             "win": 34,
             "lose": 27,
@@ -142257,8 +142257,8 @@
           "win": 72,
           "lose": 57,
           "draw": 1,
-          "rs": 468,
-          "ra": 400,
+          "rs": 472,
+          "ra": 401,
           "home": {
             "win": 33,
             "lose": 31,
@@ -142315,7 +142315,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 31,
+          "champ_prob": 32,
           "cs_prob": 100
         },
         {
@@ -142382,7 +142382,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 69,
+          "champ_prob": 68,
           "cs_prob": 100
         },
         {
@@ -142391,8 +142391,8 @@
           "win": 65,
           "lose": 65,
           "draw": 3,
-          "rs": 512,
-          "ra": 476,
+          "rs": 513,
+          "ra": 480,
           "home": {
             "win": 34,
             "lose": 27,
@@ -143066,8 +143066,8 @@
           "away_starter": "未定",
           "home_status_text": "先発: 未定",
           "away_status_text": "先発: 未定",
-          "home_prob": 51.7,
-          "away_prob": 48.3,
+          "home_prob": 52.7,
+          "away_prob": 47.3,
           "actual_home_score": null,
           "actual_away_score": null,
           "is_finished": false
@@ -143092,8 +143092,8 @@
           "away_starter": "未定",
           "home_status_text": "先発: 未定",
           "away_status_text": "先発: 未定",
-          "home_prob": 33.4,
-          "away_prob": 66.6,
+          "home_prob": 32.7,
+          "away_prob": 67.3,
           "actual_home_score": null,
           "actual_away_score": null,
           "is_finished": false
@@ -143134,8 +143134,8 @@
           "win": 72,
           "lose": 57,
           "draw": 1,
-          "rs": 468,
-          "ra": 400,
+          "rs": 472,
+          "ra": 401,
           "home": {
             "win": 33,
             "lose": 31,
@@ -143192,7 +143192,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 31,
+          "champ_prob": 32,
           "cs_prob": 100
         },
         {
@@ -143259,7 +143259,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 69,
+          "champ_prob": 68,
           "cs_prob": 100
         },
         {
@@ -143268,8 +143268,8 @@
           "win": 65,
           "lose": 65,
           "draw": 3,
-          "rs": 512,
-          "ra": 476,
+          "rs": 513,
+          "ra": 480,
           "home": {
             "win": 34,
             "lose": 27,
@@ -143956,8 +143956,8 @@
           "away_starter": "未定",
           "home_status_text": "先発: 未定",
           "away_status_text": "先発: 未定",
-          "home_prob": 61.1,
-          "away_prob": 38.9,
+          "home_prob": 59.3,
+          "away_prob": 40.7,
           "actual_home_score": null,
           "actual_away_score": null,
           "is_finished": false
@@ -143981,16 +143981,16 @@
   "simulation": {
     "central_rank_matrix": {
       "阪神": {
-        "1": 31,
-        "2": 69,
+        "1": 32,
+        "2": 68,
         "3": 0,
         "4": 0,
         "5": 0,
         "6": 0
       },
       "巨人": {
-        "1": 69,
-        "2": 31,
+        "1": 68,
+        "2": 32,
         "3": 0,
         "4": 0,
         "5": 0,
@@ -144009,7 +144009,7 @@
         "2": 0,
         "3": 0,
         "4": 48,
-        "5": 47,
+        "5": 46,
         "6": 5
       },
       "中日": {
@@ -144024,7 +144024,7 @@
         "1": 0,
         "2": 0,
         "3": 0,
-        "4": 2,
+        "4": 1,
         "5": 8,
         "6": 91
       }
@@ -144082,21 +144082,11 @@
     "central_clinch_schedules": {
       "阪神": [
         {
-          "date": "10/2",
-          "raw_date": "2026-10-02",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.04,
-          "win_expect": "-",
-          "clinch_prob_str": "0.04%",
-          "cum_prob_str": "0.04%"
-        },
-        {
           "date": "10/3",
           "raw_date": "2026-10-03",
           "opp": "広島",
           "ground": "敵地",
-          "clinch_prob_val": 0.4,
+          "clinch_prob_val": 0.38,
           "win_expect": "67",
           "clinch_prob_str": "0.4%",
           "cum_prob_str": "0.4%"
@@ -144106,10 +144096,10 @@
           "raw_date": "2026-10-04",
           "opp": "ＤｅＮＡ",
           "ground": "敵地",
-          "clinch_prob_val": 30.78,
-          "win_expect": "39",
-          "clinch_prob_str": "31%",
-          "cum_prob_str": "31%"
+          "clinch_prob_val": 0.5,
+          "win_expect": "41",
+          "clinch_prob_str": "0.5%",
+          "cum_prob_str": "0.9%"
         }
       ],
       "巨人": [
@@ -144128,19 +144118,19 @@
           "raw_date": "2026-10-02",
           "opp": "ヤクルト",
           "ground": "神宮",
-          "clinch_prob_val": 0.7799999999999999,
+          "clinch_prob_val": 0.6,
           "win_expect": "74",
-          "clinch_prob_str": "0.8%",
-          "cum_prob_str": "0.9%"
+          "clinch_prob_str": "0.6%",
+          "cum_prob_str": "0.7%"
         },
         {
           "date": "10/3",
           "raw_date": "2026-10-03",
           "opp": "ＤｅＮＡ",
           "ground": "東京D",
-          "clinch_prob_val": 3.52,
-          "win_expect": "52",
-          "clinch_prob_str": "4%",
+          "clinch_prob_val": 3.18,
+          "win_expect": "53",
+          "clinch_prob_str": "3%",
           "cum_prob_str": "4%"
         },
         {
@@ -144148,10 +144138,10 @@
           "raw_date": "2026-10-04",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 64.36,
+          "clinch_prob_val": 3.82,
           "win_expect": "-",
-          "clinch_prob_str": "64%",
-          "cum_prob_str": "69%"
+          "clinch_prob_str": "4%",
+          "cum_prob_str": "8%"
         }
       ],
       "ＤｅＮＡ": [
@@ -144161,7 +144151,7 @@
           "opp": "中日",
           "ground": "横浜",
           "clinch_prob_val": 0.0,
-          "win_expect": "68",
+          "win_expect": "67",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
         },
@@ -144171,7 +144161,7 @@
           "opp": "中日",
           "ground": "横浜",
           "clinch_prob_val": 0.0,
-          "win_expect": "68",
+          "win_expect": "67",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
         },
@@ -144181,7 +144171,7 @@
           "opp": "阪神",
           "ground": "横浜",
           "clinch_prob_val": 0.0,
-          "win_expect": "61",
+          "win_expect": "59",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
         },
@@ -144191,7 +144181,7 @@
           "opp": "阪神",
           "ground": "横浜",
           "clinch_prob_val": 0.0,
-          "win_expect": "61",
+          "win_expect": "59",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
         },
@@ -144221,7 +144211,7 @@
           "opp": "巨人",
           "ground": "敵地",
           "clinch_prob_val": 0.0,
-          "win_expect": "48",
+          "win_expect": "47",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
         },
@@ -144231,7 +144221,7 @@
           "opp": "阪神",
           "ground": "横浜",
           "clinch_prob_val": 0.0,
-          "win_expect": "61",
+          "win_expect": "59",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
         }
@@ -144273,7 +144263,7 @@
           "opp": "阪神",
           "ground": "敵地",
           "clinch_prob_val": 0.0,
-          "win_expect": "26",
+          "win_expect": "25",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
         },
@@ -144283,7 +144273,7 @@
           "opp": "阪神",
           "ground": "敵地",
           "clinch_prob_val": 0.0,
-          "win_expect": "26",
+          "win_expect": "25",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
         },
@@ -144335,7 +144325,7 @@
           "opp": "ＤｅＮＡ",
           "ground": "敵地",
           "clinch_prob_val": 0.0,
-          "win_expect": "32",
+          "win_expect": "33",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
         },
@@ -144345,7 +144335,7 @@
           "opp": "ＤｅＮＡ",
           "ground": "敵地",
           "clinch_prob_val": 0.0,
-          "win_expect": "32",
+          "win_expect": "33",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
         },
@@ -144480,10 +144470,10 @@
           "raw_date": "2026-09-23",
           "opp": "西武",
           "ground": "敵地",
-          "clinch_prob_val": 56.779999999999994,
+          "clinch_prob_val": 56.18,
           "win_expect": "80",
-          "clinch_prob_str": "57%",
-          "cum_prob_str": "57%"
+          "clinch_prob_str": "56%",
+          "cum_prob_str": "56%"
         },
         {
           "date": "9/24",
@@ -144493,26 +144483,26 @@
           "clinch_prob_val": 3.9,
           "win_expect": "-",
           "clinch_prob_str": "4%",
-          "cum_prob_str": "61%"
+          "cum_prob_str": "60%"
         },
         {
           "date": "9/25",
           "raw_date": "2026-09-25",
           "opp": "オリックス",
           "ground": "敵地",
-          "clinch_prob_val": 19.220000000000002,
+          "clinch_prob_val": 19.259999999999998,
           "win_expect": "84",
           "clinch_prob_str": "19%",
-          "cum_prob_str": "80%"
+          "cum_prob_str": "79%"
         },
         {
           "date": "9/26",
           "raw_date": "2026-09-26",
           "opp": "楽天",
           "ground": "敵地",
-          "clinch_prob_val": 13.020000000000001,
+          "clinch_prob_val": 13.58,
           "win_expect": "82",
-          "clinch_prob_str": "13%",
+          "clinch_prob_str": "14%",
           "cum_prob_str": "93%"
         },
         {
@@ -144520,7 +144510,7 @@
           "raw_date": "2026-09-27",
           "opp": "オリックス",
           "ground": "敵地",
-          "clinch_prob_val": 5.24,
+          "clinch_prob_val": 5.220000000000001,
           "win_expect": "88",
           "clinch_prob_str": "5%",
           "cum_prob_str": "98%"
@@ -144530,9 +144520,9 @@
           "raw_date": "2026-09-28",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 0.74,
+          "clinch_prob_val": 0.64,
           "win_expect": "-",
-          "clinch_prob_str": "0.7%",
+          "clinch_prob_str": "0.6%",
           "cum_prob_str": "99%"
         },
         {
@@ -144540,9 +144530,9 @@
           "raw_date": "2026-09-29",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 0.44,
+          "clinch_prob_val": 0.24,
           "win_expect": "-",
-          "clinch_prob_str": "0.4%",
+          "clinch_prob_str": "0.2%",
           "cum_prob_str": "99%"
         },
         {
@@ -144560,9 +144550,9 @@
           "raw_date": "2026-10-01",
           "opp": "楽天",
           "ground": "敵地",
-          "clinch_prob_val": 0.44,
+          "clinch_prob_val": 0.58,
           "win_expect": "78",
-          "clinch_prob_str": "0.4%",
+          "clinch_prob_str": "0.6%",
           "cum_prob_str": "100%"
         },
         {
@@ -144570,9 +144560,9 @@
           "raw_date": "2026-10-02",
           "opp": "ロッテ",
           "ground": "敵地",
-          "clinch_prob_val": 0.1,
+          "clinch_prob_val": 0.2,
           "win_expect": "79",
-          "clinch_prob_str": "0.1%",
+          "clinch_prob_str": "0.2%",
           "cum_prob_str": "100%"
         },
         {
@@ -144580,19 +144570,9 @@
           "raw_date": "2026-10-03",
           "opp": "ロッテ",
           "ground": "敵地",
-          "clinch_prob_val": 0.1,
+          "clinch_prob_val": 0.12,
           "win_expect": "79",
           "clinch_prob_str": "0.1%",
-          "cum_prob_str": "100%"
-        },
-        {
-          "date": "10/4",
-          "raw_date": "2026-10-04",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.02,
-          "win_expect": "-",
-          "clinch_prob_str": "0.02%",
           "cum_prob_str": "100%"
         }
       ],
