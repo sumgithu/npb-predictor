@@ -241,7 +241,6 @@ def validate_and_assert_standings(teams):
 
 EXP_PYTHAGOREAN = 1.83
 HOME_ODDS_ADVANTAGE = 1.15
-# 最適化されたサンプリング期間：直近65試合
 RECENT_WINDOW_GAMES = 65
 
 def calc_pythagorean_rate(rs, ra):
@@ -330,38 +329,47 @@ def simulate_full_season_probabilities(league_teams, current_standings, remainin
     base_loses = {t["team"]: t["lose"] for t in current_standings}
     sorted_matches = sorted(remaining_matches, key=lambda x: x["date"])
 
+    # 日付ごとに試合をグループ化してシミュレーション
+    matches_by_date = {}
+    for m in sorted_matches:
+        d = m["date"]
+        if d not in matches_by_date:
+            matches_by_date[d] = []
+        matches_by_date[d].append(m)
+
+    sorted_dates = sorted(matches_by_date.keys())
+
     for _ in range(NUM_SIMS):
         sim_w = dict(base_wins)
         sim_l = dict(base_loses)
         clinched_day = {t: None for t in league_teams}
 
-        for match in sorted_matches:
-            h, a = match["home"], match["away"]
-            m_date = match["date"]
-            p_home = base_probs.get((h, a), 0.535)
+        for d in sorted_dates:
+            for match in matches_by_date[d]:
+                h, a = match["home"], match["away"]
+                p_home = base_probs.get((h, a), 0.535)
+                if random.random() < p_home:
+                    sim_w[h] += 1
+                    sim_l[a] += 1
+                else:
+                    sim_w[a] += 1
+                    sim_l[h] += 1
 
-            if random.random() < p_home:
-                sim_w[h] += 1
-                sim_l[a] += 1
-            else:
-                sim_w[a] += 1
-                sim_l[h] += 1
-
+            # 各日終了時点で順位逆転可能性をチェック（他力決定も完全捕捉）
             sim_rates = sorted([(t, sim_w[t] / (sim_w[t] + sim_l[t]), sim_w[t]) for t in league_teams],
                                key=lambda x: (x[1], x[2]), reverse=True)
             leader = sim_rates[0][0]
             second = sim_rates[1][0]
             rem_2nd = TOTAL_GAMES - (sim_w[second] + sim_l[second])
 
-            # 2位チームが逆転不能になった瞬間（自チーム勝利または相手敗戦）
             if sim_w[leader] > sim_w[second] + rem_2nd and clinched_day[leader] is None:
-                clinched_day[leader] = m_date
+                clinched_day[leader] = d
 
         sim_rates = sorted([(t, sim_w[t] / (sim_w[t] + sim_l[t]), sim_w[t]) for t in league_teams],
                            key=lambda x: (x[1], x[2]), reverse=True)
 
         champ = sim_rates[0][0]
-        c_date = clinched_day[champ] or (sorted_matches[-1]["date"] if sorted_matches else "2026-10-07")
+        c_date = clinched_day[champ] or (sorted_dates[-1] if sorted_dates else "2026-10-07")
         clinch_date_counts[champ][c_date] = clinch_date_counts[champ].get(c_date, 0) + 1
 
         for idx, item in enumerate(sim_rates):
@@ -378,7 +386,6 @@ def simulate_full_season_probabilities(league_teams, current_standings, remainin
             for r in range(4, 7):
                 final_rank_matrix[tname][r] = 0
 
-    # 決定日確率（未端数保持の浮動小数点マップ）
     clinch_date_probs = {}
     for t in league_teams:
         c_map = {}
@@ -426,6 +433,9 @@ def generate_future_calendar_matches(league_teams, current_standings, registered
 
     return sim_matches + auto_matches
 
+# -------------------------------------------------------------
+# 画像1枚目準拠：DeNAの11勝0敗の上方をハイフン化し、空白行を排除
+# -------------------------------------------------------------
 def build_aligned_championship_grid(top_teams_standings):
     teams_data = []
     for t in top_teams_standings[:3]:
@@ -447,15 +457,30 @@ def build_aligned_championship_grid(top_teams_standings):
         })
 
     aligned_rows = []
-    base_team = teams_data[0]
+    base_team = teams_data[0] # 首位（巨人）
+    team3_max_rate = teams_data[2]["patterns"][0]["rate"] if len(teams_data) > 2 else 1.0
+
     for i in range(len(base_team["patterns"])):
         base_p = base_team["patterns"][i]
         target_rate = base_p["rate"]
         row = [base_p]
 
-        for td in teams_data[1:]:
-            best_match = min(td["patterns"], key=lambda x: abs(x["rate"] - target_rate))
-            row.append(best_match)
+        # 2位チーム（阪神）
+        if len(teams_data) > 1:
+            best_match_t2 = min(teams_data[1]["patterns"], key=lambda x: abs(x["rate"] - target_rate))
+            row.append(best_match_t2)
+        else:
+            row.append(None)
+
+        # 3位チーム（DeNA）：最大到達可能勝率（11勝0敗）を超える行はハイフン化
+        if len(teams_data) > 2:
+            if target_rate > team3_max_rate + 0.005:
+                row.append(None) # 到達不能（ハイフン表示）
+            else:
+                best_match_t3 = min(teams_data[2]["patterns"], key=lambda x: abs(x["rate"] - target_rate))
+                row.append(best_match_t3)
+        else:
+            row.append(None)
 
         aligned_rows.append(row)
 
@@ -465,7 +490,6 @@ def build_aligned_championship_grid(top_teams_standings):
     }
 
 def format_prob_sig1(p):
-    """0%より大きく1%未満なら有効数字1桁、1%以上なら四捨五入整数文字列"""
     if p <= 0.0001:
         return "-"
     if p < 1.0:
@@ -711,51 +735,65 @@ def build_all_history_with_predictions(games_2025, games_2026):
     last_p_table = attach_probs(last_p_table, p_rank_matrix)
 
     # -------------------------------------------------------------
-    # 優勝決定日確率テーブル（可能性が生じた初日から10試合程度表示）
+    # 画像3枚目準拠：試合がない日も含め、優勝決定可能性がある全日を網羅
     # -------------------------------------------------------------
     def build_filtered_clinch_schedule(team_name, future_matches, clinch_date_map, champ_prob):
-        all_matches = []
-        team_matches = [m for m in future_matches if m["home"] == team_name or m["away"] == team_name]
-        
-        # 試合日程ごとに集計
-        for m in team_matches:
-            d = m["date"]
-            is_home = (m["home"] == team_name)
-            opp = m["away"] if is_home else m["home"]
-            ground = "甲子園" if (team_name == "阪神" and is_home) else ("東京D" if (team_name == "巨人" and is_home) else ("横浜" if (team_name == "ＤｅＮＡ" and is_home) else ("マツダS" if (opp == "広島" and not is_home) else ("神宮" if (opp == "ヤクルト" and not is_home) else ("敵地")))))
-            prob_raw = clinch_date_map.get(d, 0.0)
-            
-            p_opp = get_rolling_recent_strength(latest_team_histories[opp], prior_stats[opp])
-            p_self = get_rolling_recent_strength(latest_team_histories[team_name], prior_stats[team_name])
-            if is_home:
-                _, p_win = calc_log5_matchup(p_opp, p_self, "未定", "未定", {})
-            else:
-                p_win, _ = calc_log5_matchup(p_self, p_opp, "未定", "未定", {})
+        all_future_dates = sorted(list({m["date"] for m in future_matches}))
+        all_rows = []
 
-            all_matches.append({
+        for d in all_future_dates:
+            # 当日に自チームの試合があるか検索
+            team_m = next((m for m in future_matches if m["date"] == d and (m["home"] == team_name or m["away"] == team_name)), None)
+            prob_raw = clinch_date_map.get(d, 0.0)
+
+            if team_m:
+                is_home = (team_m["home"] == team_name)
+                opp = team_m["away"] if is_home else team_m["home"]
+                ground = "甲子園" if (team_name == "阪神" and is_home) else ("東京D" if (team_name == "巨人" and is_home) else ("横浜" if (team_name == "ＤｅＮＡ" and is_home) else ("マツダS" if (opp == "広島" and not is_home) else ("神宮" if (opp == "ヤクルト" and not is_home) else ("敵地")))))
+                
+                p_opp = get_rolling_recent_strength(latest_team_histories[opp], prior_stats[opp])
+                p_self = get_rolling_recent_strength(latest_team_histories[team_name], prior_stats[team_name])
+                if is_home:
+                    _, p_win = calc_log5_matchup(p_opp, p_self, "未定", "未定", {})
+                else:
+                    p_win, _ = calc_log5_matchup(p_self, p_opp, "未定", "未定", {})
+                win_expect_str = str(int(round(p_win)))
+            else:
+                # 試合なし日（他力決定の可能性がある日）
+                opp = "-"
+                ground = "-"
+                win_expect_str = "-"
+
+            all_rows.append({
                 "date": f"{int(d.split('-')[1])}/{int(d.split('-')[2])}",
                 "raw_date": d,
                 "opp": opp,
                 "ground": ground,
                 "clinch_prob_val": prob_raw,
-                "win_expect": int(round(p_win))
+                "win_expect": win_expect_str
             })
 
-        # 決定確率 > 0 となる最初のインデックスを探す（わずかでも可能性がある日）
+        # 決定確率 > 0 となる最初のインデックス（初日）を探す
         first_positive_idx = None
-        for i, item in enumerate(all_matches):
+        for i, item in enumerate(all_rows):
             if item["clinch_prob_val"] > 0.0001:
                 first_positive_idx = i
                 break
 
         if first_positive_idx is not None:
-            trimmed = all_matches[first_positive_idx:first_positive_idx + 10]
+            # 可能性が生じた初日から全日程をリストアップ
+            trimmed = all_rows[first_positive_idx:]
+            # 決定確率が0%の末尾の無駄な日程は切り捨てる
+            last_pos_idx = 0
+            for i, item in enumerate(trimmed):
+                if item["clinch_prob_val"] > 0.0001:
+                    last_pos_idx = i
+            trimmed = trimmed[:last_pos_idx + 1]
         else:
-            # 可能性がない場合は終盤の試合を最大8試合
-            trimmed = all_matches[-8:] if len(all_matches) > 8 else all_matches
+            trimmed = [r for r in all_rows if r["opp"] != "-"][-8:]
 
         cum = 0.0
-        for idx, item in enumerate(trimmed):
+        for item in trimmed:
             val = item["clinch_prob_val"]
             cum += val
             item["clinch_prob_str"] = format_prob_sig1(val)
@@ -794,7 +832,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"直近65試合最適化・微小確率有効数字対応完了：{dates[0]} 〜 {dates[-1]}")
+    print(f"全日程他力決定・優勝ライン整列完了：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
