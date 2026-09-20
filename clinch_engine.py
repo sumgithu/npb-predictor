@@ -67,7 +67,6 @@ def parse_year_games_from_text(raw_text, target_year):
         if not current_date:
             continue
 
-        # 中止・ノーゲーム行の記録
         if "中止" in line or "ノーゲーム" in line:
             match_can = re.search(r'([^\s\d]+)\s*(?:中止|ノーゲーム)\s*([^\s\d]+)', line)
             if match_can:
@@ -83,7 +82,6 @@ def parse_year_games_from_text(raw_text, target_year):
                     })
             continue
 
-        # 1. 消化済みスコア行
         match_fin = re.search(r'([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)', line)
         if match_fin:
             h = normalize_team(match_fin.group(1))
@@ -107,8 +105,7 @@ def parse_year_games_from_text(raw_text, target_year):
                     a_pitcher = draw_p[1] if len(draw_p) > 1 else ""
 
                 games.append({
-                    "date": current_date,
-                    "home": h, "away": a,
+                    "date": current_date, "home": h, "away": a,
                     "home_score": hs, "away_score": as_,
                     "home_pitcher": h_pitcher, "away_pitcher": a_pitcher,
                     "home_starter": h_pitcher, "away_starter": a_pitcher,
@@ -116,7 +113,6 @@ def parse_year_games_from_text(raw_text, target_year):
                 })
             continue
 
-        # 2. 未消化予定試合行
         match_sched = re.search(r'([^\s\d]+)\s*-\s*([^\s\d]+)', line)
         if match_sched:
             h = normalize_team(match_sched.group(1))
@@ -127,8 +123,7 @@ def parse_year_games_from_text(raw_text, target_year):
                 a_starter = starters[1] if len(starters) > 1 else "未定"
 
                 games.append({
-                    "date": current_date,
-                    "home": h, "away": a,
+                    "date": current_date, "home": h, "away": a,
                     "home_score": None, "away_score": None,
                     "home_pitcher": h_starter, "away_pitcher": a_starter,
                     "home_starter": h_starter, "away_starter": a_starter,
@@ -581,7 +576,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
                     h2h_details[a][h]["lose"] += 1
                     if is_inter:
                         records[a]["interleague"]["win"] += 1
-                        records[h]["interleague"]["lose"] += 1
+                        records[a]["interleague"]["lose"] += 1
                 else:
                     records[h]["draw"] += 1
                     records[h]["home"]["draw"] += 1
@@ -639,12 +634,19 @@ def build_all_history_with_predictions(games_2025, games_2026):
         day_predictions = []
         for g in games_2026:
             if g["date"] == target_date:
+                # 中止カードはスキップ
+                if g.get("status") == "cancelled":
+                    continue
+
                 h, a = g["home"], g["away"]
                 p_away = get_rolling_recent_strength(team_match_histories_before_today[a], prior_stats[a])
                 p_home = get_rolling_recent_strength(team_match_histories_before_today[h], prior_stats[h])
 
-                h_start = g.get("home_starter") or g.get("home_pitcher") or "未定"
-                a_start = g.get("away_starter") or g.get("away_pitcher") or "未定"
+                # 予告先発投手の名前を確実に取得
+                h_start = g.get("home_starter") or g.get("home_pitcher") or ""
+                a_start = g.get("away_starter") or g.get("away_pitcher") or ""
+                h_start = h_start.strip() if h_start else "未定"
+                a_start = a_start.strip() if a_start else "未定"
 
                 prob_away, prob_home = calc_log5_matchup(p_away, p_home, a_start, h_start, pitcher_stats)
 
@@ -692,7 +694,6 @@ def build_all_history_with_predictions(games_2025, games_2026):
             latest_team_histories[h].append({"rs": g["home_score"], "ra": g["away_score"]})
             latest_team_histories[a].append({"rs": g["away_score"], "ra": g["home_score"]})
 
-    # 実在する登録試合日程（未消化分）のみを抽出（架空補完カードの生成は完全撤廃）
     actual_future_matches = [g for g in games_2026 if g.get("status") == "scheduled"]
     c_future = [g for g in actual_future_matches if g["home"] in CENTRAL_TEAMS or g["away"] in CENTRAL_TEAMS]
     p_future = [g for g in actual_future_matches if g["home"] in PACIFIC_TEAMS or g["away"] in PACIFIC_TEAMS]
@@ -721,7 +722,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
             if team_m:
                 is_home = (team_m["home"] == team_name)
                 opp = team_m["away"] if is_home else team_m["home"]
-                ground = "甲子園" if (team_name == "阪神" and is_home) else ("東京D" if (team_name == "巨人" and is_home) else ("横浜" if (team_name == "ＤｅＮＡ" and is_home) else ("マツダS" if (opp == "広島" and not is_home) else ("神宮" if (opp == "ヤクルト" and not is_home) else ("敵地")))))
+                ground = "甲子園" if (team_name == "阪神" and is_home) else ("東京D" if (team_name == "巨人" and is_home) else ("横浜" if (team_name == "ＤｅＮＡ" and is_home) else ("神宮" if (opp == "ヤクルト" and not is_home) else ("敵地"))))
                 
                 p_opp = get_rolling_recent_strength(latest_team_histories[opp], prior_stats[opp])
                 p_self = get_rolling_recent_strength(latest_team_histories[team_name], prior_stats[team_name])
@@ -800,7 +801,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了（架空日程削除済）：{dates[0]} 〜 {dates[-1]}")
+    print(f"予告先発・実日程解析完了：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
