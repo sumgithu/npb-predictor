@@ -129,7 +129,7 @@
     .legend-item { display: flex; align-items: center; gap: 6px; }
     .legend-color { width: 18px; height: 18px; border-radius: 4px; display: inline-block; }
 
-    /* 4. 優勝決定日確率テーブル (累計列付き) */
+    /* 4. 優勝決定日確率テーブル */
     .clinch-schedule-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 24px;
     }
@@ -144,7 +144,7 @@
     .clinch-subtable th { background: #f8fafc; font-size: 0.8rem; padding: 6px 4px; color: #475569; }
     .clinch-subtable td { padding: 8px 4px; border-bottom: 1px solid #f1f5f9; }
 
-    /* 5. 優勝ラインテーブル (空白なし・完全横並び) */
+    /* 5. 優勝ラインテーブル */
     .line-grid-table { min-width: 700px; }
     .team-banner { font-size: 1.1rem; font-weight: 800; color: #fff; padding: 10px; }
     .banner-hanshin { background: #eab308; }
@@ -218,10 +218,10 @@
       </table>
     </div>
 
-    <!-- 2. 予想勝利確率カード (順位表直下 / 左: ホーム, 右: ビジター) -->
+    <!-- 2. 予想勝利確率カード (左: ホーム, 右: ビジター) -->
     <div class="section-title">
       🎯 NPB 予想勝利確率
-      <span class="section-desc" id="pred-subtext">（左: ホーム vs 右: ビジター / 予告先発・直近80試合ローリングピタゴラス・Log5補正）</span>
+      <span class="section-desc" id="pred-subtext">（左: ホーム vs 右: ビジター / 予告先発・直近65試合ローリングピタゴラス・Log5補正）</span>
     </div>
     <div class="prediction-grid" id="prediction-grid"></div>
 
@@ -243,14 +243,14 @@
       </div>
     </div>
 
-    <!-- 4. 優勝決定日確率テーブル (累計列付き) -->
+    <!-- 4. 優勝決定日確率テーブル (初日微小確率の有効数字表示対応) -->
     <div class="section-title">
       📅 優勝決定日確率テーブル
-      <span class="section-desc">（決定確率・累計確率・対戦カード・開催地・見込勝率）</span>
+      <span class="section-desc">（可能性が生じる初日から10試合程度表示・対戦カード・開催地・見込勝率）</span>
     </div>
     <div class="clinch-schedule-grid" id="clinch-schedule-container"></div>
 
-    <!-- 5. 優勝ラインテーブル (空白行なし・同等勝率横並び比較) -->
+    <!-- 5. 優勝ラインテーブル (完全横並び) -->
     <div class="section-title">
       🏁 優勝ラインテーブル
       <span class="section-desc">（同等勝率横並び比較・残り試合勝敗パターン一覧表）</span>
@@ -281,11 +281,11 @@
       <div class="notes-grid">
         <div class="note-item">
           <dl>
-            <dt>予想勝利確率（左: ホーム vs 右: ビジター）</dt>
-            <dd>最新のチーム状態を精緻に反映するため、直近80試合の得失点実績に線形時間加重を適用したピタゴラス期待勝率（指数1.83）を採用。これにNPBホームアドバンテージ（オッズ1.15倍）および予告先発投手の個人成績ベイズ補正を乗算し、Log5方程式により1試合ごとの勝率を算出しています。</dd>
+            <dt>予想勝利確率（直近65試合ローリング加重モデル）</dt>
+            <dd>最新の戦力状態とチーム調子を正確に捉えるため、直近65試合（約2か月半）の得失点に線形加重を適用したピタゴラス期待勝率（指数1.83）を採用しています。これにNPBホーム優位性（オッズ1.15倍）および予告先発投手の通算勝敗ベイズ補正を乗算し、Log5方程式により1試合ごとの勝率を算出しています。</dd>
 
             <dt>全143試合完走モンテカルロ・シミュレーション</dt>
-            <dd>未確定の全日程について、毎日順次試合が開催されるものと仮定して3,000回のシーズン完走シミュレーションを実行。最終順位への到達確率（早見表）および日別の優勝決定確率を導き出しています。</dd>
+            <dd>未確定の全日程について、毎日順次試合が開催されるものと仮定して5,000回のシーズン完走シミュレーションを実行。最終順位への到達確率（早見表）および日別の優勝決定確率を導き出しています。</dd>
 
             <dt>CN（チャンピョンシップナンバー）</dt>
             <dd>首位チームが自力でリーグ優勝（1位）を確定させるために必要な最小勝利数（マジックナンバー）です。</dd>
@@ -402,7 +402,7 @@
         tbodyStandings.appendChild(tr);
       });
 
-      // 2. 予想勝利確率カードグリッド
+      // 2. 予想勝利確率カードグリッド (左: ホーム, 右: ビジター)
       const predGrid = document.getElementById('prediction-grid');
       const predictions = dayData.predictions || [];
       const hasFinished = predictions.some(p => p.is_finished);
@@ -495,7 +495,7 @@
         }
       }
 
-      // 4. 優勝決定日確率テーブル (累計確率列を追加)
+      // 4. 優勝決定日確率テーブル (初日微小確率の有効数字表示対応)
       const clinchContainer = document.getElementById('clinch-schedule-container');
       clinchContainer.innerHTML = '';
 
@@ -512,13 +512,14 @@
           card.className = 'clinch-card';
           let rowsHtml = '';
           tSched.forEach(item => {
+            const isClinchPossible = (item.clinch_prob_str !== '-');
             rowsHtml += `
               <tr>
                 <td>${item.date}</td>
                 <td style="font-weight:700;">${item.opp}</td>
                 <td>${item.ground}</td>
-                <td style="font-weight:800; color:#dc2626;">${item.clinch_prob > 0 ? item.clinch_prob + '%' : '-'}</td>
-                <td style="font-weight:800; color:#166534;">${item.cum_prob > 0 ? item.cum_prob + '%' : '-'}</td>
+                <td style="font-weight:800; color:${isClinchPossible ? '#dc2626' : '#94a3b8'};">${item.clinch_prob_str}</td>
+                <td style="font-weight:800; color:${item.cum_prob_str !== '-' ? '#166534' : '#94a3b8'};">${item.cum_prob_str}</td>
                 <td style="font-weight:700;">${item.win_expect}</td>
               </tr>
             `;
@@ -544,7 +545,7 @@
         });
       }
 
-      // 5. 優勝ラインテーブル (空白行ゼロの完全横並び比較)
+      // 5. 優勝ラインテーブル (完全横並び)
       const lineHead = document.getElementById('line-grid-head');
       const lineBody = document.getElementById('line-grid-body');
       lineHead.innerHTML = '';
@@ -570,7 +571,6 @@
           colsTh += `</tr>`;
           lineHead.innerHTML = topTh + subTh + colsTh;
 
-          // 空白行を一切発生させずに描画
           gridData.rows.forEach(r => {
             let trHtml = `<tr>`;
             r.forEach(cell => {
@@ -591,7 +591,7 @@
         }
       }
 
-      // 6. 対戦成績表描画
+      // 6. 対戦成績表
       const theadMatrix = document.getElementById('matrix-head');
       const tbodyMatrix = document.getElementById('matrix-body');
       theadMatrix.innerHTML = '';
