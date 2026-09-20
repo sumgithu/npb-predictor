@@ -86,7 +86,7 @@
     }
     .badge-dash { color: #94a3b8; font-weight: 500; }
 
-    /* 2. 予想勝率カード (左: ホーム, 右: ビジター) */
+    /* 2. 予想勝率カード */
     .prediction-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 28px;
     }
@@ -111,7 +111,7 @@
     .bar-segment-home { background-color: var(--bar-home); height: 100%; transition: width 0.3s; }
     .bar-segment-away { background-color: var(--bar-away); height: 100%; transition: width 0.3s; }
 
-    /* 3. 画像2枚目：最終順位可能性早見表 */
+    /* 3. 最終順位可能性早見表 */
     .rank-matrix-table { min-width: 480px; max-width: 600px; margin: 0 auto; }
     .rank-matrix-table th { font-weight: 800; }
     .cell-box {
@@ -129,7 +129,7 @@
     .legend-item { display: flex; align-items: center; gap: 6px; }
     .legend-color { width: 18px; height: 18px; border-radius: 4px; display: inline-block; }
 
-    /* 4. 画像3枚目：優勝決定日確率テーブル */
+    /* 4. 優勝決定日確率テーブル (累計列付き) */
     .clinch-schedule-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 24px;
     }
@@ -144,7 +144,7 @@
     .clinch-subtable th { background: #f8fafc; font-size: 0.8rem; padding: 6px 4px; color: #475569; }
     .clinch-subtable td { padding: 8px 4px; border-bottom: 1px solid #f1f5f9; }
 
-    /* 5. 画像1枚目：優勝ラインテーブル */
+    /* 5. 優勝ラインテーブル (空白なし・完全横並び) */
     .line-grid-table { min-width: 700px; }
     .team-banner { font-size: 1.1rem; font-weight: 800; color: #fff; padding: 10px; }
     .banner-hanshin { background: #eab308; }
@@ -225,7 +225,7 @@
     </div>
     <div class="prediction-grid" id="prediction-grid"></div>
 
-    <!-- 3. 画像2枚目：最終順位可能性早見表 -->
+    <!-- 3. 最終順位可能性早見表 -->
     <div class="section-title">
       📋 最終順位可能性早見表
       <span class="section-desc">（全143試合完走モンテカルロ・シミュレーション到達確率）</span>
@@ -243,14 +243,14 @@
       </div>
     </div>
 
-    <!-- 4. 画像3枚目：優勝決定日確率テーブル -->
+    <!-- 4. 優勝決定日確率テーブル (累計列付き) -->
     <div class="section-title">
       📅 優勝決定日確率テーブル
-      <span class="section-desc">（決定可能性が生じる日程から表示・対戦カード・開催地・見込勝率）</span>
+      <span class="section-desc">（決定確率・累計確率・対戦カード・開催地・見込勝率）</span>
     </div>
     <div class="clinch-schedule-grid" id="clinch-schedule-container"></div>
 
-    <!-- 5. 画像1枚目：優勝ラインテーブル (同等勝率横並び比較) -->
+    <!-- 5. 優勝ラインテーブル (空白行なし・同等勝率横並び比較) -->
     <div class="section-title">
       🏁 優勝ラインテーブル
       <span class="section-desc">（同等勝率横並び比較・残り試合勝敗パターン一覧表）</span>
@@ -273,7 +273,7 @@
       </table>
     </div>
 
-    <!-- 7. 欄外注釈パネル（復活） -->
+    <!-- 7. 欄外注釈パネル -->
     <div class="notes-card">
       <div class="notes-title">
         <span>ℹ️</span> 項目および数理モデルの解説
@@ -402,7 +402,7 @@
         tbodyStandings.appendChild(tr);
       });
 
-      // 2. 予想勝利確率カードグリッド (左: ホーム, 右: ビジター)
+      // 2. 予想勝利確率カードグリッド
       const predGrid = document.getElementById('prediction-grid');
       const predictions = dayData.predictions || [];
       const hasFinished = predictions.some(p => p.is_finished);
@@ -448,7 +448,7 @@
         });
       }
 
-      // 3. 画像2枚目：最終順位可能性早見表
+      // 3. 最終順位可能性早見表
       const rankHead = document.getElementById('rank-matrix-head');
       const rankBody = document.getElementById('rank-matrix-body');
       rankHead.innerHTML = '';
@@ -495,7 +495,7 @@
         }
       }
 
-      // 4. 画像3枚目：優勝決定日確率テーブル
+      // 4. 優勝決定日確率テーブル (累計確率列を追加)
       const clinchContainer = document.getElementById('clinch-schedule-container');
       clinchContainer.innerHTML = '';
 
@@ -518,6 +518,7 @@
                 <td style="font-weight:700;">${item.opp}</td>
                 <td>${item.ground}</td>
                 <td style="font-weight:800; color:#dc2626;">${item.clinch_prob > 0 ? item.clinch_prob + '%' : '-'}</td>
+                <td style="font-weight:800; color:#166534;">${item.cum_prob > 0 ? item.cum_prob + '%' : '-'}</td>
                 <td style="font-weight:700;">${item.win_expect}</td>
               </tr>
             `;
@@ -532,6 +533,7 @@
                   <th>対戦</th>
                   <th>開催地</th>
                   <th>決定確率</th>
+                  <th>累計</th>
                   <th>見込勝率</th>
                 </tr>
               </thead>
@@ -542,7 +544,7 @@
         });
       }
 
-      // 5. 画像1枚目：優勝ラインテーブル (同等勝率横並び比較)
+      // 5. 優勝ラインテーブル (空白行ゼロの完全横並び比較)
       const lineHead = document.getElementById('line-grid-head');
       const lineBody = document.getElementById('line-grid-body');
       lineHead.innerHTML = '';
@@ -568,6 +570,7 @@
           colsTh += `</tr>`;
           lineHead.innerHTML = topTh + subTh + colsTh;
 
+          // 空白行を一切発生させずに描画
           gridData.rows.forEach(r => {
             let trHtml = `<tr>`;
             r.forEach(cell => {
