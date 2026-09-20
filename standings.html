@@ -3,340 +3,720 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NPB 順位表・チャンピオンシップナンバー・優勝確率ダッシュボード</title>
+  <title>プロ野球チャンピョンシップナンバー＆対戦成績解析 | マジックナンバー・優勝確率・CSクリンチ</title>
+  <meta name="description" content="プロ野球（NPB）セ・パ両リーグの自力優勝チャンピョンシップナンバー（クリンチナンバー）、マジックナンバー、全143試合完走モンテカルロシミュレーションによる優勝確率およびCS進出確率、残試合数別優勝ラインをリアルタイム解析。">
+  <meta name="keywords" content="プロ野球,チャンピョンシップナンバー,クリンチナンバー,マジックナンバー,優勝確率,CS進出確率,順位表,対戦成績,ピタゴラス勝率,Log5法">
   <style>
     :root {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --card-border: #334155;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --accent-red: #ef4444;
-      --accent-blue: #3b82f6;
-      --gold: #f59e0b;
-      --pink-soft: #fbcfe8;
-      --pink-soft-text: #9d174d;
-      --cyan-soft: #cffafe;
-      --cyan-soft-text: #155e75;
-      --green-border: #22c55e;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding: 16px;
-    }
-    .container {
-      max-width: 1024px;
-      margin: 0 auto;
-    }
-    h1 {
-      font-size: 1.4rem;
-      text-align: center;
-      margin-bottom: 8px;
-    }
-    .update-time {
-      text-align: center;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-bottom: 16px;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-sub: #64748b;
+      --primary: #2563eb;
+      --border: #e2e8f0;
+      --badge-fixed: #10b981;
+      --badge-magic: #ef4444;
+      --badge-alert: #dc2626;
+      --matrix-header: #3b82f6;
+      --bar-home: #2563eb;
+      --bar-away: #dc2626;
+      --cell-current: #15803d;
+      --cell-can-climb: #f87171;
+      --cell-potential: #fecaca;
+      --cell-drop: #bae6fd;
     }
 
-    /* クリンチ・ダッシュボード・サマリーカード */
-    .clinch-summary-card {
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      border: 2px solid var(--gold);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text-main); padding: 20px 12px 60px; }
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 24px; }
+    header h1 { font-size: 1.55rem; font-weight: 800; color: #1e3a8a; }
+    header p { font-size: 0.85rem; color: var(--text-sub); margin-top: 4px; }
+    
+    .control-panel {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px 20px; display: flex; flex-wrap: wrap; justify-content: space-between;
+      align-items: center; gap: 12px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
-    .clinch-title {
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: var(--gold);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-    .scenario-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 8px;
-      margin-top: 10px;
-    }
-    .scenario-item {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      border-left: 3px solid var(--accent-blue);
-    }
-    .scenario-item strong {
-      color: #38bdf8;
+    .date-select-box { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.95rem; }
+    .date-select-box input {
+      padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border);
+      font-size: 0.95rem; font-weight: 600; color: var(--text-main); outline: none;
     }
 
-    /* 順位表テーブル */
-    .table-container {
-      overflow-x: auto;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      margin-bottom: 24px;
+    .tabs { display: flex; gap: 8px; }
+    .tab-btn {
+      padding: 8px 20px; border-radius: 20px; border: 1px solid var(--border);
+      background: #fff; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: 0.2s;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-      text-align: center;
-    }
-    th, td {
-      padding: 10px 8px;
-      border-bottom: 1px solid var(--card-border);
-    }
-    th {
-      background: #111827;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-    .cn-badge {
-      font-weight: bold;
-      color: var(--gold);
-    }
+    .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-    /* 試合カード */
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 12px;
-      margin-bottom: 24px;
+    .section-title {
+      font-size: 1.15rem; font-weight: 800; color: #1e3a8a; margin: 28px 0 14px 4px;
+      display: flex; align-items: center; gap: 8px;
     }
-    .match-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 12px;
+    .section-desc { font-size: 0.82rem; color: var(--text-sub); font-weight: 400; margin-left: 6px; }
+
+    /* 1. 順位表 */
+    .table-wrapper {
+      background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border);
+      overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04); margin-bottom: 24px;
     }
-    .match-header {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
+    table { width: 100%; border-collapse: collapse; min-width: 820px; text-align: center; font-size: 0.88rem; }
+    th, td { padding: 12px 8px; border-bottom: 1px solid var(--border); }
+    th { background-color: #f1f5f9; color: var(--text-sub); font-weight: 600; font-size: 0.82rem; }
+    tr:last-child td { border-bottom: none; }
+
+    .team-col { text-align: left; font-weight: 700; }
+    .rank-cell { font-weight: 800; color: var(--text-sub); }
+    .rem-cell { font-weight: 700; color: #475569; background-color: #f8fafc; }
+    .prob-cell { font-weight: 800; color: #1e3a8a; }
+    .prob-high { color: #dc2626; font-weight: 800; }
+
+    .badge {
+      display: inline-block; min-width: 32px; padding: 3px 8px; border-radius: 12px;
+      font-size: 0.8rem; font-weight: 700; text-align: center;
     }
-    .match-body {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: bold;
-      font-size: 1rem;
+    .badge-fixed { background-color: #d1fae5; color: #065f46; }
+    .badge-magic { background-color: #fee2e2; color: #991b1b; }
+    .badge-eliminated {
+      background-color: #fff1f2; color: var(--badge-alert);
+      border: 1.5px dashed #f43f5e; border-radius: 6px; padding: 1px 6px; font-weight: 800;
     }
-    .prob-bar {
-      height: 6px;
-      background: var(--accent-red);
-      border-radius: 3px;
-      overflow: hidden;
-      display: flex;
-      margin-top: 8px;
+    .badge-dash { color: #94a3b8; font-weight: 500; }
+
+    /* 2. 予想勝利確率／試合結果カード */
+    .prediction-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 28px;
     }
-    .prob-bar-inner {
-      background: var(--accent-blue);
-      height: 100%;
+    .pred-card {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
+    .pred-teams { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .team-box { width: 44%; }
+    .team-box.home { text-align: left; }
+    .team-box.away { text-align: right; }
+    .team-role { font-size: 0.72rem; color: var(--text-sub); font-weight: 600; }
+    .team-name { font-size: 1.15rem; font-weight: 800; color: var(--text-main); }
+    .starter-name { font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-top: 2px; }
+    .vs-badge { font-size: 0.82rem; font-weight: 800; color: #94a3b8; }
+    
+    .prob-values { display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 800; margin-bottom: 6px; }
+    .val-home { color: var(--bar-home); }
+    .val-away { color: var(--bar-away); }
+    .prob-bar-container { width: 100%; height: 10px; background-color: #e2e8f0; border-radius: 6px; overflow: hidden; display: flex; }
+    .bar-segment-home { background-color: var(--bar-home); height: 100%; transition: width 0.3s; }
+    .bar-segment-away { background-color: var(--bar-away); height: 100%; transition: width 0.3s; }
+
+    .score-result-box {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 4px; padding-top: 8px; border-top: 1px dashed #e2e8f0;
+    }
+    .score-val { font-size: 1.55rem; font-weight: 800; color: #0f172a; }
+    .score-val.winner { color: #16a34a; }
+    .score-val.loser { color: #64748b; }
+    .score-divider { font-size: 0.95rem; font-weight: 800; color: #94a3b8; }
+
+    /* 3. 最終順位可能性早見表 */
+    .rank-matrix-table { min-width: 480px; max-width: 600px; margin: 0 auto; }
+    .rank-matrix-table th { font-weight: 800; }
+    .cell-box {
+      width: 54px; height: 38px; display: inline-flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.95rem; border-radius: 4px;
+    }
+    .cell-current-rank { background-color: var(--cell-current); color: #fff; border: 3px solid #dc2626; }
+    .cell-can-climb { background-color: var(--cell-can-climb); color: #fff; }
+    .cell-potential { background-color: var(--cell-potential); color: #991b1b; }
+    .cell-drop { background-color: var(--cell-drop); color: #0369a1; }
+    .matrix-legend {
+      display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.82rem; font-weight: 700;
+      padding: 12px; justify-content: center; background: #fff; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border);
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-color { width: 18px; height: 18px; border-radius: 4px; display: inline-block; }
+
+    /* 4. 優勝決定日確率テーブル */
+    .clinch-schedule-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 24px;
+    }
+    .clinch-card {
+      background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 18px;
+    }
+    .clinch-card h3 {
+      font-size: 1.15rem; font-weight: 800; color: #166534; margin-bottom: 12px;
+      border-bottom: 2px solid #e2e8f0; padding-bottom: 6px;
+    }
+    .clinch-subtable { width: 100%; min-width: unset; font-size: 0.88rem; }
+    .clinch-subtable th { background: #f8fafc; font-size: 0.8rem; padding: 6px 4px; color: #475569; }
+    .clinch-subtable td { padding: 8px 4px; border-bottom: 1px solid #f1f5f9; }
+
+    /* 5. 優勝ラインテーブル */
+    .line-grid-table { min-width: 700px; }
+    .team-banner { font-size: 1.1rem; font-weight: 800; color: #fff; padding: 10px; }
+    .banner-hanshin { background: #eab308; }
+    .banner-kyojin { background: #ea580c; }
+    .banner-dena { background: #0284c7; }
+    .banner-sub { font-size: 0.85rem; font-weight: 700; background: #fef08a; color: #854d0e; padding: 6px; }
+    .line-highlight { background-color: #fef9c3 !important; font-weight: 800; }
+
+    /* 6. 対戦成績表 */
+    .matrix-table th { background-color: var(--matrix-header); color: #ffffff; font-weight: 700; }
+    .matrix-table td { font-size: 0.86rem; border-right: 1px solid var(--border); }
+    .matrix-self { color: #94a3b8; font-weight: bold; background-color: #f8fafc; }
+    .draw-sub { display: block; font-size: 0.75rem; color: #64748b; }
+
+    /* 7. 注釈パネル */
+    .notes-card {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 24px; font-size: 0.84rem; line-height: 1.7; color: #334155;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-top: 12px;
+    }
+    .notes-title { font-weight: 800; font-size: 0.98rem; color: #1e293b; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .notes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    .note-item dt { font-weight: 800; color: #1e3a8a; margin-bottom: 3px; font-size: 0.88rem; }
+    .note-item dd { margin: 0 0 12px 0; color: #475569; }
   </style>
 </head>
 <body>
+
   <div class="container">
-    <h1>NPB チャンピオンシップナンバー＆ペナントダッシュボード</h1>
-    <div class="update-time" id="update-time">更新中...</div>
+    <header>
+      <h1>プロ野球チャンピョンシップナンバー＆対戦成績解析</h1>
+      <p>マジックナンバー・143試合完走優勝確率・CS進出確率・対戦成績完全解析</p>
+    </header>
 
-    <!-- 1. 最短決定日＆減算シナリオ要約カード -->
-    <div class="clinch-summary-card" id="clinch-card" style="display: none;">
-      <div class="clinch-title">
-        <span>🏆 チャンピオンシップナンバー速報</span>
-        <span id="clinch-team-badge"></span>
+    <div class="control-panel">
+      <div class="date-select-box">
+        <label for="date-picker">基準日選択:</label>
+        <input type="date" id="date-picker">
       </div>
-      <div id="clinch-details" style="font-size: 0.95rem; margin-bottom: 8px;"></div>
-      <div class="scenario-grid" id="scenario-list"></div>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchLeague('central')">セ・リーグ</button>
+        <button class="tab-btn" onclick="switchLeague('pacific')">パ・リーグ</button>
+      </div>
     </div>
 
-    <!-- 2. セ・パ順位表 -->
-    <h2>セ・リーグ 順位・優勝確率</h2>
-    <div class="table-container">
+    <!-- 1. 順位表 & CN表 (最上部) -->
+    <div class="section-title">📊 順位表・チャンピョンシップナンバー（自力確定数）＆優勝確率</div>
+    <div class="table-wrapper">
       <table>
         <thead>
           <tr>
             <th>順位</th>
-            <th>球団</th>
+            <th style="text-align:left;">球団</th>
+            <th>試</th>
             <th>勝</th>
             <th>敗</th>
-            <th>引</th>
+            <th>分</th>
+            <th>残</th>
             <th>勝率</th>
+            <th>差</th>
             <th>CN</th>
+            <th>2nd(本拠)</th>
+            <th>3rd(CS)</th>
             <th>優勝確率</th>
-            <th>CS進出</th>
+            <th>CS確率</th>
           </tr>
         </thead>
-        <tbody id="tbody-central"></tbody>
+        <tbody id="standings-body">
+          <tr><td colspan="14" style="padding: 24px;">データを読み込み中...</td></tr>
+        </tbody>
       </table>
     </div>
 
-    <h2>パ・リーグ 順位・優勝確率</h2>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>順位</th>
-            <th>球団</th>
-            <th>勝</th>
-            <th>敗</th>
-            <th>引</th>
-            <th>勝率</th>
-            <th>CN</th>
-            <th>優勝確率</th>
-            <th>CS進出</th>
-          </tr>
-        </thead>
-        <tbody id="tbody-pacific"></tbody>
+    <!-- 2. 予想勝利確率／試合結果カード -->
+    <div id="pred-section">
+      <div class="section-title" id="pred-header-title">
+        <span id="pred-header-icon">🎯</span> <span id="pred-header-text">NPB 予想勝利確率</span>
+        <span class="section-desc" id="pred-subtext">（左: ホーム vs 右: ビジター）</span>
+      </div>
+      <div class="prediction-grid" id="prediction-grid"></div>
+    </div>
+
+    <!-- 3. 最終順位可能性早見表 -->
+    <div class="section-title">
+      📋 最終順位可能性早見表
+      <span class="section-desc">（全143試合完走モンテカルロ・シミュレーション到達確率）</span>
+    </div>
+    <div class="table-wrapper" style="padding: 16px 0;">
+      <table class="rank-matrix-table">
+        <thead id="rank-matrix-head"></thead>
+        <tbody id="rank-matrix-body"></tbody>
+      </table>
+      <div class="matrix-legend">
+        <div class="legend-item"><span class="legend-color" style="background-color: var(--cell-current); border: 2px solid #dc2626;"></span> 現在の順位</div>
+        <div class="legend-item"><span class="legend-color" style="background-color: var(--cell-can-climb);"></span> 自力で昇格可能</div>
+        <div class="legend-item"><span class="legend-color" style="background-color: var(--cell-potential);"></span> 昇格可能性あり</div>
+        <div class="legend-item"><span class="legend-color" style="background-color: var(--cell-drop);"></span> 降格可能性あり</div>
+      </div>
+    </div>
+
+    <!-- 4. 優勝決定日確率テーブル -->
+    <div class="section-title">
+      📅 優勝決定日確率テーブル
+      <span class="section-desc">（可能性が生じる初日から表示・対戦カード・開催地・見込勝率）</span>
+    </div>
+    <div class="clinch-schedule-grid" id="clinch-schedule-container"></div>
+
+    <!-- 5. 優勝ラインテーブル -->
+    <div class="section-title">
+      🏁 優勝ラインテーブル
+      <span class="section-desc">（同等勝率横並び比較・残り試合勝敗パターン一覧表）</span>
+    </div>
+    <div class="table-wrapper">
+      <table class="line-grid-table" id="line-grid-table">
+        <thead id="line-grid-head"></thead>
+        <tbody id="line-grid-body"></tbody>
       </table>
     </div>
 
-    <!-- 3. 本日のカード・予想確率 -->
-    <h2>🎯 NPB 予想勝利確率／⚾ 試合結果</h2>
-    <div class="cards-grid" id="matches-grid"></div>
+    <!-- 6. 対戦成績表 -->
+    <div class="section-title">⚾ 対戦成績表（カード別・ホーム/ロード・交流戦）</div>
+    <div class="table-wrapper">
+      <table class="matrix-table" id="matrix-table">
+        <thead id="matrix-head"></thead>
+        <tbody id="matrix-body">
+          <tr><td colspan="15" style="padding: 24px;">データを読み込み中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 7. 欄外注釈パネル -->
+    <div class="notes-card">
+      <div class="notes-title">
+        <span>ℹ️</span> 項目および数理モデルの解説
+      </div>
+      <div class="notes-grid">
+        <div class="note-item">
+          <dl>
+            <dt>予想勝利確率（セイバーメトリクスモデル）</dt>
+            <dd>最新のチーム状態と戦力構成を精緻に反映するため、直近の試合実績に基づく加重ピタゴラス期待勝率を採用しています。これにNPBホームアドバンテージ補正および予告先発投手の個人成績ベイズ補正を乗算し、Log5方程式により1試合ごとの勝率を算出しています。</dd>
+
+            <dt>全143試合完走モンテカルロ・シミュレーション</dt>
+            <dd>未確定の全日程について、毎日順次試合が開催されるものと仮定して5,000回のシーズン完走シミュレーションを実行。最終順位への到達確率（早見表）および日別の優勝決定確率を導き出しています。</dd>
+
+            <dt>CN（チャンピョンシップナンバー）</dt>
+            <dd>首位チームが自力でリーグ優勝（1位）を確定させるために必要な最小勝利数（マジックナンバー）です。</dd>
+          </dl>
+        </div>
+
+        <div class="note-item">
+          <dl>
+            <dt><span class="badge badge-fixed">確定</span></dt>
+            <dd>他チームが残り全勝しても自チームを逆転できない、数学的に順位が確定した状態です（CS確率等も100%確定となります）。</dd>
+
+            <dt><span class="badge badge-magic">13</span>（通常数値）</dt>
+            <dd><strong>自力確定可能</strong>：残り試合数の範囲内で、自チームの勝利のみによって自力確定できる必要勝利数です。</dd>
+
+            <dt><span class="badge badge-eliminated">◇14◇</span>（ひし形枠＋赤文字）</dt>
+            <dd><strong>自力消滅（可能性あり）</strong>：残り試合数以上の勝利が必要な状態です。自チーム全勝に加え、上位チームの敗戦アシスト（他力）が必要ですが、数学的な逆転可能性は残っています。</dd>
+
+            <dt><span class="badge-dash">-</span>（ハイフン）</dt>
+            <dd><strong>完全消滅（エリミネーション）</strong>：相手チームが残り全敗し、自チームが残り全勝しても届かない状態です。</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
-    const CENTRAL = ["阪神", "広島", "DeNA", "巨人", "ヤクルト", "中日"];
-    const PACIFIC = ["ソフトバンク", "日本ハム", "オリックス", "ロッテ", "楽天", "西武"];
+    let rawData = null;
+    let currentLeague = 'central';
+    let selectedDate = '';
 
-    async function initDashboard() {
-      let data = null;
-      try {
-        const res = await fetch("history_standings.json?t=" + Date.now());
-        data = await res.json();
-      } catch (e) {
-        console.warn("history_standings.json load failed, checking local override");
+    const SHORT_CODE = {
+      "阪神": "T", "巨人": "G", "ＤｅＮＡ": "DB",
+      "ヤクルト": "S", "中日": "D", "広島": "C",
+      "ソフトバンク": "H", "日本ハム": "F", "ロッテ": "M",
+      "楽天": "E", "オリックス": "B", "西武": "L"
+    };
+
+    const SHORT_NAMES = {
+      "阪神": "対神", "巨人": "対巨", "ＤｅＮＡ": "対デ",
+      "ヤクルト": "対ヤ", "中日": "対中", "広島": "対広",
+      "ソフトバンク": "対ソ", "日本ハム": "対日", "ロッテ": "対ロ",
+      "楽天": "対楽", "オリックス": "対オ", "西武": "対西"
+    };
+
+    const FULL_TEAM_NAMES = {
+      "阪神": "阪神タイガース", "巨人": "読売ジャイアンツ", "ＤｅＮＡ": "横浜DeNAベイスターズ",
+      "ヤクルト": "東京ヤクルトスワローズ", "中日": "中日ドラゴンズ", "広島": "広島東洋カープ",
+      "ソフトバンク": "福岡ソフトバンクホークス", "日本ハム": "北海道日本ハムファイターズ",
+      "ロッテ": "千葉ロッテマリーンズ", "楽天": "東北楽天ゴールデンイーグルス",
+      "オリックス": "オリックス・バファローズ", "西武": "埼玉西武ライオンズ"
+    };
+
+    function renderBadge(val, remainingGames) {
+      if (val === '確定') return `<span class="badge badge-fixed">確定</span>`;
+      if (typeof val === 'number') {
+        if (val > remainingGames) {
+          return `<span class="badge badge-eliminated">◇${val}◇</span>`;
+        }
+        return `<span class="badge badge-magic">${val}</span>`;
       }
-
-      // ローカルオーバーレイ（即時反映）
-      const localOverride = JSON.parse(localStorage.getItem("npb_games_db_override") || "{}");
-
-      if (data) {
-        document.getElementById("update-time").textContent = "最終計算: " + data.updated_at;
-        renderStandings("tbody-central", CENTRAL, data);
-        renderStandings("tbody-pacific", PACIFIC, data);
-        renderClinchSummary(data);
-        renderMatches(data.future_games || []);
-      }
+      return `<span class="badge-dash">-</span>`;
     }
 
-    function renderStandings(tbodyId, teams, data) {
-      const tbody = document.getElementById(tbodyId);
-      tbody.innerHTML = "";
+    function formatRecord(w, l, d) {
+      let str = `${w}-${l}`;
+      if (d > 0) str += `<span class="draw-sub">(${d})</span>`;
+      return str;
+    }
 
-      const sorted = teams.map(t => {
-        const s = data.standings[t] || { win: 0, lose: 0, draw: 0 };
-        const denom = s.win + s.lose;
-        const wp = denom > 0 ? (s.win / denom) : 0.0;
-        return {
-          team: t,
-          ...s,
-          wp: wp,
-          cn: data.cn_results[t] || "-",
-          champ: data.champ_probs[t] || 0.0,
-          cs: data.cs_probs[t] || 0.0
-        };
-      }).sort((a, b) => b.wp - a.wp);
+    function renderTables() {
+      if (!rawData || !rawData.history) return;
 
-      sorted.forEach((row, idx) => {
-        const tr = document.createElement("tr");
+      if (!rawData.history[selectedDate]) {
+        const dates = rawData.available_dates;
+        const past = dates.filter(d => d <= selectedDate);
+        selectedDate = past.length ? past[past.length - 1] : dates[0];
+        document.getElementById('date-picker').value = selectedDate;
+      }
+
+      const dayData = rawData.history[selectedDate];
+      const list = dayData[currentLeague];
+
+      // 1. 順位表 & CN表
+      const tbodyStandings = document.getElementById('standings-body');
+      tbodyStandings.innerHTML = '';
+      list.forEach(t => {
+        const rem = t.remaining !== undefined ? t.remaining : (143 - t.games);
+        const champP = t.champ_prob !== undefined ? t.champ_prob : 0;
+        const csP = (t.magic_3rd === '確定') ? 100 : (t.cs_prob !== undefined ? t.cs_prob : 0);
+
+        const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${idx + 1}</td>
-          <td><strong>${row.team}</strong></td>
-          <td>${row.win}</td>
-          <td>${row.lose}</td>
-          <td>${row.draw}</td>
-          <td>${row.wp.toFixed(3).substring(1)}</td>
-          <td class="cn-badge">${row.cn}</td>
-          <td><strong>${row.champ}%</strong></td>
-          <td>${row.cs}%</td>
+          <td class="rank-cell">${t.rank}</td>
+          <td class="team-col">${t.team}</td>
+          <td>${t.games}</td>
+          <td>${t.win}</td>
+          <td>${t.lose}</td>
+          <td>${t.draw}</td>
+          <td class="rem-cell">${rem}</td>
+          <td>${t.rate.toFixed(3).replace('0.', '.')}</td>
+          <td>${t.diff === 0 ? '--' : t.diff.toFixed(1)}</td>
+          <td>${renderBadge(t.magic_1st, rem)}</td>
+          <td>${renderBadge(t.magic_2nd, rem)}</td>
+          <td>${renderBadge(t.magic_3rd, rem)}</td>
+          <td class="prob-cell ${champP > 50 ? 'prob-high' : ''}">${champP}%</td>
+          <td class="prob-cell">${csP}%</td>
         `;
-        tbody.appendChild(tr);
+        tbodyStandings.appendChild(tr);
       });
-    }
 
-    function renderClinchSummary(data) {
-      // CNが点灯している首位チームを走査
-      const card = document.getElementById("clinch-card");
-      let activeTeam = null;
-      let activeCn = null;
+      // 2. 予想勝利確率／試合結果カードグリッド
+      const predGrid = document.getElementById('prediction-grid');
+      const predictions = dayData.predictions || [];
+      const hasFinished = predictions.some(p => p.is_finished);
 
-      for (const t of Object.keys(data.cn_results)) {
-        const val = data.cn_results[t];
-        if (val && val !== "-" && val.startsWith("M")) {
-          activeTeam = t;
-          activeCn = val;
-          break;
+      const headerIcon = document.getElementById('pred-header-icon');
+      const headerText = document.getElementById('pred-header-text');
+      const headerSub = document.getElementById('pred-subtext');
+
+      if (hasFinished) {
+        headerIcon.innerText = '⚾';
+        headerText.innerText = '試合結果';
+        headerSub.innerText = `（対象日: ${selectedDate} 試合結果 / 左: ホーム vs 右: ビジター）`;
+      } else {
+        headerIcon.innerText = '🎯';
+        headerText.innerText = 'NPB 予想勝利確率';
+        headerSub.innerText = `（対象日: ${selectedDate} 予告先発予想 / 左: ホーム vs 右: ビジター）`;
+      }
+
+      predGrid.innerHTML = '';
+      const leagueTeamSet = new Set(list.map(t => t.team));
+      const filteredPreds = predictions.filter(p => leagueTeamSet.has(p.home) || leagueTeamSet.has(p.away));
+
+      if (filteredPreds.length === 0) {
+        predGrid.innerHTML = `<div style="grid-column: 1/-1; padding: 18px; text-align: center; color: #64748b; background: #fff; border-radius: 12px; border: 1px solid var(--border);">この日の該当リーグの試合予定・結果はありません。</div>`;
+      } else {
+        filteredPreds.forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'pred-card';
+
+          if (p.is_finished && p.actual_home_score !== null && p.actual_away_score !== null) {
+            const hs = p.actual_home_score;
+            const as_ = p.actual_away_score;
+            const isHomeWin = hs > as_;
+            const isAwayWin = as_ > hs;
+
+            card.innerHTML = `
+              <div class="pred-teams">
+                <div class="team-box home">
+                  <div class="team-role">ホーム ${isHomeWin ? '<span style="color:#16a34a; font-weight:800;">(勝)</span>' : (isAwayWin ? '<span style="color:#64748b;">(敗)</span>' : '(分)')}</div>
+                  <div class="team-name">${p.home}</div>
+                </div>
+                <div class="vs-badge">VS</div>
+                <div class="team-box away">
+                  <div class="team-role">${isAwayWin ? '<span style="color:#16a34a; font-weight:800;">(勝)</span>' : (isHomeWin ? '<span style="color:#64748b;">(敗)</span>' : '(分)')} ビジター</div>
+                  <div class="team-name">${p.away}</div>
+                </div>
+              </div>
+              <div class="score-result-box">
+                <span class="score-val ${isHomeWin ? 'winner' : 'loser'}">${hs}</span>
+                <span class="score-divider">-</span>
+                <span class="score-val ${isAwayWin ? 'winner' : 'loser'}">${as_}</span>
+              </div>
+            `;
+          } else {
+            card.innerHTML = `
+              <div class="pred-teams">
+                <div class="team-box home">
+                  <div class="team-role">ホーム</div>
+                  <div class="team-name">${p.home}</div>
+                  <div class="starter-name">${p.home_status_text}</div>
+                </div>
+                <div class="vs-badge">VS</div>
+                <div class="team-box away">
+                  <div class="team-role">ビジター</div>
+                  <div class="team-name">${p.away}</div>
+                  <div class="starter-name">${p.away_status_text}</div>
+                </div>
+              </div>
+              <div class="prob-values">
+                <span class="val-home">${p.home_prob.toFixed(1)}%</span>
+                <span class="val-away">${p.away_prob.toFixed(1)}%</span>
+              </div>
+              <div class="prob-bar-container">
+                <div class="bar-segment-home" style="width: ${p.home_prob}%;"></div>
+                <div class="bar-segment-away" style="width: ${p.away_prob}%;"></div>
+              </div>
+            `;
+          }
+          predGrid.appendChild(card);
+        });
+      }
+
+      // 3. 最終順位可能性早見表
+      const rankHead = document.getElementById('rank-matrix-head');
+      const rankBody = document.getElementById('rank-matrix-body');
+      rankHead.innerHTML = '';
+      rankBody.innerHTML = '';
+
+      if (rawData.simulation) {
+        const matKey = currentLeague === 'central' ? 'central_rank_matrix' : 'pacific_rank_matrix';
+        const rankMat = rawData.simulation[matKey] || {};
+        const leagueTeams = list.map(t => t.team);
+
+        let thRow = `<tr><th></th>`;
+        leagueTeams.forEach(t => {
+          thRow += `<th>${SHORT_CODE[t] || t}</th>`;
+        });
+        thRow += `<th></th></tr>`;
+        rankHead.innerHTML = thRow;
+
+        for (let r = 1; r <= 6; r++) {
+          let trHtml = `<tr><td style="font-weight:800; padding:0 8px;">${r}</td>`;
+          leagueTeams.forEach(t => {
+            const teamObj = list.find(item => item.team === t);
+            const curRank = teamObj.rank;
+            const prob = (rankMat[t] && rankMat[t][r] !== undefined) ? rankMat[t][r] : 0;
+            let cellClass = "";
+
+            if (r === curRank) {
+              cellClass = "cell-current-rank";
+            } else if (r < curRank) {
+              if (prob > 0) {
+                const mKey = r === 1 ? "magic_1st" : (r === 2 ? "magic_2nd" : "magic_3rd");
+                const mVal = teamObj[mKey];
+                const canClimbBySelf = (typeof mVal === "number" && mVal <= teamObj.remaining);
+                cellClass = canClimbBySelf ? "cell-can-climb" : "cell-potential";
+              }
+            } else {
+              cellClass = prob > 0 ? "cell-drop" : "";
+            }
+
+            const valStr = prob > 0 ? `${prob}%` : (r === curRank ? "0%" : "-");
+            trHtml += `<td><span class="cell-box ${cellClass}">${valStr}</span></td>`;
+          });
+          trHtml += `<td style="font-weight:800; padding:0 8px;">${r}</td></tr>`;
+          rankBody.innerHTML += trHtml;
         }
       }
 
-      if (!activeTeam) {
-        card.style.display = "none";
-        return;
+      // 4. 優勝決定日確率テーブル
+      const clinchContainer = document.getElementById('clinch-schedule-container');
+      clinchContainer.innerHTML = '';
+
+      if (rawData.simulation) {
+        const schedKey = currentLeague === 'central' ? 'central_clinch_schedules' : 'pacific_clinch_schedules';
+        const schedData = rawData.simulation[schedKey] || {};
+        
+        list.slice(0, 3).forEach(t => {
+          const tName = t.team;
+          const tSched = schedData[tName] || [];
+          if (tSched.length === 0) return;
+
+          const card = document.createElement('div');
+          card.className = 'clinch-card';
+          let rowsHtml = '';
+          tSched.forEach(item => {
+            const isClinchPossible = (item.clinch_prob_str !== '-');
+            rowsHtml += `
+              <tr>
+                <td>${item.date}</td>
+                <td style="font-weight:700;">${item.opp}</td>
+                <td>${item.ground}</td>
+                <td style="font-weight:800; color:${isClinchPossible ? '#dc2626' : '#94a3b8'};">${item.clinch_prob_str}</td>
+                <td style="font-weight:800; color:${item.cum_prob_str !== '-' ? '#166534' : '#94a3b8'};">${item.cum_prob_str}</td>
+                <td style="font-weight:700;">${item.win_expect}</td>
+              </tr>
+            `;
+          });
+
+          card.innerHTML = `
+            <h3>${tName} ... 優勝確率 ${t.champ_prob}%</h3>
+            <table class="clinch-subtable">
+              <thead>
+                <tr>
+                  <th>月日</th>
+                  <th>対戦</th>
+                  <th>開催地</th>
+                  <th>決定確率</th>
+                  <th>累計</th>
+                  <th>見込勝率</th>
+                </tr>
+              </thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>
+          `;
+          clinchContainer.appendChild(card);
+        });
       }
 
-      card.style.display = "block";
-      document.getElementById("clinch-team-badge").textContent = `${activeTeam} (${activeCn})`;
-      document.getElementById("clinch-details").innerHTML = `
-        <strong>最短決定日:</strong> 9月下旬の直接対決カードにて自力優勝決定の可能性あり
+      // 5. 優勝ラインテーブル
+      const lineHead = document.getElementById('line-grid-head');
+      const lineBody = document.getElementById('line-grid-body');
+      lineHead.innerHTML = '';
+      lineBody.innerHTML = '';
+
+      if (rawData.simulation) {
+        const gridKey = currentLeague === 'central' ? 'central_lines_grid' : 'pacific_lines_grid';
+        const gridData = rawData.simulation[gridKey];
+
+        if (gridData && gridData.headers) {
+          const bannerClasses = ["banner-hanshin", "banner-kyojin", "banner-dena"];
+          let topTh = `<tr>`;
+          let subTh = `<tr>`;
+          let colsTh = `<tr>`;
+
+          gridData.headers.forEach((h, idx) => {
+            topTh += `<th colspan="3" class="team-banner ${bannerClasses[idx] || 'banner-kyojin'}">${h.team}</th>`;
+            subTh += `<th colspan="3" class="banner-sub">残り試合: ${h.remaining}（現在${h.current_w}勝${h.current_l}敗）</th>`;
+            colsTh += `<th>勝</th><th>敗</th><th>勝率</th>`;
+          });
+          topTh += `</tr>`;
+          subTh += `</tr>`;
+          colsTh += `</tr>`;
+          lineHead.innerHTML = topTh + subTh + colsTh;
+
+          gridData.rows.forEach(r => {
+            let trHtml = `<tr>`;
+            r.forEach(cell => {
+              if (cell) {
+                const isHighlight = (cell.rate >= 0.540 && cell.rate <= 0.550);
+                trHtml += `
+                  <td class="${isHighlight ? 'line-highlight' : ''}">${cell.w}</td>
+                  <td class="${isHighlight ? 'line-highlight' : ''}">${cell.l}</td>
+                  <td class="${isHighlight ? 'line-highlight' : ''}">${cell.rate_str}</td>
+                `;
+              } else {
+                trHtml += `<td>-</td><td>-</td><td>-</td>`;
+              }
+            });
+            trHtml += `</tr>`;
+            lineBody.innerHTML += trHtml;
+          });
+        }
+      }
+
+      // 6. 対戦成績表描画
+      const theadMatrix = document.getElementById('matrix-head');
+      const tbodyMatrix = document.getElementById('matrix-body');
+      theadMatrix.innerHTML = '';
+      tbodyMatrix.innerHTML = '';
+
+      const leagueTeams = list.map(t => t.team);
+      let headHtml = `
+        <tr>
+          <th style="min-width: 140px; text-align: left; padding-left: 14px;">チーム</th>
+          <th>試合</th>
+          <th>勝利</th>
+          <th>敗北</th>
+          <th>引分</th>
+          <th>勝率</th>
+          <th>差</th>
+          <th>ホーム</th>
+          <th>ロード</th>
       `;
+      leagueTeams.forEach(teamName => {
+        headHtml += `<th>${SHORT_NAMES[teamName] || teamName}</th>`;
+      });
+      headHtml += `<th>交流戦</th></tr>`;
+      theadMatrix.innerHTML = headHtml;
 
-      const list = document.getElementById("scenario-list");
-      list.innerHTML = `
-        <div class="scenario-item">自軍 ○ ＆ 2位 ● : <strong>M「2」減算</strong></div>
-        <div class="scenario-item">自軍 ○ ＆ 2位 ○ : <strong>M「1」減算</strong></div>
-        <div class="scenario-item">自軍 ● ＆ 2位 ● : <strong>M「1」減算</strong></div>
-        <div class="scenario-item">自軍 ● ＆ 2位 ○ : <strong>変化なし</strong></div>
-      `;
-    }
-
-    function renderMatches(matches) {
-      const grid = document.getElementById("matches-grid");
-      grid.innerHTML = "";
-
-      matches.forEach(m => {
-        const card = document.createElement("div");
-        card.className = "match-card";
-        const hasScore = m.home_score !== null && m.away_score !== null;
-
-        card.innerHTML = `
-          <div class="match-header">
-            <span>${hasScore ? "⚾ 試合終了" : "🎯 NPB 予想勝率"}</span>
-            <span>${m.date}</span>
-          </div>
-          <div class="match-body">
-            <span>${m.home} ${hasScore ? m.home_score : (m.home_pitcher ? `(${m.home_pitcher})` : '')}</span>
-            <span style="color:var(--text-muted); font-size:0.8rem;">vs</span>
-            <span>${hasScore ? m.away_score : ''} ${m.away} ${!hasScore && m.away_pitcher ? `(${m.away_pitcher})` : ''}</span>
-          </div>
-          ${!hasScore ? `
-            <div class="prob-bar">
-              <div class="prob-bar-inner" style="width: 53%;"></div>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-top:4px; color:var(--text-muted);">
-              <span>ホーム 53%</span>
-              <span>47% ビジター</span>
-            </div>
-          ` : ''}
+      list.forEach(t => {
+        const tr = document.createElement('tr');
+        let rowHtml = `
+          <td class="team-col" style="padding-left: 14px;">${FULL_TEAM_NAMES[t.team] || t.team}</td>
+          <td>${t.games}</td>
+          <td>${t.win}</td>
+          <td>${t.lose}</td>
+          <td>${t.draw}</td>
+          <td>${t.rate.toFixed(3).replace('0.', '.')}</td>
+          <td>${t.diff === 0 ? '--' : t.diff.toFixed(1)}</td>
+          <td>${formatRecord(t.home.win, t.home.lose, t.home.draw)}</td>
+          <td>${formatRecord(t.away.win, t.away.lose, t.away.draw)}</td>
         `;
-        grid.appendChild(card);
+
+        leagueTeams.forEach(oppName => {
+          if (oppName === t.team) {
+            rowHtml += `<td class="matrix-self">***</td>`;
+          } else {
+            const h2h = t.h2h && t.h2h[oppName] ? t.h2h[oppName] : {win: 0, lose: 0, draw: 0};
+            rowHtml += `<td>${formatRecord(h2h.win, h2h.lose, h2h.draw)}</td>`;
+          }
+        });
+
+        rowHtml += `<td>${formatRecord(t.interleague.win, t.interleague.lose, t.interleague.draw)}</td>`;
+        tr.innerHTML = rowHtml;
+        tbodyMatrix.appendChild(tr);
       });
     }
 
-    window.addEventListener("DOMContentLoaded", initDashboard);
+    function switchLeague(league) {
+      currentLeague = league;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      renderTables();
+    }
+
+    async function init() {
+      try {
+        const res = await fetch(`history_standings.json?t=${new Date().getTime()}`);
+        rawData = await res.json();
+
+        const dates = rawData.available_dates;
+        const picker = document.getElementById('date-picker');
+        picker.min = dates[0];
+        picker.max = dates[dates.length - 1];
+        picker.value = rawData.latest_date;
+        selectedDate = rawData.latest_date;
+
+        picker.addEventListener('change', (e) => {
+          selectedDate = e.target.value;
+          renderTables();
+        });
+
+        renderTables();
+      } catch (err) {
+        document.getElementById('standings-body').innerHTML = `<tr><td colspan="14" style="padding: 24px; color:red;">データ読み込みに失敗しました。</td></tr>`;
+      }
+    }
+
+    init();
   </script>
 </body>
 </html>
