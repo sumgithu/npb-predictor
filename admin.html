@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>NPB 試合結果・先発予定 手動管理</title>
   <style>
     :root {
@@ -20,19 +20,19 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg); color: var(--text-main); padding: 24px 16px 80px; }
-    .container { max-width: 980px; margin: 0 auto; }
+    body { background-color: var(--bg); color: var(--text-main); padding: 16px 8px 60px; }
+    .container { max-width: 960px; margin: 0 auto; }
 
-    header { text-align: center; margin-bottom: 24px; }
-    header h1 { font-size: 1.5rem; font-weight: 800; color: #1e3a8a; }
-    header p { font-size: 0.85rem; color: var(--text-sub); margin-top: 4px; }
+    header { text-align: center; margin-bottom: 20px; }
+    header h1 { font-size: 1.35rem; font-weight: 800; color: #1e3a8a; }
+    header p { font-size: 0.8rem; color: var(--text-sub); margin-top: 4px; }
 
     .card {
       background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
-      padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 20px;
+      padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 16px;
     }
 
-    .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-bottom: 12px; }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     .form-group label { font-size: 0.82rem; font-weight: 700; color: #334155; }
     .form-group input, .form-group select {
@@ -40,13 +40,13 @@
       font-size: 0.9rem; outline: none; background: #fff;
     }
 
-    /* 対戦カード行 (左: ホーム, 右: ビジター + 中止ボタン) */
+    /* 対戦カード行（PCレイアウト） */
     .match-row {
       display: grid;
-      grid-template-columns: 2fr 0.9fr 28px 0.9fr 2fr 80px 36px;
+      grid-template-columns: 2fr 75px 28px 75px 2fr 60px 32px;
       align-items: center;
-      gap: 10px;
-      padding: 14px 16px;
+      gap: 8px;
+      padding: 12px 14px;
       background: #f8fafc;
       border: 1px solid var(--border);
       border-radius: 10px;
@@ -60,11 +60,11 @@
     .match-team span.label { font-size: 0.72rem; font-weight: 700; }
     .match-team span.label.home-lbl { color: var(--home-color); }
     .match-team span.label.away-lbl { color: var(--away-color); }
-    .match-team select { padding: 6px 8px; font-weight: 700; border-radius: 6px; border: 1px solid var(--border); }
+    .match-team select { padding: 6px 8px; font-weight: 700; border-radius: 6px; border: 1px solid var(--border); font-size: 0.9rem; }
     .match-team input.pitcher { padding: 5px 8px; font-size: 0.82rem; border-radius: 6px; border: 1px solid var(--border); }
     
     .score-input {
-      width: 100%; text-align: center; font-size: 1.25rem; font-weight: 800;
+      width: 100%; min-width: 50px; text-align: center; font-size: 1.25rem; font-weight: 800;
       padding: 6px 0; border-radius: 6px; border: 1px solid var(--border); background: #fff;
     }
     .score-input:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
@@ -82,27 +82,60 @@
       cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
 
+    /* スマホ・モバイル最適化レイアウト（768px以下） */
+    @media (max-width: 768px) {
+      .match-row {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 14px 12px;
+      }
+      .mobile-card-header {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 6px;
+      }
+      .mobile-vs-row {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 56px 20px 56px 1fr;
+        align-items: center;
+        gap: 6px;
+      }
+      .mobile-pitcher-row {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .match-team select { width: 100%; font-size: 0.95rem; }
+      .score-input { height: 42px; font-size: 1.3rem; }
+    }
+
     .btn-action {
-      padding: 8px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s;
-      border: 1px solid var(--border); background: #fff; color: var(--text-main);
+      padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s;
+      border: 1px solid var(--border); background: #fff; color: var(--text-main); font-size: 0.85rem;
     }
     .btn-action:hover { background: #f1f5f9; border-color: var(--primary); color: var(--primary); }
 
     .btn-add {
       width: 100%; padding: 12px; border: 1.5px dashed #cbd5e1; border-radius: 8px;
       background: transparent; color: var(--text-sub); font-weight: 700; cursor: pointer;
-      margin-bottom: 20px; transition: 0.2s;
+      margin-bottom: 16px; transition: 0.2s; font-size: 0.9rem;
     }
     .btn-add:hover { background: #f1f5f9; border-color: var(--primary); color: var(--primary); }
 
-    .actions { display: flex; justify-content: space-between; align-items: center; }
+    .actions { display: flex; flex-direction: column; gap: 12px; }
     .btn-save {
-      background: var(--primary); color: #fff; border: none; padding: 12px 32px;
-      border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s;
+      width: 100%; background: var(--primary); color: #fff; border: none; padding: 14px 20px;
+      border-radius: 8px; font-weight: 800; font-size: 1.05rem; cursor: pointer; transition: 0.2s;
     }
     .btn-save:hover { background: var(--primary-hover); }
 
-    .status-msg { font-size: 0.9rem; font-weight: 700; }
+    .status-msg { font-size: 0.88rem; font-weight: 700; text-align: center; }
     .status-msg.success { color: var(--success); }
     .status-msg.error { color: var(--danger); }
   </style>
@@ -112,7 +145,7 @@
   <div class="container">
     <header>
       <h1>NPB 試合結果・先発投手 手動管理</h1>
-      <p>日付を選択し、結果入力または中止登録を行いGitHubへ保存します（左: ホーム, 右: ビジター）</p>
+      <p>日付を選択し、結果入力または中止登録を行いGitHubへ保存します（左: ホーム vs 右: ビジター）</p>
     </header>
 
     <div class="card">
@@ -127,14 +160,14 @@
         </div>
       </div>
       <div style="font-size: 0.75rem; color: var(--text-sub);">
-        ※ トークンはブラウザにのみ保存され、GitHub APIと直接安全に通信します。
+        ※ トークンはブラウザにのみ保存され、GitHub APIと安全に直接通信します。
       </div>
     </div>
 
-    <div class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-      <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
-        <label style="font-size: 1rem;">入力対象日:</label>
-        <input type="date" id="target-date" style="font-size: 1rem; font-weight: 700; padding: 6px 12px;">
+    <div class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+      <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px;">
+        <label style="font-size: 0.95rem;">入力対象日:</label>
+        <input type="date" id="target-date" style="font-size: 0.95rem; font-weight: 700; padding: 6px 10px;">
       </div>
       <button type="button" class="btn-action" onclick="onReloadClick()">データを再読込</button>
     </div>
@@ -270,7 +303,6 @@
 
         if (!curDate) continue;
 
-        // 中止行の判定
         if (line.includes("中止") || line.includes("ノーゲーム")) {
           const canM = line.match(/([^\s\d]+)\s*(?:中止|ノーゲーム)\s*([^\s\d]+)/);
           if (canM) {
@@ -289,7 +321,6 @@
           continue;
         }
 
-        // 1. スコア行 (ホーム - ビジター)
         const finM = line.match(/([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)/);
         if (finM) {
           const h = normalizeTeam(finM[1]);
@@ -311,7 +342,6 @@
           }
         }
 
-        // 2. 予定試合行 (ホーム - ビジター)
         const schedM = line.match(/([^\s\d]+)\s*-\s*([^\s\d]+)/);
         if (schedM) {
           const h = normalizeTeam(schedM[1]);
@@ -353,14 +383,13 @@
 
       const emptyNotice = document.createElement('div');
       emptyNotice.style.cssText = "padding: 16px; text-align: center; color: #64748b; font-weight: 600;";
-      emptyNotice.innerText = `この日（${date}）の公式対戦日程はありません。「＋ 対戦カードを追加」から手動作成できます。`;
+      emptyNotice.innerText = `この日（${date}）の公式対戦日程はありません。「＋ 対戦カードを追加」から作成できます。`;
       container.appendChild(emptyNotice);
     }
 
     function toggleCancelRow(chk) {
       const row = chk.closest('.match-row');
       const scoreInputs = row.querySelectorAll('.score-input');
-      const pitcherInputs = row.querySelectorAll('.pitcher');
 
       if (chk.checked) {
         row.classList.add('is-cancelled');
@@ -396,31 +425,40 @@
       const homePitcher = data ? (data.home_starter || data.home_pitcher || '') : '';
       const awayPitcher = data ? (data.away_starter || data.away_pitcher || '') : '';
 
+      // PC・スマホ兼用（画面幅に応じてCSSで整列）
       row.innerHTML = `
-        <div class="match-team">
-          <span class="label home-lbl">ホーム</span>
-          <select class="home-team">${homeOptions}</select>
-          <input type="text" class="pitcher home-pitcher" placeholder="先発/勝利投手" value="${homePitcher}">
+        <div class="mobile-card-header">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <label class="cancel-box" style="flex-direction:row; gap:4px;">
+              <input type="checkbox" class="chk-cancel" onchange="toggleCancelRow(this)" ${isCancelled ? 'checked' : ''}>
+              <span>雨天中止</span>
+            </label>
+          </div>
+          <button type="button" class="btn-del" title="削除" onclick="this.closest('.match-row').remove()">✕</button>
         </div>
 
-        <input type="number" class="score-input home-score" placeholder="点" min="0" max="35" value="${homeScore}" ${isCancelled ? 'disabled' : ''}>
+        <div class="mobile-vs-row">
+          <div class="match-team">
+            <span class="label home-lbl">ホーム</span>
+            <select class="home-team">${homeOptions}</select>
+          </div>
 
-        <div class="vs-text">VS</div>
+          <input type="number" class="score-input home-score" placeholder="点" min="0" max="35" value="${homeScore}" ${isCancelled ? 'disabled' : ''}>
 
-        <input type="number" class="score-input away-score" placeholder="点" min="0" max="35" value="${awayScore}" ${isCancelled ? 'disabled' : ''}>
+          <div class="vs-text">VS</div>
 
-        <div class="match-team">
-          <span class="label away-lbl" style="text-align: right;">ビジター</span>
-          <select class="away-team">${awayOptions}</select>
-          <input type="text" class="pitcher away-pitcher" placeholder="先発/敗戦投手" value="${awayPitcher}">
+          <input type="number" class="score-input away-score" placeholder="点" min="0" max="35" value="${awayScore}" ${isCancelled ? 'disabled' : ''}>
+
+          <div class="match-team" style="text-align:right;">
+            <span class="label away-lbl">ビジター</span>
+            <select class="away-team">${awayOptions}</select>
+          </div>
         </div>
 
-        <label class="cancel-box" title="雨天中止・ノーゲーム">
-          <input type="checkbox" class="chk-cancel" onchange="toggleCancelRow(this)" ${isCancelled ? 'checked' : ''}>
-          <span>中止</span>
-        </label>
-
-        <button type="button" class="btn-del" title="削除" onclick="this.parentElement.remove()">✕</button>
+        <div class="mobile-pitcher-row">
+          <input type="text" class="pitcher home-pitcher" placeholder="ホーム先発/勝利投手" value="${homePitcher}">
+          <input type="text" class="pitcher away-pitcher" placeholder="ビジター先発/敗戦投手" value="${awayPitcher}">
+        </div>
       `;
       container.appendChild(row);
     }
@@ -483,7 +521,7 @@
 
       const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(currentDb, null, 2))));
       const payload = {
-        message: `Update schedule/results for ${date} via admin UI`,
+        message: `Update results/schedule for ${date} via responsive admin UI`,
         content: contentBase64,
         sha: fileSha || undefined
       };
