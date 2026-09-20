@@ -64,6 +64,7 @@
     "2026-06-05",
     "2026-06-06",
     "2026-06-07",
+    "2026-06-08",
     "2026-06-09",
     "2026-06-10",
     "2026-06-11",
@@ -4420,6 +4421,19 @@
         }
       ],
       "predictions": [
+        {
+          "home": "ヤクルト",
+          "away": "広島",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 60.9,
+          "away_prob": 39.1,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
         {
           "home": "中日",
           "away": "巨人",
@@ -10483,6 +10497,19 @@
           "is_finished": true
         },
         {
+          "home": "広島",
+          "away": "巨人",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 48.5,
+          "away_prob": 51.5,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
+        {
           "home": "楽天",
           "away": "日本ハム",
           "home_starter": "内",
@@ -11323,6 +11350,19 @@
           "is_finished": true
         },
         {
+          "home": "ＤｅＮＡ",
+          "away": "広島",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 56.7,
+          "away_prob": 43.3,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
+        {
           "home": "中日",
           "away": "阪神",
           "home_starter": "松山",
@@ -11334,6 +11374,19 @@
           "actual_home_score": 3,
           "actual_away_score": 5,
           "is_finished": true
+        },
+        {
+          "home": "楽天",
+          "away": "オリックス",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 50.7,
+          "away_prob": 49.3,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
         },
         {
           "home": "西武",
@@ -14746,6 +14799,19 @@
           "actual_home_score": 2,
           "actual_away_score": 5,
           "is_finished": true
+        },
+        {
+          "home": "阪神",
+          "away": "巨人",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 73.5,
+          "away_prob": 26.5,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
         },
         {
           "home": "ロッテ",
@@ -20758,6 +20824,19 @@
       ],
       "predictions": [
         {
+          "home": "ＤｅＮＡ",
+          "away": "阪神",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 49.5,
+          "away_prob": 50.5,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
+        {
           "home": "広島",
           "away": "ヤクルト",
           "home_starter": "岡本",
@@ -20795,6 +20874,19 @@
           "actual_home_score": 3,
           "actual_away_score": 4,
           "is_finished": true
+        },
+        {
+          "home": "ロッテ",
+          "away": "オリックス",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 39.7,
+          "away_prob": 60.3,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
         }
       ]
     },
@@ -23341,6 +23433,19 @@
           "actual_home_score": 9,
           "actual_away_score": 4,
           "is_finished": true
+        },
+        {
+          "home": "ソフトバンク",
+          "away": "ロッテ",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 69.8,
+          "away_prob": 30.2,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
         }
       ]
     },
@@ -28459,6 +28564,19 @@
           "actual_home_score": 3,
           "actual_away_score": 0,
           "is_finished": true
+        },
+        {
+          "home": "広島",
+          "away": "中日",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 57.0,
+          "away_prob": 43.0,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
         },
         {
           "home": "日本ハム",
@@ -41360,6 +41478,19 @@
           "is_finished": true
         },
         {
+          "home": "阪神",
+          "away": "中日",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 66.4,
+          "away_prob": 33.6,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
+        {
           "home": "広島",
           "away": "ＤｅＮＡ",
           "home_starter": "玉村",
@@ -49992,6 +50123,32 @@
           "actual_home_score": 0,
           "actual_away_score": 3,
           "is_finished": true
+        },
+        {
+          "home": "阪神",
+          "away": "西武",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 45.9,
+          "away_prob": 54.1,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
+        {
+          "home": "広島",
+          "away": "日本ハム",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 46.4,
+          "away_prob": 53.6,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
         }
       ]
     },
@@ -54298,6 +54455,19 @@
           "is_finished": true
         },
         {
+          "home": "阪神",
+          "away": "楽天",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 69.8,
+          "away_prob": 30.2,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
+        {
           "home": "広島",
           "away": "オリックス",
           "home_starter": "岡本",
@@ -54309,6 +54479,807 @@
           "actual_home_score": 5,
           "actual_away_score": 2,
           "is_finished": true
+        }
+      ]
+    },
+    "2026-06-08": {
+      "central": [
+        {
+          "team": "阪神",
+          "games": 56,
+          "win": 32,
+          "lose": 23,
+          "draw": 1,
+          "rs": 213,
+          "ra": 181,
+          "home": {
+            "win": 16,
+            "lose": 14,
+            "draw": 1
+          },
+          "away": {
+            "win": 16,
+            "lose": 9,
+            "draw": 0
+          },
+          "interleague": {
+            "win": 4,
+            "lose": 6,
+            "draw": 0
+          },
+          "remaining": 87,
+          "rate": 0.5818181818181818,
+          "h2h": {
+            "阪神": {
+              "win": 0,
+              "lose": 0,
+              "draw": 0
+            },
+            "巨人": {
+              "win": 7,
+              "lose": 6,
+              "draw": 0
+            },
+            "ＤｅＮＡ": {
+              "win": 3,
+              "lose": 2,
+              "draw": 0
+            },
+            "ヤクルト": {
+              "win": 5,
+              "lose": 5,
+              "draw": 0
+            },
+            "中日": {
+              "win": 9,
+              "lose": 6,
+              "draw": 0
+            },
+            "広島": {
+              "win": 4,
+              "lose": 3,
+              "draw": 1
+            }
+          },
+          "rank": 1,
+          "diff": 0.0,
+          "magic_1st": 79,
+          "magic_2nd": 79,
+          "magic_3rd": 75,
+          "magic_4th": 75,
+          "magic_5th": 74
+        },
+        {
+          "team": "ヤクルト",
+          "games": 58,
+          "win": 32,
+          "lose": 25,
+          "draw": 1,
+          "rs": 188,
+          "ra": 194,
+          "home": {
+            "win": 14,
+            "lose": 14,
+            "draw": 1
+          },
+          "away": {
+            "win": 18,
+            "lose": 11,
+            "draw": 0
+          },
+          "interleague": {
+            "win": 4,
+            "lose": 7,
+            "draw": 1
+          },
+          "remaining": 85,
+          "rate": 0.5614035087719298,
+          "h2h": {
+            "阪神": {
+              "win": 3,
+              "lose": 3,
+              "draw": 0
+            },
+            "巨人": {
+              "win": 7,
+              "lose": 6,
+              "draw": 0
+            },
+            "ＤｅＮＡ": {
+              "win": 8,
+              "lose": 5,
+              "draw": 0
+            },
+            "ヤクルト": {
+              "win": 0,
+              "lose": 0,
+              "draw": 0
+            },
+            "中日": {
+              "win": 4,
+              "lose": 6,
+              "draw": 0
+            },
+            "広島": {
+              "win": 6,
+              "lose": 6,
+              "draw": 0
+            }
+          },
+          "rank": 2,
+          "diff": 1.0,
+          "magic_1st": 78,
+          "magic_2nd": 78,
+          "magic_3rd": 75,
+          "magic_4th": 74,
+          "magic_5th": 72
+        },
+        {
+          "team": "巨人",
+          "games": 58,
+          "win": 31,
+          "lose": 25,
+          "draw": 2,
+          "rs": 183,
+          "ra": 190,
+          "home": {
+            "win": 18,
+            "lose": 14,
+            "draw": 2
+          },
+          "away": {
+            "win": 13,
+            "lose": 11,
+            "draw": 0
+          },
+          "interleague": {
+            "win": 7,
+            "lose": 3,
+            "draw": 2
+          },
+          "remaining": 85,
+          "rate": 0.5535714285714286,
+          "h2h": {
+            "阪神": {
+              "win": 4,
+              "lose": 5,
+              "draw": 0
+            },
+            "巨人": {
+              "win": 0,
+              "lose": 0,
+              "draw": 0
+            },
+            "ＤｅＮＡ": {
+              "win": 7,
+              "lose": 3,
+              "draw": 0
+            },
+            "ヤクルト": {
+              "win": 4,
+              "lose": 5,
+              "draw": 0
+            },
+            "中日": {
+              "win": 5,
+              "lose": 6,
+              "draw": 0
+            },
+            "広島": {
+              "win": 4,
+              "lose": 2,
+              "draw": 0
+            }
+          },
+          "rank": 3,
+          "diff": 1.5,
+          "magic_1st": 80,
+          "magic_2nd": 79,
+          "magic_3rd": 75,
+          "magic_4th": 73,
+          "magic_5th": 71
+        },
+        {
+          "team": "ＤｅＮＡ",
+          "games": 58,
+          "win": 25,
+          "lose": 31,
+          "draw": 2,
+          "rs": 207,
+          "ra": 231,
+          "home": {
+            "win": 13,
+            "lose": 14,
+            "draw": 2
+          },
+          "away": {
+            "win": 12,
+            "lose": 17,
+            "draw": 0
+          },
+          "interleague": {
+            "win": 4,
+            "lose": 8,
+            "draw": 0
+          },
+          "remaining": 85,
+          "rate": 0.44642857142857145,
+          "h2h": {
+            "阪神": {
+              "win": 5,
+              "lose": 6,
+              "draw": 0
+            },
+            "巨人": {
+              "win": 2,
+              "lose": 6,
+              "draw": 0
+            },
+            "ＤｅＮＡ": {
+              "win": 0,
+              "lose": 0,
+              "draw": 0
+            },
+            "ヤクルト": {
+              "win": 2,
+              "lose": 5,
+              "draw": 0
+            },
+            "中日": {
+              "win": 5,
+              "lose": 3,
+              "draw": 1
+            },
+            "広島": {
+              "win": 7,
+              "lose": 6,
+              "draw": 1
+            }
+          },
+          "rank": 4,
+          "diff": 7.5,
+          "magic_1st": 81,
+          "magic_2nd": 81,
+          "magic_3rd": 81,
+          "magic_4th": 78,
+          "magic_5th": 74
+        },
+        {
+          "team": "広島",
+          "games": 55,
+          "win": 21,
+          "lose": 31,
+          "draw": 3,
+          "rs": 161,
+          "ra": 177,
+          "home": {
+            "win": 13,
+            "lose": 16,
+            "draw": 1
+          },
+          "away": {
+            "win": 8,
+            "lose": 15,
+            "draw": 2
+          },
+          "interleague": {
+            "win": 3,
+            "lose": 7,
+            "draw": 1
+          },
+          "remaining": 88,
+          "rate": 0.40384615384615385,
+          "h2h": {
+            "阪神": {
+              "win": 3,
+              "lose": 4,
+              "draw": 1
+            },
+            "巨人": {
+              "win": 3,
+              "lose": 5,
+              "draw": 0
+            },
+            "ＤｅＮＡ": {
+              "win": 3,
+              "lose": 4,
+              "draw": 1
+            },
+            "ヤクルト": {
+              "win": 2,
+              "lose": 2,
+              "draw": 0
+            },
+            "中日": {
+              "win": 7,
+              "lose": 5,
+              "draw": 0
+            },
+            "広島": {
+              "win": 0,
+              "lose": 0,
+              "draw": 0
+            }
+          },
+          "rank": 5,
+          "diff": 9.5,
+          "magic_1st": 84,
+          "magic_2nd": 83,
+          "magic_3rd": 83,
+          "magic_4th": 82,
+          "magic_5th": 78
+        },
+        {
+          "team": "中日",
+          "games": 58,
+          "win": 20,
+          "lose": 37,
+          "draw": 1,
+          "rs": 187,
+          "ra": 217,
+          "home": {
+            "win": 16,
+            "lose": 19,
+            "draw": 0
+          },
+          "away": {
+            "win": 4,
+            "lose": 18,
+            "draw": 1
+          },
+          "interleague": {
+            "win": 5,
+            "lose": 7,
+            "draw": 0
+          },
+          "remaining": 85,
+          "rate": 0.3508771929824561,
+          "h2h": {
+            "阪神": {
+              "win": 2,
+              "lose": 5,
+              "draw": 0
+            },
+            "巨人": {
+              "win": 3,
+              "lose": 2,
+              "draw": 0
+            },
+            "ＤｅＮＡ": {
+              "win": 2,
+              "lose": 4,
+              "draw": 1
+            },
+            "ヤクルト": {
+              "win": 5,
+              "lose": 3,
+              "draw": 0
+            },
+            "中日": {
+              "win": 0,
+              "lose": 0,
+              "draw": 0
+            },
+            "広島": {
+              "win": 3,
+              "lose": 5,
+              "draw": 0
+            }
+          },
+          "rank": 6,
+          "diff": 13.0,
+          "magic_1st": 86,
+          "magic_2nd": 84,
+          "magic_3rd": 83,
+          "magic_4th": 81,
+          "magic_5th": 81
+        }
+      ],
+      "pacific": [
+        {
+          "team": "西武",
+          "games": 59,
+          "win": 35,
+          "lose": 22,
+          "draw": 2,
+          "rs": 227,
+          "ra": 175,
+          "home": {
+            "win": 16,
+            "lose": 12,
+            "draw": 1
+          },
+          "away": {
+            "win": 19,
+            "lose": 10,
+            "draw": 1
+          },
+          "interleague": {
+            "win": 8,
+            "lose": 2,
+            "draw": 1
+          },
+          "remaining": 84,
+          "rate": 0.6140350877192983,
+          "h2h": {
+            "ソフトバンク": {
+              "win": 8,
+              "lose": 5,
+              "draw": 0
+            },
+            "日本ハム": {
+              "win": 5,
+              "lose": 6,
+              "draw": 0
+            },
+            "ロッテ": {
+              "win": 6,
+              "lose": 6,
+              "draw": 0
+            },
+            "楽天": {
+              "win": 5,
+              "lose": 2,
+              "draw": 1
+            },
+            "オリックス": {
+              "win": 3,
+              "lose": 3,
+              "draw": 0
+            },
+            "西武": {
+              "win": 0,
+              "lose": 0,
+              "draw": 0
+            }
+          },
+          "rank": 1,
+          "diff": 0.0,
+          "magic_1st": 77,
+          "magic_2nd": 74,
+          "magic_3rd": 74,
+          "magic_4th": 74,
+          "magic_5th": 70
+        },
+        {
+          "team": "ソフトバンク",
+          "games": 57,
+          "win": 33,
+          "lose": 24,
+          "draw": 0,
+          "rs": 246,
+          "ra": 205,
+          "home": {
+            "win": 16,
+            "lose": 11,
+            "draw": 0
+          },
+          "away": {
+            "win": 17,
+            "lose": 13,
+            "draw": 0
+          },
+          "interleague": {
+            "win": 10,
+            "lose": 2,
+            "draw": 0
+          },
+          "remaining": 86,
+          "rate": 0.5789473684210527,
+          "h2h": {
+            "ソフトバンク": {
+              "win": 0,
+              "lose": 0,
+              "draw": 0
+            },
+            "日本ハム": {
+              "win": 8,
+              "lose": 2,
+              "draw": 0
+            },
+            "ロッテ": {
+              "win": 4,
+              "lose": 3,
+              "draw": 0
+            },
+            "楽天": {
+              "win": 6,
+              "lose": 6,
+              "draw": 0
+            },
+            "オリックス": {
+              "win": 2,
+              "lose": 4,
+              "draw": 0
+            },
+            "西武": {
+              "win": 3,
+              "lose": 6,
+              "draw": 0
+            }
+          },
+          "rank": 2,
+          "diff": 2.0,
+          "magic_1st": 80,
+          "magic_2nd": 76,
+          "magic_3rd": 76,
+          "magic_4th": 75,
+          "magic_5th": 74
+        },
+        {
+          "team": "オリックス",
+          "games": 58,
+          "win": 30,
+          "lose": 27,
+          "draw": 1,
+          "rs": 203,
+          "ra": 202,
+          "home": {
+            "win": 20,
+            "lose": 5,
+            "draw": 0
+          },
+          "away": {
+            "win": 10,
+            "lose": 22,
+            "draw": 1
+          },
+          "interleague": {
+            "win": 4,
+            "lose": 7,
+            "draw": 1
+          },
+          "remaining": 85,
+          "rate": 0.5263157894736842,
+          "h2h": {
+            "ソフトバンク": {
+              "win": 5,
+              "lose": 3,
+              "draw": 0
+            },
+            "日本ハム": {
+              "win": 5,
+              "lose": 6,
+              "draw": 0
+            },
+            "ロッテ": {
+              "win": 7,
+              "lose": 5,
+              "draw": 0
+            },
+            "楽天": {
+              "win": 3,
+              "lose": 4,
+              "draw": 0
+            },
+            "オリックス": {
+              "win": 0,
+              "lose": 0,
+              "draw": 0
+            },
+            "西武": {
+              "win": 6,
+              "lose": 6,
+              "draw": 0
+            }
+          },
+          "rank": 3,
+          "diff": 5.0,
+          "magic_1st": 80,
+          "magic_2nd": 78,
+          "magic_3rd": 78,
+          "magic_4th": 77,
+          "magic_5th": 73
+        },
+        {
+          "team": "日本ハム",
+          "games": 60,
+          "win": 31,
+          "lose": 29,
+          "draw": 0,
+          "rs": 238,
+          "ra": 221,
+          "home": {
+            "win": 14,
+            "lose": 11,
+            "draw": 0
+          },
+          "away": {
+            "win": 17,
+            "lose": 18,
+            "draw": 0
+          },
+          "interleague": {
+            "win": 8,
+            "lose": 3,
+            "draw": 0
+          },
+          "remaining": 83,
+          "rate": 0.5166666666666667,
+          "h2h": {
+            "ソフトバンク": {
+              "win": 0,
+              "lose": 6,
+              "draw": 0
+            },
+            "日本ハム": {
+              "win": 0,
+              "lose": 0,
+              "draw": 0
+            },
+            "ロッテ": {
+              "win": 5,
+              "lose": 6,
+              "draw": 0
+            },
+            "楽天": {
+              "win": 7,
+              "lose": 6,
+              "draw": 0
+            },
+            "オリックス": {
+              "win": 7,
+              "lose": 6,
+              "draw": 0
+            },
+            "西武": {
+              "win": 4,
+              "lose": 3,
+              "draw": 0
+            }
+          },
+          "rank": 4,
+          "diff": 5.5,
+          "magic_1st": 79,
+          "magic_2nd": 78,
+          "magic_3rd": 78,
+          "magic_4th": 75,
+          "magic_5th": 73
+        },
+        {
+          "team": "ロッテ",
+          "games": 58,
+          "win": 27,
+          "lose": 29,
+          "draw": 2,
+          "rs": 187,
+          "ra": 210,
+          "home": {
+            "win": 14,
+            "lose": 11,
+            "draw": 0
+          },
+          "away": {
+            "win": 13,
+            "lose": 18,
+            "draw": 2
+          },
+          "interleague": {
+            "win": 6,
+            "lose": 4,
+            "draw": 2
+          },
+          "remaining": 85,
+          "rate": 0.48214285714285715,
+          "h2h": {
+            "ソフトバンク": {
+              "win": 3,
+              "lose": 4,
+              "draw": 0
+            },
+            "日本ハム": {
+              "win": 4,
+              "lose": 3,
+              "draw": 0
+            },
+            "ロッテ": {
+              "win": 0,
+              "lose": 0,
+              "draw": 0
+            },
+            "楽天": {
+              "win": 5,
+              "lose": 6,
+              "draw": 0
+            },
+            "オリックス": {
+              "win": 4,
+              "lose": 6,
+              "draw": 0
+            },
+            "西武": {
+              "win": 5,
+              "lose": 5,
+              "draw": 0
+            }
+          },
+          "rank": 5,
+          "diff": 7.5,
+          "magic_1st": 82,
+          "magic_2nd": 80,
+          "magic_3rd": 80,
+          "magic_4th": 78,
+          "magic_5th": 74
+        },
+        {
+          "team": "楽天",
+          "games": 57,
+          "win": 21,
+          "lose": 35,
+          "draw": 1,
+          "rs": 176,
+          "ra": 213,
+          "home": {
+            "win": 12,
+            "lose": 15,
+            "draw": 0
+          },
+          "away": {
+            "win": 9,
+            "lose": 20,
+            "draw": 1
+          },
+          "interleague": {
+            "win": 2,
+            "lose": 9,
+            "draw": 0
+          },
+          "remaining": 86,
+          "rate": 0.375,
+          "h2h": {
+            "ソフトバンク": {
+              "win": 6,
+              "lose": 6,
+              "draw": 0
+            },
+            "日本ハム": {
+              "win": 4,
+              "lose": 5,
+              "draw": 0
+            },
+            "ロッテ": {
+              "win": 3,
+              "lose": 2,
+              "draw": 0
+            },
+            "楽天": {
+              "win": 0,
+              "lose": 0,
+              "draw": 0
+            },
+            "オリックス": {
+              "win": 4,
+              "lose": 3,
+              "draw": 0
+            },
+            "西武": {
+              "win": 2,
+              "lose": 5,
+              "draw": 1
+            }
+          },
+          "rank": 6,
+          "diff": 13.5,
+          "magic_1st": 86,
+          "magic_2nd": 86,
+          "magic_3rd": 83,
+          "magic_4th": 83,
+          "magic_5th": 81
+        }
+      ],
+      "predictions": [
+        {
+          "home": "阪神",
+          "away": "楽天",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 69.8,
+          "away_prob": 30.2,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
         }
       ]
     },
@@ -55105,8 +56076,8 @@
           "away_starter": "平良",
           "home_status_text": "勝利: 伊藤",
           "away_status_text": "敗戦: 平良",
-          "home_prob": 62.2,
-          "away_prob": 37.8,
+          "home_prob": 62.3,
+          "away_prob": 37.7,
           "actual_home_score": 4,
           "actual_away_score": 1,
           "is_finished": true
@@ -55118,8 +56089,8 @@
           "away_starter": "則本",
           "home_status_text": "敗戦: 荘司",
           "away_status_text": "勝利: 則本",
-          "home_prob": 70.0,
-          "away_prob": 30.0,
+          "home_prob": 69.5,
+          "away_prob": 30.5,
           "actual_home_score": 2,
           "actual_away_score": 8,
           "is_finished": true
@@ -55131,8 +56102,8 @@
           "away_starter": "中﨑",
           "home_status_text": "勝利: 岩城",
           "away_status_text": "敗戦: 中﨑",
-          "home_prob": 54.0,
-          "away_prob": 46.0,
+          "home_prob": 53.9,
+          "away_prob": 46.1,
           "actual_home_score": 4,
           "actual_away_score": 3,
           "is_finished": true
@@ -55144,8 +56115,8 @@
           "away_starter": "マラー",
           "home_status_text": "勝利: ジャクソン",
           "away_status_text": "敗戦: マラー",
-          "home_prob": 65.4,
-          "away_prob": 34.6,
+          "home_prob": 65.2,
+          "away_prob": 34.8,
           "actual_home_score": 3,
           "actual_away_score": 1,
           "is_finished": true
@@ -55157,8 +56128,8 @@
           "away_starter": "キハダ",
           "home_status_text": "勝利: 権田",
           "away_status_text": "敗戦: キハダ",
-          "home_prob": 54.2,
-          "away_prob": 45.8,
+          "home_prob": 54.9,
+          "away_prob": 45.1,
           "actual_home_score": 4,
           "actual_away_score": 3,
           "is_finished": true
@@ -55984,8 +56955,8 @@
           "away_starter": "戸郷",
           "home_status_text": "敗戦: 古謝",
           "away_status_text": "勝利: 戸郷",
-          "home_prob": 28.4,
-          "away_prob": 71.6,
+          "home_prob": 28.3,
+          "away_prob": 71.7,
           "actual_home_score": 0,
           "actual_away_score": 7,
           "is_finished": true
@@ -55997,8 +56968,8 @@
           "away_starter": "髙",
           "home_status_text": "勝利: 佐藤隼",
           "away_status_text": "敗戦: 髙",
-          "home_prob": 76.0,
-          "away_prob": 24.0,
+          "home_prob": 76.5,
+          "away_prob": 23.5,
           "actual_home_score": 5,
           "actual_away_score": 4,
           "is_finished": true
@@ -56010,8 +56981,8 @@
           "away_starter": "櫻井",
           "home_status_text": "敗戦: 毛利",
           "away_status_text": "勝利: 櫻井",
-          "home_prob": 76.2,
-          "away_prob": 23.8,
+          "home_prob": 75.9,
+          "away_prob": 24.1,
           "actual_home_score": 4,
           "actual_away_score": 11,
           "is_finished": true
@@ -56023,8 +56994,8 @@
           "away_starter": "高橋",
           "home_status_text": "勝利: 曽谷",
           "away_status_text": "敗戦: 高橋",
-          "home_prob": 64.5,
-          "away_prob": 35.5,
+          "home_prob": 64.2,
+          "away_prob": 35.8,
           "actual_home_score": 8,
           "actual_away_score": 4,
           "is_finished": true
@@ -56036,8 +57007,8 @@
           "away_starter": "大竹",
           "home_status_text": "勝利: 松本晴",
           "away_status_text": "敗戦: 大竹",
-          "home_prob": 62.8,
-          "away_prob": 37.2,
+          "home_prob": 63.0,
+          "away_prob": 37.0,
           "actual_home_score": 6,
           "actual_away_score": 2,
           "is_finished": true
@@ -56850,8 +57821,8 @@
           "away_starter": "田中将",
           "home_status_text": "勝利: 瀧中",
           "away_status_text": "敗戦: 田中将",
-          "home_prob": 29.2,
-          "away_prob": 70.8,
+          "home_prob": 29.4,
+          "away_prob": 70.6,
           "actual_home_score": 8,
           "actual_away_score": 2,
           "is_finished": true
@@ -56889,8 +57860,8 @@
           "away_starter": "下川",
           "home_status_text": "勝利: エスピノーザ",
           "away_status_text": "敗戦: 下川",
-          "home_prob": 71.3,
-          "away_prob": 28.7,
+          "home_prob": 71.2,
+          "away_prob": 28.8,
           "actual_home_score": 4,
           "actual_away_score": 2,
           "is_finished": true
@@ -56902,8 +57873,8 @@
           "away_starter": "畠",
           "home_status_text": "勝利: 木村光",
           "away_status_text": "敗戦: 畠",
-          "home_prob": 75.0,
-          "away_prob": 25.0,
+          "home_prob": 75.6,
+          "away_prob": 24.4,
           "actual_home_score": 3,
           "actual_away_score": 2,
           "is_finished": true
@@ -57703,8 +58674,8 @@
           "away_starter": "柳",
           "home_status_text": "勝利: 細野",
           "away_status_text": "敗戦: 柳",
-          "home_prob": 48.5,
-          "away_prob": 51.5,
+          "home_prob": 48.3,
+          "away_prob": 51.7,
           "actual_home_score": 3,
           "actual_away_score": 1,
           "is_finished": true
@@ -57716,8 +58687,8 @@
           "away_starter": "玉村",
           "home_status_text": "勝利: 岸",
           "away_status_text": "敗戦: 玉村",
-          "home_prob": 36.1,
-          "away_prob": 63.9,
+          "home_prob": 35.6,
+          "away_prob": 64.4,
           "actual_home_score": 2,
           "actual_away_score": 1,
           "is_finished": true
@@ -57729,8 +58700,8 @@
           "away_starter": "竹丸",
           "home_status_text": "勝利: 髙橋光成",
           "away_status_text": "敗戦: 竹丸",
-          "home_prob": 66.7,
-          "away_prob": 33.3,
+          "home_prob": 66.8,
+          "away_prob": 33.2,
           "actual_home_score": 3,
           "actual_away_score": 0,
           "is_finished": true
@@ -57742,8 +58713,8 @@
           "away_starter": "宮城",
           "home_status_text": "勝利: 鈴木",
           "away_status_text": "敗戦: 宮城",
-          "home_prob": 70.8,
-          "away_prob": 29.2,
+          "home_prob": 70.6,
+          "away_prob": 29.4,
           "actual_home_score": 3,
           "actual_away_score": 2,
           "is_finished": true
@@ -57755,8 +58726,8 @@
           "away_starter": "村上",
           "home_status_text": "勝利: 入山",
           "away_status_text": "敗戦: 村上",
-          "home_prob": 57.3,
-          "away_prob": 42.7,
+          "home_prob": 57.2,
+          "away_prob": 42.8,
           "actual_home_score": 2,
           "actual_away_score": 1,
           "is_finished": true
@@ -57768,8 +58739,8 @@
           "away_starter": "吉村",
           "home_status_text": "敗戦: 前田純",
           "away_status_text": "勝利: 吉村",
-          "home_prob": 82.7,
-          "away_prob": 17.3,
+          "home_prob": 83.0,
+          "away_prob": 17.0,
           "actual_home_score": 2,
           "actual_away_score": 4,
           "is_finished": true
@@ -58569,8 +59540,8 @@
           "away_starter": "草加",
           "home_status_text": "勝利: 堀",
           "away_status_text": "敗戦: 草加",
-          "home_prob": 80.4,
-          "away_prob": 19.6,
+          "home_prob": 80.6,
+          "away_prob": 19.4,
           "actual_home_score": 4,
           "actual_away_score": 3,
           "is_finished": true
@@ -58582,8 +59553,8 @@
           "away_starter": "森下",
           "home_status_text": "敗戦: 早川",
           "away_status_text": "勝利: 森下",
-          "home_prob": 52.3,
-          "away_prob": 47.7,
+          "home_prob": 52.1,
+          "away_prob": 47.9,
           "actual_home_score": 0,
           "actual_away_score": 2,
           "is_finished": true
@@ -58621,8 +59592,8 @@
           "away_starter": "髙橋",
           "home_status_text": "敗戦: ジェリー",
           "away_status_text": "勝利: 髙橋",
-          "home_prob": 19.1,
-          "away_prob": 80.9,
+          "home_prob": 19.0,
+          "away_prob": 81.0,
           "actual_home_score": 3,
           "actual_away_score": 6,
           "is_finished": true
@@ -58634,8 +59605,8 @@
           "away_starter": "山野",
           "home_status_text": "勝利: 前田悠",
           "away_status_text": "敗戦: 山野",
-          "home_prob": 73.8,
-          "away_prob": 26.2,
+          "home_prob": 74.1,
+          "away_prob": 25.9,
           "actual_home_score": 8,
           "actual_away_score": 1,
           "is_finished": true
@@ -59448,8 +60419,8 @@
           "away_starter": "岡本",
           "home_status_text": "敗戦: 藤井",
           "away_status_text": "勝利: 岡本",
-          "home_prob": 42.2,
-          "away_prob": 57.8,
+          "home_prob": 42.0,
+          "away_prob": 58.0,
           "actual_home_score": 0,
           "actual_away_score": 3,
           "is_finished": true
@@ -59461,8 +60432,8 @@
           "away_starter": "井上",
           "home_status_text": "勝利: ワイナンス",
           "away_status_text": "敗戦: 井上",
-          "home_prob": 73.2,
-          "away_prob": 26.8,
+          "home_prob": 73.0,
+          "away_prob": 27.0,
           "actual_home_score": 1,
           "actual_away_score": 0,
           "is_finished": true
@@ -59487,8 +60458,8 @@
           "away_starter": "ドリス",
           "home_status_text": "勝利: 吉田",
           "away_status_text": "敗戦: ドリス",
-          "home_prob": 32.2,
-          "away_prob": 67.8,
+          "home_prob": 31.7,
+          "away_prob": 68.3,
           "actual_home_score": 3,
           "actual_away_score": 2,
           "is_finished": true
@@ -59500,8 +60471,8 @@
           "away_starter": "奥川",
           "home_status_text": "敗戦: アルメンタ",
           "away_status_text": "勝利: 奥川",
-          "home_prob": 64.6,
-          "away_prob": 35.4,
+          "home_prob": 64.2,
+          "away_prob": 35.8,
           "actual_home_score": 0,
           "actual_away_score": 4,
           "is_finished": true
@@ -60301,8 +61272,8 @@
           "away_starter": "武内",
           "home_status_text": "敗戦: 才木",
           "away_status_text": "勝利: 武内",
-          "home_prob": 48.5,
-          "away_prob": 51.5,
+          "home_prob": 48.4,
+          "away_prob": 51.6,
           "actual_home_score": 0,
           "actual_away_score": 1,
           "is_finished": true
@@ -60314,8 +61285,8 @@
           "away_starter": "北山",
           "home_status_text": "敗戦: 斉藤優",
           "away_status_text": "勝利: 北山",
-          "home_prob": 42.3,
-          "away_prob": 57.7,
+          "home_prob": 42.1,
+          "away_prob": 57.9,
           "actual_home_score": 0,
           "actual_away_score": 2,
           "is_finished": true
@@ -61916,8 +62887,8 @@
           "away_starter": "金丸",
           "home_status_text": "敗戦: 竹丸",
           "away_status_text": "勝利: 金丸",
-          "home_prob": 63.3,
-          "away_prob": 36.7,
+          "home_prob": 63.2,
+          "away_prob": 36.8,
           "actual_home_score": 2,
           "actual_away_score": 3,
           "is_finished": true
@@ -61929,8 +62900,8 @@
           "away_starter": "ターノック",
           "home_status_text": "勝利: 吉村",
           "away_status_text": "敗戦: ターノック",
-          "home_prob": 76.1,
-          "away_prob": 23.9,
+          "home_prob": 76.2,
+          "away_prob": 23.8,
           "actual_home_score": 9,
           "actual_away_score": 2,
           "is_finished": true
@@ -61955,8 +62926,8 @@
           "away_starter": "大津",
           "home_status_text": "勝利: 伊藤",
           "away_status_text": "敗戦: 大津",
-          "home_prob": 36.6,
-          "away_prob": 63.4,
+          "home_prob": 36.7,
+          "away_prob": 63.3,
           "actual_home_score": 4,
           "actual_away_score": 3,
           "is_finished": true
@@ -61968,8 +62939,8 @@
           "away_starter": "鈴木翔",
           "home_status_text": "勝利: 八木",
           "away_status_text": "敗戦: 鈴木翔",
-          "home_prob": 93.4,
-          "away_prob": 6.6,
+          "home_prob": 93.6,
+          "away_prob": 6.4,
           "actual_home_score": 8,
           "actual_away_score": 5,
           "is_finished": true
@@ -62802,17 +63773,43 @@
           "is_finished": true
         },
         {
+          "home": "ＤｅＮＡ",
+          "away": "阪神",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 40.0,
+          "away_prob": 60.0,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
+        {
           "home": "日本ハム",
           "away": "ソフトバンク",
           "home_starter": "孫",
           "away_starter": "津森",
           "home_status_text": "敗戦: 孫",
           "away_status_text": "勝利: 津森",
-          "home_prob": 36.2,
-          "away_prob": 63.8,
+          "home_prob": 36.0,
+          "away_prob": 64.0,
           "actual_home_score": 7,
           "actual_away_score": 10,
           "is_finished": true
+        },
+        {
+          "home": "ロッテ",
+          "away": "楽天",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 62.2,
+          "away_prob": 37.8,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
         },
         {
           "home": "オリックス",
@@ -63622,8 +64619,8 @@
           "away_starter": "アブレウ",
           "home_status_text": "敗戦: 大勢",
           "away_status_text": "勝利: アブレウ",
-          "home_prob": 74.5,
-          "away_prob": 25.5,
+          "home_prob": 74.6,
+          "away_prob": 25.4,
           "actual_home_score": 3,
           "actual_away_score": 5,
           "is_finished": true
@@ -63635,8 +64632,8 @@
           "away_starter": "岡本",
           "home_status_text": "敗戦: 高橋",
           "away_status_text": "勝利: 岡本",
-          "home_prob": 49.1,
-          "away_prob": 50.9,
+          "home_prob": 49.2,
+          "away_prob": 50.8,
           "actual_home_score": 1,
           "actual_away_score": 2,
           "is_finished": true
@@ -63661,8 +64658,8 @@
           "away_starter": "前田悠",
           "home_status_text": "敗戦: 柴田",
           "away_status_text": "勝利: 前田悠",
-          "home_prob": 21.6,
-          "away_prob": 78.4,
+          "home_prob": 21.5,
+          "away_prob": 78.5,
           "actual_home_score": 0,
           "actual_away_score": 8,
           "is_finished": true
@@ -63674,8 +64671,8 @@
           "away_starter": "加治屋",
           "home_status_text": "勝利: 八木",
           "away_status_text": "敗戦: 加治屋",
-          "home_prob": 83.3,
-          "away_prob": 16.7,
+          "home_prob": 83.5,
+          "away_prob": 16.5,
           "actual_home_score": 7,
           "actual_away_score": 4,
           "is_finished": true
@@ -63687,8 +64684,8 @@
           "away_starter": "渡邉",
           "home_status_text": "敗戦: 九里",
           "away_status_text": "勝利: 渡邉",
-          "home_prob": 43.5,
-          "away_prob": 56.5,
+          "home_prob": 43.4,
+          "away_prob": 56.6,
           "actual_home_score": 3,
           "actual_away_score": 5,
           "is_finished": true
@@ -64488,8 +65485,8 @@
           "away_starter": "上田",
           "home_status_text": "勝利: 中込",
           "away_status_text": "敗戦: 上田",
-          "home_prob": 12.2,
-          "away_prob": 87.8,
+          "home_prob": 12.0,
+          "away_prob": 88.0,
           "actual_home_score": 8,
           "actual_away_score": 7,
           "is_finished": true
@@ -65289,8 +66286,8 @@
           "away_starter": "入江",
           "home_status_text": "勝利: マラー",
           "away_status_text": "敗戦: 入江",
-          "home_prob": 68.2,
-          "away_prob": 31.8,
+          "home_prob": 68.4,
+          "away_prob": 31.6,
           "actual_home_score": 5,
           "actual_away_score": 2,
           "is_finished": true
@@ -65302,8 +66299,8 @@
           "away_starter": "リランソ",
           "home_status_text": "敗戦: 岩崎",
           "away_status_text": "勝利: リランソ",
-          "home_prob": 40.6,
-          "away_prob": 59.4,
+          "home_prob": 40.5,
+          "away_prob": 59.5,
           "actual_home_score": 3,
           "actual_away_score": 4,
           "is_finished": true
@@ -65315,8 +66312,8 @@
           "away_starter": "戸郷",
           "home_status_text": "敗戦: 玉村",
           "away_status_text": "勝利: 戸郷",
-          "home_prob": 45.6,
-          "away_prob": 54.4,
+          "home_prob": 45.5,
+          "away_prob": 54.5,
           "actual_home_score": 3,
           "actual_away_score": 7,
           "is_finished": true
@@ -65328,8 +66325,8 @@
           "away_starter": "廣池",
           "home_status_text": "勝利: 北山",
           "away_status_text": "敗戦: 廣池",
-          "home_prob": 65.0,
-          "away_prob": 35.0,
+          "home_prob": 65.1,
+          "away_prob": 34.9,
           "actual_home_score": 4,
           "actual_away_score": 0,
           "is_finished": true
@@ -65341,8 +66338,8 @@
           "away_starter": "ワイナンス",
           "home_status_text": "勝利: 瀧中",
           "away_status_text": "敗戦: ワイナンス",
-          "home_prob": 20.4,
-          "away_prob": 79.6,
+          "home_prob": 20.5,
+          "away_prob": 79.5,
           "actual_home_score": 8,
           "actual_away_score": 4,
           "is_finished": true
@@ -65354,8 +66351,8 @@
           "away_starter": "ジェリー",
           "home_status_text": "敗戦: 上沢",
           "away_status_text": "勝利: ジェリー",
-          "home_prob": 72.3,
-          "away_prob": 27.7,
+          "home_prob": 72.2,
+          "away_prob": 27.8,
           "actual_home_score": 0,
           "actual_away_score": 5,
           "is_finished": true
@@ -66162,6 +67159,32 @@
           "is_finished": true
         },
         {
+          "home": "阪神",
+          "away": "ヤクルト",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 63.9,
+          "away_prob": 36.1,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
+        {
+          "home": "広島",
+          "away": "巨人",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 45.9,
+          "away_prob": 54.1,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
+        {
           "home": "日本ハム",
           "away": "ロッテ",
           "home_starter": "加藤貴",
@@ -66181,8 +67204,8 @@
           "away_starter": "田嶋大",
           "home_status_text": "勝利: 上茶谷",
           "away_status_text": "敗戦: 田嶋大",
-          "home_prob": 85.7,
-          "away_prob": 14.3,
+          "home_prob": 85.8,
+          "away_prob": 14.2,
           "actual_home_score": 8,
           "actual_away_score": 5,
           "is_finished": true
@@ -66982,11 +68005,24 @@
           "away_starter": "平良",
           "home_status_text": "勝利: 齋藤",
           "away_status_text": "敗戦: 平良",
-          "home_prob": 28.9,
-          "away_prob": 71.1,
+          "home_prob": 28.7,
+          "away_prob": 71.3,
           "actual_home_score": 3,
           "actual_away_score": 1,
           "is_finished": true
+        },
+        {
+          "home": "阪神",
+          "away": "ヤクルト",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 63.9,
+          "away_prob": 36.1,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
         },
         {
           "home": "楽天",
@@ -67008,8 +68044,8 @@
           "away_starter": "山﨑",
           "home_status_text": "勝利: 鈴木豪",
           "away_status_text": "敗戦: 山﨑",
-          "home_prob": 66.4,
-          "away_prob": 33.6,
+          "home_prob": 66.5,
+          "away_prob": 33.5,
           "actual_home_score": 5,
           "actual_away_score": 2,
           "is_finished": true
@@ -67803,6 +68839,45 @@
       ],
       "predictions": [
         {
+          "home": "ヤクルト",
+          "away": "中日",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 50.6,
+          "away_prob": 49.4,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
+        {
+          "home": "ＤｅＮＡ",
+          "away": "巨人",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 45.5,
+          "away_prob": 54.5,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
+        {
+          "home": "広島",
+          "away": "阪神",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 40.8,
+          "away_prob": 59.2,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
+        {
           "home": "西武",
           "away": "日本ハム",
           "home_starter": "甲斐野",
@@ -67814,6 +68889,19 @@
           "actual_home_score": 4,
           "actual_away_score": 3,
           "is_finished": true
+        },
+        {
+          "home": "ロッテ",
+          "away": "ソフトバンク",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 35.8,
+          "away_prob": 64.2,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
         }
       ]
     },
@@ -68604,14 +69692,40 @@
       ],
       "predictions": [
         {
+          "home": "ヤクルト",
+          "away": "中日",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 50.6,
+          "away_prob": 49.4,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
+        {
+          "home": "ＤｅＮＡ",
+          "away": "巨人",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 45.5,
+          "away_prob": 54.5,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
+        {
           "home": "広島",
           "away": "阪神",
           "home_starter": "ハーン",
           "away_starter": "村上",
           "home_status_text": "勝利: ハーン",
           "away_status_text": "敗戦: 村上",
-          "home_prob": 48.0,
-          "away_prob": 52.0,
+          "home_prob": 47.7,
+          "away_prob": 52.3,
           "actual_home_score": 3,
           "actual_away_score": 2,
           "is_finished": true
@@ -68623,11 +69737,24 @@
           "away_starter": "島本",
           "home_status_text": "敗戦: 隅田",
           "away_status_text": "勝利: 島本",
-          "home_prob": 50.8,
-          "away_prob": 49.2,
+          "home_prob": 50.7,
+          "away_prob": 49.3,
           "actual_home_score": 2,
           "actual_away_score": 4,
           "is_finished": true
+        },
+        {
+          "home": "ロッテ",
+          "away": "ソフトバンク",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 35.8,
+          "away_prob": 64.2,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
         },
         {
           "home": "オリックス",
@@ -68636,8 +69763,8 @@
           "away_starter": "岸",
           "home_status_text": "敗戦: エスピノーザ",
           "away_status_text": "勝利: 岸",
-          "home_prob": 81.2,
-          "away_prob": 18.8,
+          "home_prob": 81.4,
+          "away_prob": 18.6,
           "actual_home_score": 1,
           "actual_away_score": 5,
           "is_finished": true
@@ -69463,8 +70590,8 @@
           "away_starter": "髙橋",
           "home_status_text": "敗戦: 岡本",
           "away_status_text": "勝利: 髙橋",
-          "home_prob": 14.0,
-          "away_prob": 86.0,
+          "home_prob": 13.9,
+          "away_prob": 86.1,
           "actual_home_score": 3,
           "actual_away_score": 12,
           "is_finished": true
@@ -70303,8 +71430,8 @@
           "away_starter": "星",
           "home_status_text": "敗戦: マルティネス",
           "away_status_text": "勝利: 星",
-          "home_prob": 77.1,
-          "away_prob": 22.9,
+          "home_prob": 77.3,
+          "away_prob": 22.7,
           "actual_home_score": 3,
           "actual_away_score": 4,
           "is_finished": true
@@ -70316,8 +71443,8 @@
           "away_starter": "森浦",
           "home_status_text": "敗戦: 山﨑",
           "away_status_text": "勝利: 森浦",
-          "home_prob": 50.3,
-          "away_prob": 49.7,
+          "home_prob": 50.2,
+          "away_prob": 49.8,
           "actual_home_score": 4,
           "actual_away_score": 7,
           "is_finished": true
@@ -70329,8 +71456,8 @@
           "away_starter": "松山",
           "home_status_text": "勝利: 岩崎",
           "away_status_text": "敗戦: 松山",
-          "home_prob": 46.4,
-          "away_prob": 53.6,
+          "home_prob": 46.0,
+          "away_prob": 54.0,
           "actual_home_score": 3,
           "actual_away_score": 2,
           "is_finished": true
@@ -70355,8 +71482,8 @@
           "away_starter": "ジャクソン",
           "home_status_text": "敗戦: 荘司",
           "away_status_text": "勝利: ジャクソン",
-          "home_prob": 56.3,
-          "away_prob": 43.7,
+          "home_prob": 56.2,
+          "away_prob": 43.8,
           "actual_home_score": 2,
           "actual_away_score": 5,
           "is_finished": true
@@ -71176,6 +72303,19 @@
           "is_finished": true
         },
         {
+          "home": "阪神",
+          "away": "中日",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 63.3,
+          "away_prob": 36.7,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
+        {
           "home": "日本ハム",
           "away": "オリックス",
           "home_starter": "加藤貴",
@@ -71208,8 +72348,8 @@
           "away_starter": "ワイナンス",
           "home_status_text": "勝利: 前田悠",
           "away_status_text": "敗戦: ワイナンス",
-          "home_prob": 76.4,
-          "away_prob": 23.6,
+          "home_prob": 76.6,
+          "away_prob": 23.4,
           "actual_home_score": 11,
           "actual_away_score": 0,
           "is_finished": true
@@ -72009,8 +73149,8 @@
           "away_starter": "髙",
           "home_status_text": "引分: 岩田",
           "away_status_text": "引分: 髙",
-          "home_prob": 70.6,
-          "away_prob": 29.4,
+          "home_prob": 70.7,
+          "away_prob": 29.3,
           "actual_home_score": 3,
           "actual_away_score": 3,
           "is_finished": true
@@ -72035,8 +73175,8 @@
           "away_starter": "佐藤一",
           "home_status_text": "勝利: 有原",
           "away_status_text": "敗戦: 佐藤一",
-          "home_prob": 50.5,
-          "away_prob": 49.5,
+          "home_prob": 50.4,
+          "away_prob": 49.6,
           "actual_home_score": 9,
           "actual_away_score": 1,
           "is_finished": true
@@ -72048,8 +73188,8 @@
           "away_starter": "武内",
           "home_status_text": "勝利: 大津",
           "away_status_text": "敗戦: 武内",
-          "home_prob": 70.5,
-          "away_prob": 29.5,
+          "home_prob": 70.4,
+          "away_prob": 29.6,
           "actual_home_score": 3,
           "actual_away_score": 1,
           "is_finished": true
@@ -72849,8 +73989,8 @@
           "away_starter": "伊勢",
           "home_status_text": "敗戦: 星",
           "away_status_text": "勝利: 伊勢",
-          "home_prob": 44.2,
-          "away_prob": 55.8,
+          "home_prob": 43.9,
+          "away_prob": 56.1,
           "actual_home_score": 2,
           "actual_away_score": 7,
           "is_finished": true
@@ -72875,8 +74015,8 @@
           "away_starter": "森",
           "home_status_text": "敗戦: 大竹",
           "away_status_text": "勝利: 森",
-          "home_prob": 65.8,
-          "away_prob": 34.2,
+          "home_prob": 65.7,
+          "away_prob": 34.3,
           "actual_home_score": 1,
           "actual_away_score": 5,
           "is_finished": true
@@ -72888,8 +74028,8 @@
           "away_starter": "伊藤",
           "home_status_text": "勝利: 早川",
           "away_status_text": "敗戦: 伊藤",
-          "home_prob": 25.9,
-          "away_prob": 74.1,
+          "home_prob": 25.8,
+          "away_prob": 74.2,
           "actual_home_score": 8,
           "actual_away_score": 0,
           "is_finished": true
@@ -72901,8 +74041,8 @@
           "away_starter": "豆田",
           "home_status_text": "引分: 博志",
           "away_status_text": "引分: 豆田",
-          "home_prob": 67.6,
-          "away_prob": 32.4,
+          "home_prob": 67.8,
+          "away_prob": 32.2,
           "actual_home_score": 4,
           "actual_away_score": 4,
           "is_finished": true
@@ -73715,8 +74855,8 @@
           "away_starter": "篠木",
           "home_status_text": "敗戦: 松本健",
           "away_status_text": "勝利: 篠木",
-          "home_prob": 63.6,
-          "away_prob": 36.4,
+          "home_prob": 63.5,
+          "away_prob": 36.5,
           "actual_home_score": 1,
           "actual_away_score": 12,
           "is_finished": true
@@ -73735,6 +74875,19 @@
           "is_finished": true
         },
         {
+          "home": "阪神",
+          "away": "広島",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 64.2,
+          "away_prob": 35.8,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
+        {
           "home": "楽天",
           "away": "日本ハム",
           "home_starter": "前田健",
@@ -73746,6 +74899,19 @@
           "actual_home_score": 4,
           "actual_away_score": 1,
           "is_finished": true
+        },
+        {
+          "home": "オリックス",
+          "away": "西武",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 39.5,
+          "away_prob": 60.5,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
         },
         {
           "home": "ソフトバンク",
@@ -74555,8 +75721,8 @@
           "away_starter": "深沢",
           "home_status_text": "敗戦: 吉村",
           "away_status_text": "勝利: 深沢",
-          "home_prob": 66.8,
-          "away_prob": 33.2,
+          "home_prob": 66.9,
+          "away_prob": 33.1,
           "actual_home_score": 4,
           "actual_away_score": 6,
           "is_finished": true
@@ -74568,8 +75734,8 @@
           "away_starter": "井上",
           "home_status_text": "敗戦: 金丸",
           "away_status_text": "勝利: 井上",
-          "home_prob": 52.3,
-          "away_prob": 47.7,
+          "home_prob": 52.2,
+          "away_prob": 47.8,
           "actual_home_score": 0,
           "actual_away_score": 1,
           "is_finished": true
@@ -74607,8 +75773,8 @@
           "away_starter": "隅田",
           "home_status_text": "勝利: エスピノーザ",
           "away_status_text": "敗戦: 隅田",
-          "home_prob": 45.7,
-          "away_prob": 54.3,
+          "home_prob": 45.6,
+          "away_prob": 54.4,
           "actual_home_score": 3,
           "actual_away_score": 1,
           "is_finished": true
@@ -74620,8 +75786,8 @@
           "away_starter": "小島",
           "home_status_text": "勝利: 松本晴",
           "away_status_text": "敗戦: 小島",
-          "home_prob": 80.1,
-          "away_prob": 19.9,
+          "home_prob": 80.0,
+          "away_prob": 20.0,
           "actual_home_score": 7,
           "actual_away_score": 2,
           "is_finished": true
@@ -75421,8 +76587,8 @@
           "away_starter": "髙橋",
           "home_status_text": "勝利: 赤星",
           "away_status_text": "敗戦: 髙橋",
-          "home_prob": 18.6,
-          "away_prob": 81.4,
+          "home_prob": 18.5,
+          "away_prob": 81.5,
           "actual_home_score": 4,
           "actual_away_score": 3,
           "is_finished": true
@@ -75434,8 +76600,8 @@
           "away_starter": "マラー",
           "home_status_text": "勝利: 石田裕",
           "away_status_text": "敗戦: マラー",
-          "home_prob": 55.1,
-          "away_prob": 44.9,
+          "home_prob": 55.2,
+          "away_prob": 44.8,
           "actual_home_score": 4,
           "actual_away_score": 0,
           "is_finished": true
@@ -75447,8 +76613,8 @@
           "away_starter": "キハダ",
           "home_status_text": "勝利: 辻",
           "away_status_text": "敗戦: キハダ",
-          "home_prob": 47.1,
-          "away_prob": 52.9,
+          "home_prob": 47.0,
+          "away_prob": 53.0,
           "actual_home_score": 4,
           "actual_away_score": 3,
           "is_finished": true
@@ -75473,8 +76639,8 @@
           "away_starter": "北山",
           "home_status_text": "勝利: ジャクソン",
           "away_status_text": "敗戦: 北山",
-          "home_prob": 36.6,
-          "away_prob": 63.4,
+          "home_prob": 36.5,
+          "away_prob": 63.5,
           "actual_home_score": 10,
           "actual_away_score": 2,
           "is_finished": true
@@ -76287,8 +77453,8 @@
           "away_starter": "才木",
           "home_status_text": "敗戦: 西舘",
           "away_status_text": "勝利: 才木",
-          "home_prob": 58.4,
-          "away_prob": 41.6,
+          "home_prob": 58.6,
+          "away_prob": 41.4,
           "actual_home_score": 1,
           "actual_away_score": 4,
           "is_finished": true
@@ -76313,8 +77479,8 @@
           "away_starter": "星",
           "home_status_text": "勝利: 森浦",
           "away_status_text": "敗戦: 星",
-          "home_prob": 72.8,
-          "away_prob": 27.2,
+          "home_prob": 72.9,
+          "away_prob": 27.1,
           "actual_home_score": 4,
           "actual_away_score": 3,
           "is_finished": true
@@ -76339,8 +77505,8 @@
           "away_starter": "加藤貴",
           "home_status_text": "敗戦: 小野",
           "away_status_text": "勝利: 加藤貴",
-          "home_prob": 58.9,
-          "away_prob": 41.1,
+          "home_prob": 59.0,
+          "away_prob": 41.0,
           "actual_home_score": 2,
           "actual_away_score": 7,
           "is_finished": true
@@ -77153,8 +78319,8 @@
           "away_starter": "伊原",
           "home_status_text": "敗戦: 則本",
           "away_status_text": "勝利: 伊原",
-          "home_prob": 18.7,
-          "away_prob": 81.3,
+          "home_prob": 18.6,
+          "away_prob": 81.4,
           "actual_home_score": 2,
           "actual_away_score": 10,
           "is_finished": true
@@ -77179,8 +78345,8 @@
           "away_starter": "ウォルターズ",
           "home_status_text": "敗戦: 栗林",
           "away_status_text": "勝利: ウォルターズ",
-          "home_prob": 87.6,
-          "away_prob": 12.4,
+          "home_prob": 87.7,
+          "away_prob": 12.3,
           "actual_home_score": 0,
           "actual_away_score": 1,
           "is_finished": true
@@ -77980,8 +79146,8 @@
           "away_starter": "田中瑛",
           "home_status_text": "勝利: マルセリーノ",
           "away_status_text": "敗戦: 田中瑛",
-          "home_prob": 36.0,
-          "away_prob": 64.0,
+          "home_prob": 35.9,
+          "away_prob": 64.1,
           "actual_home_score": 11,
           "actual_away_score": 6,
           "is_finished": true
@@ -77993,8 +79159,8 @@
           "away_starter": "森下",
           "home_status_text": "勝利: 大野",
           "away_status_text": "敗戦: 森下",
-          "home_prob": 66.6,
-          "away_prob": 33.4,
+          "home_prob": 66.5,
+          "away_prob": 33.5,
           "actual_home_score": 10,
           "actual_away_score": 1,
           "is_finished": true
@@ -78006,8 +79172,8 @@
           "away_starter": "高橋",
           "home_status_text": "敗戦: 下村",
           "away_status_text": "勝利: 高橋",
-          "home_prob": 75.7,
-          "away_prob": 24.3,
+          "home_prob": 75.6,
+          "away_prob": 24.4,
           "actual_home_score": 1,
           "actual_away_score": 2,
           "is_finished": true
@@ -78019,8 +79185,8 @@
           "away_starter": "武内",
           "home_status_text": "敗戦: 島本",
           "away_status_text": "勝利: 武内",
-          "home_prob": 72.7,
-          "away_prob": 27.3,
+          "home_prob": 72.8,
+          "away_prob": 27.2,
           "actual_home_score": 1,
           "actual_away_score": 2,
           "is_finished": true
@@ -78872,8 +80038,8 @@
           "away_starter": "リランソ",
           "home_status_text": "勝利: ドリス",
           "away_status_text": "敗戦: リランソ",
-          "home_prob": 48.3,
-          "away_prob": 51.7,
+          "home_prob": 48.4,
+          "away_prob": 51.6,
           "actual_home_score": 2,
           "actual_away_score": 1,
           "is_finished": true
@@ -78885,8 +80051,8 @@
           "away_starter": "髙橋光成",
           "home_status_text": "勝利: 山﨑福也",
           "away_status_text": "敗戦: 髙橋光成",
-          "home_prob": 57.0,
-          "away_prob": 43.0,
+          "home_prob": 57.2,
+          "away_prob": 42.8,
           "actual_home_score": 8,
           "actual_away_score": 2,
           "is_finished": true
@@ -78898,8 +80064,8 @@
           "away_starter": "髙島",
           "home_status_text": "敗戦: ロング",
           "away_status_text": "勝利: 髙島",
-          "home_prob": 25.3,
-          "away_prob": 74.7,
+          "home_prob": 25.2,
+          "away_prob": 74.8,
           "actual_home_score": 3,
           "actual_away_score": 8,
           "is_finished": true
@@ -79712,8 +80878,8 @@
           "away_starter": "井上",
           "home_status_text": "敗戦: 篠木",
           "away_status_text": "勝利: 井上",
-          "home_prob": 65.0,
-          "away_prob": 35.0,
+          "home_prob": 64.9,
+          "away_prob": 35.1,
           "actual_home_score": 3,
           "actual_away_score": 4,
           "is_finished": true
@@ -79725,8 +80891,8 @@
           "away_starter": "床田",
           "home_status_text": "敗戦: 金丸",
           "away_status_text": "勝利: 床田",
-          "home_prob": 66.5,
-          "away_prob": 33.5,
+          "home_prob": 66.4,
+          "away_prob": 33.6,
           "actual_home_score": 1,
           "actual_away_score": 5,
           "is_finished": true
@@ -79764,8 +80930,8 @@
           "away_starter": "エスピノーザ",
           "home_status_text": "敗戦: 小島",
           "away_status_text": "勝利: エスピノーザ",
-          "home_prob": 34.3,
-          "away_prob": 65.7,
+          "home_prob": 34.4,
+          "away_prob": 65.6,
           "actual_home_score": 2,
           "actual_away_score": 7,
           "is_finished": true
@@ -80578,8 +81744,8 @@
           "away_starter": "中川",
           "home_status_text": "勝利: 山野",
           "away_status_text": "敗戦: 中川",
-          "home_prob": 36.9,
-          "away_prob": 63.1,
+          "home_prob": 36.8,
+          "away_prob": 63.2,
           "actual_home_score": 5,
           "actual_away_score": 4,
           "is_finished": true
@@ -80591,8 +81757,8 @@
           "away_starter": "髙橋",
           "home_status_text": "敗戦: マラー",
           "away_status_text": "勝利: 髙橋",
-          "home_prob": 14.0,
-          "away_prob": 86.0,
+          "home_prob": 13.9,
+          "away_prob": 86.1,
           "actual_home_score": 2,
           "actual_away_score": 5,
           "is_finished": true
@@ -80617,8 +81783,8 @@
           "away_starter": "松本裕",
           "home_status_text": "敗戦: 島本",
           "away_status_text": "勝利: 松本裕",
-          "home_prob": 65.7,
-          "away_prob": 34.3,
+          "home_prob": 65.8,
+          "away_prob": 34.2,
           "actual_home_score": 2,
           "actual_away_score": 4,
           "is_finished": true
@@ -81444,8 +82610,8 @@
           "away_starter": "西舘",
           "home_status_text": "敗戦: 奥川",
           "away_status_text": "勝利: 西舘",
-          "home_prob": 29.1,
-          "away_prob": 70.9,
+          "home_prob": 28.9,
+          "away_prob": 71.1,
           "actual_home_score": 2,
           "actual_away_score": 8,
           "is_finished": true
@@ -81470,8 +82636,8 @@
           "away_starter": "東",
           "home_status_text": "勝利: 遠藤",
           "away_status_text": "敗戦: 東",
-          "home_prob": 22.8,
-          "away_prob": 77.2,
+          "home_prob": 22.7,
+          "away_prob": 77.3,
           "actual_home_score": 6,
           "actual_away_score": 4,
           "is_finished": true
@@ -81496,8 +82662,8 @@
           "away_starter": "椋木",
           "home_status_text": "勝利: 泰",
           "away_status_text": "敗戦: 椋木",
-          "home_prob": 57.8,
-          "away_prob": 42.2,
+          "home_prob": 57.9,
+          "away_prob": 42.1,
           "actual_home_score": 3,
           "actual_away_score": 2,
           "is_finished": true
@@ -82310,8 +83476,8 @@
           "away_starter": "赤星",
           "home_status_text": "敗戦: 丸山翔",
           "away_status_text": "勝利: 赤星",
-          "home_prob": 38.7,
-          "away_prob": 61.3,
+          "home_prob": 38.8,
+          "away_prob": 61.2,
           "actual_home_score": 1,
           "actual_away_score": 3,
           "is_finished": true
@@ -82323,8 +83489,8 @@
           "away_starter": "木下",
           "home_status_text": "敗戦: 柳",
           "away_status_text": "勝利: 木下",
-          "home_prob": 76.8,
-          "away_prob": 23.2,
+          "home_prob": 77.0,
+          "away_prob": 23.0,
           "actual_home_score": 1,
           "actual_away_score": 3,
           "is_finished": true
@@ -82336,8 +83502,8 @@
           "away_starter": "上茶谷",
           "home_status_text": "敗戦: 伊藤",
           "away_status_text": "勝利: 上茶谷",
-          "home_prob": 17.2,
-          "away_prob": 82.8,
+          "home_prob": 17.1,
+          "away_prob": 82.9,
           "actual_home_score": 2,
           "actual_away_score": 6,
           "is_finished": true
@@ -82362,8 +83528,8 @@
           "away_starter": "中森",
           "home_status_text": "敗戦: 渡邉",
           "away_status_text": "勝利: 中森",
-          "home_prob": 42.9,
-          "away_prob": 57.1,
+          "home_prob": 42.7,
+          "away_prob": 57.3,
           "actual_home_score": 3,
           "actual_away_score": 4,
           "is_finished": true
@@ -83163,8 +84329,8 @@
           "away_starter": "齋藤",
           "home_status_text": "勝利: マルティネス",
           "away_status_text": "敗戦: 齋藤",
-          "home_prob": 61.1,
-          "away_prob": 38.9,
+          "home_prob": 61.2,
+          "away_prob": 38.8,
           "actual_home_score": 4,
           "actual_away_score": 1,
           "is_finished": true
@@ -83189,8 +84355,8 @@
           "away_starter": "才木",
           "home_status_text": "敗戦: アドゥワ",
           "away_status_text": "勝利: 才木",
-          "home_prob": 27.9,
-          "away_prob": 72.1,
+          "home_prob": 27.8,
+          "away_prob": 72.2,
           "actual_home_score": 2,
           "actual_away_score": 4,
           "is_finished": true
@@ -84003,8 +85169,8 @@
           "away_starter": "松本健",
           "home_status_text": "勝利: 深沢",
           "away_status_text": "敗戦: 松本健",
-          "home_prob": 36.9,
-          "away_prob": 63.1,
+          "home_prob": 36.8,
+          "away_prob": 63.2,
           "actual_home_score": 8,
           "actual_away_score": 0,
           "is_finished": true
@@ -84029,8 +85195,8 @@
           "away_starter": "武内",
           "home_status_text": "勝利: 荘司",
           "away_status_text": "敗戦: 武内",
-          "home_prob": 32.8,
-          "away_prob": 67.2,
+          "home_prob": 32.7,
+          "away_prob": 67.3,
           "actual_home_score": 3,
           "actual_away_score": 2,
           "is_finished": true
@@ -84055,8 +85221,8 @@
           "away_starter": "細野",
           "home_status_text": "敗戦: ジェリー",
           "away_status_text": "勝利: 細野",
-          "home_prob": 47.6,
-          "away_prob": 52.4,
+          "home_prob": 47.7,
+          "away_prob": 52.3,
           "actual_home_score": 0,
           "actual_away_score": 7,
           "is_finished": true
@@ -84869,8 +86035,8 @@
           "away_starter": "吉村",
           "home_status_text": "勝利: 片山",
           "away_status_text": "敗戦: 吉村",
-          "home_prob": 48.9,
-          "away_prob": 51.1,
+          "home_prob": 48.8,
+          "away_prob": 51.2,
           "actual_home_score": 5,
           "actual_away_score": 1,
           "is_finished": true
@@ -84882,8 +86048,8 @@
           "away_starter": "工藤",
           "home_status_text": "敗戦: ハーン",
           "away_status_text": "勝利: 工藤",
-          "home_prob": 41.2,
-          "away_prob": 58.8,
+          "home_prob": 41.1,
+          "away_prob": 58.9,
           "actual_home_score": 2,
           "actual_away_score": 4,
           "is_finished": true
@@ -84908,8 +86074,8 @@
           "away_starter": "前田悠",
           "home_status_text": "敗戦: ロング",
           "away_status_text": "勝利: 前田悠",
-          "home_prob": 5.8,
-          "away_prob": 94.2,
+          "home_prob": 5.7,
+          "away_prob": 94.3,
           "actual_home_score": 0,
           "actual_away_score": 3,
           "is_finished": true
@@ -84921,8 +86087,8 @@
           "away_starter": "山﨑福也",
           "home_status_text": "敗戦: 髙島",
           "away_status_text": "勝利: 山﨑福也",
-          "home_prob": 37.4,
-          "away_prob": 62.6,
+          "home_prob": 37.2,
+          "away_prob": 62.8,
           "actual_home_score": 1,
           "actual_away_score": 5,
           "is_finished": true
@@ -85722,8 +86888,8 @@
           "away_starter": "床田",
           "home_status_text": "勝利: 井上",
           "away_status_text": "敗戦: 床田",
-          "home_prob": 60.6,
-          "away_prob": 39.4,
+          "home_prob": 60.5,
+          "away_prob": 39.5,
           "actual_home_score": 3,
           "actual_away_score": 1,
           "is_finished": true
@@ -85735,8 +86901,8 @@
           "away_starter": "髙橋宏",
           "home_status_text": "敗戦: ウォルターズ",
           "away_status_text": "勝利: 髙橋宏",
-          "home_prob": 29.6,
-          "away_prob": 70.4,
+          "home_prob": 29.5,
+          "away_prob": 70.5,
           "actual_home_score": 2,
           "actual_away_score": 4,
           "is_finished": true
@@ -85761,8 +86927,8 @@
           "away_starter": "中村祐",
           "home_status_text": "敗戦: 岸",
           "away_status_text": "勝利: 中村祐",
-          "home_prob": 32.8,
-          "away_prob": 67.2,
+          "home_prob": 32.6,
+          "away_prob": 67.4,
           "actual_home_score": 4,
           "actual_away_score": 5,
           "is_finished": true
@@ -85787,8 +86953,8 @@
           "away_starter": "有原",
           "home_status_text": "勝利: 九里",
           "away_status_text": "敗戦: 有原",
-          "home_prob": 49.2,
-          "away_prob": 50.8,
+          "home_prob": 49.3,
+          "away_prob": 50.7,
           "actual_home_score": 3,
           "actual_away_score": 0,
           "is_finished": true
@@ -86588,8 +87754,8 @@
           "away_starter": "岡本",
           "home_status_text": "勝利: 山﨑",
           "away_status_text": "敗戦: 岡本",
-          "home_prob": 50.2,
-          "away_prob": 49.8,
+          "home_prob": 50.1,
+          "away_prob": 49.9,
           "actual_home_score": 11,
           "actual_away_score": 5,
           "is_finished": true
@@ -86614,8 +87780,8 @@
           "away_starter": "宮城",
           "home_status_text": "勝利: 木下",
           "away_status_text": "敗戦: 宮城",
-          "home_prob": 43.8,
-          "away_prob": 56.2,
+          "home_prob": 43.7,
+          "away_prob": 56.3,
           "actual_home_score": 2,
           "actual_away_score": 1,
           "is_finished": true
@@ -86627,8 +87793,8 @@
           "away_starter": "エスピノーザ",
           "home_status_text": "敗戦: 上沢",
           "away_status_text": "勝利: エスピノーザ",
-          "home_prob": 70.4,
-          "away_prob": 29.6,
+          "home_prob": 70.5,
+          "away_prob": 29.5,
           "actual_home_score": 1,
           "actual_away_score": 2,
           "is_finished": true
@@ -87428,8 +88594,8 @@
           "away_starter": "斉藤優",
           "home_status_text": "敗戦: 西舘",
           "away_status_text": "勝利: 斉藤優",
-          "home_prob": 85.2,
-          "away_prob": 14.8,
+          "home_prob": 85.3,
+          "away_prob": 14.7,
           "actual_home_score": 1,
           "actual_away_score": 6,
           "is_finished": true
@@ -87454,8 +88620,8 @@
           "away_starter": "マルセリーノ",
           "home_status_text": "勝利: 岩崎",
           "away_status_text": "敗戦: マルセリーノ",
-          "home_prob": 31.5,
-          "away_prob": 68.5,
+          "home_prob": 31.4,
+          "away_prob": 68.6,
           "actual_home_score": 5,
           "actual_away_score": 4,
           "is_finished": true
@@ -87480,8 +88646,8 @@
           "away_starter": "早川",
           "home_status_text": "勝利: 小島",
           "away_status_text": "敗戦: 早川",
-          "home_prob": 53.6,
-          "away_prob": 46.4,
+          "home_prob": 53.7,
+          "away_prob": 46.3,
           "actual_home_score": 10,
           "actual_away_score": 2,
           "is_finished": true
@@ -88294,8 +89460,8 @@
           "away_starter": "北山",
           "home_status_text": "敗戦: 隅田",
           "away_status_text": "勝利: 北山",
-          "home_prob": 55.1,
-          "away_prob": 44.9,
+          "home_prob": 55.2,
+          "away_prob": 44.8,
           "actual_home_score": 2,
           "actual_away_score": 11,
           "is_finished": true
@@ -88307,8 +89473,8 @@
           "away_starter": "九谷",
           "home_status_text": "敗戦: 鈴木",
           "away_status_text": "勝利: 九谷",
-          "home_prob": 77.5,
-          "away_prob": 22.5,
+          "home_prob": 77.4,
+          "away_prob": 22.6,
           "actual_home_score": 3,
           "actual_away_score": 4,
           "is_finished": true
@@ -89121,8 +90287,8 @@
           "away_starter": "菊地",
           "home_status_text": "勝利: 廣澤",
           "away_status_text": "敗戦: 菊地",
-          "home_prob": 60.0,
-          "away_prob": 40.0,
+          "home_prob": 60.1,
+          "away_prob": 39.9,
           "actual_home_score": 5,
           "actual_away_score": 3,
           "is_finished": true
@@ -89134,8 +90300,8 @@
           "away_starter": "伊勢",
           "home_status_text": "勝利: 吉田",
           "away_status_text": "敗戦: 伊勢",
-          "home_prob": 40.9,
-          "away_prob": 59.1,
+          "home_prob": 40.7,
+          "away_prob": 59.3,
           "actual_home_score": 3,
           "actual_away_score": 2,
           "is_finished": true
@@ -89147,8 +90313,8 @@
           "away_starter": "マルティネス",
           "home_status_text": "敗戦: 岩崎",
           "away_status_text": "勝利: マルティネス",
-          "home_prob": 53.2,
-          "away_prob": 46.8,
+          "home_prob": 53.1,
+          "away_prob": 46.9,
           "actual_home_score": 2,
           "actual_away_score": 4,
           "is_finished": true
@@ -89173,8 +90339,8 @@
           "away_starter": "河村",
           "home_status_text": "勝利: 片山",
           "away_status_text": "敗戦: 河村",
-          "home_prob": 27.3,
-          "away_prob": 72.7,
+          "home_prob": 27.2,
+          "away_prob": 72.8,
           "actual_home_score": 3,
           "actual_away_score": 2,
           "is_finished": true
@@ -89974,8 +91140,8 @@
           "away_starter": "遠藤",
           "home_status_text": "勝利: リランソ",
           "away_status_text": "敗戦: 遠藤",
-          "home_prob": 62.3,
-          "away_prob": 37.7,
+          "home_prob": 62.5,
+          "away_prob": 37.5,
           "actual_home_score": 2,
           "actual_away_score": 1,
           "is_finished": true
@@ -90000,8 +91166,8 @@
           "away_starter": "竹丸",
           "home_status_text": "敗戦: 伊原",
           "away_status_text": "勝利: 竹丸",
-          "home_prob": 80.2,
-          "away_prob": 19.8,
+          "home_prob": 80.3,
+          "away_prob": 19.7,
           "actual_home_score": 1,
           "actual_away_score": 5,
           "is_finished": true
@@ -90013,8 +91179,8 @@
           "away_starter": "泰",
           "home_status_text": "勝利: 柳川",
           "away_status_text": "敗戦: 泰",
-          "home_prob": 80.5,
-          "away_prob": 19.5,
+          "home_prob": 80.6,
+          "away_prob": 19.4,
           "actual_home_score": 4,
           "actual_away_score": 3,
           "is_finished": true
@@ -90039,8 +91205,8 @@
           "away_starter": "中森",
           "home_status_text": "勝利: 山﨑",
           "away_status_text": "敗戦: 中森",
-          "home_prob": 17.7,
-          "away_prob": 82.3,
+          "home_prob": 17.6,
+          "away_prob": 82.4,
           "actual_home_score": 5,
           "actual_away_score": 3,
           "is_finished": true
@@ -90879,8 +92045,8 @@
           "away_starter": "瀧中",
           "home_status_text": "勝利: 山﨑福也",
           "away_status_text": "敗戦: 瀧中",
-          "home_prob": 84.4,
-          "away_prob": 15.6,
+          "home_prob": 84.5,
+          "away_prob": 15.5,
           "actual_home_score": 6,
           "actual_away_score": 2,
           "is_finished": true
@@ -90905,8 +92071,8 @@
           "away_starter": "ジャクソン",
           "home_status_text": "敗戦: 九里",
           "away_status_text": "勝利: ジャクソン",
-          "home_prob": 48.8,
-          "away_prob": 51.2,
+          "home_prob": 48.9,
+          "away_prob": 51.1,
           "actual_home_score": 2,
           "actual_away_score": 3,
           "is_finished": true
@@ -91706,8 +92872,8 @@
           "away_starter": "平良",
           "home_status_text": "勝利: ハワード",
           "away_status_text": "敗戦: 平良",
-          "home_prob": 26.5,
-          "away_prob": 73.5,
+          "home_prob": 26.4,
+          "away_prob": 73.6,
           "actual_home_score": 6,
           "actual_away_score": 0,
           "is_finished": true
@@ -91719,8 +92885,8 @@
           "away_starter": "門別",
           "home_status_text": "敗戦: 丸山翔",
           "away_status_text": "勝利: 門別",
-          "home_prob": 40.8,
-          "away_prob": 59.2,
+          "home_prob": 40.9,
+          "away_prob": 59.1,
           "actual_home_score": 3,
           "actual_away_score": 4,
           "is_finished": true
@@ -91752,14 +92918,27 @@
           "is_finished": true
         },
         {
+          "home": "楽天",
+          "away": "ソフトバンク",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 23.1,
+          "away_prob": 76.9,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
+        {
           "home": "西武",
           "away": "オリックス",
           "home_starter": "中村祐",
           "away_starter": "吉田",
           "home_status_text": "敗戦: 中村祐",
           "away_status_text": "勝利: 吉田",
-          "home_prob": 81.1,
-          "away_prob": 18.9,
+          "home_prob": 81.2,
+          "away_prob": 18.8,
           "actual_home_score": 4,
           "actual_away_score": 5,
           "is_finished": true
@@ -92559,8 +93738,8 @@
           "away_starter": "篠木",
           "home_status_text": "敗戦: 竹丸",
           "away_status_text": "勝利: 篠木",
-          "home_prob": 47.0,
-          "away_prob": 53.0,
+          "home_prob": 47.1,
+          "away_prob": 52.9,
           "actual_home_score": 7,
           "actual_away_score": 8,
           "is_finished": true
@@ -92598,8 +93777,8 @@
           "away_starter": "中森",
           "home_status_text": "敗戦: 福島",
           "away_status_text": "勝利: 中森",
-          "home_prob": 46.6,
-          "away_prob": 53.4,
+          "home_prob": 46.5,
+          "away_prob": 53.5,
           "actual_home_score": 3,
           "actual_away_score": 5,
           "is_finished": true
@@ -93425,8 +94604,8 @@
           "away_starter": "深沢",
           "home_status_text": "敗戦: 小笠原",
           "away_status_text": "勝利: 深沢",
-          "home_prob": 67.1,
-          "away_prob": 32.9,
+          "home_prob": 67.2,
+          "away_prob": 32.8,
           "actual_home_score": 1,
           "actual_away_score": 2,
           "is_finished": true
@@ -93438,8 +94617,8 @@
           "away_starter": "及川",
           "home_status_text": "敗戦: キハダ",
           "away_status_text": "勝利: 及川",
-          "home_prob": 18.0,
-          "away_prob": 82.0,
+          "home_prob": 17.9,
+          "away_prob": 82.1,
           "actual_home_score": 3,
           "actual_away_score": 4,
           "is_finished": true
@@ -93451,8 +94630,8 @@
           "away_starter": "吉田",
           "home_status_text": "勝利: 遠藤",
           "away_status_text": "敗戦: 吉田",
-          "home_prob": 39.5,
-          "away_prob": 60.5,
+          "home_prob": 39.6,
+          "away_prob": 60.4,
           "actual_home_score": 4,
           "actual_away_score": 3,
           "is_finished": true
@@ -93490,8 +94669,8 @@
           "away_starter": "髙島",
           "home_status_text": "勝利: 武内",
           "away_status_text": "敗戦: 髙島",
-          "home_prob": 60.3,
-          "away_prob": 39.7,
+          "home_prob": 60.4,
+          "away_prob": 39.6,
           "actual_home_score": 5,
           "actual_away_score": 1,
           "is_finished": true
@@ -95118,8 +96297,8 @@
           "away_starter": "マルティネス",
           "home_status_text": "勝利: 遠藤",
           "away_status_text": "敗戦: マルティネス",
-          "home_prob": 32.8,
-          "away_prob": 67.2,
+          "home_prob": 32.7,
+          "away_prob": 67.3,
           "actual_home_score": 4,
           "actual_away_score": 3,
           "is_finished": true
@@ -95144,8 +96323,8 @@
           "away_starter": "伊藤",
           "home_status_text": "勝利: 上沢",
           "away_status_text": "敗戦: 伊藤",
-          "home_prob": 64.5,
-          "away_prob": 35.5,
+          "home_prob": 64.4,
+          "away_prob": 35.6,
           "actual_home_score": 1,
           "actual_away_score": 0,
           "is_finished": true
@@ -95945,8 +97124,8 @@
           "away_starter": "髙橋",
           "home_status_text": "勝利: 東",
           "away_status_text": "敗戦: 髙橋",
-          "home_prob": 26.7,
-          "away_prob": 73.3,
+          "home_prob": 26.6,
+          "away_prob": 73.4,
           "actual_home_score": 11,
           "actual_away_score": 7,
           "is_finished": true
@@ -95958,8 +97137,8 @@
           "away_starter": "山野",
           "home_status_text": "勝利: 涌井",
           "away_status_text": "敗戦: 山野",
-          "home_prob": 66.8,
-          "away_prob": 33.2,
+          "home_prob": 66.7,
+          "away_prob": 33.3,
           "actual_home_score": 4,
           "actual_away_score": 1,
           "is_finished": true
@@ -95984,8 +97163,8 @@
           "away_starter": "佐藤爽",
           "home_status_text": "勝利: 毛利",
           "away_status_text": "敗戦: 佐藤爽",
-          "home_prob": 20.1,
-          "away_prob": 79.9,
+          "home_prob": 20.0,
+          "away_prob": 80.0,
           "actual_home_score": 8,
           "actual_away_score": 0,
           "is_finished": true
@@ -96824,8 +98003,8 @@
           "away_starter": "清水",
           "home_status_text": "勝利: 橋本",
           "away_status_text": "敗戦: 清水",
-          "home_prob": 71.0,
-          "away_prob": 29.0,
+          "home_prob": 70.9,
+          "away_prob": 29.1,
           "actual_home_score": 5,
           "actual_away_score": 0,
           "is_finished": true
@@ -96837,8 +98016,8 @@
           "away_starter": "船迫",
           "home_status_text": "敗戦: 辻",
           "away_status_text": "勝利: 船迫",
-          "home_prob": 36.4,
-          "away_prob": 63.6,
+          "home_prob": 36.3,
+          "away_prob": 63.7,
           "actual_home_score": 7,
           "actual_away_score": 11,
           "is_finished": true
@@ -96850,8 +98029,8 @@
           "away_starter": "岸",
           "home_status_text": "敗戦: 田嶋大",
           "away_status_text": "勝利: 岸",
-          "home_prob": 58.1,
-          "away_prob": 41.9,
+          "home_prob": 58.2,
+          "away_prob": 41.8,
           "actual_home_score": 1,
           "actual_away_score": 3,
           "is_finished": true
@@ -96863,8 +98042,8 @@
           "away_starter": "堀",
           "home_status_text": "敗戦: オスナ",
           "away_status_text": "勝利: 堀",
-          "home_prob": 26.3,
-          "away_prob": 73.7,
+          "home_prob": 26.1,
+          "away_prob": 73.9,
           "actual_home_score": 2,
           "actual_away_score": 6,
           "is_finished": true
@@ -97664,8 +98843,8 @@
           "away_starter": "奥川",
           "home_status_text": "敗戦: ハワード",
           "away_status_text": "勝利: 奥川",
-          "home_prob": 67.6,
-          "away_prob": 32.4,
+          "home_prob": 67.5,
+          "away_prob": 32.5,
           "actual_home_score": 0,
           "actual_away_score": 1,
           "is_finished": true
@@ -97690,8 +98869,8 @@
           "away_starter": "藤嶋",
           "home_status_text": "敗戦: ドリス",
           "away_status_text": "勝利: 藤嶋",
-          "home_prob": 58.6,
-          "away_prob": 41.4,
+          "home_prob": 58.7,
+          "away_prob": 41.3,
           "actual_home_score": 2,
           "actual_away_score": 3,
           "is_finished": true
@@ -97729,8 +98908,8 @@
           "away_starter": "寺西",
           "home_status_text": "敗戦: 廣池",
           "away_status_text": "勝利: 寺西",
-          "home_prob": 55.4,
-          "away_prob": 44.6,
+          "home_prob": 55.5,
+          "away_prob": 44.5,
           "actual_home_score": 2,
           "actual_away_score": 6,
           "is_finished": true
@@ -98530,8 +99709,8 @@
           "away_starter": "高橋",
           "home_status_text": "勝利: 竹丸",
           "away_status_text": "敗戦: 高橋",
-          "home_prob": 82.7,
-          "away_prob": 17.3,
+          "home_prob": 82.6,
+          "away_prob": 17.4,
           "actual_home_score": 8,
           "actual_away_score": 2,
           "is_finished": true
@@ -99396,8 +100575,8 @@
           "away_starter": "松本健",
           "home_status_text": "勝利: 小笠原",
           "away_status_text": "敗戦: 松本健",
-          "home_prob": 70.8,
-          "away_prob": 29.2,
+          "home_prob": 70.7,
+          "away_prob": 29.3,
           "actual_home_score": 7,
           "actual_away_score": 3,
           "is_finished": true
@@ -99409,8 +100588,8 @@
           "away_starter": "鈴木",
           "home_status_text": "勝利: 片山",
           "away_status_text": "敗戦: 鈴木",
-          "home_prob": 43.8,
-          "away_prob": 56.2,
+          "home_prob": 43.7,
+          "away_prob": 56.3,
           "actual_home_score": 3,
           "actual_away_score": 0,
           "is_finished": true
@@ -99422,8 +100601,8 @@
           "away_starter": "柳",
           "home_status_text": "勝利: 木下",
           "away_status_text": "敗戦: 柳",
-          "home_prob": 42.0,
-          "away_prob": 58.0,
+          "home_prob": 41.8,
+          "away_prob": 58.2,
           "actual_home_score": 1,
           "actual_away_score": 0,
           "is_finished": true
@@ -100269,6 +101448,19 @@
           "is_finished": true
         },
         {
+          "home": "ヤクルト",
+          "away": "広島",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 42.6,
+          "away_prob": 57.4,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
+        {
           "home": "中日",
           "away": "ＤｅＮＡ",
           "home_starter": "大野",
@@ -100288,8 +101480,8 @@
           "away_starter": "平良",
           "home_status_text": "敗戦: 伊藤",
           "away_status_text": "勝利: 平良",
-          "home_prob": 64.4,
-          "away_prob": 35.6,
+          "home_prob": 64.5,
+          "away_prob": 35.5,
           "actual_home_score": 0,
           "actual_away_score": 1,
           "is_finished": true
@@ -101115,8 +102307,8 @@
           "away_starter": "髙橋",
           "home_status_text": "敗戦: 井上",
           "away_status_text": "勝利: 髙橋",
-          "home_prob": 29.0,
-          "away_prob": 71.0,
+          "home_prob": 28.9,
+          "away_prob": 71.1,
           "actual_home_score": 1,
           "actual_away_score": 5,
           "is_finished": true
@@ -101981,11 +103173,24 @@
           "away_starter": "下村",
           "home_status_text": "敗戦: 西舘",
           "away_status_text": "勝利: 下村",
-          "home_prob": 73.3,
-          "away_prob": 26.7,
+          "home_prob": 73.4,
+          "away_prob": 26.6,
           "actual_home_score": 2,
           "actual_away_score": 3,
           "is_finished": true
+        },
+        {
+          "home": "ヤクルト",
+          "away": "広島",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 49.9,
+          "away_prob": 50.1,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
         },
         {
           "home": "中日",
@@ -101994,8 +103199,8 @@
           "away_starter": "深沢",
           "home_status_text": "敗戦: 金丸",
           "away_status_text": "勝利: 深沢",
-          "home_prob": 57.4,
-          "away_prob": 42.6,
+          "home_prob": 57.5,
+          "away_prob": 42.5,
           "actual_home_score": 1,
           "actual_away_score": 5,
           "is_finished": true
@@ -102873,8 +104078,8 @@
           "away_starter": "小島",
           "home_status_text": "勝利: 岩城",
           "away_status_text": "敗戦: 小島",
-          "home_prob": 58.3,
-          "away_prob": 41.7,
+          "home_prob": 58.2,
+          "away_prob": 41.8,
           "actual_home_score": 7,
           "actual_away_score": 0,
           "is_finished": true
@@ -103713,8 +104918,8 @@
           "away_starter": "竹丸",
           "home_status_text": "勝利: マラー",
           "away_status_text": "敗戦: 竹丸",
-          "home_prob": 44.6,
-          "away_prob": 55.4,
+          "home_prob": 44.5,
+          "away_prob": 55.5,
           "actual_home_score": 11,
           "actual_away_score": 2,
           "is_finished": true
@@ -103739,8 +104944,8 @@
           "away_starter": "中森",
           "home_status_text": "敗戦: ウィンゲンター",
           "away_status_text": "勝利: 中森",
-          "home_prob": 36.5,
-          "away_prob": 63.5,
+          "home_prob": 36.4,
+          "away_prob": 63.6,
           "actual_home_score": 1,
           "actual_away_score": 5,
           "is_finished": true
@@ -104566,8 +105771,8 @@
           "away_starter": "片山",
           "home_status_text": "勝利: 松本健",
           "away_status_text": "敗戦: 片山",
-          "home_prob": 53.5,
-          "away_prob": 46.5,
+          "home_prob": 53.6,
+          "away_prob": 46.4,
           "actual_home_score": 2,
           "actual_away_score": 1,
           "is_finished": true
@@ -104579,8 +105784,8 @@
           "away_starter": "小笠原",
           "home_status_text": "敗戦: 柳",
           "away_status_text": "勝利: 小笠原",
-          "home_prob": 65.1,
-          "away_prob": 34.9,
+          "home_prob": 65.2,
+          "away_prob": 34.8,
           "actual_home_score": 0,
           "actual_away_score": 11,
           "is_finished": true
@@ -104618,8 +105823,8 @@
           "away_starter": "有原",
           "home_status_text": "敗戦: 曽谷",
           "away_status_text": "勝利: 有原",
-          "home_prob": 46.1,
-          "away_prob": 53.9,
+          "home_prob": 46.2,
+          "away_prob": 53.8,
           "actual_home_score": 7,
           "actual_away_score": 13,
           "is_finished": true
@@ -105445,8 +106650,8 @@
           "away_starter": "清水",
           "home_status_text": "勝利: 桐敷",
           "away_status_text": "敗戦: 清水",
-          "home_prob": 29.7,
-          "away_prob": 70.3,
+          "home_prob": 29.6,
+          "away_prob": 70.4,
           "actual_home_score": 3,
           "actual_away_score": 2,
           "is_finished": true
@@ -106298,8 +107503,8 @@
           "away_starter": "井上",
           "home_status_text": "勝利: 東",
           "away_status_text": "敗戦: 井上",
-          "home_prob": 53.2,
-          "away_prob": 46.8,
+          "home_prob": 53.3,
+          "away_prob": 46.7,
           "actual_home_score": 1,
           "actual_away_score": 0,
           "is_finished": true
@@ -107177,8 +108382,8 @@
           "away_starter": "高橋",
           "home_status_text": "敗戦: 下村",
           "away_status_text": "勝利: 高橋",
-          "home_prob": 71.5,
-          "away_prob": 28.5,
+          "home_prob": 71.4,
+          "away_prob": 28.6,
           "actual_home_score": 1,
           "actual_away_score": 4,
           "is_finished": true
@@ -107203,8 +108408,8 @@
           "away_starter": "杉山",
           "home_status_text": "引分: ラオ",
           "away_status_text": "引分: 杉山",
-          "home_prob": 53.9,
-          "away_prob": 46.1,
+          "home_prob": 54.0,
+          "away_prob": 46.0,
           "actual_home_score": 5,
           "actual_away_score": 5,
           "is_finished": true
@@ -108030,8 +109235,8 @@
           "away_starter": "森下",
           "home_status_text": "勝利: ハワード",
           "away_status_text": "敗戦: 森下",
-          "home_prob": 59.4,
-          "away_prob": 40.6,
+          "home_prob": 59.3,
+          "away_prob": 40.7,
           "actual_home_score": 2,
           "actual_away_score": 0,
           "is_finished": true
@@ -108043,8 +109248,8 @@
           "away_starter": "ルーカス",
           "home_status_text": "敗戦: 平良",
           "away_status_text": "勝利: ルーカス",
-          "home_prob": 83.3,
-          "away_prob": 16.7,
+          "home_prob": 83.4,
+          "away_prob": 16.6,
           "actual_home_score": 1,
           "actual_away_score": 4,
           "is_finished": true
@@ -108890,6 +110095,19 @@
           "is_finished": true
         },
         {
+          "home": "ＤｅＮＡ",
+          "away": "阪神",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 48.0,
+          "away_prob": 52.0,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
+        {
           "home": "中日",
           "away": "ヤクルト",
           "home_starter": "齋藤",
@@ -108909,11 +110127,24 @@
           "away_starter": "隅田",
           "home_status_text": "敗戦: 九谷",
           "away_status_text": "勝利: 隅田",
-          "home_prob": 58.7,
-          "away_prob": 41.3,
+          "home_prob": 58.6,
+          "away_prob": 41.4,
           "actual_home_score": 0,
           "actual_away_score": 2,
           "is_finished": true
+        },
+        {
+          "home": "ロッテ",
+          "away": "日本ハム",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 37.4,
+          "away_prob": 62.6,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
         },
         {
           "home": "ソフトバンク",
@@ -109723,8 +110954,8 @@
           "away_starter": "遠藤",
           "home_status_text": "敗戦: 堀田",
           "away_status_text": "勝利: 遠藤",
-          "home_prob": 89.6,
-          "away_prob": 10.4,
+          "home_prob": 89.7,
+          "away_prob": 10.3,
           "actual_home_score": 2,
           "actual_away_score": 3,
           "is_finished": true
@@ -109736,8 +110967,8 @@
           "away_starter": "岩崎",
           "home_status_text": "敗戦: レイノルズ",
           "away_status_text": "勝利: 岩崎",
-          "home_prob": 85.2,
-          "away_prob": 14.8,
+          "home_prob": 85.3,
+          "away_prob": 14.7,
           "actual_home_score": 3,
           "actual_away_score": 5,
           "is_finished": true
@@ -111455,8 +112686,8 @@
           "away_starter": "田中瑛",
           "home_status_text": "敗戦: ウォルターズ",
           "away_status_text": "勝利: 田中瑛",
-          "home_prob": 17.2,
-          "away_prob": 82.8,
+          "home_prob": 17.1,
+          "away_prob": 82.9,
           "actual_home_score": 3,
           "actual_away_score": 5,
           "is_finished": true
@@ -112334,8 +113565,8 @@
           "away_starter": "木下",
           "home_status_text": "敗戦: 橋本",
           "away_status_text": "勝利: 木下",
-          "home_prob": 65.9,
-          "away_prob": 34.1,
+          "home_prob": 66.0,
+          "away_prob": 34.0,
           "actual_home_score": 3,
           "actual_away_score": 4,
           "is_finished": true
@@ -112360,8 +113591,8 @@
           "away_starter": "上茶谷",
           "home_status_text": "敗戦: 毛利",
           "away_status_text": "勝利: 上茶谷",
-          "home_prob": 7.6,
-          "away_prob": 92.4,
+          "home_prob": 7.5,
+          "away_prob": 92.5,
           "actual_home_score": 2,
           "actual_away_score": 4,
           "is_finished": true
@@ -112373,8 +113604,8 @@
           "away_starter": "前田健",
           "home_status_text": "敗戦: ジェリー",
           "away_status_text": "勝利: 前田健",
-          "home_prob": 55.2,
-          "away_prob": 44.8,
+          "home_prob": 55.3,
+          "away_prob": 44.7,
           "actual_home_score": 4,
           "actual_away_score": 12,
           "is_finished": true
@@ -113174,8 +114405,8 @@
           "away_starter": "吉田",
           "home_status_text": "勝利: 馬場",
           "away_status_text": "敗戦: 吉田",
-          "home_prob": 70.2,
-          "away_prob": 29.8,
+          "home_prob": 70.3,
+          "away_prob": 29.7,
           "actual_home_score": 4,
           "actual_away_score": 2,
           "is_finished": true
@@ -113187,8 +114418,8 @@
           "away_starter": "ハワード",
           "home_status_text": "勝利: 村上",
           "away_status_text": "敗戦: ハワード",
-          "home_prob": 61.8,
-          "away_prob": 38.2,
+          "home_prob": 61.9,
+          "away_prob": 38.1,
           "actual_home_score": 4,
           "actual_away_score": 1,
           "is_finished": true
@@ -114066,8 +115297,8 @@
           "away_starter": "高橋",
           "home_status_text": "敗戦: 玉村",
           "away_status_text": "勝利: 高橋",
-          "home_prob": 57.8,
-          "away_prob": 42.2,
+          "home_prob": 57.9,
+          "away_prob": 42.1,
           "actual_home_score": 1,
           "actual_away_score": 9,
           "is_finished": true
@@ -114906,8 +116137,8 @@
           "away_starter": "松山",
           "home_status_text": "勝利: 中川虎",
           "away_status_text": "敗戦: 松山",
-          "home_prob": 65.7,
-          "away_prob": 34.3,
+          "home_prob": 65.6,
+          "away_prob": 34.4,
           "actual_home_score": 4,
           "actual_away_score": 3,
           "is_finished": true
@@ -114958,8 +116189,8 @@
           "away_starter": "岸",
           "home_status_text": "勝利: 武内",
           "away_status_text": "敗戦: 岸",
-          "home_prob": 64.3,
-          "away_prob": 35.7,
+          "home_prob": 64.4,
+          "away_prob": 35.6,
           "actual_home_score": 4,
           "actual_away_score": 1,
           "is_finished": true
@@ -115772,8 +117003,8 @@
           "away_starter": "ルイーズ",
           "home_status_text": "勝利: マルティネス",
           "away_status_text": "敗戦: ルイーズ",
-          "home_prob": 33.3,
-          "away_prob": 66.7,
+          "home_prob": 33.2,
+          "away_prob": 66.8,
           "actual_home_score": 4,
           "actual_away_score": 3,
           "is_finished": true
@@ -115785,8 +117016,8 @@
           "away_starter": "髙橋",
           "home_status_text": "敗戦: 吉村",
           "away_status_text": "勝利: 髙橋",
-          "home_prob": 12.2,
-          "away_prob": 87.8,
+          "home_prob": 12.1,
+          "away_prob": 87.9,
           "actual_home_score": 2,
           "actual_away_score": 6,
           "is_finished": true
@@ -116638,8 +117869,8 @@
           "away_starter": "レイノルズ",
           "home_status_text": "敗戦: 赤星",
           "away_status_text": "勝利: レイノルズ",
-          "home_prob": 36.4,
-          "away_prob": 63.6,
+          "home_prob": 36.3,
+          "away_prob": 63.7,
           "actual_home_score": 1,
           "actual_away_score": 2,
           "is_finished": true
@@ -117491,8 +118722,8 @@
           "away_starter": "伊藤将",
           "home_status_text": "敗戦: 増居",
           "away_status_text": "勝利: 伊藤将",
-          "home_prob": 63.1,
-          "away_prob": 36.9,
+          "home_prob": 63.2,
+          "away_prob": 36.8,
           "actual_home_score": 4,
           "actual_away_score": 7,
           "is_finished": true
@@ -118305,8 +119536,8 @@
           "away_starter": "齋藤",
           "home_status_text": "引分: 清水",
           "away_status_text": "引分: 齋藤",
-          "home_prob": 54.8,
-          "away_prob": 45.2,
+          "home_prob": 55.0,
+          "away_prob": 45.0,
           "actual_home_score": 1,
           "actual_away_score": 1,
           "is_finished": true
@@ -119158,8 +120389,8 @@
           "away_starter": "マラー",
           "home_status_text": "敗戦: 廣澤",
           "away_status_text": "勝利: マラー",
-          "home_prob": 56.5,
-          "away_prob": 43.5,
+          "home_prob": 56.6,
+          "away_prob": 43.4,
           "actual_home_score": 4,
           "actual_away_score": 8,
           "is_finished": true
@@ -119184,8 +120415,8 @@
           "away_starter": "則本",
           "home_status_text": "敗戦: 岡本",
           "away_status_text": "勝利: 則本",
-          "home_prob": 44.3,
-          "away_prob": 55.7,
+          "home_prob": 44.4,
+          "away_prob": 55.6,
           "actual_home_score": 5,
           "actual_away_score": 10,
           "is_finished": true
@@ -120017,6 +121248,19 @@
         }
       ],
       "predictions": [
+        {
+          "home": "ヤクルト",
+          "away": "中日",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 35.9,
+          "away_prob": 64.1,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
+        },
         {
           "home": "阪神",
           "away": "ＤｅＮＡ",
@@ -120877,8 +122121,8 @@
           "away_starter": "柳",
           "home_status_text": "敗戦: 戸郷",
           "away_status_text": "勝利: 柳",
-          "home_prob": 64.7,
-          "away_prob": 35.3,
+          "home_prob": 64.6,
+          "away_prob": 35.4,
           "actual_home_score": 0,
           "actual_away_score": 3,
           "is_finished": true
@@ -120890,11 +122134,24 @@
           "away_starter": "ウォルターズ",
           "home_status_text": "敗戦: 伊勢",
           "away_status_text": "勝利: ウォルターズ",
-          "home_prob": 82.7,
-          "away_prob": 17.3,
+          "home_prob": 82.8,
+          "away_prob": 17.2,
           "actual_home_score": 1,
           "actual_away_score": 3,
           "is_finished": true
+        },
+        {
+          "home": "阪神",
+          "away": "広島",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 74.1,
+          "away_prob": 25.9,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
         },
         {
           "home": "ロッテ",
@@ -120903,8 +122160,8 @@
           "away_starter": "西口",
           "home_status_text": "勝利: 横山",
           "away_status_text": "敗戦: 西口",
-          "home_prob": 29.9,
-          "away_prob": 70.1,
+          "home_prob": 29.8,
+          "away_prob": 70.2,
           "actual_home_score": 3,
           "actual_away_score": 2,
           "is_finished": true
@@ -120929,8 +122186,8 @@
           "away_starter": "山﨑福也",
           "home_status_text": "勝利: モイネロ",
           "away_status_text": "敗戦: 山﨑福也",
-          "home_prob": 53.6,
-          "away_prob": 46.4,
+          "home_prob": 53.5,
+          "away_prob": 46.5,
           "actual_home_score": 14,
           "actual_away_score": 1,
           "is_finished": true
@@ -121743,8 +123000,8 @@
           "away_starter": "山野",
           "home_status_text": "勝利: 吉野",
           "away_status_text": "敗戦: 山野",
-          "home_prob": 29.6,
-          "away_prob": 70.4,
+          "home_prob": 29.5,
+          "away_prob": 70.5,
           "actual_home_score": 9,
           "actual_away_score": 2,
           "is_finished": true
@@ -122596,8 +123853,8 @@
           "away_starter": "吉田",
           "home_status_text": "勝利: 田中瑛",
           "away_status_text": "敗戦: 吉田",
-          "home_prob": 67.1,
-          "away_prob": 32.9,
+          "home_prob": 67.3,
+          "away_prob": 32.7,
           "actual_home_score": 5,
           "actual_away_score": 3,
           "is_finished": true
@@ -122609,11 +123866,24 @@
           "away_starter": "吉村",
           "home_status_text": "勝利: 深沢",
           "away_status_text": "敗戦: 吉村",
-          "home_prob": 81.0,
-          "away_prob": 19.0,
+          "home_prob": 80.9,
+          "away_prob": 19.1,
           "actual_home_score": 8,
           "actual_away_score": 1,
           "is_finished": true
+        },
+        {
+          "home": "阪神",
+          "away": "広島",
+          "home_starter": "未定",
+          "away_starter": "未定",
+          "home_status_text": "先発: 未定",
+          "away_status_text": "先発: 未定",
+          "home_prob": 73.5,
+          "away_prob": 26.5,
+          "actual_home_score": null,
+          "actual_away_score": null,
+          "is_finished": false
         },
         {
           "home": "ロッテ",
@@ -122622,8 +123892,8 @@
           "away_starter": "岸",
           "home_status_text": "勝利: 高野脩",
           "away_status_text": "敗戦: 岸",
-          "home_prob": 47.1,
-          "away_prob": 52.9,
+          "home_prob": 47.2,
+          "away_prob": 52.8,
           "actual_home_score": 6,
           "actual_away_score": 1,
           "is_finished": true
@@ -123462,8 +124732,8 @@
           "away_starter": "黒木",
           "home_status_text": "勝利: 博志",
           "away_status_text": "敗戦: 黒木",
-          "home_prob": 56.4,
-          "away_prob": 43.6,
+          "home_prob": 56.5,
+          "away_prob": 43.5,
           "actual_home_score": 5,
           "actual_away_score": 4,
           "is_finished": true
@@ -125168,8 +126438,8 @@
           "away_starter": "森博",
           "home_status_text": "敗戦: 木下",
           "away_status_text": "勝利: 森博",
-          "home_prob": 64.8,
-          "away_prob": 35.2,
+          "home_prob": 64.7,
+          "away_prob": 35.3,
           "actual_home_score": 0,
           "actual_away_score": 1,
           "is_finished": true
@@ -125181,8 +126451,8 @@
           "away_starter": "有原",
           "home_status_text": "敗戦: 武内",
           "away_status_text": "勝利: 有原",
-          "home_prob": 57.0,
-          "away_prob": 43.0,
+          "home_prob": 57.1,
+          "away_prob": 42.9,
           "actual_home_score": 1,
           "actual_away_score": 7,
           "is_finished": true
@@ -125995,8 +127265,8 @@
           "away_starter": "玉村",
           "home_status_text": "敗戦: 増居",
           "away_status_text": "勝利: 玉村",
-          "home_prob": 77.9,
-          "away_prob": 22.1,
+          "home_prob": 78.0,
+          "away_prob": 22.0,
           "actual_home_score": 0,
           "actual_away_score": 3,
           "is_finished": true
@@ -128489,8 +129759,8 @@
           "away_starter": "古謝",
           "home_status_text": "敗戦: 森",
           "away_status_text": "勝利: 古謝",
-          "home_prob": 67.7,
-          "away_prob": 32.3,
+          "home_prob": 67.6,
+          "away_prob": 32.4,
           "actual_home_score": 1,
           "actual_away_score": 5,
           "is_finished": true
@@ -129329,8 +130599,8 @@
           "away_starter": "森下",
           "home_status_text": "勝利: 大竹",
           "away_status_text": "敗戦: 森下",
-          "home_prob": 73.5,
-          "away_prob": 26.5,
+          "home_prob": 73.4,
+          "away_prob": 26.6,
           "actual_home_score": 2,
           "actual_away_score": 1,
           "is_finished": true
@@ -130195,8 +131465,8 @@
           "away_starter": "隅田",
           "home_status_text": "敗戦: 高野脩",
           "away_status_text": "勝利: 隅田",
-          "home_prob": 38.2,
-          "away_prob": 61.8,
+          "home_prob": 38.1,
+          "away_prob": 61.9,
           "actual_home_score": 2,
           "actual_away_score": 4,
           "is_finished": true
@@ -130269,7 +131539,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 39,
+          "champ_prob": 30,
           "cs_prob": 100
         },
         {
@@ -130336,7 +131606,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 61,
+          "champ_prob": 70,
           "cs_prob": 100
         },
         {
@@ -131146,7 +132416,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 39,
+          "champ_prob": 30,
           "cs_prob": 100
         },
         {
@@ -131213,7 +132483,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 61,
+          "champ_prob": 70,
           "cs_prob": 100
         },
         {
@@ -132023,7 +133293,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 39,
+          "champ_prob": 30,
           "cs_prob": 100
         },
         {
@@ -132090,7 +133360,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 61,
+          "champ_prob": 70,
           "cs_prob": 100
         },
         {
@@ -132913,7 +134183,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 39,
+          "champ_prob": 30,
           "cs_prob": 100
         },
         {
@@ -132980,7 +134250,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 61,
+          "champ_prob": 70,
           "cs_prob": 100
         },
         {
@@ -133803,7 +135073,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 39,
+          "champ_prob": 30,
           "cs_prob": 100
         },
         {
@@ -133870,7 +135140,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 61,
+          "champ_prob": 70,
           "cs_prob": 100
         },
         {
@@ -134641,7 +135911,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 39,
+          "champ_prob": 30,
           "cs_prob": 100
         },
         {
@@ -134708,7 +135978,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 61,
+          "champ_prob": 70,
           "cs_prob": 100
         },
         {
@@ -135518,7 +136788,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 39,
+          "champ_prob": 30,
           "cs_prob": 100
         },
         {
@@ -135585,7 +136855,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 61,
+          "champ_prob": 70,
           "cs_prob": 100
         },
         {
@@ -136395,7 +137665,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 39,
+          "champ_prob": 30,
           "cs_prob": 100
         },
         {
@@ -136462,7 +137732,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 61,
+          "champ_prob": 70,
           "cs_prob": 100
         },
         {
@@ -137272,7 +138542,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 39,
+          "champ_prob": 30,
           "cs_prob": 100
         },
         {
@@ -137339,7 +138609,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 61,
+          "champ_prob": 70,
           "cs_prob": 100
         },
         {
@@ -138123,7 +139393,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 39,
+          "champ_prob": 30,
           "cs_prob": 100
         },
         {
@@ -138190,7 +139460,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 61,
+          "champ_prob": 70,
           "cs_prob": 100
         },
         {
@@ -138987,7 +140257,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 39,
+          "champ_prob": 30,
           "cs_prob": 100
         },
         {
@@ -139054,7 +140324,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 61,
+          "champ_prob": 70,
           "cs_prob": 100
         },
         {
@@ -139825,7 +141095,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 39,
+          "champ_prob": 30,
           "cs_prob": 100
         },
         {
@@ -139892,7 +141162,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 61,
+          "champ_prob": 70,
           "cs_prob": 100
         },
         {
@@ -140689,7 +141959,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 39,
+          "champ_prob": 30,
           "cs_prob": 100
         },
         {
@@ -140756,7 +142026,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 61,
+          "champ_prob": 70,
           "cs_prob": 100
         },
         {
@@ -141527,7 +142797,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 39,
+          "champ_prob": 30,
           "cs_prob": 100
         },
         {
@@ -141594,7 +142864,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 61,
+          "champ_prob": 70,
           "cs_prob": 100
         },
         {
@@ -142404,7 +143674,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 39,
+          "champ_prob": 30,
           "cs_prob": 100
         },
         {
@@ -142471,7 +143741,7 @@
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
-          "champ_prob": 61,
+          "champ_prob": 70,
           "cs_prob": 100
         },
         {
@@ -143193,16 +144463,16 @@
   "simulation": {
     "central_rank_matrix": {
       "阪神": {
-        "1": 39,
-        "2": 61,
+        "1": 30,
+        "2": 70,
         "3": 0,
         "4": 0,
         "5": 0,
         "6": 0
       },
       "巨人": {
-        "1": 61,
-        "2": 39,
+        "1": 70,
+        "2": 30,
         "3": 0,
         "4": 0,
         "5": 0,
@@ -143220,25 +144490,25 @@
         "1": 0,
         "2": 0,
         "3": 0,
-        "4": 42,
-        "5": 53,
+        "4": 49,
+        "5": 46,
         "6": 5
       },
       "中日": {
         "1": 0,
         "2": 0,
         "3": 0,
-        "4": 57,
-        "5": 40,
-        "6": 3
+        "4": 50,
+        "5": 47,
+        "6": 4
       },
       "広島": {
         "1": 0,
         "2": 0,
         "3": 0,
         "4": 1,
-        "5": 7,
-        "6": 92
+        "5": 8,
+        "6": 91
       }
     },
     "pacific_rank_matrix": {
@@ -143252,8 +144522,8 @@
       },
       "日本ハム": {
         "1": 0,
-        "2": 40,
-        "3": 60,
+        "2": 27,
+        "3": 73,
         "4": 0,
         "5": 0,
         "6": 0
@@ -143262,8 +144532,8 @@
         "1": 0,
         "2": 0,
         "3": 0,
-        "4": 54,
-        "5": 46,
+        "4": 46,
+        "5": 54,
         "6": 0
       },
       "楽天": {
@@ -143278,14 +144548,14 @@
         "1": 0,
         "2": 0,
         "3": 0,
-        "4": 46,
-        "5": 54,
+        "4": 54,
+        "5": 46,
         "6": 0
       },
       "西武": {
         "1": 0,
-        "2": 60,
-        "3": 40,
+        "2": 73,
+        "3": 27,
         "4": 0,
         "5": 0,
         "6": 0
@@ -143294,21 +144564,11 @@
     "central_clinch_schedules": {
       "阪神": [
         {
-          "date": "10/2",
-          "raw_date": "2026-10-02",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.02,
-          "win_expect": "-",
-          "clinch_prob_str": "0.02%",
-          "cum_prob_str": "0.02%"
-        },
-        {
           "date": "10/3",
           "raw_date": "2026-10-03",
           "opp": "広島",
           "ground": "マツダS",
-          "clinch_prob_val": 0.32,
+          "clinch_prob_val": 0.33999999999999997,
           "win_expect": "66",
           "clinch_prob_str": "0.3%",
           "cum_prob_str": "0.3%"
@@ -143318,60 +144578,10 @@
           "raw_date": "2026-10-04",
           "opp": "ＤｅＮＡ",
           "ground": "敵地",
-          "clinch_prob_val": 0.58,
+          "clinch_prob_val": 29.160000000000004,
           "win_expect": "38",
-          "clinch_prob_str": "0.6%",
-          "cum_prob_str": "0.9%"
-        },
-        {
-          "date": "10/5",
-          "raw_date": "2026-10-05",
-          "opp": "広島",
-          "ground": "甲子園",
-          "clinch_prob_val": 1.4200000000000002,
-          "win_expect": "72",
-          "clinch_prob_str": "1%",
-          "cum_prob_str": "2%"
-        },
-        {
-          "date": "10/6",
-          "raw_date": "2026-10-06",
-          "opp": "広島",
-          "ground": "甲子園",
-          "clinch_prob_val": 3.04,
-          "win_expect": "72",
-          "clinch_prob_str": "3%",
-          "cum_prob_str": "5%"
-        },
-        {
-          "date": "10/7",
-          "raw_date": "2026-10-07",
-          "opp": "巨人",
-          "ground": "甲子園",
-          "clinch_prob_val": 8.58,
-          "win_expect": "47",
-          "clinch_prob_str": "9%",
-          "cum_prob_str": "14%"
-        },
-        {
-          "date": "10/8",
-          "raw_date": "2026-10-08",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.0,
-          "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "14%"
-        },
-        {
-          "date": "10/9",
-          "raw_date": "2026-10-09",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 24.82,
-          "win_expect": "-",
-          "clinch_prob_str": "25%",
-          "cum_prob_str": "39%"
+          "clinch_prob_str": "29%",
+          "cum_prob_str": "30%"
         }
       ],
       "巨人": [
@@ -143380,27 +144590,27 @@
           "raw_date": "2026-10-01",
           "opp": "阪神",
           "ground": "敵地",
-          "clinch_prob_val": 0.13999999999999999,
+          "clinch_prob_val": 0.18,
           "win_expect": "53",
-          "clinch_prob_str": "0.1%",
-          "cum_prob_str": "0.1%"
+          "clinch_prob_str": "0.2%",
+          "cum_prob_str": "0.2%"
         },
         {
           "date": "10/2",
           "raw_date": "2026-10-02",
           "opp": "ヤクルト",
           "ground": "神宮",
-          "clinch_prob_val": 0.64,
+          "clinch_prob_val": 0.9199999999999999,
           "win_expect": "74",
-          "clinch_prob_str": "0.6%",
-          "cum_prob_str": "0.8%"
+          "clinch_prob_str": "0.9%",
+          "cum_prob_str": "1%"
         },
         {
           "date": "10/3",
           "raw_date": "2026-10-03",
           "opp": "ＤｅＮＡ",
           "ground": "東京D",
-          "clinch_prob_val": 3.2,
+          "clinch_prob_val": 3.36,
           "win_expect": "51",
           "clinch_prob_str": "3%",
           "cum_prob_str": "4%"
@@ -143410,63 +144620,23 @@
           "raw_date": "2026-10-04",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 4.68,
+          "clinch_prob_val": 66.03999999999999,
           "win_expect": "-",
-          "clinch_prob_str": "5%",
-          "cum_prob_str": "9%"
-        },
-        {
-          "date": "10/5",
-          "raw_date": "2026-10-05",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 2.86,
-          "win_expect": "-",
-          "clinch_prob_str": "3%",
-          "cum_prob_str": "12%"
-        },
-        {
-          "date": "10/6",
-          "raw_date": "2026-10-06",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 3.2199999999999998,
-          "win_expect": "-",
-          "clinch_prob_str": "3%",
-          "cum_prob_str": "15%"
-        },
-        {
-          "date": "10/7",
-          "raw_date": "2026-10-07",
-          "opp": "阪神",
-          "ground": "敵地",
-          "clinch_prob_val": 14.879999999999999,
-          "win_expect": "53",
-          "clinch_prob_str": "15%",
-          "cum_prob_str": "30%"
-        },
-        {
-          "date": "10/8",
-          "raw_date": "2026-10-08",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.0,
-          "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "30%"
-        },
-        {
-          "date": "10/9",
-          "raw_date": "2026-10-09",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 31.6,
-          "win_expect": "-",
-          "clinch_prob_str": "32%",
-          "cum_prob_str": "61%"
+          "clinch_prob_str": "66%",
+          "cum_prob_str": "70%"
         }
       ],
       "ＤｅＮＡ": [
+        {
+          "date": "9/22",
+          "raw_date": "2026-09-22",
+          "opp": "中日",
+          "ground": "横浜",
+          "clinch_prob_val": 0.0,
+          "win_expect": "69",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
         {
           "date": "9/23",
           "raw_date": "2026-09-23",
@@ -143536,19 +144706,19 @@
           "win_expect": "62",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
-        },
-        {
-          "date": "10/8",
-          "raw_date": "2026-10-08",
-          "opp": "ヤクルト",
-          "ground": "横浜",
-          "clinch_prob_val": 0.0,
-          "win_expect": "80",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
         }
       ],
       "ヤクルト": [
+        {
+          "date": "9/25",
+          "raw_date": "2026-09-25",
+          "opp": "中日",
+          "ground": "敵地",
+          "clinch_prob_val": 0.0,
+          "win_expect": "39",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
         {
           "date": "9/26",
           "raw_date": "2026-09-26",
@@ -143616,16 +144786,6 @@
           "ground": "敵地",
           "clinch_prob_val": 0.0,
           "win_expect": "51",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/8",
-          "raw_date": "2026-10-08",
-          "opp": "ＤｅＮＡ",
-          "ground": "敵地",
-          "clinch_prob_val": 0.0,
-          "win_expect": "20",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
         }
@@ -143700,19 +144860,39 @@
           "win_expect": "61",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
-        },
-        {
-          "date": "10/9",
-          "raw_date": "2026-10-09",
-          "opp": "広島",
-          "ground": "敵地",
-          "clinch_prob_val": 0.0,
-          "win_expect": "65",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
         }
       ],
       "広島": [
+        {
+          "date": "9/24",
+          "raw_date": "2026-09-24",
+          "opp": "巨人",
+          "ground": "敵地",
+          "clinch_prob_val": 0.0,
+          "win_expect": "29",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
+        {
+          "date": "9/25",
+          "raw_date": "2026-09-25",
+          "opp": "巨人",
+          "ground": "敵地",
+          "clinch_prob_val": 0.0,
+          "win_expect": "29",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
+        {
+          "date": "9/27",
+          "raw_date": "2026-09-27",
+          "opp": "ＤｅＮＡ",
+          "ground": "敵地",
+          "clinch_prob_val": 0.0,
+          "win_expect": "22",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
         {
           "date": "9/28",
           "raw_date": "2026-09-28",
@@ -143762,36 +144942,6 @@
           "win_expect": "49",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
-        },
-        {
-          "date": "10/5",
-          "raw_date": "2026-10-05",
-          "opp": "阪神",
-          "ground": "敵地",
-          "clinch_prob_val": 0.0,
-          "win_expect": "28",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/6",
-          "raw_date": "2026-10-06",
-          "opp": "阪神",
-          "ground": "敵地",
-          "clinch_prob_val": 0.0,
-          "win_expect": "28",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/9",
-          "raw_date": "2026-10-09",
-          "opp": "中日",
-          "ground": "敵地",
-          "clinch_prob_val": 0.0,
-          "win_expect": "35",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
         }
       ]
     },
@@ -143802,17 +144952,17 @@
           "raw_date": "2026-09-23",
           "opp": "西武",
           "ground": "敵地",
-          "clinch_prob_val": 56.8,
+          "clinch_prob_val": 55.58,
           "win_expect": "80",
-          "clinch_prob_str": "57%",
-          "cum_prob_str": "57%"
+          "clinch_prob_str": "56%",
+          "cum_prob_str": "56%"
         },
         {
           "date": "9/24",
           "raw_date": "2026-09-24",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 3.66,
+          "clinch_prob_val": 4.46,
           "win_expect": "-",
           "clinch_prob_str": "4%",
           "cum_prob_str": "60%"
@@ -143822,9 +144972,9 @@
           "raw_date": "2026-09-25",
           "opp": "オリックス",
           "ground": "敵地",
-          "clinch_prob_val": 19.36,
+          "clinch_prob_val": 20.380000000000003,
           "win_expect": "84",
-          "clinch_prob_str": "19%",
+          "clinch_prob_str": "20%",
           "cum_prob_str": "80%"
         },
         {
@@ -143832,7 +144982,7 @@
           "raw_date": "2026-09-26",
           "opp": "楽天",
           "ground": "敵地",
-          "clinch_prob_val": 12.920000000000002,
+          "clinch_prob_val": 12.58,
           "win_expect": "82",
           "clinch_prob_str": "13%",
           "cum_prob_str": "93%"
@@ -143842,9 +144992,9 @@
           "raw_date": "2026-09-27",
           "opp": "オリックス",
           "ground": "敵地",
-          "clinch_prob_val": 5.6000000000000005,
+          "clinch_prob_val": 4.78,
           "win_expect": "88",
-          "clinch_prob_str": "6%",
+          "clinch_prob_str": "5%",
           "cum_prob_str": "98%"
         },
         {
@@ -143852,19 +145002,19 @@
           "raw_date": "2026-09-28",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 0.5599999999999999,
+          "clinch_prob_val": 0.64,
           "win_expect": "-",
           "clinch_prob_str": "0.6%",
-          "cum_prob_str": "99%"
+          "cum_prob_str": "98%"
         },
         {
           "date": "9/29",
           "raw_date": "2026-09-29",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 0.33999999999999997,
+          "clinch_prob_val": 0.48,
           "win_expect": "-",
-          "clinch_prob_str": "0.3%",
+          "clinch_prob_str": "0.5%",
           "cum_prob_str": "99%"
         },
         {
@@ -143882,9 +145032,9 @@
           "raw_date": "2026-10-01",
           "opp": "楽天",
           "ground": "敵地",
-          "clinch_prob_val": 0.45999999999999996,
+          "clinch_prob_val": 0.64,
           "win_expect": "78",
-          "clinch_prob_str": "0.5%",
+          "clinch_prob_str": "0.6%",
           "cum_prob_str": "100%"
         },
         {
@@ -143892,9 +145042,9 @@
           "raw_date": "2026-10-02",
           "opp": "ロッテ",
           "ground": "敵地",
-          "clinch_prob_val": 0.22,
+          "clinch_prob_val": 0.27999999999999997,
           "win_expect": "79",
-          "clinch_prob_str": "0.2%",
+          "clinch_prob_str": "0.3%",
           "cum_prob_str": "100%"
         },
         {
@@ -143902,9 +145052,9 @@
           "raw_date": "2026-10-03",
           "opp": "ロッテ",
           "ground": "敵地",
-          "clinch_prob_val": 0.06,
+          "clinch_prob_val": 0.12,
           "win_expect": "79",
-          "clinch_prob_str": "0.06%",
+          "clinch_prob_str": "0.1%",
           "cum_prob_str": "100%"
         },
         {
@@ -143912,33 +145062,23 @@
           "raw_date": "2026-10-04",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 0.0,
+          "clinch_prob_val": 0.06,
           "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "100%"
-        },
-        {
-          "date": "10/5",
-          "raw_date": "2026-10-05",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.0,
-          "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "100%"
-        },
-        {
-          "date": "10/6",
-          "raw_date": "2026-10-06",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.02,
-          "win_expect": "-",
-          "clinch_prob_str": "0.02%",
+          "clinch_prob_str": "0.06%",
           "cum_prob_str": "100%"
         }
       ],
       "日本ハム": [
+        {
+          "date": "9/21",
+          "raw_date": "2026-09-21",
+          "opp": "オリックス",
+          "ground": "敵地",
+          "clinch_prob_val": 0.0,
+          "win_expect": "74",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
         {
           "date": "9/22",
           "raw_date": "2026-09-22",
@@ -144008,19 +145148,19 @@
           "win_expect": "61",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
-        },
-        {
-          "date": "10/5",
-          "raw_date": "2026-10-05",
-          "opp": "西武",
-          "ground": "敵地",
-          "clinch_prob_val": 0.0,
-          "win_expect": "56",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
         }
       ],
       "ロッテ": [
+        {
+          "date": "9/27",
+          "raw_date": "2026-09-27",
+          "opp": "日本ハム",
+          "ground": "敵地",
+          "clinch_prob_val": 0.0,
+          "win_expect": "39",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
         {
           "date": "9/28",
           "raw_date": "2026-09-28",
@@ -144088,16 +145228,6 @@
           "ground": "敵地",
           "clinch_prob_val": 0.0,
           "win_expect": "52",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/6",
-          "raw_date": "2026-10-06",
-          "opp": "西武",
-          "ground": "敵地",
-          "clinch_prob_val": 0.0,
-          "win_expect": "48",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
         }
@@ -144268,6 +145398,26 @@
       ],
       "西武": [
         {
+          "date": "9/21",
+          "raw_date": "2026-09-21",
+          "opp": "ロッテ",
+          "ground": "敵地",
+          "clinch_prob_val": 0.0,
+          "win_expect": "52",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
+        {
+          "date": "9/22",
+          "raw_date": "2026-09-22",
+          "opp": "ソフトバンク",
+          "ground": "敵地",
+          "clinch_prob_val": 0.0,
+          "win_expect": "20",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
+        {
           "date": "9/23",
           "raw_date": "2026-09-23",
           "opp": "ソフトバンク",
@@ -144324,26 +145474,6 @@
           "ground": "敵地",
           "clinch_prob_val": 0.0,
           "win_expect": "67",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/5",
-          "raw_date": "2026-10-05",
-          "opp": "日本ハム",
-          "ground": "敵地",
-          "clinch_prob_val": 0.0,
-          "win_expect": "44",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/6",
-          "raw_date": "2026-10-06",
-          "opp": "ロッテ",
-          "ground": "敵地",
-          "clinch_prob_val": 0.0,
-          "win_expect": "52",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
         }
