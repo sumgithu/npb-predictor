@@ -240,8 +240,8 @@ def validate_and_assert_standings(teams):
     return teams
 
 EXP_PYTHAGOREAN = 1.83
-PRIOR_WEIGHT_GAMES = 35.0
 HOME_ODDS_ADVANTAGE = 1.15
+RECENT_WINDOW_GAMES = 80  # 直近80試合を基準とする
 
 def calc_pythagorean_rate(rs, ra):
     if rs <= 0 and ra <= 0:
@@ -250,19 +250,50 @@ def calc_pythagorean_rate(rs, ra):
     ra_pow = math.pow(max(0.1, ra), EXP_PYTHAGOREAN)
     return rs_pow / (rs_pow + ra_pow)
 
-def get_bayesian_team_strength(prior_stats, current_stats):
-    cur_games = current_stats["games"]
-    prior_games = prior_stats["games"]
-    avg_rs = prior_stats["rs"] / max(1, prior_games) if prior_games > 0 else 3.5
-    avg_ra = prior_stats["ra"] / max(1, prior_games) if prior_games > 0 else 3.5
+# -------------------------------------------------------------
+# 直近80試合ローリング加重・ピタゴラス期待勝率の算出
+# -------------------------------------------------------------
+def get_rolling_recent_strength(team_match_history, prior_stats):
+    """
+    直近80試合の得失点を重視し、直近ほど高い加重を掛けて算出。
+    80試合以上の消化がある終盤では、前年実績（事前分布）の影響をゼロにする。
+    """
+    total_played = len(team_match_history)
+    
+    if total_played == 0:
+        avg_rs = prior_stats["rs"] / max(1, prior_stats["games"]) if prior_stats["games"] > 0 else 3.5
+        avg_ra = prior_stats["ra"] / max(1, prior_stats["games"]) if prior_stats["games"] > 0 else 3.5
+        return calc_pythagorean_rate(avg_rs, avg_ra)
 
-    p_rs = avg_rs * PRIOR_WEIGHT_GAMES
-    p_ra = avg_ra * PRIOR_WEIGHT_GAMES
+    # 直近80試合を抽出
+    recent_matches = team_match_history[-RECENT_WINDOW_GAMES:]
+    weighted_rs = 0.0
+    weighted_ra = 0.0
+    weight_sum = 0.0
 
-    blended_rs = p_rs + current_stats["rs"]
-    blended_ra = p_ra + current_stats["ra"]
+    # 線形加重（最も古い試合を 1.0、最新の試合を 2.0 として直近を重視）
+    n = len(recent_matches)
+    for idx, match in enumerate(recent_matches):
+        w = 1.0 + (idx / max(1, n - 1))  # 1.0 〜 2.0
+        weighted_rs += match["rs"] * w
+        weighted_ra += match["ra"] * w
+        weight_sum += w
 
-    return calc_pythagorean_rate(blended_rs, blended_ra)
+    eff_rs = weighted_rs / weight_sum
+    eff_ra = weighted_ra / weight_sum
+
+    # シーズン初期（試合数が少ない時）のみ前年実績をブレンド、80試合以上では完全ゼロ
+    if total_played < RECENT_WINDOW_GAMES:
+        prior_weight = max(0.0, (RECENT_WINDOW_GAMES - total_played) / RECENT_WINDOW_GAMES) * 20.0
+        p_rs = (prior_stats["rs"] / max(1, prior_stats["games"])) * prior_weight
+        p_ra = (prior_stats["ra"] / max(1, prior_stats["games"])) * prior_weight
+        final_rs = (eff_rs * total_played + p_rs) / (total_played + prior_weight)
+        final_ra = (eff_ra * total_played + p_ra) / (total_played + prior_weight)
+    else:
+        final_rs = eff_rs
+        final_ra = eff_ra
+
+    return calc_pythagorean_rate(final_rs, final_ra)
 
 def get_pitcher_multiplier(pitcher_name, pitcher_stats):
     if not pitcher_name or pitcher_name == "未定":
@@ -291,17 +322,18 @@ def calc_log5_matchup(p_away, p_home, away_pitcher, home_pitcher, pitcher_stats)
 
     return round(final_p_away * 100.0, 1), round(final_p_home * 100.0, 1)
 
-def simulate_full_season_probabilities(league_teams, current_standings, remaining_matches, prior_stats, pre_records):
+def simulate_full_season_probabilities(league_teams, current_standings, remaining_matches, team_match_histories, prior_stats):
     NUM_SIMS = 3000
     rank_counts = {t: {r: 0 for r in range(1, 7)} for t in league_teams}
     clinch_date_counts = {t: {} for t in league_teams}
 
+    # 直近80試合ベースの対戦勝率キャッシュ
     base_probs = {}
     for t1 in league_teams:
         for t2 in league_teams:
             if t1 != t2:
-                p1 = get_bayesian_team_strength(prior_stats[t1], pre_records[t1])
-                p2 = get_bayesian_team_strength(prior_stats[t2], pre_records[t2])
+                p1 = get_rolling_recent_strength(team_match_histories[t1], prior_stats[t1])
+                p2 = get_rolling_recent_strength(team_match_histories[t2], prior_stats[t2])
                 pa, ph = calc_log5_matchup(p2, p1, "未定", "未定", {})
                 base_probs[(t1, t2)] = ph / 100.0
 
@@ -490,7 +522,6 @@ def build_all_history_with_predictions(games_2025, games_2026):
     all_dates = sorted(list({g["date"] for g in games_2026}))
     history_snapshots = {}
 
-    # 直近で「1試合でも終了している」最新日付を正確に特定
     finished_dates = sorted(list({g["date"] for g in games_2026 if g.get("status") == "finished"}))
     last_finished_date = finished_dates[-1] if finished_dates else all_dates[0]
 
@@ -505,11 +536,11 @@ def build_all_history_with_predictions(games_2025, games_2026):
             "interleague": {"win": 0, "lose": 0, "draw": 0}
         } for t in all_teams}
 
-        pre_records = {t: {"games": 0, "rs": 0, "ra": 0} for t in all_teams}
+        # チームごとの直近試合ログ（得失点）
+        team_match_histories_before_today = {t: [] for t in all_teams}
         h2h_played = {t1: {t2: 0 for t2 in all_teams} for t1 in all_teams}
         h2h_details = {t1: {t2: {"win": 0, "lose": 0, "draw": 0} for t2 in all_teams} for t1 in all_teams}
 
-        # target_date までの集計（同日に終了試合があれば即座に成績へ算入）
         has_finished_up_to_today = False
 
         for g in games_2026:
@@ -519,13 +550,10 @@ def build_all_history_with_predictions(games_2025, games_2026):
             hs, as_ = g["home_score"], g["away_score"]
             g_date = g["date"]
 
+            # 当日より前の直近履歴（オッズ算出用）
             if g_date < target_date:
-                pre_records[h]["games"] += 1
-                pre_records[h]["rs"] += hs
-                pre_records[h]["ra"] += as_
-                pre_records[a]["games"] += 1
-                pre_records[a]["rs"] += as_
-                pre_records[a]["ra"] += hs
+                team_match_histories_before_today[h].append({"rs": hs, "ra": as_})
+                team_match_histories_before_today[a].append({"rs": as_, "ra": hs})
 
                 hp, ap = g.get("home_pitcher"), g.get("away_pitcher")
                 if hp:
@@ -567,7 +595,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
                     records[h]["lose"] += 1
                     records[h]["home"]["lose"] += 1
                     h2h_details[a][h]["win"] += 1
-                    h2h_details[a][h]["lose"] += 1
+                    h2h_details[h][a]["lose"] += 1
                     if is_inter:
                         records[a]["interleague"]["win"] += 1
                         records[h]["interleague"]["lose"] += 1
@@ -625,12 +653,13 @@ def build_all_history_with_predictions(games_2025, games_2026):
             c_table = last_c_table
             p_table = last_p_table
 
+        # 当該日の予想勝利確率カード（直近80試合ローリング加重適用）
         day_predictions = []
         for g in games_2026:
             if g["date"] == target_date:
                 h, a = g["home"], g["away"]
-                p_away = get_bayesian_team_strength(prior_stats[a], pre_records[a])
-                p_home = get_bayesian_team_strength(prior_stats[h], pre_records[h])
+                p_away = get_rolling_recent_strength(team_match_histories_before_today[a], prior_stats[a])
+                p_home = get_rolling_recent_strength(team_match_histories_before_today[h], prior_stats[h])
 
                 h_start = g.get("home_starter") or g.get("home_pitcher") or "未定"
                 a_start = g.get("away_starter") or g.get("away_pitcher") or "未定"
@@ -674,6 +703,14 @@ def build_all_history_with_predictions(games_2025, games_2026):
             "predictions": day_predictions
         }
 
+    # 最新時点でのチーム直近履歴を構築
+    latest_team_histories = {t: [] for t in all_teams}
+    for g in games_2026:
+        if g.get("status") == "finished":
+            h, a = g["home"], g["away"]
+            latest_team_histories[h].append({"rs": g["home_score"], "ra": g["away_score"]})
+            latest_team_histories[a].append({"rs": g["away_score"], "ra": g["home_score"]})
+
     # 143試合補完シミュレーション
     future_registered = [g for g in games_2026 if g.get("status") != "finished"]
     future_c_matches = generate_future_calendar_matches(CENTRAL_TEAMS, last_c_table, 
@@ -683,8 +720,8 @@ def build_all_history_with_predictions(games_2025, games_2026):
                                                         [g for g in future_registered if g["home"] in PACIFIC_TEAMS], 
                                                         last_finished_date)
 
-    c_rank_matrix, c_clinch_dates = simulate_full_season_probabilities(CENTRAL_TEAMS, last_c_table, future_c_matches, prior_stats, pre_records)
-    p_rank_matrix, p_clinch_dates = simulate_full_season_probabilities(PACIFIC_TEAMS, last_p_table, future_p_matches, prior_stats, pre_records)
+    c_rank_matrix, c_clinch_dates = simulate_full_season_probabilities(CENTRAL_TEAMS, last_c_table, future_c_matches, latest_team_histories, prior_stats)
+    p_rank_matrix, p_clinch_dates = simulate_full_season_probabilities(PACIFIC_TEAMS, last_p_table, future_p_matches, latest_team_histories, prior_stats)
 
     def attach_probs(table, rank_mat):
         for t in table:
@@ -707,8 +744,8 @@ def build_all_history_with_predictions(games_2025, games_2026):
             ground = "甲子園" if (team_name == "阪神" and is_home) else ("東京D" if (team_name == "巨人" and is_home) else ("横浜" if (team_name == "ＤｅＮＡ" and is_home) else ("マツダS" if (opp == "広島" and not is_home) else ("神宮" if (opp == "ヤクルト" and not is_home) else ("本拠地" if is_home else "敵地")))))
             prob = clinch_date_map.get(d, 0)
             
-            p_opp = get_bayesian_team_strength(prior_stats[opp], pre_records[opp])
-            p_self = get_bayesian_team_strength(prior_stats[team_name], pre_records[team_name])
+            p_opp = get_rolling_recent_strength(latest_team_histories[opp], prior_stats[opp])
+            p_self = get_rolling_recent_strength(latest_team_histories[team_name], prior_stats[team_name])
             if is_home:
                 _, p_win = calc_log5_matchup(p_opp, p_self, "未定", "未定", {})
             else:
@@ -769,7 +806,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了：最新日 {default_latest} (全 {len(dates)} 日分)")
+    print(f"直近80試合ローリング加重モデル反映完了：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
