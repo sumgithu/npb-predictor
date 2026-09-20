@@ -56,14 +56,13 @@ def parse_year_games_from_text(raw_text, target_year):
         if not line:
             continue
 
-        # CSV形式 (例: 2026-03-27,巨人,阪神,3,1,...) の判定
+        # CSV形式 (例: 2026-03-27,巨人,阪神,3,1,...)
         csv_parts = [p.strip() for p in line.split(',')]
         if len(csv_parts) >= 6 and re.match(r'^\d{4}-\d{2}-\d{2}$', csv_parts[0]):
             c_date, h_raw, a_raw = csv_parts[0], csv_parts[1], csv_parts[2]
             h = normalize_team(h_raw)
             a = normalize_team(a_raw)
             if h in all_teams and a in all_teams:
-                # 中止判定（スコア空または末尾フラグ1）
                 if csv_parts[3] == "" or (len(csv_parts) >= 8 and csv_parts[7] == "1"):
                     games.append({
                         "date": c_date, "home": h, "away": a,
@@ -173,20 +172,19 @@ def load_all_games():
         games_2025 = parse_year_games_from_text(raw_text, 2025)
         games_2026_base = parse_year_games_from_text(raw_text, 2026)
 
-    # 手動管理 games_db.json があれば登録日のカードを完全置換
+    # 手動管理 games_db.json があればその日のカードを最優先で置換
     if os.path.exists(MANUAL_DB_FILE):
         try:
             with open(MANUAL_DB_FILE, "r", encoding="utf-8") as f:
                 manual_db = json.load(f)
             manual_games = manual_db.get("games", [])
             
-            # 手入力でスコアが入っているものは確実に status="finished" に強制
+            # スコアが入っていれば確実に finished とする
             for mg in manual_games:
                 if mg.get("home_score") is not None and mg.get("away_score") is not None:
                     mg["status"] = "finished"
             
             manual_dates = {g["date"] for g in manual_games}
-
             merged_2026 = [g for g in games_2026_base if g["date"] not in manual_dates]
             merged_2026.extend(manual_games)
             merged_2026.sort(key=lambda x: (x["date"], x.get("status") == "finished"))
@@ -540,7 +538,8 @@ def build_all_history_with_predictions(games_2025, games_2026):
     all_dates = sorted(list({g["date"] for g in games_2026}))
     history_snapshots = {}
 
-    finished_dates = sorted(list({g["date"] for g in games_2026 if g.get("status") == "finished"}))
+    # finished_dates はスコアが入っている全試合から取得
+    finished_dates = sorted(list({g["date"] for g in games_2026 if g.get("status") == "finished" and g.get("home_score") is not None}))
     last_finished_date = finished_dates[-1] if finished_dates else all_dates[0]
 
     last_c_table = None
@@ -558,10 +557,9 @@ def build_all_history_with_predictions(games_2025, games_2026):
         h2h_played = {t1: {t2: 0 for t2 in all_teams} for t1 in all_teams}
         h2h_details = {t1: {t2: {"win": 0, "lose": 0, "draw": 0} for t2 in all_teams} for t1 in all_teams}
 
-        has_finished_up_to_today = False
-
+        # target_date 当日を含めて消化済み試合を厳密に集計
         for g in games_2026:
-            if g.get("status") != "finished":
+            if g.get("status") != "finished" or g.get("home_score") is None or g.get("away_score") is None:
                 continue
             h, a = g["home"], g["away"]
             hs, as_ = g["home_score"], g["away_score"]
@@ -581,9 +579,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
                     if as_ > hs: pitcher_stats[ap]["win"] += 1
                     elif as_ < hs: pitcher_stats[ap]["lose"] += 1
 
-            # 当日以前の消化試合を確実に加算
             if g_date <= target_date:
-                has_finished_up_to_today = True
                 records[h]["games"] += 1
                 records[a]["games"] += 1
                 records[h]["rs"] += hs
@@ -626,48 +622,44 @@ def build_all_history_with_predictions(games_2025, games_2026):
                         records[h]["interleague"]["draw"] += 1
                         records[a]["interleague"]["draw"] += 1
 
-        if has_finished_up_to_today and target_date <= last_finished_date:
-            def format_league(league_teams):
-                table = []
-                for t in league_teams:
-                    r = records[t]
-                    r["remaining"] = TOTAL_GAMES - r["games"]
-                    r["rate"] = calc_win_rate(r["win"], r["lose"])
-                    r["h2h"] = {opp: h2h_details[t][opp] for opp in league_teams}
-                    table.append(r)
-                table.sort(key=lambda x: (x["rate"], x["win"]), reverse=True)
-                top_w, top_l = table[0]["win"], table[0]["lose"]
-                for idx, t in enumerate(table):
-                    t["rank"] = idx + 1
-                    diff = ((top_w - t["win"]) + (t["lose"] - top_l)) / 2.0
-                    t["diff"] = max(0.0, diff) if idx > 0 else 0.0
-                return table
+        def format_league(league_teams):
+            table = []
+            for t in league_teams:
+                r = records[t]
+                r["remaining"] = TOTAL_GAMES - r["games"]
+                r["rate"] = calc_win_rate(r["win"], r["lose"])
+                r["h2h"] = {opp: h2h_details[t][opp] for opp in league_teams}
+                table.append(r)
+            table.sort(key=lambda x: (x["rate"], x["win"]), reverse=True)
+            top_w, top_l = table[0]["win"], table[0]["lose"]
+            for idx, t in enumerate(table):
+                t["rank"] = idx + 1
+                diff = ((top_w - t["win"]) + (t["lose"] - top_l)) / 2.0
+                t["diff"] = max(0.0, diff) if idx > 0 else 0.0
+            return table
 
-            c_table = format_league(CENTRAL_TEAMS)
-            p_table = format_league(PACIFIC_TEAMS)
+        c_table = format_league(CENTRAL_TEAMS)
+        p_table = format_league(PACIFIC_TEAMS)
 
-            for t in c_table:
-                t["magic_1st"] = evaluate_clinch_target(t, 1, c_table, h2h_played)
-                t["magic_2nd"] = evaluate_clinch_target(t, 2, c_table, h2h_played)
-                t["magic_3rd"] = evaluate_clinch_target(t, 3, c_table, h2h_played)
-                t["magic_4th"] = evaluate_clinch_target(t, 4, c_table, h2h_played)
-                t["magic_5th"] = evaluate_clinch_target(t, 5, c_table, h2h_played)
+        for t in c_table:
+            t["magic_1st"] = evaluate_clinch_target(t, 1, c_table, h2h_played)
+            t["magic_2nd"] = evaluate_clinch_target(t, 2, c_table, h2h_played)
+            t["magic_3rd"] = evaluate_clinch_target(t, 3, c_table, h2h_played)
+            t["magic_4th"] = evaluate_clinch_target(t, 4, c_table, h2h_played)
+            t["magic_5th"] = evaluate_clinch_target(t, 5, c_table, h2h_played)
 
-            for t in p_table:
-                t["magic_1st"] = evaluate_clinch_target(t, 1, p_table, h2h_played)
-                t["magic_2nd"] = evaluate_clinch_target(t, 2, p_table, h2h_played)
-                t["magic_3rd"] = evaluate_clinch_target(t, 3, p_table, h2h_played)
-                t["magic_4th"] = evaluate_clinch_target(t, 4, p_table, h2h_played)
-                t["magic_5th"] = evaluate_clinch_target(t, 5, p_table, h2h_played)
+        for t in p_table:
+            t["magic_1st"] = evaluate_clinch_target(t, 1, p_table, h2h_played)
+            t["magic_2nd"] = evaluate_clinch_target(t, 2, p_table, h2h_played)
+            t["magic_3rd"] = evaluate_clinch_target(t, 3, p_table, h2h_played)
+            t["magic_4th"] = evaluate_clinch_target(t, 4, p_table, h2h_played)
+            t["magic_5th"] = evaluate_clinch_target(t, 5, p_table, h2h_played)
 
-            c_table = validate_and_assert_standings(c_table)
-            p_table = validate_and_assert_standings(p_table)
+        c_table = validate_and_assert_standings(c_table)
+        p_table = validate_and_assert_standings(p_table)
 
-            last_c_table = c_table
-            last_p_table = p_table
-        else:
-            c_table = last_c_table
-            p_table = last_p_table
+        last_c_table = c_table
+        last_p_table = p_table
 
         day_predictions = []
         processed_pairs = set()
@@ -734,7 +726,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
 
     latest_team_histories = {t: [] for t in all_teams}
     for g in games_2026:
-        if g.get("status") == "finished":
+        if g.get("status") == "finished" and g.get("home_score") is not None:
             h, a = g["home"], g["away"]
             latest_team_histories[h].append({"rs": g["home_score"], "ra": g["away_score"]})
             latest_team_histories[a].append({"rs": g["away_score"], "ra": g["home_score"]})
@@ -846,7 +838,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了（CSVパース＆手動DB完全統合）：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了（当日試合数完全同期）：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
