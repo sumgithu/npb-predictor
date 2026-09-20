@@ -144,7 +144,7 @@
     .clinch-subtable th { background: #f8fafc; font-size: 0.8rem; padding: 6px 4px; color: #475569; }
     .clinch-subtable td { padding: 8px 4px; border-bottom: 1px solid #f1f5f9; }
 
-    /* 5. 優勝ラインテーブル */
+    /* 5. 優勝ラインテーブル (ハイフン対応) */
     .line-grid-table { min-width: 700px; }
     .team-banner { font-size: 1.1rem; font-weight: 800; color: #fff; padding: 10px; }
     .banner-hanshin { background: #eab308; }
@@ -221,7 +221,7 @@
     <!-- 2. 予想勝利確率カード (左: ホーム, 右: ビジター) -->
     <div class="section-title">
       🎯 NPB 予想勝利確率
-      <span class="section-desc" id="pred-subtext">（左: ホーム vs 右: ビジター / 予告先発・直近65試合ローリングピタゴラス・Log5補正）</span>
+      <span class="section-desc" id="pred-subtext">（左: ホーム vs 右: ビジター / 予告先発・直近試合加重ピタゴラス・Log5補正）</span>
     </div>
     <div class="prediction-grid" id="prediction-grid"></div>
 
@@ -243,14 +243,14 @@
       </div>
     </div>
 
-    <!-- 4. 優勝決定日確率テーブル (初日微小確率の有効数字表示対応) -->
+    <!-- 4. 優勝決定日確率テーブル (他力決定日網羅) -->
     <div class="section-title">
       📅 優勝決定日確率テーブル
-      <span class="section-desc">（可能性が生じる初日から10試合程度表示・対戦カード・開催地・見込勝率）</span>
+      <span class="section-desc">（可能性が生じる初日から表示・対戦カード・開催地・見込勝率）</span>
     </div>
     <div class="clinch-schedule-grid" id="clinch-schedule-container"></div>
 
-    <!-- 5. 優勝ラインテーブル (完全横並び) -->
+    <!-- 5. 優勝ラインテーブル (画像1枚目仕様) -->
     <div class="section-title">
       🏁 優勝ラインテーブル
       <span class="section-desc">（同等勝率横並び比較・残り試合勝敗パターン一覧表）</span>
@@ -281,8 +281,8 @@
       <div class="notes-grid">
         <div class="note-item">
           <dl>
-            <dt>予想勝利確率（直近65試合ローリング加重モデル）</dt>
-            <dd>最新の戦力状態とチーム調子を正確に捉えるため、直近65試合（約2か月半）の得失点に線形加重を適用したピタゴラス期待勝率（指数1.83）を採用しています。これにNPBホーム優位性（オッズ1.15倍）および予告先発投手の通算勝敗ベイズ補正を乗算し、Log5方程式により1試合ごとの勝率を算出しています。</dd>
+            <dt>予想勝利確率（セイバーメトリクスモデル）</dt>
+            <dd>最新のチーム状態と戦力構成を精緻に反映するため、直近の試合実績に基づく加重ピタゴラス期待勝率を採用しています。これにNPBホームアドバンテージ補正および予告先発投手の個人成績ベイズ補正を乗算し、Log5方程式により1試合ごとの勝率を算出しています。</dd>
 
             <dt>全143試合完走モンテカルロ・シミュレーション</dt>
             <dd>未確定の全日程について、毎日順次試合が開催されるものと仮定して5,000回のシーズン完走シミュレーションを実行。最終順位への到達確率（早見表）および日別の優勝決定確率を導き出しています。</dd>
@@ -402,7 +402,7 @@
         tbodyStandings.appendChild(tr);
       });
 
-      // 2. 予想勝利確率カードグリッド (左: ホーム, 右: ビジター)
+      // 2. 予想勝利確率カードグリッド
       const predGrid = document.getElementById('prediction-grid');
       const predictions = dayData.predictions || [];
       const hasFinished = predictions.some(p => p.is_finished);
@@ -495,7 +495,7 @@
         }
       }
 
-      // 4. 優勝決定日確率テーブル (初日微小確率の有効数字表示対応)
+      // 4. 優勝決定日確率テーブル (他力決定日も網羅・画像3枚目仕様)
       const clinchContainer = document.getElementById('clinch-schedule-container');
       clinchContainer.innerHTML = '';
 
@@ -545,7 +545,7 @@
         });
       }
 
-      // 5. 優勝ラインテーブル (完全横並び)
+      // 5. 優勝ラインテーブル (画像1枚目仕様：DeNA上方ハイフン化)
       const lineHead = document.getElementById('line-grid-head');
       const lineBody = document.getElementById('line-grid-body');
       lineHead.innerHTML = '';
@@ -582,7 +582,8 @@
                   <td class="${isHighlight ? 'line-highlight' : ''}">${cell.rate_str}</td>
                 `;
               } else {
-                trHtml += `<td></td><td></td><td></td>`;
+                // 画像1枚目準拠のハイフン表示
+                trHtml += `<td>-</td><td>-</td><td>-</td>`;
               }
             });
             trHtml += `</tr>`;
@@ -591,7 +592,7 @@
         }
       }
 
-      // 6. 対戦成績表
+      // 6. 対戦成績表描画
       const theadMatrix = document.getElementById('matrix-head');
       const tbodyMatrix = document.getElementById('matrix-body');
       theadMatrix.innerHTML = '';
