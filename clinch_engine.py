@@ -56,6 +56,36 @@ def parse_year_games_from_text(raw_text, target_year):
         if not line:
             continue
 
+        # CSV形式 (例: 2026-03-27,巨人,阪神,3,1,...) の判定
+        csv_parts = [p.strip() for p in line.split(',')]
+        if len(csv_parts) >= 6 and re.match(r'^\d{4}-\d{2}-\d{2}$', csv_parts[0]):
+            c_date, h_raw, a_raw = csv_parts[0], csv_parts[1], csv_parts[2]
+            h = normalize_team(h_raw)
+            a = normalize_team(a_raw)
+            if h in all_teams and a in all_teams:
+                # 中止判定（スコア空または末尾フラグ1）
+                if csv_parts[3] == "" or (len(csv_parts) >= 8 and csv_parts[7] == "1"):
+                    games.append({
+                        "date": c_date, "home": h, "away": a,
+                        "home_score": None, "away_score": None,
+                        "home_pitcher": "未定", "away_pitcher": "未定",
+                        "home_starter": "未定", "away_starter": "未定",
+                        "status": "cancelled"
+                    })
+                else:
+                    hs = int(csv_parts[3])
+                    as_ = int(csv_parts[4])
+                    pitcher_info = csv_parts[5] if len(csv_parts) >= 6 else ""
+                    games.append({
+                        "date": c_date, "home": h, "away": a,
+                        "home_score": hs, "away_score": as_,
+                        "home_pitcher": pitcher_info, "away_pitcher": pitcher_info,
+                        "home_starter": pitcher_info, "away_starter": pitcher_info,
+                        "status": "finished"
+                    })
+                continue
+
+        # 通常テキスト形式 (例: 3/27（金） 巨人 3 - 1 阪神 ...)
         date_m = re.match(r'^(\d{1,2})\/(\d{1,2})(?:[（(][日月火水木金土][）)])?\s*(.*)$', line)
         if date_m:
             m, d = int(date_m.group(1)), int(date_m.group(2))
@@ -143,12 +173,18 @@ def load_all_games():
         games_2025 = parse_year_games_from_text(raw_text, 2025)
         games_2026_base = parse_year_games_from_text(raw_text, 2026)
 
-    # 手入力 games_db.json があればその日のカードをテキストから完全置換
+    # 手動管理 games_db.json があれば登録日のカードを完全置換
     if os.path.exists(MANUAL_DB_FILE):
         try:
             with open(MANUAL_DB_FILE, "r", encoding="utf-8") as f:
                 manual_db = json.load(f)
             manual_games = manual_db.get("games", [])
+            
+            # 手入力でスコアが入っているものは確実に status="finished" に強制
+            for mg in manual_games:
+                if mg.get("home_score") is not None and mg.get("away_score") is not None:
+                    mg["status"] = "finished"
+            
             manual_dates = {g["date"] for g in manual_games}
 
             merged_2026 = [g for g in games_2026_base if g["date"] not in manual_dates]
@@ -376,7 +412,6 @@ def simulate_full_season_probabilities(league_teams, current_standings, remainin
             second = sim_rates[1][0]
             rem_2nd = TOTAL_GAMES - (sim_w[second] + sim_l[second])
 
-            # 2位チームが物理的に逆転不能になった瞬間（決定日）のみを記録
             if sim_w[leader] > sim_w[second] + rem_2nd and clinched_day[leader] is None:
                 clinched_day[leader] = d
 
@@ -385,7 +420,6 @@ def simulate_full_season_probabilities(league_teams, current_standings, remainin
 
         champ = sim_rates[0][0]
         c_date = clinched_day[champ]
-        # 公式実在日程の範囲内で確定した場合のみ日別カウント
         if c_date is not None:
             clinch_date_counts[champ][c_date] = clinch_date_counts[champ].get(c_date, 0) + 1
 
@@ -547,6 +581,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
                     if as_ > hs: pitcher_stats[ap]["win"] += 1
                     elif as_ < hs: pitcher_stats[ap]["lose"] += 1
 
+            # 当日以前の消化試合を確実に加算
             if g_date <= target_date:
                 has_finished_up_to_today = True
                 records[h]["games"] += 1
@@ -811,7 +846,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了（CSVパース＆手動DB完全統合）：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
