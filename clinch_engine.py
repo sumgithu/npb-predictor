@@ -40,7 +40,14 @@ def load_data():
     if os.path.exists(db_path):
         try:
             with open(db_path, "r", encoding="utf-8") as f:
-                manual_db = json.load(f)
+                loaded = json.load(f)
+                # 辞書型（オブジェクト）のデータのみを取り込む安全処理
+                if isinstance(loaded, dict):
+                    manual_db = loaded
+                elif isinstance(loaded, list):
+                    for item in loaded:
+                        if isinstance(item, dict) and "id" in item:
+                            manual_db[item["id"]] = item
         except Exception as e:
             print(f"Warning: Failed to load {db_path}: {e}")
 
@@ -49,31 +56,33 @@ def load_data():
         with open(csv_path, "r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                gid = f"{row['date']}_{row['home']}_{row['away']}"
-                hs = int(row['home_score']) if row['home_score'] != "" else None
-                as_ = int(row['away_score']) if row['away_score'] != "" else None
+                gid = f"{row.get('date', '')}_{row.get('home', '')}_{row.get('away', '')}"
+                hs = int(row['home_score']) if row.get('home_score') and row['home_score'].strip() != "" else None
+                as_ = int(row['away_score']) if row.get('away_score') and row['away_score'].strip() != "" else None
                 games_map[gid] = {
                     "id": gid,
-                    "date": row['date'],
-                    "home": row['home'],
-                    "away": row['away'],
+                    "date": row.get('date', ''),
+                    "home": row.get('home', ''),
+                    "away": row.get('away', ''),
                     "home_score": hs,
                     "away_score": as_,
-                    "home_pitcher": row['home_pitcher'],
-                    "away_pitcher": row['away_pitcher'],
-                    "canceled": str(row['canceled']) in ["1", "True", "true"]
+                    "home_pitcher": row.get('home_pitcher', ''),
+                    "away_pitcher": row.get('away_pitcher', ''),
+                    "canceled": str(row.get('canceled', '0')) in ["1", "True", "true"]
                 }
 
-    # games_db.json（管理画面入力）で上書き
+    # games_db.json（手動管理データ）で上書き（辞書形式のものだけを厳密に抽出）
     for gid, override in manual_db.items():
-        if gid in games_map:
-            games_map[gid].update(override)
-        else:
-            games_map[gid] = override
+        if isinstance(override, dict):
+            if gid in games_map:
+                games_map[gid].update(override)
+            else:
+                games_map[gid] = override
 
-    all_games = list(games_map.values())
-    all_games.sort(key=lambda x: (x.get("date", ""), x.get("id", "")))
-    return all_games
+    # 辞書型データのみを抽出し、確実にソートできるように安全ガード
+    valid_games = [g for g in games_map.values() if isinstance(g, dict)]
+    valid_games.sort(key=lambda x: (str(x.get("date", "")), str(x.get("id", ""))))
+    return valid_games
 
 def compile_standings(games):
     standings = {t: {"win": 0, "lose": 0, "draw": 0, "rs": 0, "ra": 0, "games_history": []} for t in ALL_TEAMS}
@@ -81,7 +90,7 @@ def compile_standings(games):
     future_games = []
 
     for g in games:
-        if g.get("canceled", False):
+        if not isinstance(g, dict) or g.get("canceled", False):
             continue
         h = g.get("home")
         a = g.get("away")
@@ -177,7 +186,7 @@ def calculate_strict_cn(leader, chaser, standings, remaining_h2h, tie_favors_lea
 def get_h2h_matrix(games):
     h2h_rem = {}
     for g in games:
-        if g.get("canceled", False):
+        if not isinstance(g, dict) or g.get("canceled", False):
             continue
         h, a = g["home"], g["away"]
         if g.get("home_score") is None:
@@ -188,8 +197,9 @@ def get_h2h_matrix(games):
 def pad_unscheduled_games(schedule, standings):
     scheduled_counts = {t: 0 for t in ALL_TEAMS}
     for g in schedule:
-        scheduled_counts[g["home"]] += 1
-        scheduled_counts[g["away"]] += 1
+        if isinstance(g, dict):
+            scheduled_counts[g["home"]] += 1
+            scheduled_counts[g["away"]] += 1
 
     virtual_schedule = list(schedule)
     for league in [TEAMS_CENTRAL, TEAMS_PACIFIC]:
