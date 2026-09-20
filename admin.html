@@ -15,6 +15,8 @@
       --border: #e2e8f0;
       --danger: #ef4444;
       --success: #10b981;
+      --home-color: #1d4ed8;
+      --away-color: #b91c1c;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -38,6 +40,7 @@
       font-size: 0.9rem; outline: none; background: #fff;
     }
 
+    /* 対戦カード行 (左: ホーム, 右: ビジター) */
     .match-row {
       display: grid;
       grid-template-columns: 2.2fr 1fr 30px 1fr 2.2fr 40px;
@@ -50,7 +53,9 @@
       margin-bottom: 12px;
     }
     .match-team { display: flex; flex-direction: column; gap: 4px; }
-    .match-team span.label { font-size: 0.72rem; color: var(--text-sub); font-weight: 700; }
+    .match-team span.label { font-size: 0.72rem; font-weight: 700; }
+    .match-team span.label.home-lbl { color: var(--home-color); }
+    .match-team span.label.away-lbl { color: var(--away-color); }
     .match-team select { padding: 6px 8px; font-weight: 700; border-radius: 6px; border: 1px solid var(--border); }
     .match-team input.pitcher { padding: 5px 8px; font-size: 0.82rem; border-radius: 6px; border: 1px solid var(--border); }
     .score-input {
@@ -93,7 +98,7 @@
   <div class="container">
     <header>
       <h1>NPB 試合結果・先発投手 手動管理</h1>
-      <p>日付を選択すると、テキストログ内の予定カード・予告先発が直接自動展開されます。</p>
+      <p>日付を選択し、スコアまたは先発投手名を入力してデータベースを更新します（左: ホーム, 右: ビジター）</p>
     </header>
 
     <div class="card">
@@ -186,7 +191,6 @@
 
       showStatus("GitHubより全データを同期中...", "");
       try {
-        // 1. games_db.json の読み込み
         const resDb = await fetch(`https://api.github.com/repos/${repo}/contents/games_db.json?t=${new Date().getTime()}`, {
           headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
         });
@@ -197,7 +201,6 @@
           currentDb = JSON.parse(decoded);
         }
 
-        // 2. 2016-2026プロ野球レギュラーシーズン結果.txt の取得
         const txtFilename = encodeURIComponent("2016-2026プロ野球レギュラーシーズン結果.txt");
         const resTxt = await fetch(`https://api.github.com/repos/${repo}/contents/${txtFilename}?t=${new Date().getTime()}`, {
           headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
@@ -215,14 +218,9 @@
             if (fallbackRes.ok) {
               const raw = await fallbackRes.text();
               parseTextSchedule(raw);
-              const totalDays = Object.keys(textScheduleMap).length;
-              showStatus(`完全同期完了 (テキストログから ${totalDays} 日分の日程を読み込みました)`, "success");
-            } else {
-              showStatus("テキストログ取得失敗", "error");
+              showStatus("同期完了", "success");
             }
-          } catch (_) {
-            showStatus("テキストログ取得エラー", "error");
-          }
+          } catch (_) {}
         }
 
         loadDateForm();
@@ -233,9 +231,7 @@
 
     function parseTextSchedule(rawText) {
       textScheduleMap = {};
-      // 改行コードの差異（CRLF / LF）を統一
       const normalized = rawText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-      
       const secSplit = normalized.split(/\n2026\n/);
       const sec2026 = secSplit.length > 1 ? secSplit[secSplit.length - 1] : normalized;
 
@@ -246,7 +242,6 @@
         let line = rawLine.trim();
         if (!line) continue;
 
-        // 日付検知: 行頭が "9/19" または "9/19（土）" 形式
         const dateMatch = line.match(/^(\d{1,2})\/(\d{1,2})(?:[\s\S]*?[（(][日月火水木金土][）)])?\s*(.*)$/);
         if (dateMatch && parseInt(dateMatch[1], 10) <= 12 && parseInt(dateMatch[2], 10) <= 31) {
           const m = parseInt(dateMatch[1], 10);
@@ -261,7 +256,7 @@
 
         if (!curDate || line.includes("中止") || line.includes("ノーゲーム")) continue;
 
-        // 1. スコア確定試合 (例: 巨人 6 - 4 ヤクルト ...)
+        // 1. スコア行 (ホーム - ビジター)
         const finM = line.match(/([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)/);
         if (finM) {
           const h = normalizeTeam(finM[1]);
@@ -282,9 +277,7 @@
           }
         }
 
-        // 2. 未消化予定試合 (ホーム - ビジター 表記)
-        // 例: 巨人 - 中日 東京ドーム ... 先発：田中将 先発：中西
-        // 例: 中日 - 広島 バンテリンドーム ... (先発なし)
+        // 2. 予定試合行 (ホーム - ビジター)
         const schedM = line.match(/([^\s\d]+)\s*-\s*([^\s\d]+)/);
         if (schedM) {
           const h = normalizeTeam(schedM[1]);
@@ -301,21 +294,6 @@
               home_pitcher: hStarter, away_pitcher: aStarter
             });
             continue;
-          }
-        }
-
-        // 3. vs 表記 (例: 広島 vs 阪神)
-        const vsM = line.match(/([^\s\d]+)\s+vs\s+([^\s\d]+)/i);
-        if (vsM) {
-          const a = normalizeTeam(vsM[1]);
-          const h = normalizeTeam(vsM[2]);
-          if (TEAMS.includes(h) && TEAMS.includes(a)) {
-            textScheduleMap[curDate].push({
-              home: h, away: a,
-              home_score: null, away_score: null,
-              home_starter: "未定", away_starter: "未定",
-              home_pitcher: "未定", away_pitcher: "未定"
-            });
           }
         }
       }
@@ -340,13 +318,14 @@
         return;
       }
 
-      // 3. 該当日にカードが存在しない場合（移動日等）
+      // 3. 該当日にカードが存在しない場合
       const emptyNotice = document.createElement('div');
       emptyNotice.style.cssText = "padding: 16px; text-align: center; color: #64748b; font-weight: 600;";
       emptyNotice.innerText = `この日（${date}）の公式対戦日程はありません。「＋ 対戦カードを追加」から手動作成できます。`;
       container.appendChild(emptyNotice);
     }
 
+    // 左: ホーム, 右: ビジター で描画
     function addMatchRow(data = null) {
       const container = document.getElementById('matches-container');
       
@@ -357,34 +336,34 @@
       const row = document.createElement('div');
       row.className = 'match-row';
 
-      const selAway = data ? data.away : "広島";
-      const selHome = data ? data.home : "中日";
+      const selHome = data ? data.home : "巨人";
+      const selAway = data ? data.away : "ヤクルト";
 
-      const awayOptions = TEAMS.map(t => `<option value="${t}" ${selAway === t ? 'selected' : ''}>${t}</option>`).join('');
       const homeOptions = TEAMS.map(t => `<option value="${t}" ${selHome === t ? 'selected' : ''}>${t}</option>`).join('');
+      const awayOptions = TEAMS.map(t => `<option value="${t}" ${selAway === t ? 'selected' : ''}>${t}</option>`).join('');
 
-      const awayScore = data && data.away_score !== null && data.away_score !== undefined ? data.away_score : '';
       const homeScore = data && data.home_score !== null && data.home_score !== undefined ? data.home_score : '';
-      const awayPitcher = data ? (data.away_starter || data.away_pitcher || '') : '';
+      const awayScore = data && data.away_score !== null && data.away_score !== undefined ? data.away_score : '';
       const homePitcher = data ? (data.home_starter || data.home_pitcher || '') : '';
+      const awayPitcher = data ? (data.away_starter || data.away_pitcher || '') : '';
 
       row.innerHTML = `
         <div class="match-team">
-          <span class="label">ビジター</span>
-          <select class="away-team">${awayOptions}</select>
-          <input type="text" class="pitcher away-pitcher" placeholder="先発/敗戦投手" value="${awayPitcher}">
+          <span class="label home-lbl">ホーム</span>
+          <select class="home-team">${homeOptions}</select>
+          <input type="text" class="pitcher home-pitcher" placeholder="先発/勝利投手" value="${homePitcher}">
         </div>
-
-        <input type="number" class="score-input away-score" placeholder="点" min="0" max="35" value="${awayScore}">
-
-        <div class="vs-text">VS</div>
 
         <input type="number" class="score-input home-score" placeholder="点" min="0" max="35" value="${homeScore}">
 
+        <div class="vs-text">VS</div>
+
+        <input type="number" class="score-input away-score" placeholder="点" min="0" max="35" value="${awayScore}">
+
         <div class="match-team">
-          <span class="label">ホーム</span>
-          <select class="home-team">${homeOptions}</select>
-          <input type="text" class="pitcher home-pitcher" placeholder="先発/勝利投手" value="${homePitcher}">
+          <span class="label away-lbl" style="text-align: right;">ビジター</span>
+          <select class="away-team">${awayOptions}</select>
+          <input type="text" class="pitcher away-pitcher" placeholder="先発/敗戦投手" value="${awayPitcher}">
         </div>
 
         <button type="button" class="btn-del" title="削除" onclick="this.parentElement.remove()">✕</button>
@@ -406,12 +385,12 @@
       const newDayGames = [];
 
       for (const row of rows) {
-        const away = row.querySelector('.away-team').value;
         const home = row.querySelector('.home-team').value;
-        const awayScoreStr = row.querySelector('.away-score').value.trim();
+        const away = row.querySelector('.away-team').value;
         const homeScoreStr = row.querySelector('.home-score').value.trim();
-        const awayPitcher = row.querySelector('.away-pitcher').value.trim();
+        const awayScoreStr = row.querySelector('.away-score').value.trim();
         const homePitcher = row.querySelector('.home-pitcher').value.trim();
+        const awayPitcher = row.querySelector('.away-pitcher').value.trim();
 
         if (away === home) continue;
 
