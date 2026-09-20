@@ -21,7 +21,7 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: var(--bg); color: var(--text-main); padding: 24px 16px 80px; }
-    .container { max-width: 960px; margin: 0 auto; }
+    .container { max-width: 980px; margin: 0 auto; }
 
     header { text-align: center; margin-bottom: 24px; }
     header h1 { font-size: 1.5rem; font-weight: 800; color: #1e3a8a; }
@@ -40,10 +40,10 @@
       font-size: 0.9rem; outline: none; background: #fff;
     }
 
-    /* 対戦カード行 (左: ホーム, 右: ビジター) */
+    /* 対戦カード行 (左: ホーム, 右: ビジター + 中止ボタン) */
     .match-row {
       display: grid;
-      grid-template-columns: 2.2fr 1fr 30px 1fr 2.2fr 40px;
+      grid-template-columns: 2fr 0.9fr 28px 0.9fr 2fr 80px 36px;
       align-items: center;
       gap: 10px;
       padding: 14px 16px;
@@ -52,17 +52,31 @@
       border-radius: 10px;
       margin-bottom: 12px;
     }
+    .match-row.is-cancelled {
+      background: #f1f5f9;
+      opacity: 0.65;
+    }
     .match-team { display: flex; flex-direction: column; gap: 4px; }
     .match-team span.label { font-size: 0.72rem; font-weight: 700; }
     .match-team span.label.home-lbl { color: var(--home-color); }
     .match-team span.label.away-lbl { color: var(--away-color); }
     .match-team select { padding: 6px 8px; font-weight: 700; border-radius: 6px; border: 1px solid var(--border); }
     .match-team input.pitcher { padding: 5px 8px; font-size: 0.82rem; border-radius: 6px; border: 1px solid var(--border); }
+    
     .score-input {
       width: 100%; text-align: center; font-size: 1.25rem; font-weight: 800;
       padding: 6px 0; border-radius: 6px; border: 1px solid var(--border); background: #fff;
     }
+    .score-input:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
+    
     .vs-text { text-align: center; font-size: 0.85rem; font-weight: 800; color: #94a3b8; }
+    
+    .cancel-box {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-weight: 700; color: #64748b; gap: 2px; cursor: pointer;
+    }
+    .cancel-box input { cursor: pointer; width: 16px; height: 16px; }
+
     .btn-del {
       background: none; border: none; color: var(--danger); font-size: 1.25rem;
       cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -98,7 +112,7 @@
   <div class="container">
     <header>
       <h1>NPB 試合結果・先発投手 手動管理</h1>
-      <p>日付を選択し、スコアまたは先発投手名を入力してデータベースを更新します（左: ホーム, 右: ビジター）</p>
+      <p>日付を選択し、結果入力または中止登録を行いGitHubへ保存します（左: ホーム, 右: ビジター）</p>
     </header>
 
     <div class="card">
@@ -113,7 +127,7 @@
         </div>
       </div>
       <div style="font-size: 0.75rem; color: var(--text-sub);">
-        ※ トークンはブラウザにのみ保存され、GitHub APIと安全に直接通信します。
+        ※ トークンはブラウザにのみ保存され、GitHub APIと直接安全に通信します。
       </div>
     </div>
 
@@ -254,7 +268,26 @@
           if (!line) continue;
         }
 
-        if (!curDate || line.includes("中止") || line.includes("ノーゲーム")) continue;
+        if (!curDate) continue;
+
+        // 中止行の判定
+        if (line.includes("中止") || line.includes("ノーゲーム")) {
+          const canM = line.match(/([^\s\d]+)\s*(?:中止|ノーゲーム)\s*([^\s\d]+)/);
+          if (canM) {
+            const h = normalizeTeam(canM[1]);
+            const a = normalizeTeam(canM[2]);
+            if (TEAMS.includes(h) && TEAMS.includes(a)) {
+              textScheduleMap[curDate].push({
+                home: h, away: a,
+                home_score: null, away_score: null,
+                home_starter: "未定", away_starter: "未定",
+                home_pitcher: "未定", away_pitcher: "未定",
+                status: "cancelled"
+              });
+            }
+          }
+          continue;
+        }
 
         // 1. スコア行 (ホーム - ビジター)
         const finM = line.match(/([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)/);
@@ -271,7 +304,8 @@
               home: h, away: a,
               home_score: hs, away_score: as_,
               home_pitcher: hs > as_ ? (winP ? winP[1] : '') : (loseP ? loseP[1] : ''),
-              away_pitcher: as_ > hs ? (winP ? winP[1] : '') : (loseP ? loseP[1] : '')
+              away_pitcher: as_ > hs ? (winP ? winP[1] : '') : (loseP ? loseP[1] : ''),
+              status: "finished"
             });
             continue;
           }
@@ -291,7 +325,8 @@
               home: h, away: a,
               home_score: null, away_score: null,
               home_starter: hStarter, away_starter: aStarter,
-              home_pitcher: hStarter, away_pitcher: aStarter
+              home_pitcher: hStarter, away_pitcher: aStarter,
+              status: "scheduled"
             });
             continue;
           }
@@ -304,28 +339,41 @@
       const container = document.getElementById('matches-container');
       container.innerHTML = '';
 
-      // 1. games_db.json 内に手入力保存された該当日のデータがあれば最優先
       const manualGames = (currentDb.games || []).filter(g => g.date === date);
       if (manualGames.length > 0) {
         manualGames.forEach(g => addMatchRow(g));
         return;
       }
 
-      // 2. テキストログから読み込まれた該当日の対戦カード
       const schedGames = textScheduleMap[date] || [];
       if (schedGames.length > 0) {
         schedGames.forEach(g => addMatchRow(g));
         return;
       }
 
-      // 3. 該当日にカードが存在しない場合
       const emptyNotice = document.createElement('div');
       emptyNotice.style.cssText = "padding: 16px; text-align: center; color: #64748b; font-weight: 600;";
       emptyNotice.innerText = `この日（${date}）の公式対戦日程はありません。「＋ 対戦カードを追加」から手動作成できます。`;
       container.appendChild(emptyNotice);
     }
 
-    // 左: ホーム, 右: ビジター で描画
+    function toggleCancelRow(chk) {
+      const row = chk.closest('.match-row');
+      const scoreInputs = row.querySelectorAll('.score-input');
+      const pitcherInputs = row.querySelectorAll('.pitcher');
+
+      if (chk.checked) {
+        row.classList.add('is-cancelled');
+        scoreInputs.forEach(input => {
+          input.value = '';
+          input.disabled = true;
+        });
+      } else {
+        row.classList.remove('is-cancelled');
+        scoreInputs.forEach(input => input.disabled = false);
+      }
+    }
+
     function addMatchRow(data = null) {
       const container = document.getElementById('matches-container');
       
@@ -333,8 +381,9 @@
         container.innerHTML = '';
       }
 
+      const isCancelled = data && data.status === "cancelled";
       const row = document.createElement('div');
-      row.className = 'match-row';
+      row.className = `match-row ${isCancelled ? 'is-cancelled' : ''}`;
 
       const selHome = data ? data.home : "巨人";
       const selAway = data ? data.away : "ヤクルト";
@@ -354,17 +403,22 @@
           <input type="text" class="pitcher home-pitcher" placeholder="先発/勝利投手" value="${homePitcher}">
         </div>
 
-        <input type="number" class="score-input home-score" placeholder="点" min="0" max="35" value="${homeScore}">
+        <input type="number" class="score-input home-score" placeholder="点" min="0" max="35" value="${homeScore}" ${isCancelled ? 'disabled' : ''}>
 
         <div class="vs-text">VS</div>
 
-        <input type="number" class="score-input away-score" placeholder="点" min="0" max="35" value="${awayScore}">
+        <input type="number" class="score-input away-score" placeholder="点" min="0" max="35" value="${awayScore}" ${isCancelled ? 'disabled' : ''}>
 
         <div class="match-team">
           <span class="label away-lbl" style="text-align: right;">ビジター</span>
           <select class="away-team">${awayOptions}</select>
           <input type="text" class="pitcher away-pitcher" placeholder="先発/敗戦投手" value="${awayPitcher}">
         </div>
+
+        <label class="cancel-box" title="雨天中止・ノーゲーム">
+          <input type="checkbox" class="chk-cancel" onchange="toggleCancelRow(this)" ${isCancelled ? 'checked' : ''}>
+          <span>中止</span>
+        </label>
 
         <button type="button" class="btn-del" title="削除" onclick="this.parentElement.remove()">✕</button>
       `;
@@ -391,21 +445,33 @@
         const awayScoreStr = row.querySelector('.away-score').value.trim();
         const homePitcher = row.querySelector('.home-pitcher').value.trim();
         const awayPitcher = row.querySelector('.away-pitcher').value.trim();
+        const isCancelled = row.querySelector('.chk-cancel').checked;
 
         if (away === home) continue;
 
-        const isFinished = (awayScoreStr !== "" && homeScoreStr !== "");
+        let status = "scheduled";
+        let hs = null;
+        let as_ = null;
+
+        if (isCancelled) {
+          status = "cancelled";
+        } else if (awayScoreStr !== "" && homeScoreStr !== "") {
+          status = "finished";
+          hs = parseInt(homeScoreStr, 10);
+          as_ = parseInt(awayScoreStr, 10);
+        }
+
         newDayGames.push({
           date: date,
           home: home,
           away: away,
-          home_score: isFinished ? parseInt(homeScoreStr, 10) : null,
-          away_score: isFinished ? parseInt(awayScoreStr, 10) : null,
+          home_score: hs,
+          away_score: as_,
           home_starter: homePitcher || "未定",
           away_starter: awayPitcher || "未定",
           home_pitcher: homePitcher,
           away_pitcher: awayPitcher,
-          status: isFinished ? "finished" : "scheduled"
+          status: status
         });
       }
 
