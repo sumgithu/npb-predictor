@@ -10,7 +10,7 @@ GAMES_INTRA = 25
 GAMES_INTER = 3
 HISTORY_FILE = "history_standings.json"
 MANUAL_DB_FILE = "games_db.json"
-TEXT_LOG_FILE = "npb_games_clean.csv"
+TEXT_LOG_FILE = "2016-2026プロ野球レギュラーシーズン結果.txt"
 
 CENTRAL_TEAMS = ["阪神", "巨人", "ＤｅＮＡ", "ヤクルト", "中日", "広島"]
 PACIFIC_TEAMS = ["ソフトバンク", "日本ハム", "ロッテ", "楽天", "オリックス", "西武"]
@@ -56,7 +56,7 @@ def parse_year_games_from_text(raw_text, target_year):
         if not line:
             continue
 
-        # CSV形式 (例: 2026-03-27,巨人,阪神,3,1,...)
+        # 1. CSV形式
         csv_parts = [p.strip() for p in line.split(',')]
         if len(csv_parts) >= 6 and re.match(r'^\d{4}-\d{2}-\d{2}$', csv_parts[0]):
             c_date, h_raw, a_raw = csv_parts[0], csv_parts[1], csv_parts[2]
@@ -74,17 +74,17 @@ def parse_year_games_from_text(raw_text, target_year):
                 else:
                     hs = int(csv_parts[3])
                     as_ = int(csv_parts[4])
-                    pitcher_info = csv_parts[5] if len(csv_parts) >= 6 else ""
+                    p_info = csv_parts[5] if len(csv_parts) >= 6 else ""
                     games.append({
                         "date": c_date, "home": h, "away": a,
                         "home_score": hs, "away_score": as_,
-                        "home_pitcher": pitcher_info, "away_pitcher": pitcher_info,
-                        "home_starter": pitcher_info, "away_starter": pitcher_info,
+                        "home_pitcher": p_info, "away_pitcher": p_info,
+                        "home_starter": p_info, "away_starter": p_info,
                         "status": "finished"
                     })
                 continue
 
-        # 通常テキスト形式 (例: 3/27（金） 巨人 3 - 1 阪神 ...)
+        # 2. 通常テキスト形式
         date_m = re.match(r'^(\d{1,2})\/(\d{1,2})(?:[（(][日月火水木金土][）)])?\s*(.*)$', line)
         if date_m:
             m, d = int(date_m.group(1)), int(date_m.group(2))
@@ -164,35 +164,65 @@ def parse_year_games_from_text(raw_text, target_year):
 
 def load_all_games():
     games_2025 = []
-    games_2026_base = []
+    games_2026_master = []
 
-    if os.path.exists(TEXT_LOG_FILE):
-        with open(TEXT_LOG_FILE, "r", encoding="utf-8") as f:
+    # マスターテキストファイルの読み込み（存在しない場合は npb_games_clean.csv をフォールバック参照）
+    active_master_file = TEXT_LOG_FILE if os.path.exists(TEXT_LOG_FILE) else "npb_games_clean.csv"
+    if os.path.exists(active_master_file):
+        with open(active_master_file, "r", encoding="utf-8") as f:
             raw_text = f.read()
         games_2025 = parse_year_games_from_text(raw_text, 2025)
-        games_2026_base = parse_year_games_from_text(raw_text, 2026)
+        games_2026_master = parse_year_games_from_text(raw_text, 2026)
 
-    # 手動管理 games_db.json があればその日のカードを最優先で置換
+    # 手動暫定DB（games_db.json）とのマージ処理
+    # 原則：テキストをマスターとしつつ、直近の日付で手動側にスコアや予告先発が入っていれば手動で上書き結合
     if os.path.exists(MANUAL_DB_FILE):
         try:
             with open(MANUAL_DB_FILE, "r", encoding="utf-8") as f:
-                manual_db = json.load(f)
-            manual_games = manual_db.get("games", [])
-            
-            # スコアが入っていれば確実に finished とする
+                manual_payload = json.load(f)
+
+            if isinstance(manual_payload, list):
+                manual_games = manual_payload
+            elif isinstance(manual_payload, dict) and "games" in manual_payload:
+                manual_games = manual_payload["games"]
+            else:
+                manual_games = []
+
+            # 暫定入力カードを (date, home, away) をキーにして辞書化
+            manual_map = {}
             for mg in manual_games:
-                if mg.get("home_score") is not None and mg.get("away_score") is not None:
+                if not mg or "date" not in mg or "home" not in mg or "away" not in mg:
+                    continue
+                k = (mg["date"], normalize_team(mg["home"]), normalize_team(mg["away"]))
+                if mg.get("home_score") is not None and mg.get("away_score") is not None and str(mg.get("home_score")).strip() != "" and str(mg.get("away_score")).strip() != "":
+                    mg["home_score"] = int(mg["home_score"])
+                    mg["away_score"] = int(mg["away_score"])
                     mg["status"] = "finished"
-            
-            manual_dates = {g["date"] for g in manual_games}
-            merged_2026 = [g for g in games_2026_base if g["date"] not in manual_dates]
-            merged_2026.extend(manual_games)
+                manual_map[k] = mg
+
+            merged_2026 = []
+            applied_keys = set()
+
+            for mg_orig in games_2026_master:
+                k = (mg_orig["date"], mg_orig["home"], mg_orig["away"])
+                if k in manual_map:
+                    # 手動暫定側に入力がある場合は手動側で上書き
+                    merged_2026.append(manual_map[k])
+                    applied_keys.add(k)
+                else:
+                    merged_2026.append(mg_orig)
+
+            # テキスト日程表にまだ載っていない追加カードがあれば末尾に追加
+            for k, mg in manual_map.items():
+                if k not in applied_keys:
+                    merged_2026.append(mg)
+
             merged_2026.sort(key=lambda x: (x["date"], x.get("status") == "finished"))
             return games_2025, merged_2026
         except Exception as e:
             print(f"games_db.json 読込警告: {e}")
 
-    return games_2025, games_2026_base
+    return games_2025, games_2026_master
 
 def get_remaining_h2h(t1, t2, h2h_played, rem_1, rem_2):
     played = h2h_played.get(t1, {}).get(t2, 0)
@@ -514,7 +544,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
     pitcher_stats = {}
 
     for g in games_2025:
-        if g.get("status") == "finished":
+        if g.get("status") == "finished" and g.get("home_score") is not None:
             h, a = g["home"], g["away"]
             hs, as_ = g["home_score"], g["away_score"]
             prior_stats[h]["games"] += 1
@@ -538,13 +568,6 @@ def build_all_history_with_predictions(games_2025, games_2026):
     all_dates = sorted(list({g["date"] for g in games_2026}))
     history_snapshots = {}
 
-    # finished_dates はスコアが入っている全試合から取得
-    finished_dates = sorted(list({g["date"] for g in games_2026 if g.get("status") == "finished" and g.get("home_score") is not None}))
-    last_finished_date = finished_dates[-1] if finished_dates else all_dates[0]
-
-    last_c_table = None
-    last_p_table = None
-
     for target_date in all_dates:
         records = {t: {
             "team": t, "games": 0, "win": 0, "lose": 0, "draw": 0, "rs": 0, "ra": 0,
@@ -557,18 +580,16 @@ def build_all_history_with_predictions(games_2025, games_2026):
         h2h_played = {t1: {t2: 0 for t2 in all_teams} for t1 in all_teams}
         h2h_details = {t1: {t2: {"win": 0, "lose": 0, "draw": 0} for t2 in all_teams} for t1 in all_teams}
 
-        # target_date 当日を含めて消化済み試合を厳密に集計
         for g in games_2026:
-            if g.get("status") != "finished" or g.get("home_score") is None or g.get("away_score") is None:
+            if g.get("home_score") is None or g.get("away_score") is None:
                 continue
             h, a = g["home"], g["away"]
-            hs, as_ = g["home_score"], g["away_score"]
+            hs, as_ = int(g["home_score"]), int(g["away_score"])
             g_date = g["date"]
 
             if g_date < target_date:
                 team_match_histories_before_today[h].append({"rs": hs, "ra": as_})
                 team_match_histories_before_today[a].append({"rs": as_, "ra": hs})
-
                 hp, ap = g.get("home_pitcher"), g.get("away_pitcher")
                 if hp:
                     if hp not in pitcher_stats: pitcher_stats[hp] = {"win": 0, "lose": 0}
@@ -658,9 +679,6 @@ def build_all_history_with_predictions(games_2025, games_2026):
         c_table = validate_and_assert_standings(c_table)
         p_table = validate_and_assert_standings(p_table)
 
-        last_c_table = c_table
-        last_p_table = p_table
-
         day_predictions = []
         processed_pairs = set()
 
@@ -686,13 +704,14 @@ def build_all_history_with_predictions(games_2025, games_2026):
                 prob_away, prob_home = calc_log5_matchup(p_away, p_home, a_start, h_start, pitcher_stats)
 
                 hs, as_ = g.get("home_score"), g.get("away_score")
-                is_fin = (g.get("status") == "finished" and hs is not None and as_ is not None)
+                is_fin = (hs is not None and as_ is not None and str(hs).strip() != "" and str(as_).strip() != "")
 
                 if is_fin:
-                    if hs > as_:
+                    hs_int, as_int = int(hs), int(as_)
+                    if hs_int > as_int:
                         h_label = f"勝利: {h_start}" if h_start != "未定" else "勝利"
                         a_label = f"敗戦: {a_start}" if a_start != "未定" else "敗戦"
-                    elif hs < as_:
+                    elif hs_int < as_int:
                         h_label = f"敗戦: {h_start}" if h_start != "未定" else "敗戦"
                         a_label = f"勝利: {a_start}" if a_start != "未定" else "勝利"
                     else:
@@ -711,8 +730,8 @@ def build_all_history_with_predictions(games_2025, games_2026):
                     "away_status_text": a_label,
                     "home_prob": prob_home,
                     "away_prob": prob_away,
-                    "actual_home_score": hs,
-                    "actual_away_score": as_,
+                    "actual_home_score": int(hs) if is_fin else None,
+                    "actual_away_score": int(as_) if is_fin else None,
                     "is_finished": is_fin
                 })
 
@@ -726,17 +745,22 @@ def build_all_history_with_predictions(games_2025, games_2026):
 
     latest_team_histories = {t: [] for t in all_teams}
     for g in games_2026:
-        if g.get("status") == "finished" and g.get("home_score") is not None:
+        if g.get("home_score") is not None and g.get("away_score") is not None:
             h, a = g["home"], g["away"]
-            latest_team_histories[h].append({"rs": g["home_score"], "ra": g["away_score"]})
-            latest_team_histories[a].append({"rs": g["away_score"], "ra": g["home_score"]})
+            latest_team_histories[h].append({"rs": int(g["home_score"]), "ra": int(g["away_score"])})
+            latest_team_histories[a].append({"rs": int(g["away_score"]), "ra": int(g["home_score"])})
 
-    actual_future_matches = [g for g in games_2026 if g.get("status") == "scheduled"]
+    actual_future_matches = [g for g in games_2026 if g.get("home_score") is None and g.get("status") != "cancelled"]
     c_future = [g for g in actual_future_matches if g["home"] in CENTRAL_TEAMS or g["away"] in CENTRAL_TEAMS]
     p_future = [g for g in actual_future_matches if g["home"] in PACIFIC_TEAMS or g["away"] in PACIFIC_TEAMS]
 
-    c_rank_matrix, c_clinch_dates = simulate_full_season_probabilities(CENTRAL_TEAMS, last_c_table, c_future, latest_team_histories, prior_stats)
-    p_rank_matrix, p_clinch_dates = simulate_full_season_probabilities(PACIFIC_TEAMS, last_p_table, p_future, latest_team_histories, prior_stats)
+    dates_with_finished = [d for d in all_dates if any(g["date"] == d and g.get("home_score") is not None for g in games_2026)]
+    last_eval_date = dates_with_finished[-1] if dates_with_finished else all_dates[0]
+    eval_c_table = history_snapshots[last_eval_date]["central"]
+    eval_p_table = history_snapshots[last_eval_date]["pacific"]
+
+    c_rank_matrix, c_clinch_dates = simulate_full_season_probabilities(CENTRAL_TEAMS, eval_c_table, c_future, latest_team_histories, prior_stats)
+    p_rank_matrix, p_clinch_dates = simulate_full_season_probabilities(PACIFIC_TEAMS, eval_p_table, p_future, latest_team_histories, prior_stats)
 
     def attach_probs(table, rank_mat):
         for t in table:
@@ -745,8 +769,10 @@ def build_all_history_with_predictions(games_2025, games_2026):
             t["cs_prob"] = 100 if t.get("magic_3rd") == "確定" else (probs.get(1, 0) + probs.get(2, 0) + probs.get(3, 0))
         return table
 
-    last_c_table = attach_probs(last_c_table, c_rank_matrix)
-    last_p_table = attach_probs(last_p_table, p_rank_matrix)
+    for d in all_dates:
+        if d in history_snapshots:
+            history_snapshots[d]["central"] = attach_probs(history_snapshots[d]["central"], c_rank_matrix)
+            history_snapshots[d]["pacific"] = attach_probs(history_snapshots[d]["pacific"], p_rank_matrix)
 
     def build_filtered_clinch_schedule(team_name, future_matches, clinch_date_map, champ_prob):
         all_future_dates = sorted(list({m["date"] for m in future_matches}))
@@ -807,11 +833,14 @@ def build_all_history_with_predictions(games_2025, games_2026):
 
         return trimmed
 
-    c_clinch_schedules = {t: build_filtered_clinch_schedule(t, c_future, c_clinch_dates.get(t, {}), last_c_table[idx]["champ_prob"]) for idx, t in enumerate(CENTRAL_TEAMS)}
-    p_clinch_schedules = {t: build_filtered_clinch_schedule(t, p_future, p_clinch_dates.get(t, {}), last_p_table[idx]["champ_prob"]) for idx, t in enumerate(PACIFIC_TEAMS)}
+    last_snap_c = history_snapshots[last_eval_date]["central"]
+    last_snap_p = history_snapshots[last_eval_date]["pacific"]
 
-    c_lines_grid = build_aligned_championship_grid(last_c_table)
-    p_lines_grid = build_aligned_championship_grid(last_p_table)
+    c_clinch_schedules = {t: build_filtered_clinch_schedule(t, c_future, c_clinch_dates.get(t, {}), last_snap_c[idx]["champ_prob"]) for idx, t in enumerate(CENTRAL_TEAMS)}
+    p_clinch_schedules = {t: build_filtered_clinch_schedule(t, p_future, p_clinch_dates.get(t, {}), last_snap_p[idx]["champ_prob"]) for idx, t in enumerate(PACIFIC_TEAMS)}
+
+    c_lines_grid = build_aligned_championship_grid(last_snap_c)
+    p_lines_grid = build_aligned_championship_grid(last_snap_p)
 
     simulation_payload = {
         "central_rank_matrix": c_rank_matrix,
@@ -822,20 +851,18 @@ def build_all_history_with_predictions(games_2025, games_2026):
         "pacific_lines_grid": p_lines_grid
     }
 
-    return all_dates, last_finished_date, history_snapshots, simulation_payload
+    # JST本日を取得
+    jst_today = (datetime.datetime.utcnow() + datetime.timedelta(hours=9)).strftime("%Y-%m-%d")
+    default_display_date = jst_today if jst_today in all_dates else last_eval_date
+
+    return all_dates, default_display_date, history_snapshots, simulation_payload
 
 def main():
     games_2025, games_2026 = load_all_games()
     dates, default_latest, history, sim_data = build_all_history_with_predictions(games_2025, games_2026)
 
-    # 実行時の日本時間当日を取得
-    jst_today = (datetime.datetime.utcnow() + datetime.timedelta(hours=9)).strftime("%Y-%m-%d")
-    
-    # 本日の日付がデータ内に存在すれば初期表示日に設定、なければ直近の終了日
-    initial_display_date = jst_today if jst_today in dates else default_latest
-
     output = {
-        "latest_date": initial_display_date,
+        "latest_date": default_latest,
         "available_dates": dates,
         "history": history,
         "simulation": sim_data
@@ -844,4 +871,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了（初期表示日: {initial_display_date}）：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了（マスター優先・暫定差分マージ適用）：{dates[0]} 〜 {dates[-1]}")
+
+if __name__ == "__main__":
+    main()
