@@ -194,6 +194,7 @@ def parse_year_games_from_text(raw_text, target_year):
 
     return games
 
+# ★ 手動管理DB（games_db.json）を厳格に優先マージするローダー
 def load_all_games():
     games_2025 = []
     games_2026_master = []
@@ -205,6 +206,7 @@ def load_all_games():
         games_2025 = parse_year_games_from_text(raw_text, 2025)
         games_2026_master = parse_year_games_from_text(raw_text, 2026)
 
+    manual_map = {}
     if os.path.exists(MANUAL_DB_FILE):
         try:
             with open(MANUAL_DB_FILE, "r", encoding="utf-8") as f:
@@ -212,52 +214,65 @@ def load_all_games():
 
             manual_games = manual_payload if isinstance(manual_payload, list) else manual_payload.get("games", [])
 
-            manual_map = {}
             for mg in manual_games:
                 if not mg or "date" not in mg or "home" not in mg or "away" not in mg:
                     continue
                 norm_h = normalize_team(mg["home"])
                 norm_a = normalize_team(mg["away"])
-                mg["home"] = norm_h
-                mg["away"] = norm_a
 
-                hs_raw = str(mg.get("home_score", "")).strip()
-                as_raw = str(mg.get("away_score", "")).strip()
-                if hs_raw != "" and as_raw != "" and hs_raw != "null" and as_raw != "null":
-                    mg["home_score"] = int(hs_raw)
-                    mg["away_score"] = int(as_raw)
-                    mg["status"] = "finished"
-                elif mg.get("status") == "cancelled":
-                    mg["home_score"] = None
-                    mg["away_score"] = None
-                else:
-                    mg["home_score"] = None
-                    mg["away_score"] = None
-                    mg["status"] = "scheduled"
+                entry = dict(mg)
+                entry["home"] = norm_h
+                entry["away"] = norm_a
 
-                manual_map[(mg["date"], norm_h, norm_a)] = mg
+                hs_val = mg.get("home_score")
+                as_val = mg.get("away_score")
 
-            merged_2026 = []
-            applied_keys = set()
+                # スコアが 0 を含む有効な数値または数字文字列であるかを厳密に判定
+                is_fin = False
+                if hs_val is not None and as_val is not None:
+                    hs_s = str(hs_val).strip()
+                    as_s = str(as_val).strip()
+                    if hs_s != "" and as_s != "" and hs_s != "null" and as_s != "null":
+                        try:
+                            entry["home_score"] = int(hs_s)
+                            entry["away_score"] = int(as_s)
+                            entry["status"] = "finished"
+                            is_fin = True
+                        except ValueError:
+                            pass
 
-            for mg_orig in games_2026_master:
-                k = (mg_orig["date"], mg_orig["home"], mg_orig["away"])
-                if k in manual_map:
-                    merged_2026.append(manual_map[k])
-                    applied_keys.add(k)
-                else:
-                    merged_2026.append(mg_orig)
+                if not is_fin:
+                    if mg.get("status") == "cancelled":
+                        entry["home_score"] = None
+                        entry["away_score"] = None
+                        entry["status"] = "cancelled"
+                    else:
+                        entry["home_score"] = None
+                        entry["away_score"] = None
+                        entry["status"] = "scheduled"
 
-            for k, mg in manual_map.items():
-                if k not in applied_keys:
-                    merged_2026.append(mg)
-
-            merged_2026.sort(key=lambda x: (x["date"], x.get("status") == "finished"))
-            return games_2025, merged_2026
+                manual_map[(mg["date"], norm_h, norm_a)] = entry
         except Exception as e:
             print(f"games_db.json 読込警告: {e}")
 
-    return games_2025, games_2026_master
+    merged_2026 = []
+    applied_keys = set()
+
+    # 手動DBのレコードをマスターに優先適用
+    for mg_orig in games_2026_master:
+        k = (mg_orig["date"], mg_orig["home"], mg_orig["away"])
+        if k in manual_map:
+            merged_2026.append(manual_map[k])
+            applied_keys.add(k)
+        else:
+            merged_2026.append(mg_orig)
+
+    for k, mg in manual_map.items():
+        if k not in applied_keys:
+            merged_2026.append(mg)
+
+    merged_2026.sort(key=lambda x: x["date"])
+    return games_2025, merged_2026
 
 def get_remaining_h2h(t1, t2, h2h_played, rem_1, rem_2):
     played = h2h_played.get(t1, {}).get(t2, 0)
@@ -507,7 +522,6 @@ def simulate_full_season_probabilities(league_teams, current_standings, remainin
 
     return final_rank_matrix, clinch_date_probs
 
-# ★ 優勝ラインテーブル（1段目は「-」、2段目から9-0が完全連続で整列）
 def build_aligned_championship_grid(top_teams_standings):
     teams_data = []
     for t in top_teams_standings[:3]:
@@ -534,12 +548,9 @@ def build_aligned_championship_grid(top_teams_standings):
 
     aligned_rows = [[base_p] for base_p in base_patterns]
 
-    # 各チームの全パターンを最も近い勝率の開始位置から隙間なく連続配置
     for td in teams_data[1:]:
         pats = td["patterns"]
         t_max_rate = pats[0]["rate"]
-
-        # 9-0 の勝率（.582）に最も近い阪神の行（11-1の.585）を開始インデックスとする
         best_start = min(range(num_rows), key=lambda r: abs(base_patterns[r]["rate"] - t_max_rate))
 
         assigned = [None] * num_rows
@@ -648,7 +659,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
                     records[a]["lose"] += 1
                     records[a]["away"]["lose"] += 1
                     h2h_details[h][a]["win"] += 1
-                    h2h_details[a][h]["lose"] += 1
+                    h2h_details[h][a]["lose"] += 1
                     if is_inter:
                         records[h]["interleague"]["win"] += 1
                         records[a]["interleague"]["lose"] += 1
@@ -735,7 +746,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
                 prob_away, prob_home = calc_log5_matchup(p_away, p_home, a_start, h_start, current_day_pitcher_stats, stadium)
 
                 hs, as_ = g.get("home_score"), g.get("away_score")
-                is_fin = (hs is not None and as_ is not None and str(hs).strip() != "" and str(as_).strip() != "")
+                is_fin = (g.get("status") == "finished" and hs is not None and as_ is not None)
 
                 if is_fin:
                     hs_int, as_int = int(hs), int(as_)
@@ -790,7 +801,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
     c_future = [g for g in actual_future_matches if g["home"] in CENTRAL_TEAMS or g["away"] in CENTRAL_TEAMS]
     p_future = [g for g in actual_future_matches if g["home"] in PACIFIC_TEAMS or g["away"] in PACIFIC_TEAMS]
 
-    dates_with_finished = [d for d in all_dates if any(g["date"] == d and g.get("home_score") is not None for g in games_2026)]
+    dates_with_finished = [d for d in all_dates if any(g["date"] == d and g.get("status") == "finished" for g in games_2026)]
     last_eval_date = dates_with_finished[-1] if dates_with_finished else all_dates[0]
     eval_c_file = history_snapshots.get(last_eval_date, history_snapshots[all_dates[0]])
     eval_c_table = eval_c_file["central"]
@@ -940,7 +951,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了（優勝ライン完全連続化・パークファクター組込版）：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了（手動DB完全正本化）：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
