@@ -2,109 +2,69 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>NPB 試合結果・先発 手動管理画面</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NPB 試合結果・先発 手動管理ダッシュボード</title>
   <style>
     :root {
       --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text-main: #0f172a;
-      --text-sub: #64748b;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
       --primary: #2563eb;
       --primary-hover: #1d4ed8;
-      --border: #e2e8f0;
-      --danger: #ef4444;
-      --success: #10b981;
-      --home-color: #1d4ed8;
-      --away-color: #b91c1c;
+      --danger: #dc2626;
+      --success: #16a34a;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg); color: var(--text-main); padding: 20px 12px 60px; }
-    .container { max-width: 900px; margin: 0 auto; }
-
-    header { text-align: center; margin-bottom: 24px; }
+    body { background-color: var(--bg); color: var(--text); padding: 20px 16px 80px; }
+    .container { max-width: 860px; margin: 0 auto; }
+    header { margin-bottom: 24px; text-align: center; }
     header h1 { font-size: 1.4rem; font-weight: 800; color: #1e3a8a; }
-    header p { font-size: 0.85rem; color: var(--text-sub); margin-top: 4px; }
-
-    .card {
-      background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
-      padding: 16px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 16px;
+    
+    .config-box {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
-
-    .config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 8px; }
+    .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-group label { font-size: 0.82rem; font-weight: 700; color: #334155; }
+    .form-group label { font-size: 0.8rem; font-weight: 700; color: #475569; }
     .form-group input, .form-group select {
-      padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
-      font-size: 0.95rem; outline: none; background: #fff;
+      padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.9rem; outline: none;
     }
 
-    .date-panel {
-      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+    .toolbar {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+      background: #eff6ff; padding: 12px 16px; border-radius: 10px; border: 1px solid #bfdbfe;
     }
-    .date-panel .date-box { display: flex; align-items: center; gap: 10px; font-weight: 700; }
-    .date-panel input[type="date"] { font-size: 1.05rem; font-weight: 700; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); }
-
-    .btn-action {
-      padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s;
-      border: 1px solid var(--border); background: #fff; color: var(--text-main); font-size: 0.9rem;
+    .date-control { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 0.95rem; }
+    .btn {
+      padding: 8px 18px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer;
+      border: none; transition: 0.2s;
     }
-    .btn-action:hover { background: #f1f5f9; border-color: var(--primary); color: var(--primary); }
-
-    .match-card {
-      background: #f8fafc; border: 1px solid var(--border); border-radius: 10px;
-      padding: 14px 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px;
-    }
-    .match-card.is-cancelled { background: #f1f5f9; opacity: 0.6; }
-
-    .card-top {
-      display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;
-    }
-    .chk-cancel-box { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 700; color: var(--danger); cursor: pointer; }
-    .chk-cancel-box input { width: 18px; height: 18px; cursor: pointer; }
-    .btn-del { background: none; border: none; color: #94a3b8; font-size: 1.25rem; cursor: pointer; }
-    .btn-del:hover { color: var(--danger); }
-
-    .vs-row {
-      display: grid; grid-template-columns: 1fr 65px 30px 65px 1fr;
-      align-items: center; gap: 8px;
-    }
-    .team-select-box { display: flex; flex-direction: column; gap: 4px; }
-    .team-select-box span { font-size: 0.75rem; font-weight: 700; }
-    .team-select-box span.home-lbl { color: var(--home-color); }
-    .team-select-box span.away-lbl { color: var(--away-color); text-align: right; }
-    .team-select-box select { width: 100%; padding: 8px; font-weight: 700; border-radius: 6px; border: 1px solid var(--border); font-size: 0.95rem; }
-
-    .score-input {
-      width: 100%; height: 44px; text-align: center; font-size: 1.35rem; font-weight: 800;
-      border-radius: 6px; border: 1px solid var(--border); background: #fff;
-    }
-    .score-input:disabled { background: #e2e8f0; color: #94a3b8; }
-    .vs-text { text-align: center; font-size: 0.9rem; font-weight: 800; color: #94a3b8; }
-
-    .pitcher-row {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-    }
-    .pitcher-input {
-      width: 100%; padding: 8px 10px; font-size: 0.85rem; border-radius: 6px; border: 1px solid var(--border);
-    }
-
-    .btn-add {
-      width: 100%; padding: 12px; border: 1.5px dashed #cbd5e1; border-radius: 8px;
-      background: transparent; color: var(--text-sub); font-weight: 700; cursor: pointer;
-      margin-bottom: 16px; transition: 0.2s; font-size: 0.95rem;
-    }
-    .btn-add:hover { background: #f1f5f9; border-color: var(--primary); color: var(--primary); }
-
-    .btn-save {
-      width: 100%; background: var(--primary); color: #fff; border: none; padding: 14px 20px;
-      border-radius: 8px; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: 0.2s;
-    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: #fff; color: #334155; border: 1px solid var(--border); }
+    .btn-save { background: var(--primary); color: #fff; font-size: 1.05rem; width: 100%; padding: 14px; margin-top: 16px; border-radius: 8px; }
     .btn-save:hover { background: var(--primary-hover); }
 
-    .status-msg { font-size: 0.92rem; font-weight: 700; text-align: center; margin-bottom: 8px; }
+    .game-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 18px 20px; margin-bottom: 14px; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .game-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .team-select-box { flex: 1; }
+    .score-input-box { width: 140px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .score-input { width: 50px; text-align: center; font-size: 1.25rem; font-weight: 800; padding: 4px; border-radius: 6px; border: 1px solid var(--border); }
+    .starter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    
+    .cancel-check {
+      display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: var(--danger); margin-bottom: 8px;
+    }
+    .del-btn {
+      position: absolute; top: 12px; right: 14px; color: #94a3b8; cursor: pointer; font-size: 1.1rem; border: none; background: transparent;
+    }
+    .del-btn:hover { color: var(--danger); }
+    .status-msg { text-align: center; margin-top: 12px; font-weight: 700; font-size: 0.9rem; }
     .status-msg.success { color: var(--success); }
     .status-msg.error { color: var(--danger); }
   </style>
@@ -113,15 +73,14 @@
 
   <div class="container">
     <header>
-      <h1>NPB 試合結果・先発 手動管理画面</h1>
-      <p>日々の試合結果・予告先発・雨天中止を暫定入力しGitHubへ即時反映します</p>
+      <h1>⚾ NPB 試合結果・先発 手動管理ダッシュボード</h1>
     </header>
 
-    <div class="card">
+    <div class="config-box">
       <div class="config-grid">
         <div class="form-group">
-          <label>リポジトリ名</label>
-          <input type="text" id="repo-name" value="sumgithu/npb-predictor">
+          <label>リポジトリ名 (例: user/repo)</label>
+          <input type="text" id="repo-name" placeholder="sumgithu/npb-predictor">
         </div>
         <div class="form-group">
           <label>GitHub Personal Access Token (repo権限必須)</label>
@@ -130,451 +89,261 @@
       </div>
     </div>
 
-    <div class="card date-panel">
-      <div class="date-box">
-        <label>入力対象日:</label>
+    <div class="toolbar">
+      <div class="date-control">
+        <label for="target-date">入力対象日:</label>
         <input type="date" id="target-date">
       </div>
-      <button type="button" class="btn-action" onclick="onReloadClick()">日程を再読込</button>
+      <button class="btn btn-secondary" onclick="loadGamesForDate()">日程を再読込</button>
     </div>
 
-    <div class="card">
-      <div id="matches-container"></div>
-      <button type="button" class="btn-add" onclick="addMatchCard()">＋ 対戦カードを追加</button>
+    <div id="games-container"></div>
 
-      <div id="status-msg" class="status-msg"></div>
-      <button type="button" class="btn-save" onclick="saveToGitHub()">データベースを更新保存</button>
-    </div>
+    <button class="btn btn-secondary" style="width: 100%; margin-top: 10px;" onclick="addNewGameCard()">＋ 対戦カードを追加</button>
+    <button class="btn btn-save" onclick="saveToGitHub()">データベースを更新保存</button>
+
+    <div id="status-msg" class="status-msg"></div>
   </div>
 
   <script>
-    const TEAMS = ["阪神", "巨人", "ＤｅＮＡ", "ヤクルト", "中日", "広島", "ソフトバンク", "日本ハム", "ロッテ", "楽天", "オリックス", "西武"];
-    const TEAM_ALIASES = {
-      "DeNA": "ＤｅＮＡ", "横浜": "ＤｅＮＡ", "横浜DeNA": "ＤｅＮＡ", "横浜ＤｅＮＡ": "ＤｅＮＡ",
-      "ソフトバンク": "ソフトバンク", "福岡ソフトバンク": "ソフトバンク", "福岡": "ソフトバンク",
-      "ロッテ": "ロッテ", "千葉ロッテ": "ロッテ",
-      "楽天": "楽天", "東北楽天": "楽天",
-      "オリックス": "オリックス", "オリックス・バファローズ": "オリックス",
-      "日本ハム": "日本ハム", "北海道日本ハム": "日本ハム", "日ハム": "日本ハム",
-      "西武": "西武", "埼玉西武": "西武",
-      "阪神": "阪神", "阪神タイガース": "阪神",
-      "巨人": "巨人", "読売": "巨人", "読売ジャイアンツ": "巨人",
-      "広島": "広島", "広島東洋": "広島",
-      "ヤクルト": "ヤクルト", "東京ヤクルト": "ヤクルト",
-      "中日": "中日", "中日ドラゴンズ": "中日"
-    };
+    const TEAMS = [
+      "阪神", "巨人", "ＤｅＮＡ", "ヤクルト", "中日", "広島",
+      "ソフトバンク", "日本ハム", "ロッテ", "楽天", "オリックス", "西武"
+    ];
 
-    function normalizeTeam(t) {
-      if (!t) return "";
-      const clean = t.trim();
-      return TEAM_ALIASES[clean] || clean;
+    let fullDbPayload = null;
+    let gamesList = [];
+    let sha = null;
+
+    // ★ 日本標準時（JST）の当日日付をデフォルト設定
+    function getJstDateString() {
+      const now = new Date();
+      const jstOffset = 9 * 60;
+      const jstTime = new Date(now.getTime() + (jstOffset + now.getTimezoneOffset()) * 60000);
+      const y = jstTime.getFullYear();
+      const m = String(jstTime.getMonth() + 1).padStart(2, '0');
+      const d = String(jstTime.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
     }
 
-    let gamesDbList = [];
-    let textScheduleMap = {};
-    let fileSha = "";
+    async function init() {
+      document.getElementById('repo-name').value = localStorage.getItem('npb_admin_repo') || '';
+      document.getElementById('gh-token').value = localStorage.getItem('npb_admin_token') || '';
 
-    const repoInput = document.getElementById('repo-name');
-    const tokenInput = document.getElementById('gh-token');
-    const dateInput = document.getElementById('target-date');
-    const statusMsg = document.getElementById('status-msg');
+      const targetInput = document.getElementById('target-date');
+      targetInput.value = getJstDateString();
 
-    window.addEventListener('DOMContentLoaded', () => {
-      let savedRepo = localStorage.getItem('npb_admin_repo') || 'sumgithu/npb-predictor';
-      if (savedRepo === 'sumgithu/npb-predict') savedRepo = 'sumgithu/npb-predictor';
-      repoInput.value = savedRepo;
-      tokenInput.value = localStorage.getItem('npb_admin_token') || '';
-
-      // 本日日付
-      dateInput.value = "2026-09-21";
-
-      repoInput.addEventListener('change', () => {
-        let val = repoInput.value.trim();
-        if (val === 'sumgithu/npb-predict') val = 'sumgithu/npb-predictor';
-        repoInput.value = val;
-        localStorage.setItem('npb_admin_repo', val);
+      targetInput.addEventListener('change', () => {
+        renderGamesForTargetDate();
       });
-      tokenInput.addEventListener('change', () => {
-        localStorage.setItem('npb_admin_token', tokenInput.value.trim());
-        loadAllSources();
-      });
-      
-      dateInput.addEventListener('change', () => renderDateMatches());
-      dateInput.addEventListener('input', () => renderDateMatches());
 
-      loadAllSources();
-    });
-
-    async function onReloadClick() {
-      await loadAllSources();
-      renderDateMatches();
+      await fetchCurrentDb();
     }
 
-    async function loadAllSources() {
-      let repo = repoInput.value.trim();
-      if (repo === 'sumgithu/npb-predict') repo = 'sumgithu/npb-predictor';
-      repoInput.value = repo;
+    async function fetchCurrentDb() {
+      const repo = document.getElementById('repo-name').value.trim();
+      const token = document.getElementById('gh-token').value.trim();
+      if (!repo) return;
 
-      const token = tokenInput.value.trim();
-      if (!repo || !token) {
-        showStatus("リポジトリ名とGitHub Personal Access Tokenを入力してください", "error");
-        renderDateMatches();
-        return;
-      }
-
-      showStatus("GitHubより最新データを同期中...", "");
+      const url = `https://api.github.com/repos/${repo}/contents/games_db.json`;
+      const headers = { 'Accept': 'application/vnd.github.v3+json' };
+      if (token) headers['Authorization'] = `token ${token}`;
 
       try {
-        // 1. games_db.json の読み込み（API認証経由）
-        const resDb = await fetch(`https://api.github.com/repos/${repo}/contents/games_db.json?t=${Date.now()}`, {
-          headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
-        });
-
-        if (resDb.ok) {
-          const data = await resDb.json();
-          fileSha = data.sha;
-          const decoded = decodeURIComponent(escape(atob(data.content)));
-          const parsed = JSON.parse(decoded);
-          if (Array.isArray(parsed)) {
-            gamesDbList = parsed;
-          } else if (parsed && Array.isArray(parsed.games)) {
-            gamesDbList = parsed.games;
-          } else {
-            gamesDbList = [];
-          }
-        }
-
-        // 2. マスターテキスト（2016-2026プロ野球レギュラーシーズン結果.txt）の読み込み（API認証経由・URLエンコード必須）
-        const encodedFilename = encodeURIComponent("2016-2026プロ野球レギュラーシーズン結果.txt");
-        const resTxt = await fetch(`https://api.github.com/repos/${repo}/contents/${encodedFilename}?t=${Date.now()}`, {
-          headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
-        });
-
-        if (resTxt.ok) {
-          const txtData = await resTxt.json();
-          const decodedTxt = decodeURIComponent(escape(atob(txtData.content)));
-          parseMasterText(decodedTxt);
-          showStatus("マスター日程および手動DBの完全同期完了", "success");
-        } else {
-          // フォールバック（npb_games_clean.csv）
-          const resCsv = await fetch(`https://api.github.com/repos/${repo}/contents/npb_games_clean.csv?t=${Date.now()}`, {
-            headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
-          });
-          if (resCsv.ok) {
-            const csvData = await resCsv.json();
-            const decodedCsv = decodeURIComponent(escape(atob(csvData.content)));
-            parseMasterText(decodedCsv);
-            showStatus("CSV日程および手動DBの完全同期完了", "success");
-          } else {
-            showStatus("手動DB同期完了（マスターテキストの取得に失敗しました）", "error");
-          }
-        }
-
-        renderDateMatches();
-      } catch (e) {
-        showStatus("同期通信エラー: " + e.message, "error");
-        renderDateMatches();
+        const res = await fetch(url, { headers });
+        if (!res.ok) throw new Error("DB取得失敗");
+        const data = await res.json();
+        sha = data.sha;
+        const decoded = decodeURIComponent(escape(atob(data.content)));
+        fullDbPayload = JSON.parse(decoded);
+        gamesList = Array.isArray(fullDbPayload) ? fullDbPayload : (fullDbPayload.games || []);
+        renderGamesForTargetDate();
+      } catch (err) {
+        document.getElementById('status-msg').innerText = "DBの取得に失敗しました。設定を確認してください。";
+        document.getElementById('status-msg').className = "status-msg error";
       }
     }
 
-    function parseMasterText(rawText) {
-      textScheduleMap = {};
-      const normalized = rawText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-      const secSplit = normalized.split(/\n2026\n/);
-      const sec2026 = secSplit.length > 1 ? secSplit[secSplit.length - 1] : normalized;
-
-      let curDate = null;
-      const lines = sec2026.split('\n');
-
-      for (let rawLine of lines) {
-        let line = rawLine.trim();
-        if (!line) continue;
-
-        // CSV形式
-        const csvParts = line.split(',').map(s => s.trim());
-        if (csvParts.length >= 6 && /^\d{4}-\d{2}-\d{2}$/.test(csvParts[0])) {
-          const d = csvParts[0];
-          const h = normalizeTeam(csvParts[1]);
-          const a = normalizeTeam(csvParts[2]);
-          if (TEAMS.includes(h) && TEAMS.includes(a)) {
-            if (!textScheduleMap[d]) textScheduleMap[d] = [];
-            const isCancelled = (csvParts[3] === "" || csvParts[7] === "1");
-            textScheduleMap[d].push({
-              home: h, away: a,
-              home_score: isCancelled ? null : (csvParts[3] !== "" ? parseInt(csvParts[3], 10) : null),
-              away_score: isCancelled ? null : (csvParts[4] !== "" ? parseInt(csvParts[4], 10) : null),
-              home_starter: csvParts[5] || "未定", away_starter: csvParts[5] || "未定",
-              home_pitcher: csvParts[5] || "", away_pitcher: csvParts[5] || "",
-              status: isCancelled ? "cancelled" : (csvParts[3] !== "" ? "finished" : "scheduled")
-            });
-            continue;
-          }
-        }
-
-        // テキスト形式
-        const dateMatch = line.match(/^(\d{1,2})\/(\d{1,2})(?:[\s\S]*?[（(][日月火水木金土][）)])?\s*(.*)$/);
-        if (dateMatch && parseInt(dateMatch[1], 10) <= 12 && parseInt(dateMatch[2], 10) <= 31) {
-          const m = parseInt(dateMatch[1], 10);
-          const d = parseInt(dateMatch[2], 10);
-          curDate = `2026-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-          if (!textScheduleMap[curDate]) textScheduleMap[curDate] = [];
-          line = dateMatch[3].trim();
-          if (!line) continue;
-        }
-
-        if (!curDate) continue;
-
-        if (line.includes("中止") || line.includes("ノーゲーム")) {
-          const canM = line.match(/([^\s\d]+)\s*(?:中止|ノーゲーム)\s*([^\s\d]+)/);
-          if (canM) {
-            const h = normalizeTeam(canM[1]);
-            const a = normalizeTeam(canM[2]);
-            if (TEAMS.includes(h) && TEAMS.includes(a)) {
-              textScheduleMap[curDate].push({
-                home: h, away: a,
-                home_score: null, away_score: null,
-                home_starter: "未定", away_starter: "未定",
-                home_pitcher: "未定", away_pitcher: "未定",
-                status: "cancelled"
-              });
-            }
-          }
-          continue;
-        }
-
-        const finM = line.match(/([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)/);
-        if (finM) {
-          const h = normalizeTeam(finM[1]);
-          const a = normalizeTeam(finM[4]);
-          if (TEAMS.includes(h) && TEAMS.includes(a)) {
-            textScheduleMap[curDate].push({
-              home: h, away: a,
-              home_score: parseInt(finM[2], 10), away_score: parseInt(finM[3], 10),
-              home_pitcher: "", away_pitcher: "",
-              home_starter: "未定", away_starter: "未定",
-              status: "finished"
-            });
-            continue;
-          }
-        }
-
-        const schedM = line.match(/([^\s\d]+)\s*-\s*([^\s\d]+)/);
-        if (schedM) {
-          const h = normalizeTeam(schedM[1]);
-          const a = normalizeTeam(schedM[2]);
-          if (TEAMS.includes(h) && TEAMS.includes(a)) {
-            const starters = [...line.matchAll(/先発[:：]\s*([^\s,，]+)/g)].map(m => m[1]);
-            textScheduleMap[curDate].push({
-              home: h, away: a,
-              home_score: null, away_score: null,
-              home_starter: starters[0] || "未定", away_starter: starters[1] || "未定",
-              home_pitcher: starters[0] || "", away_pitcher: starters[1] || "",
-              status: "scheduled"
-            });
-            continue;
-          }
-        }
-      }
-    }
-
-    function renderDateMatches() {
-      const date = dateInput.value;
-      const container = document.getElementById('matches-container');
+    function renderGamesForTargetDate() {
+      const container = document.getElementById('games-container');
       container.innerHTML = '';
+      const targetDate = document.getElementById('target-date').value;
 
-      // 1. 手動DBに対象日のデータがあるか
-      const manualDayGames = gamesDbList.filter(g => g && g.date === date);
-      if (manualDayGames.length > 0) {
-        manualDayGames.forEach(g => addMatchCard(g));
+      const dayGames = gamesList.filter(g => g.date === targetDate);
+
+      if (dayGames.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding: 24px; color:#64748b; background:#fff; border-radius:8px; border:1px solid #e2e8f0;">この日の登録データはありません。「＋ 対戦カードを追加」から作成できます。</div>`;
         return;
       }
 
-      // 2. なければマスターテキスト側の日程を展開
-      const masterGames = textScheduleMap[date] || [];
-      if (masterGames.length > 0) {
-        masterGames.forEach(g => addMatchCard(g));
-        return;
-      }
-
-      const emptyNotice = document.createElement('div');
-      emptyNotice.style.cssText = "padding: 24px; text-align: center; color: #64748b; font-weight: 700;";
-      emptyNotice.innerText = `この日（${date}）の登録日程はありません。「＋ 対戦カードを追加」から作成できます。`;
-      container.appendChild(emptyNotice);
+      dayGames.forEach((g, idx) => {
+        container.appendChild(createGameCardElement(g, idx));
+      });
     }
 
-    function toggleCancelRow(chk) {
-      const card = chk.closest('.match-card');
-      const scoreInputs = card.querySelectorAll('.score-input');
-
-      if (chk.checked) {
-        card.classList.add('is-cancelled');
-        scoreInputs.forEach(input => {
-          input.value = '';
-          input.disabled = true;
-        });
-      } else {
-        card.classList.remove('is-cancelled');
-        scoreInputs.forEach(input => input.disabled = false);
-      }
-    }
-
-    function addMatchCard(data = null) {
-      const container = document.getElementById('matches-container');
-      
-      if (container.children.length === 1 && container.children[0].tagName === 'DIV' && !container.children[0].classList.contains('match-card')) {
-        container.innerHTML = '';
-      }
-
-      const isCancelled = data && data.status === "cancelled";
+    function createGameCardElement(g, index) {
       const card = document.createElement('div');
-      card.className = `match-card ${isCancelled ? 'is-cancelled' : ''}`;
+      card.className = 'game-card';
+      card.dataset.index = index;
 
-      const selHome = data && data.home ? normalizeTeam(data.home) : "阪神";
-      const selAway = data && data.away ? normalizeTeam(data.away) : "ＤｅＮＡ";
-
-      const homeOptions = TEAMS.map(t => `<option value="${t}" ${selHome === t ? 'selected' : ''}>${t}</option>`).join('');
-      const awayOptions = TEAMS.map(t => `<option value="${t}" ${selAway === t ? 'selected' : ''}>${t}</option>`).join('');
-
-      const homeScore = data && data.home_score !== null && data.home_score !== undefined ? data.home_score : '';
-      const awayScore = data && data.away_score !== null && data.away_score !== undefined ? data.away_score : '';
-      const homePitcher = data ? (data.home_starter || data.home_pitcher || '') : '';
-      const awayPitcher = data ? (data.away_starter || data.away_pitcher || '') : '';
+      const isCancelled = g.status === 'cancelled';
+      const hs = g.home_score !== null && g.home_score !== undefined ? g.home_score : '';
+      const as_ = g.away_score !== null && g.away_score !== undefined ? g.away_score : '';
 
       card.innerHTML = `
-        <div class="card-top">
-          <label class="chk-cancel-box">
-            <input type="checkbox" class="chk-cancel" onchange="toggleCancelRow(this)" ${isCancelled ? 'checked' : ''}>
-            <span>雨天等中止</span>
-          </label>
-          <button type="button" class="btn-del" title="削除" onclick="this.closest('.match-card').remove()">✕</button>
-        </div>
-
-        <div class="vs-row">
+        <button class="del-btn" onclick="removeCard(this)">✕</button>
+        <label class="cancel-check">
+          <input type="checkbox" class="is-cancelled" ${isCancelled ? 'checked' : ''} onchange="toggleCancel(this)"> 雨天等中止
+        </label>
+        <div class="game-row">
           <div class="team-select-box">
-            <span class="home-lbl">ホーム</span>
-            <select class="home-team">${homeOptions}</select>
+            <div style="font-size:0.75rem; color:#64748b; font-weight:700; margin-bottom:2px;">ホーム</div>
+            <select class="home-team" style="width:100%;">
+              ${TEAMS.map(t => `<option value="${t}" ${t === g.home ? 'selected' : ''}>${t}</option>`).join('')}
+            </select>
           </div>
-
-          <input type="number" class="score-input home-score" placeholder="点" min="0" max="35" value="${homeScore}" ${isCancelled ? 'disabled' : ''}>
-
-          <div class="vs-text">VS</div>
-
-          <input type="number" class="score-input away-score" placeholder="点" min="0" max="35" value="${awayScore}" ${isCancelled ? 'disabled' : ''}>
-
-          <div class="team-select-box">
-            <span class="away-lbl">ビジター</span>
-            <select class="away-team">${awayOptions}</select>
+          <div class="score-input-box">
+            <input type="text" class="score-input home-score" value="${hs}" placeholder="点" ${isCancelled ? 'disabled' : ''}>
+            <span style="font-weight:800; color:#94a3b8;">vs</span>
+            <input type="text" class="score-input away-score" value="${as_}" placeholder="点" ${isCancelled ? 'disabled' : ''}>
+          </div>
+          <div class="team-select-box" style="text-align:right;">
+            <div style="font-size:0.75rem; color:#64748b; font-weight:700; margin-bottom:2px;">ビジター</div>
+            <select class="away-team" style="width:100%;">
+              ${TEAMS.map(t => `<option value="${t}" ${t === g.away ? 'selected' : ''}>${t}</option>`).join('')}
+            </select>
           </div>
         </div>
-
-        <div class="pitcher-row">
-          <input type="text" class="pitcher-input home-pitcher" placeholder="ホーム予告先発 / 勝利投手" value="${homePitcher}">
-          <input type="text" class="pitcher-input away-pitcher" placeholder="ビジター予告先発 / 敗戦投手" value="${awayPitcher}">
+        <div class="starter-row">
+          <div class="form-group">
+            <input type="text" class="home-starter" value="${g.home_starter || g.home_pitcher || ''}" placeholder="ホーム先発/勝利投手">
+          </div>
+          <div class="form-group">
+            <input type="text" class="away-starter" value="${g.away_starter || g.away_pitcher || ''}" placeholder="ビジター先発/敗戦投手">
+          </div>
         </div>
       `;
-      container.appendChild(card);
+      return card;
+    }
+
+    function toggleCancel(el) {
+      const card = el.closest('.game-card');
+      const inputs = card.querySelectorAll('.score-input');
+      inputs.forEach(inp => inp.disabled = el.checked);
+    }
+
+    function removeCard(el) {
+      el.closest('.game-card').remove();
+    }
+
+    function addNewGameCard() {
+      const container = document.getElementById('games-container');
+      const emptyG = {
+        home: "阪神", away: "巨人",
+        home_score: null, away_score: null,
+        home_starter: "", away_starter: "",
+        status: "scheduled"
+      };
+      container.appendChild(createGameCardElement(emptyG, -1));
     }
 
     async function saveToGitHub() {
-      let repo = repoInput.value.trim();
-      if (repo === 'sumgithu/npb-predict') repo = 'sumgithu/npb-predictor';
-      repoInput.value = repo;
-      localStorage.setItem('npb_admin_repo', repo);
+      const repo = document.getElementById('repo-name').value.trim();
+      const token = document.getElementById('gh-token').value.trim();
+      const targetDate = document.getElementById('target-date').value;
+      const statusEl = document.getElementById('status-msg');
 
-      const token = tokenInput.value.trim();
-      const date = dateInput.value;
-
-      if (!repo || !token || !date) {
-        showStatus("リポジトリ名とGitHub Personal Access Tokenを入力してください", "error");
+      if (!repo || !token) {
+        alert("リポジトリ名とPersonal Access Tokenを入力してください。");
         return;
       }
 
-      const cards = document.querySelectorAll('.match-card');
-      const newDayGames = [];
+      localStorage.setItem('npb_admin_repo', repo);
+      localStorage.setItem('npb_admin_token', token);
 
-      for (const card of cards) {
-        const home = card.querySelector('.home-team').value;
-        const away = card.querySelector('.away-team').value;
-        const homeScoreStr = card.querySelector('.home-score').value.trim();
-        const awayScoreStr = card.querySelector('.away-score').value.trim();
-        const homePitcher = card.querySelector('.home-pitcher').value.trim();
-        const awayPitcher = card.querySelector('.away-pitcher').value.trim();
-        const isCancelled = card.querySelector('.chk-cancel').checked;
+      const cards = document.querySelectorAll('.game-card');
+      const updatedDayGames = [];
 
-        if (away === home) continue;
+      cards.forEach(c => {
+        const home = c.querySelector('.home-team').value;
+        const away = c.querySelector('.away-team').value;
+        const isCan = c.querySelector('.is-cancelled').checked;
+        const hsRaw = c.querySelector('.home-score').value.trim();
+        const asRaw = c.querySelector('.away-score').value.trim();
+        const hStart = c.querySelector('.home-starter').value.trim();
+        const aStart = c.querySelector('.away-starter').value.trim();
 
         let status = "scheduled";
         let hs = null;
         let as_ = null;
 
-        if (isCancelled) {
+        if (isCan) {
           status = "cancelled";
-        } else if (awayScoreStr !== "" && homeScoreStr !== "") {
+        } else if (hsRaw !== "" && asRaw !== "") {
           status = "finished";
-          hs = parseInt(homeScoreStr, 10);
-          as_ = parseInt(awayScoreStr, 10);
+          hs = parseInt(hsRaw, 10);
+          as_ = parseInt(asRaw, 10);
         }
 
-        newDayGames.push({
-          date: date,
+        updatedDayGames.push({
+          date: targetDate,
           home: home,
           away: away,
           home_score: hs,
           away_score: as_,
-          home_starter: homePitcher || "未定",
-          away_starter: awayPitcher || "未定",
-          home_pitcher: homePitcher,
-          away_pitcher: awayPitcher,
+          home_starter: hStart || "未定",
+          away_starter: aStart || "未定",
+          home_pitcher: hStart || "未定",
+          away_pitcher: aStart || "未定",
           status: status
         });
-      }
+      });
 
-      gamesDbList = gamesDbList.filter(g => g && g.date !== date);
-      gamesDbList.push(...newDayGames);
-      gamesDbList.sort((a, b) => a.date.localeCompare(b.date));
+      const otherGames = gamesList.filter(g => g.date !== targetDate);
+      const newAllGames = otherGames.concat(updatedDayGames);
+      newAllGames.sort((a, b) => a.date.localeCompare(b.date));
 
-      showStatus("GitHubへ保存中...", "");
+      let payloadObj = Array.isArray(fullDbPayload) ? newAllGames : { games: newAllGames };
+      const contentStr = JSON.stringify(payloadObj, null, 2);
+      const encoded = btoa(unescape(encodeURIComponent(contentStr)));
 
-      const payloadObj = {
-        season: 2026,
-        games: gamesDbList
-      };
-
-      const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(payloadObj, null, 2))));
-      const payload = {
-        message: `Update results/starters for ${date} via admin UI`,
-        content: contentBase64,
-        sha: fileSha || undefined
-      };
+      statusEl.innerText = "GitHubへ保存中...";
+      statusEl.className = "status-msg";
 
       try {
-        const res = await fetch(`https://api.github.com/repos/${repo}/contents/games_db.json`, {
+        const url = `https://api.github.com/repos/${repo}/contents/games_db.json`;
+        const res = await fetch(url, {
           method: 'PUT',
           headers: {
-            Authorization: `token ${token}`,
-            Accept: 'application/vnd.github.v3+json',
+            'Authorization': `token ${token}`,
+            'Accept': 'application/vnd.github.v3+json',
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({
+            message: `Update results/starters for ${targetDate}`,
+            content: encoded,
+            sha: sha
+          })
         });
 
-        if (res.ok) {
-          const resData = await res.json();
-          fileSha = resData.content.sha;
-          showStatus(`保存完了！ (${date} のデータを更新しました。Actionsが自動実行されます)`, "success");
-        } else {
-          const err = await res.json();
-          showStatus(`保存失敗: ${err.message}`, "error");
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.message || "更新失敗");
         }
-      } catch (e) {
-        showStatus("通信エラーで保存できませんでした", "error");
+
+        const resData = await res.json();
+        sha = resData.content.sha;
+        gamesList = newAllGames;
+
+        statusEl.innerText = `保存完了！（${targetDate} のデータを更新しました。Actionsが自動実行されます）`;
+        statusEl.className = "status-msg success";
+      } catch (err) {
+        statusEl.innerText = `保存エラー: ${err.message}`;
+        statusEl.className = "status-msg error";
       }
     }
 
-    function showStatus(text, type) {
-      statusMsg.className = `status-msg ${type}`;
-      statusMsg.innerText = text;
-    }
+    init();
   </script>
 </body>
 </html>
