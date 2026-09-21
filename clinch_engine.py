@@ -221,7 +221,7 @@ def load_all_games():
                     mg["home_score"] = int(hs_raw)
                     mg["away_score"] = int(as_raw)
                     mg["status"] = "finished"
-                elif mg.get("status"] == "cancelled":
+                elif mg.get("status") == "cancelled":
                     mg["home_score"] = None
                     mg["away_score"] = None
                 else:
