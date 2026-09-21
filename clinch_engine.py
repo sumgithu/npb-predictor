@@ -194,7 +194,6 @@ def parse_year_games_from_text(raw_text, target_year):
 
     return games
 
-# ★ 手動管理DB（games_db.json）を厳格に優先マージするローダー
 def load_all_games():
     games_2025 = []
     games_2026_master = []
@@ -227,7 +226,6 @@ def load_all_games():
                 hs_val = mg.get("home_score")
                 as_val = mg.get("away_score")
 
-                # スコアが 0 を含む有効な数値または数字文字列であるかを厳密に判定
                 is_fin = False
                 if hs_val is not None and as_val is not None:
                     hs_s = str(hs_val).strip()
@@ -258,7 +256,6 @@ def load_all_games():
     merged_2026 = []
     applied_keys = set()
 
-    # 手動DBのレコードをマスターに優先適用
     for mg_orig in games_2026_master:
         k = (mg_orig["date"], mg_orig["home"], mg_orig["away"])
         if k in manual_map:
@@ -614,6 +611,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
         h2h_played = {t1: {t2: 0 for t2 in all_teams} for t1 in all_teams}
         h2h_details = {t1: {t2: {"win": 0, "lose": 0, "draw": 0} for t2 in all_teams} for t1 in all_teams}
 
+        # ★ 修正②: target_date 時点の投手統計を初期化
         current_day_pitcher_stats = {k: dict(v) for k, v in base_pitcher_stats.items()}
 
         for g in games_2026:
@@ -623,6 +621,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
             hs, as_ = int(g["home_score"]), int(g["away_score"])
             g_date = g["date"]
 
+            # ★ 修正②: target_date より過去の試合のみをチーム得失点・投手成績に反映（未来情報リークの完全防止）
             if g_date < target_date:
                 team_total_stats_before_today[h]["rs"] += hs
                 team_total_stats_before_today[h]["ra"] += as_
@@ -641,6 +640,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
                     if as_ > hs: current_day_pitcher_stats[ap]["win"] += 1
                     elif as_ < hs: current_day_pitcher_stats[ap]["lose"] += 1
 
+            # 順位表・対戦成績は target_date 当日までの試合を集計
             if g_date <= target_date:
                 records[h]["games"] += 1
                 records[a]["games"] += 1
@@ -658,8 +658,9 @@ def build_all_history_with_predictions(games_2025, games_2026):
                     records[h]["home"]["win"] += 1
                     records[a]["lose"] += 1
                     records[a]["away"]["lose"] += 1
+                    # ★ 修正①: H2Hホーム勝利時の相手負けカウントバグを完全修正
                     h2h_details[h][a]["win"] += 1
-                    h2h_details[h][a]["lose"] += 1
+                    h2h_details[a][h]["lose"] += 1
                     if is_inter:
                         records[h]["interleague"]["win"] += 1
                         records[a]["interleague"]["lose"] += 1
@@ -951,7 +952,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了（手動DB完全正本化）：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了（H2H・投手リーク修正完全版）：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
