@@ -5,13 +5,13 @@
       "date": "2026-09-21",
       "home": "中日",
       "away": "広島",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 10,
+      "away_score": 0,
       "home_starter": "高橋宏",
       "away_starter": "高橋優",
       "home_pitcher": "高橋宏",
       "away_pitcher": "高橋優",
-      "status": "scheduled"
+      "status": "finished"
     },
     {
       "date": "2026-09-21",
@@ -29,13 +29,13 @@
       "date": "2026-09-21",
       "home": "日本ハム",
       "away": "オリックス",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 5,
+      "away_score": 3,
       "home_starter": "前田健",
       "away_starter": "上茶谷",
       "home_pitcher": "前田健",
       "away_pitcher": "上茶谷",
-      "status": "scheduled"
+      "status": "finished"
     },
     {
       "date": "2026-09-21",
