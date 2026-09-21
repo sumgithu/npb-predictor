@@ -84,7 +84,6 @@ def parse_year_games_from_text(raw_text, target_year):
         if not line:
             continue
 
-        # CSV形式
         csv_parts = [p.strip() for p in line.split(',')]
         if len(csv_parts) >= 6 and re.match(r'^\d{4}-\d{2}-\d{2}$', csv_parts[0]):
             c_date, h_raw, a_raw = csv_parts[0], csv_parts[1], csv_parts[2]
@@ -112,7 +111,6 @@ def parse_year_games_from_text(raw_text, target_year):
                     })
                 continue
 
-        # テキスト形式（日付行）
         date_m = re.match(r'^(\d{1,2})\/(\d{1,2})(?:[（(][日月火水木金土][）)])?\s*(.*)$', line)
         if date_m:
             m, d = int(date_m.group(1)), int(date_m.group(2))
@@ -124,7 +122,6 @@ def parse_year_games_from_text(raw_text, target_year):
         if not current_date:
             continue
 
-        # 中止行の検出
         if "中止" in line or "ノーゲーム" in line:
             match_can = re.search(r'([^\s\d]+)\s*(?:中止|ノーゲーム)\s*([^\s\d]+)', line)
             if match_can:
@@ -140,7 +137,6 @@ def parse_year_games_from_text(raw_text, target_year):
                     })
             continue
 
-        # 試合終了行の検出
         match_fin = re.search(r'([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)', line)
         if match_fin:
             h = normalize_team(match_fin.group(1))
@@ -172,7 +168,6 @@ def parse_year_games_from_text(raw_text, target_year):
                 })
             continue
 
-        # 予告先発・予定行の検出
         match_sched = re.search(r'([^\s\d]+)\s*-\s*([^\s\d]+)', line)
         if match_sched:
             h = normalize_team(match_sched.group(1))
@@ -226,7 +221,7 @@ def load_all_games():
                     mg["home_score"] = int(hs_raw)
                     mg["away_score"] = int(as_raw)
                     mg["status"] = "finished"
-                elif mg.get("status") == "cancelled":
+                elif mg.get("status"] == "cancelled":
                     mg["home_score"] = None
                     mg["away_score"] = None
                 else:
@@ -623,8 +618,6 @@ def build_all_history_with_predictions(games_2025, games_2026):
         h2h_details = {t1: {t2: {"win": 0, "lose": 0, "draw": 0} for t2 in all_teams} for t1 in all_teams}
 
         for g in games_2026:
-            if g.get("status"] == "cancelled" if "status" in g else False or g.get("home_score") is None or g.get("away_score") is None:
-                continue
             if g.get("status") == "cancelled" or g.get("home_score") is None or g.get("away_score") is None:
                 continue
             h, a = g["home"], g["away"]
@@ -922,7 +915,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了（構文エラー解消版）：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
