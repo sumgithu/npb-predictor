@@ -174,28 +174,22 @@ def load_all_games():
     games_2025 = []
     games_2026_master = []
 
-    # マスターテキストファイルの読み込み（存在しない場合は npb_games_clean.csv をフォールバック参照）
-    active_master_file = TEXT_LOG_FILE if os.path.exists(TEXT_LOG_FILE) else "npb_games_clean.csv"
-    if os.path.exists(active_master_file):
-        with open(active_master_file, "r", encoding="utf-8") as f:
+    # 1. マスターテキストファイルの読み込み
+    active_master = TEXT_LOG_FILE if os.path.exists(TEXT_LOG_FILE) else "npb_games_clean.csv"
+    if os.path.exists(active_master):
+        with open(active_master, "r", encoding="utf-8") as f:
             raw_text = f.read()
         games_2025 = parse_year_games_from_text(raw_text, 2025)
         games_2026_master = parse_year_games_from_text(raw_text, 2026)
 
-    # 手動暫定DB（games_db.json）との厳密重複排除マージ
+    # 2. 手動暫定DB（games_db.json）とのマージ
     if os.path.exists(MANUAL_DB_FILE):
         try:
             with open(MANUAL_DB_FILE, "r", encoding="utf-8") as f:
                 manual_payload = json.load(f)
 
-            if isinstance(manual_payload, list):
-                manual_games = manual_payload
-            elif isinstance(manual_payload, dict) and "games" in manual_payload:
-                manual_games = manual_payload["games"]
-            else:
-                manual_games = []
+            manual_games = manual_payload if isinstance(manual_payload, list) else manual_payload.get("games", [])
 
-            # チーム名を完全正規化してマップ化
             manual_map = {}
             for mg in manual_games:
                 if not mg or "date" not in mg or "home" not in mg or "away" not in mg:
@@ -205,7 +199,6 @@ def load_all_games():
                 mg["home"] = norm_h
                 mg["away"] = norm_a
 
-                # スコア判定
                 hs_raw = str(mg.get("home_score", "")).strip()
                 as_raw = str(mg.get("away_score", "")).strip()
                 if hs_raw != "" and as_raw != "" and hs_raw != "null" and as_raw != "null":
@@ -220,8 +213,7 @@ def load_all_games():
                     mg["away_score"] = None
                     mg["status"] = "scheduled"
 
-                k = (mg["date"], norm_h, norm_a)
-                manual_map[k] = mg
+                manual_map[(mg["date"], norm_h, norm_a)] = mg
 
             merged_2026 = []
             applied_keys = set()
@@ -229,13 +221,12 @@ def load_all_games():
             for mg_orig in games_2026_master:
                 k = (mg_orig["date"], mg_orig["home"], mg_orig["away"])
                 if k in manual_map:
-                    # 手動暫定側に有効なデータがあれば差し替え
+                    # 手動DBにデータがあればそちらで上書き（予告先発等）
                     merged_2026.append(manual_map[k])
                     applied_keys.add(k)
                 else:
                     merged_2026.append(mg_orig)
 
-            # テキスト日程にない追加カードのみをマージ
             for k, mg in manual_map.items():
                 if k not in applied_keys:
                     merged_2026.append(mg)
@@ -604,7 +595,6 @@ def build_all_history_with_predictions(games_2025, games_2026):
         h2h_details = {t1: {t2: {"win": 0, "lose": 0, "draw": 0} for t2 in all_teams} for t1 in all_teams}
 
         for g in games_2026:
-            # スコアが入っていない・中止のカードは勝敗に算入しない
             if g.get("status") == "cancelled" or g.get("home_score") is None or g.get("away_score") is None:
                 continue
             h, a = g["home"], g["away"]
@@ -875,6 +865,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
         "pacific_lines_grid": p_lines_grid
     }
 
+    # 基準日の初期値：日本時間当日（9/21）が存在すればそれを使用
     jst_today = (datetime.datetime.utcnow() + datetime.timedelta(hours=9)).strftime("%Y-%m-%d")
     default_display_date = jst_today if jst_today in all_dates else last_eval_date
 
@@ -894,7 +885,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了（パ・リーグ厳密重複排除適用）：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
