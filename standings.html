@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>プロ野球チャンピョンシップナンバー＆対戦成績解析 | マジックナンバー・優勝確率・CSクリンチ</title>
-  <meta name="description" content="プロ野球（NPB）セ・パ両リーグの自力優勝チャンピョンシップナンバー（クリンチナンバー）、マジックナンバー、全143試合完走モンテカルロシミュレーションによる優勝確率およびCS進出確率、残試合数別優勝ラインをリアルタイム解析。">
-  <meta name="keywords" content="プロ野球,チャンピョンシップナンバー,クリンチナンバー,マジックナンバー,優勝確率,CS進出確率,順位表,対戦成績,ピタゴラス勝率,Log5法">
+  <meta name="description" content="プロ野球（NPB）セ・パ両リーグの自力優勝チャンピョンシップナンバー、マジックナンバー、全143試合完走モンテカルロシミュレーションによる優勝確率およびCS進出確率、残試合数別優勝ラインをリアルタイム解析。">
+  <meta name="keywords" content="プロ野球,チャンピョンシップナンバー,マジックナンバー,優勝確率,CS進出確率,順位表,対戦成績,ピタゴラス勝率,Log5法">
   <style>
     :root {
       --bg: #f8fafc;
@@ -94,14 +94,19 @@
     }
     .badge-dash { color: #94a3b8; font-weight: 500; }
 
-    /* 順位表直下のバッジ解説ガイド */
+    /* 順位表直下のバッジ解説ガイド（ズレ防止レイアウト） */
     .badge-guide-panel {
       background: #ffffff; border: 1px solid var(--border); border-radius: 10px;
-      padding: 12px 16px; margin-bottom: 24px; font-size: 0.82rem; color: #334155;
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;
+      padding: 14px 18px; margin-bottom: 24px; font-size: 0.84rem; color: #334155;
+      display: flex; flex-direction: column; gap: 10px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
-    .badge-guide-item { display: flex; align-items: center; gap: 8px; line-height: 1.4; }
+    .badge-guide-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;
+    }
+    .badge-guide-item {
+      display: flex; align-items: center; gap: 10px; line-height: 1.45;
+    }
     .badge-guide-item .desc { color: #475569; }
 
     /* 2. 予想勝利確率／試合結果カード */
@@ -234,7 +239,7 @@
         <span>💡</span> チャンピョンシップナンバー（CN）とは？ マジックナンバーとの違い
       </div>
       <div class="cn-concept-desc">
-        従来のマジックナンバーは「他球団の自力優勝がすべて消滅した瞬間」に初めて点灯しますが、<strong>CN（クリンチナンバー）は他球団の自力優勝の有無にかかわらず、全球団を対象に常時計算・点灯</strong>します。<br>
+        従来のマジックナンバーは「他球団の自力優勝がすべて消滅した瞬間」に初めて点灯しますが、<strong>CN（チャンピョンシップナンバー）は他球団の自力優勝の有無にかかわらず、全球団を対象に常時計算・点灯</strong>します。<br>
         自力優勝が消滅して自チームの残り試合数以上の勝利が必要になった場合でも、数学的な優勝・進出可能性が完全消滅（エリミネーション）しない限り、<strong>「優勝（あるいは順位確定）への全体的な近さ・必要な勝数」を表す指標</strong>として表示され続けます。
       </div>
     </div>
@@ -278,23 +283,27 @@
       </table>
     </div>
 
-    <!-- 順位表直下のCNバッジ凡例ガイド -->
+    <!-- 順位表直下のCNバッジ凡例ガイド（レイアウト修復版） -->
     <div class="badge-guide-panel">
-      <div class="badge-guide-item">
-        <span class="badge badge-magic">11</span>
-        <div class="desc"><strong>自力確定可能</strong>：残り試合数の範囲内であり、自チームの勝利のみで確定できる必要勝利数。</div>
+      <div class="badge-guide-row">
+        <div class="badge-guide-item">
+          <span class="badge badge-magic">11</span>
+          <div class="desc"><strong>自力確定可能</strong>：残り試合数の範囲内で、自チームの勝利のみで確定できる必要勝利数。</div>
+        </div>
+        <div class="badge-guide-item">
+          <span class="badge badge-eliminated">◇13◇</span>
+          <div class="desc"><strong>自力消滅（可能性あり）</strong>：残り試合数を超える勝数が必要。自力確定は消滅したが他力アシストで逆転可能な状態。</div>
+        </div>
       </div>
-      <div class="badge-guide-item">
-        <span class="badge badge-eliminated">◇13◇</span>
-        <div class="desc"><strong>自力消滅（可能性あり）</strong>：残り試合数を超える勝数が必要。自力確定は消滅したが他力アシストで逆転可能な状態。</div>
-      </div>
-      <div class="badge-guide-item">
-        <span class="badge-dash" style="font-size:1.1rem; font-weight:800; min-width:28px; text-align:center;">-</span>
-        <div class="desc"><strong>完全消滅（エリミネーション）</strong>：相手が全敗し自チームが全勝しても届かない数学的消滅状態。</div>
-      </div>
-      <div class="badge-guide-item">
-        <span class="badge badge-fixed">確定</span>
-        <div class="desc"><strong>順位確定</strong>：他チームの結果を問わず、その順位以上（またはCS進出）が数学的に100%決定した状態。</div>
+      <div class="badge-guide-row">
+        <div class="badge-guide-item">
+          <span class="badge-dash" style="font-size:1.1rem; font-weight:800; min-width:32px; text-align:center;">-</span>
+          <div class="desc"><strong>完全消滅（エリミネーション）</strong>：相手が全敗し自チームが全勝しても届かない数学的消滅状態。</div>
+        </div>
+        <div class="badge-guide-item">
+          <span class="badge badge-fixed">確定</span>
+          <div class="desc"><strong>順位確定</strong>：他チームの結果を問わず、その順位以上（またはCS進出）が数学的に100%決定した状態。</div>
+        </div>
       </div>
     </div>
 
@@ -366,10 +375,10 @@
         <div class="note-item">
           <dl>
             <dt>予想勝利確率（独自Log5予測モデル）</dt>
-            <dd>シーズン通算の得失点力から求めたピタゴラス期待勝率を基礎とし、NPBホームアドバンテージ補正および登板実績に基づく先発投手の動的ベイズ補正を反映して各試合の勝率を算出しています。</dd>
+            <dd>シーズン通算の得失点力から求めたピタゴラス期待勝率（球場パークファクター連動）を基礎とし、NPBホームアドバンテージ補正および登板実績に基づく先発投手の動的ベイズ補正を反映して各試合の勝率を算出しています。</dd>
 
             <dt>全143試合完走モンテカルロ・シミュレーション（優勝確率・CS確率）</dt>
-            <dd>未確定の全日程について、チーム通算得失点力・残日程・ホームアドバンテージを考慮して3,000回のシーズン完走シミュレーションを実行。順位確定確率を導出しています（※過去日付表示時は試合数に応じたベイズ事前分布回帰モデルにより算出）。</dd>
+            <dd>未確定の全日程について、チーム通算得失点力・残日程・ホームアドバンテージ・球場特性を考慮して3,000回のシーズン完走シミュレーションを実行。順位確定確率を導出しています（※過去日付表示時は試合数に応じたベイズ事前分布回帰モデルにより算出）。</dd>
           </dl>
         </div>
 
