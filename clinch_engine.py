@@ -398,9 +398,10 @@ def get_pitcher_multiplier(pitcher_name, pitcher_stats):
         return 1.0
     st = pitcher_stats.get(pitcher_name, {"win": 0, "lose": 0})
     w, l = st["win"], st["lose"]
+    # ラプラス・平滑化により極端な偏りを抑止（3勝3敗を事前分布とする）
     rate = (w + 3.0) / (w + l + 6.0)
     odds = rate / (1.0 - rate)
-    return math.pow(odds, 0.35)
+    return math.pow(odds, 0.25)  # 指数を0.35から0.25へ緩和し過剰な補正を抑制
 
 def calc_log5_matchup(p_away, p_home, away_pitcher, home_pitcher, pitcher_stats):
     denom = p_away + p_home - (2.0 * p_away * p_home)
@@ -578,7 +579,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
     all_teams = CENTRAL_TEAMS + PACIFIC_TEAMS
 
     prior_stats = {t: {"games": 0, "rs": 0, "ra": 0} for t in all_teams}
-    pitcher_stats = {}
+    base_pitcher_stats = {}
 
     for g in games_2025:
         if g.get("status") == "finished" and g.get("home_score") is not None:
@@ -594,13 +595,13 @@ def build_all_history_with_predictions(games_2025, games_2026):
             hp = g.get("home_pitcher")
             ap = g.get("away_pitcher")
             if hp:
-                if hp not in pitcher_stats: pitcher_stats[hp] = {"win": 0, "lose": 0}
-                if hs > as_: pitcher_stats[hp]["win"] += 1
-                elif hs < as_: pitcher_stats[hp]["lose"] += 1
+                if hp not in base_pitcher_stats: base_pitcher_stats[hp] = {"win": 0, "lose": 0}
+                if hs > as_: base_pitcher_stats[hp]["win"] += 1
+                elif hs < as_: base_pitcher_stats[hp]["lose"] += 1
             if ap:
-                if ap not in pitcher_stats: pitcher_stats[ap] = {"win": 0, "lose": 0}
-                if as_ > hs: pitcher_stats[ap]["win"] += 1
-                elif as_ < hs: pitcher_stats[ap]["lose"] += 1
+                if ap not in base_pitcher_stats: base_pitcher_stats[ap] = {"win": 0, "lose": 0}
+                if as_ > hs: base_pitcher_stats[ap]["win"] += 1
+                elif as_ < hs: base_pitcher_stats[ap]["lose"] += 1
 
     all_dates = sorted(list({g["date"] for g in games_2026}))
     history_snapshots = {}
@@ -617,6 +618,9 @@ def build_all_history_with_predictions(games_2025, games_2026):
         h2h_played = {t1: {t2: 0 for t2 in all_teams} for t1 in all_teams}
         h2h_details = {t1: {t2: {"win": 0, "lose": 0, "draw": 0} for t2 in all_teams} for t1 in all_teams}
 
+        # ★ 修正②: 日付ごとに pitcher_stats をディープコピーで独立初期化（重複加算バグの完全解消）
+        current_day_pitcher_stats = {k: dict(v) for k, v in base_pitcher_stats.items()}
+
         for g in games_2026:
             if g.get("status") == "cancelled" or g.get("home_score") is None or g.get("away_score") is None:
                 continue
@@ -629,13 +633,13 @@ def build_all_history_with_predictions(games_2025, games_2026):
                 team_match_histories_before_today[a].append({"rs": as_, "ra": hs})
                 hp, ap = g.get("home_pitcher"), g.get("away_pitcher")
                 if hp:
-                    if hp not in pitcher_stats: pitcher_stats[hp] = {"win": 0, "lose": 0}
-                    if hs > as_: pitcher_stats[hp]["win"] += 1
-                    elif hs < as_: pitcher_stats[hp]["lose"] += 1
+                    if hp not in current_day_pitcher_stats: current_day_pitcher_stats[hp] = {"win": 0, "lose": 0}
+                    if hs > as_: current_day_pitcher_stats[hp]["win"] += 1
+                    elif hs < as_: current_day_pitcher_stats[hp]["lose"] += 1
                 if ap:
-                    if ap not in pitcher_stats: pitcher_stats[ap] = {"win": 0, "lose": 0}
-                    if as_ > hs: pitcher_stats[ap]["win"] += 1
-                    elif as_ < hs: pitcher_stats[ap]["lose"] += 1
+                    if ap not in current_day_pitcher_stats: current_day_pitcher_stats[ap] = {"win": 0, "lose": 0}
+                    if as_ > hs: current_day_pitcher_stats[ap]["win"] += 1
+                    elif as_ < hs: current_day_pitcher_stats[ap]["lose"] += 1
 
             if g_date <= target_date:
                 records[h]["games"] += 1
@@ -664,8 +668,9 @@ def build_all_history_with_predictions(games_2025, games_2026):
                     records[a]["away"]["win"] += 1
                     records[h]["lose"] += 1
                     records[h]["home"]["lose"] += 1
+                    # ★ 修正①: H2H対戦成績バグの修正（相手の負けを正しくインクリメント）
                     h2h_details[a][h]["win"] += 1
-                    h2h_details[a][h]["lose"] += 1
+                    h2h_details[h][a]["lose"] += 1
                     if is_inter:
                         records[a]["interleague"]["win"] += 1
                         records[h]["interleague"]["lose"] += 1
@@ -738,7 +743,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
                 h_start = h_start.strip() if h_start else "未定"
                 a_start = a_start.strip() if a_start else "未定"
 
-                prob_away, prob_home = calc_log5_matchup(p_away, p_home, a_start, h_start, pitcher_stats)
+                prob_away, prob_home = calc_log5_matchup(p_away, p_home, a_start, h_start, current_day_pitcher_stats)
 
                 hs, as_ = g.get("home_score"), g.get("away_score")
                 is_fin = (hs is not None and as_ is not None and str(hs).strip() != "" and str(as_).strip() != "")
@@ -800,7 +805,6 @@ def build_all_history_with_predictions(games_2025, games_2026):
     c_rank_matrix, c_clinch_dates = simulate_full_season_probabilities(CENTRAL_TEAMS, eval_c_table, c_future, latest_team_histories, prior_stats)
     p_rank_matrix, p_clinch_dates = simulate_full_season_probabilities(PACIFIC_TEAMS, eval_p_table, p_future, latest_team_histories, prior_stats)
 
-    # ★ 過去日付にも適切な優勝確率を付与（全日シミュレーション負荷を抑えつつ、過去日付時点の勝率・順位に基づく動的確率算出）
     def attach_probs_for_snapshot(table, is_latest):
         if is_latest:
             rank_mat = c_rank_matrix if table[0]["team"] in CENTRAL_TEAMS else p_rank_matrix
@@ -810,20 +814,17 @@ def build_all_history_with_predictions(games_2025, games_2026):
                 t["cs_prob"] = 100 if t.get("magic_3rd") == "確定" else (probs.get(1, 0) + probs.get(2, 0) + probs.get(3, 0))
             return table
 
-        # 過去日付の場合：その時点の順位表・ゲーム差・残り試合数から妥当な確率分布を直接算出
         raw_map = {}
         for t in table:
             w, l, rem = t["win"], t["lose"], t["remaining"]
             rate = t["rate"]
             diff = t["diff"]
-            # 序盤〜中盤の勝率とゲーム差に応じた指数配分
             power = math.exp(max(-5.0, (rate - 0.500) * 12.0 - (diff * 0.45)))
             raw_map[t["team"]] = power
 
         norm_map = normalize_probabilities_to_100(raw_map)
         for t in table:
             t["champ_prob"] = norm_map.get(t["team"], 0)
-            # CS進出確率も順位とゲーム差に応じて妥当に算出
             if t["rank"] <= 3:
                 t["cs_prob"] = min(100, max(60, 100 - int(t["diff"] * 8)))
             else:
@@ -920,10 +921,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
         "pacific_lines_grid": p_lines_grid
     }
 
-    jst_today = (datetime.datetime.utcnow() + datetime.timedelta(hours=9)).strftime("%Y-%m-%d")
-    default_display_date = jst_today if jst_today in all_dates else last_eval_date
-
-    return all_dates, default_display_date, history_snapshots, simulation_payload
+    return all_dates, last_eval_date, history_snapshots, simulation_payload
 
 def main():
     games_2025, games_2026 = load_all_games()
@@ -939,7 +937,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了（過去日付動的確率化・構文エラー解消）：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了（H2H・投手統計バグ完全解消版）：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
