@@ -43,6 +43,8 @@ PARK_FACTORS = {
     "楽天モバイル": 0.95, "ベルーナ": 0.90, "甲子園": 0.88, "バンテリン": 0.84
 }
 
+NPB_DRAW_RATE = 0.045  # NPBの平均引き分け発生率（約4.5%）
+
 def normalize_team(name):
     if not name:
         return ""
@@ -424,6 +426,7 @@ def calc_log5_matchup(p_away, p_home, away_pitcher, home_pitcher, pitcher_stats,
 
     return round(final_p_away * 100.0, 1), round(final_p_home * 100.0, 1)
 
+# ★ 引き分け（Draw）を考慮したシーズン完走モンテカルロシミュレーション
 def simulate_full_season_probabilities(league_teams, current_standings, remaining_matches, team_total_stats, prior_stats):
     NUM_SIMS = 3000
     rank_counts = {t: {r: 0 for r in range(1, 7)} for t in league_teams}
@@ -460,15 +463,23 @@ def simulate_full_season_probabilities(league_teams, current_standings, remainin
         for d in sorted_dates:
             for match in matches_by_date[d]:
                 h, a = match["home"], match["away"]
-                p_home = base_probs.get((h, a), 0.535)
-                if random.random() < p_home:
-                    sim_w[h] += 1
-                    sim_l[a] += 1
-                else:
-                    sim_w[a] += 1
-                    sim_l[h] += 1
+                p_home_decided = base_probs.get((h, a), 0.535)
 
-            sim_rates = sorted([(t, sim_w[t] / (sim_w[t] + sim_l[t]), sim_w[t]) for t in league_teams],
+                # NPBの実測引き分け率（約4.5%）を分岐に採用
+                rnd = random.random()
+                if rnd < NPB_DRAW_RATE:
+                    # 引き分け：勝率計算（W / (W+L)）上、両チームのW/Lは変動しない
+                    pass
+                else:
+                    # 引き分け以外の枠内で勝敗を決定
+                    if random.random() < p_home_decided:
+                        sim_w[h] += 1
+                        sim_l[a] += 1
+                    else:
+                        sim_w[a] += 1
+                        sim_l[h] += 1
+
+            sim_rates = sorted([(t, calc_win_rate(sim_w[t], sim_l[t]), sim_w[t]) for t in league_teams],
                                key=lambda x: (x[1], x[2]), reverse=True)
             leader = sim_rates[0][0]
             second = sim_rates[1][0]
@@ -477,7 +488,7 @@ def simulate_full_season_probabilities(league_teams, current_standings, remainin
             if sim_w[leader] > sim_w[second] + rem_2nd and clinched_day[leader] is None:
                 clinched_day[leader] = d
 
-        sim_rates = sorted([(t, sim_w[t] / (sim_w[t] + sim_l[t]), sim_w[t]) for t in league_teams],
+        sim_rates = sorted([(t, calc_win_rate(sim_w[t], sim_l[t]), sim_w[t]) for t in league_teams],
                            key=lambda x: (x[1], x[2]), reverse=True)
 
         champ = sim_rates[0][0]
@@ -611,7 +622,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
         h2h_played = {t1: {t2: 0 for t2 in all_teams} for t1 in all_teams}
         h2h_details = {t1: {t2: {"win": 0, "lose": 0, "draw": 0} for t2 in all_teams} for t1 in all_teams}
 
-        # ★ 修正②: target_date 時点の投手統計を初期化
+        # target_date ごとに2025年終了時点の投手データをディープコピー
         current_day_pitcher_stats = {k: dict(v) for k, v in base_pitcher_stats.items()}
 
         for g in games_2026:
@@ -621,7 +632,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
             hs, as_ = int(g["home_score"]), int(g["away_score"])
             g_date = g["date"]
 
-            # ★ 修正②: target_date より過去の試合のみをチーム得失点・投手成績に反映（未来情報リークの完全防止）
+            # ★ 修正②: チーム成績・投手成績の更新を「g_date < target_date」の内側へ完全集約（未来情報リークの完全排除）
             if g_date < target_date:
                 team_total_stats_before_today[h]["rs"] += hs
                 team_total_stats_before_today[h]["ra"] += as_
@@ -640,7 +651,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
                     if as_ > hs: current_day_pitcher_stats[ap]["win"] += 1
                     elif as_ < hs: current_day_pitcher_stats[ap]["lose"] += 1
 
-            # 順位表・対戦成績は target_date 当日までの試合を集計
+            # target_date 当日までの試合で順位表およびH2H対戦成績を正しく集計
             if g_date <= target_date:
                 records[h]["games"] += 1
                 records[a]["games"] += 1
@@ -658,7 +669,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
                     records[h]["home"]["win"] += 1
                     records[a]["lose"] += 1
                     records[a]["away"]["lose"] += 1
-                    # ★ 修正①: H2Hホーム勝利時の相手負けカウントバグを完全修正
+                    # ★ 修正①: H2Hホームチーム勝利時のバグを完全に修正（ホーム勝ち＆アウェイ負け）
                     h2h_details[h][a]["win"] += 1
                     h2h_details[a][h]["lose"] += 1
                     if is_inter:
@@ -669,6 +680,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
                     records[a]["away"]["win"] += 1
                     records[h]["lose"] += 1
                     records[h]["home"]["lose"] += 1
+                    # ビジターチーム勝利時（ビジター勝ち＆ホーム負け）
                     h2h_details[a][h]["win"] += 1
                     h2h_details[h][a]["lose"] += 1
                     if is_inter:
@@ -952,7 +964,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了（H2H・投手リーク修正完全版）：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了（H2H完全修復・未来情報完全遮断・引分分岐導入）：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
