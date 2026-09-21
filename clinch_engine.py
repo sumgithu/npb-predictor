@@ -769,22 +769,90 @@ def poisson_pmf(k, lam):
 
 
 def three_way_from_scores(lam_home, lam_away):
-    ph = pa = pd = 0.0
+    """
+    Poisson得点分布から勝・分・敗の確率を算出する。
+
+    Poissonの同点確率は「9回終了時点の同点確率」に相当し、
+    NPBの最終的な引き分け率とは一致しないため、そのまま
+    引き分け確率には使用しない。
+
+    NPBの実績に合わせ、試合単位の引き分け率を約2.7%とし、
+    その試合が平均より引き分けになりやすいかどうかを
+    Poissonの同点確率から相対的に補正する。
+    """
+
+    ph = pa = pd_raw = 0.0
+
     home_pmf = [poisson_pmf(k, lam_home) for k in range(MAX_RUNS + 1)]
     away_pmf = [poisson_pmf(k, lam_away) for k in range(MAX_RUNS + 1)]
+
     for h, hp in enumerate(home_pmf):
         for a, ap in enumerate(away_pmf):
             p = hp * ap
+
             if h > a:
                 ph += p
             elif h < a:
                 pa += p
             else:
-                pd += p
-    total = ph + pd + pa
+                pd_raw += p
+
+    total = ph + pd_raw + pa
+
     if total <= 0:
         return 0.5, 0.0, 0.5
-    return ph / total, pd / total, pa / total
+
+    ph /= total
+    pd_raw /= total
+    pa /= total
+
+    # --------------------------------------------------------
+    # NPBの試合単位の引き分け率を基準にする
+    #
+    # 2025年NPB全体：
+    #  セ・リーグ 14試合 / 429試合
+    #  パ・リーグ  9試合 / 429試合
+    #  合計        23試合 / 858試合 ≒ 2.68%
+    #
+    # したがって約2.7%を基準値とする。
+    # --------------------------------------------------------
+    BASE_DRAW_RATE = 0.027
+
+    # 平均的な得点環境でのPoisson同点確率を基準にする。
+    # NPBの1チーム平均得点は概ね3～4点なので3.5を採用。
+    reference_lambda = 3.5
+
+    reference_pmf = [
+        poisson_pmf(k, reference_lambda)
+        for k in range(MAX_RUNS + 1)
+    ]
+
+    reference_draw = sum(p * p for p in reference_pmf)
+
+    # 現在の試合が平均的な試合よりどの程度
+    # 「同点になりやすいか」を相対評価する。
+    relative_draw = pd_raw / max(1e-9, reference_draw)
+
+    # 極端な変動を抑えるため平方根に近い0.65乗で縮小。
+    relative_draw = relative_draw ** 0.65
+
+    p_draw = BASE_DRAW_RATE * relative_draw
+
+    # 現実的な範囲に制限する。
+    p_draw = max(0.010, min(0.060, p_draw))
+
+    # 残りの確率を、Poissonによる勝敗比率に従って配分。
+    decision_mass = 1.0 - p_draw
+    decided_total = ph + pa
+
+    if decided_total <= 0:
+        p_home = decision_mass * 0.5
+        p_away = decision_mass * 0.5
+    else:
+        p_home = decision_mass * ph / decided_total
+        p_away = decision_mass * pa / decided_total
+
+    return p_home, p_draw, p_away
 
 
 def apply_conditional_logit_adjustment(p_home, p_draw, p_away, log_odds_adjust):
