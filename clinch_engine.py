@@ -47,6 +47,30 @@ def calc_win_rate(w, l):
     decided = w + l
     return (w / decided) if decided > 0 else 0.0
 
+def normalize_probabilities_to_100(prob_dict):
+    """
+    最大剰余方式（ヘアー・ニーマイヤー法）
+    各チームの浮動小数点確率の合計を厳密に整数の100%に正規化する。
+    """
+    total_val = sum(prob_dict.values())
+    if total_val <= 0:
+        return {k: 0 for k in prob_dict}
+    
+    # 全体を100にスケーリング
+    scaled = {k: (v / total_val) * 100.0 for k, v in prob_dict.items()}
+    floored = {k: int(math.floor(v)) for k, v in scaled.items()}
+    remainder = {k: scaled[k] - floored[k] for k in scaled}
+    
+    remaining_sum = 100 - sum(floored.values())
+    # 端数が大きい順に1%を配分
+    sorted_by_remainder = sorted(remainder.keys(), key=lambda k: remainder[k], reverse=True)
+    
+    for i in range(remaining_sum):
+        team = sorted_by_remainder[i]
+        floored[team] += 1
+        
+    return floored
+
 def parse_year_games_from_text(raw_text, target_year):
     normalized = raw_text.replace("\r\n", "\n").replace("\r", "\n")
     sec_key = f"\n{target_year}\n"
@@ -71,7 +95,7 @@ def parse_year_games_from_text(raw_text, target_year):
         if not line:
             continue
 
-        # 1. カンマ区切り形式（CSV）
+        # CSV形式
         csv_parts = [p.strip() for p in line.split(',')]
         if len(csv_parts) >= 6 and re.match(r'^\d{4}-\d{2}-\d{2}$', csv_parts[0]):
             c_date, h_raw, a_raw = csv_parts[0], csv_parts[1], csv_parts[2]
@@ -99,7 +123,7 @@ def parse_year_games_from_text(raw_text, target_year):
                     })
                 continue
 
-        # 2. テキスト形式（日付行）
+        # テキスト形式
         date_m = re.match(r'^(\d{1,2})\/(\d{1,2})(?:[（(][日月火水木金土][）)])?\s*(.*)$', line)
         if date_m:
             m, d = int(date_m.group(1)), int(date_m.group(2))
@@ -111,7 +135,6 @@ def parse_year_games_from_text(raw_text, target_year):
         if not current_date:
             continue
 
-        # 中止行の検出
         if "中止" in line or "ノーゲーム" in line:
             match_can = re.search(r'([^\s\d]+)\s*(?:中止|ノーゲーム)\s*([^\s\d]+)', line)
             if match_can:
@@ -127,7 +150,6 @@ def parse_year_games_from_text(raw_text, target_year):
                     })
             continue
 
-        # 試合終了行の検出
         match_fin = re.search(r'([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)', line)
         if match_fin:
             h = normalize_team(match_fin.group(1))
@@ -159,7 +181,6 @@ def parse_year_games_from_text(raw_text, target_year):
                 })
             continue
 
-        # 予告先発・予定行の検出
         match_sched = re.search(r'([^\s\d]+)\s*-\s*([^\s\d]+)', line)
         if match_sched:
             h = normalize_team(match_sched.group(1))
@@ -475,7 +496,17 @@ def simulate_full_season_probabilities(league_teams, current_standings, remainin
         for idx, item in enumerate(sim_rates):
             rank_counts[item[0]][idx + 1] += 1
 
-    final_rank_matrix = {t: {r: round((rank_counts[t][r] / NUM_SIMS) * 100) for r in range(1, 7)} for t in league_teams}
+    # 生の確率（%）
+    raw_champ_probs = {t: (rank_counts[t][1] / NUM_SIMS) * 100.0 for t in league_teams}
+    # ★ 合計が厳密に100%になるように正規化（最大剰余方式）
+    norm_champ_probs = normalize_probabilities_to_100(raw_champ_probs)
+
+    final_rank_matrix = {}
+    for t in league_teams:
+        final_rank_matrix[t] = {}
+        final_rank_matrix[t][1] = norm_champ_probs[t]
+        for r in range(2, 7):
+            final_rank_matrix[t][r] = round((rank_counts[t][r] / NUM_SIMS) * 100)
 
     for t in current_standings:
         tname = t["team"]
@@ -795,7 +826,6 @@ def build_all_history_with_predictions(games_2025, games_2026):
             history_snapshots[d]["central"] = attach_probs(history_snapshots[d]["central"], c_rank_matrix)
             history_snapshots[d]["pacific"] = attach_probs(history_snapshots[d]["pacific"], p_rank_matrix)
 
-    # 決定日確率テーブル（npb.eikai.co.jp準拠＋球場名・累計確率算出）
     def build_filtered_clinch_schedule(team_name, future_matches, clinch_date_map, champ_prob):
         all_future_dates = sorted(list({m["date"] for m in future_matches} | set(clinch_date_map.keys())))
         all_rows = []
@@ -899,7 +929,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了（決定日確率・累積確率完全同期）：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了（優勝確率合計100%正規化適用）：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
