@@ -84,30 +84,33 @@
 
     .badge {
       display: inline-block; min-width: 32px; padding: 3px 8px; border-radius: 12px;
-      font-size: 0.8rem; font-weight: 700; text-align: center;
+      font-size: 0.8rem; font-weight: 700; text-align: center; box-sizing: border-box;
     }
     .badge-fixed { background-color: #d1fae5; color: #065f46; }
     .badge-magic { background-color: #fee2e2; color: #991b1b; }
     .badge-eliminated {
       background-color: #fff1f2; color: var(--badge-alert);
       border: 1.5px dashed #f43f5e; border-radius: 6px; padding: 1px 6px; font-weight: 800;
+      white-space: nowrap;
     }
-    .badge-dash { color: #94a3b8; font-weight: 500; }
+    .badge-dash { color: #94a3b8; font-weight: 800; font-size: 1.1rem; }
 
-    /* 順位表直下のバッジ解説ガイド（ズレ防止レイアウト） */
+    /* 順位表直下のバッジ解説ガイド（重なり完全防止版） */
     .badge-guide-panel {
       background: #ffffff; border: 1px solid var(--border); border-radius: 10px;
       padding: 14px 18px; margin-bottom: 24px; font-size: 0.84rem; color: #334155;
-      display: flex; flex-direction: column; gap: 10px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 14px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
-    .badge-guide-row {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;
-    }
     .badge-guide-item {
-      display: flex; align-items: center; gap: 10px; line-height: 1.45;
+      display: flex; align-items: flex-start; gap: 14px; line-height: 1.5;
     }
-    .badge-guide-item .desc { color: #475569; }
+    .badge-col {
+      flex: 0 0 54px; display: flex; justify-content: center; align-items: center; padding-top: 1px;
+    }
+    .badge-guide-item .desc {
+      flex: 1; color: #475569;
+    }
 
     /* 2. 予想勝利確率／試合結果カード */
     .prediction-grid {
@@ -283,27 +286,23 @@
       </table>
     </div>
 
-    <!-- 順位表直下のCNバッジ凡例ガイド（レイアウト修復版） -->
+    <!-- 順位表直下のCNバッジ凡例ガイド（独立カラムによるズレ完全防止版） -->
     <div class="badge-guide-panel">
-      <div class="badge-guide-row">
-        <div class="badge-guide-item">
-          <span class="badge badge-magic">11</span>
-          <div class="desc"><strong>自力確定可能</strong>：残り試合数の範囲内で、自チームの勝利のみで確定できる必要勝利数。</div>
-        </div>
-        <div class="badge-guide-item">
-          <span class="badge badge-eliminated">◇13◇</span>
-          <div class="desc"><strong>自力消滅（可能性あり）</strong>：残り試合数を超える勝数が必要。自力確定は消滅したが他力アシストで逆転可能な状態。</div>
-        </div>
+      <div class="badge-guide-item">
+        <div class="badge-col"><span class="badge badge-magic">11</span></div>
+        <div class="desc"><strong>自力確定可能</strong>：残り試合数の範囲内であり、自チームの勝利のみで確定できる必要勝利数。</div>
       </div>
-      <div class="badge-guide-row">
-        <div class="badge-guide-item">
-          <span class="badge-dash" style="font-size:1.1rem; font-weight:800; min-width:32px; text-align:center;">-</span>
-          <div class="desc"><strong>完全消滅（エリミネーション）</strong>：相手が全敗し自チームが全勝しても届かない数学的消滅状態。</div>
-        </div>
-        <div class="badge-guide-item">
-          <span class="badge badge-fixed">確定</span>
-          <div class="desc"><strong>順位確定</strong>：他チームの結果を問わず、その順位以上（またはCS進出）が数学的に100%決定した状態。</div>
-        </div>
+      <div class="badge-guide-item">
+        <div class="badge-col"><span class="badge badge-eliminated">◇13◇</span></div>
+        <div class="desc"><strong>自力消滅（可能性あり）</strong>：残り試合数を超える勝数が必要。自力確定は消滅したが他力アシストで逆転可能な状態。</div>
+      </div>
+      <div class="badge-guide-item">
+        <div class="badge-col"><span class="badge-dash">-</span></div>
+        <div class="desc"><strong>完全消滅（エリミネーション）</strong>：相手が全敗し自チームが全勝しても届かない数学的消滅状態。</div>
+      </div>
+      <div class="badge-guide-item">
+        <div class="badge-col"><span class="badge badge-fixed">確定</span></div>
+        <div class="desc"><strong>順位確定</strong>：他チームの結果を問わず、その順位以上（またはCS進出）が数学的に100%決定した状態。</div>
       </div>
     </div>
 
