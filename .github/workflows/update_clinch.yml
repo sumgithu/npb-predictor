@@ -8,6 +8,8 @@ on:
     - cron: '30 14 * * *'
   workflow_dispatch: # 手動実行トリガー
   push:
+    branches:
+      - main
     paths:
       - '2016-2026プロ野球レギュラーシーズン結果.txt'
       - 'games_db.json'
@@ -24,14 +26,19 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Convert Raw Log to Clean CSV
-        run: python convert_log.py
+      - name: Convert Raw Log to Clean CSV (if exists)
+        run: |
+          if [ -f convert_log.py ]; then
+            python convert_log.py
+          fi
 
       - name: Run Clinch Engine
         run: python clinch_engine.py
@@ -40,5 +47,5 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add npb_games_clean.csv history_standings.json games_db.json
+          git add npb_games_clean.csv history_standings.json
           git diff --quiet && git diff --staged --quiet || (git commit -m "Auto update standings and clean CSV [skip ci]" && git push)
