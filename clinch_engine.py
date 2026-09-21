@@ -30,6 +30,13 @@ TEAM_ALIASES = {
     "中日": "中日", "中日ドラゴンズ": "中日"
 }
 
+STADIUM_NAMES = {
+    "阪神": "甲子園", "巨人": "東京D", "ＤｅＮＡ": "横浜",
+    "ヤクルト": "神宮", "中日": "バンテリン", "広島": "マツダS",
+    "ソフトバンク": "PayPay", "日本ハム": "エスコンF", "ロッテ": "ZOZO",
+    "楽天": "楽天モバイル", "オリックス": "京セラ", "西武": "ベルーナ"
+}
+
 def normalize_team(name):
     if not name:
         return ""
@@ -64,7 +71,7 @@ def parse_year_games_from_text(raw_text, target_year):
         if not line:
             continue
 
-        # CSV形式
+        # 1. カンマ区切り形式（CSV）
         csv_parts = [p.strip() for p in line.split(',')]
         if len(csv_parts) >= 6 and re.match(r'^\d{4}-\d{2}-\d{2}$', csv_parts[0]):
             c_date, h_raw, a_raw = csv_parts[0], csv_parts[1], csv_parts[2]
@@ -92,7 +99,7 @@ def parse_year_games_from_text(raw_text, target_year):
                     })
                 continue
 
-        # テキスト形式
+        # 2. テキスト形式（日付行）
         date_m = re.match(r'^(\d{1,2})\/(\d{1,2})(?:[（(][日月火水木金土][）)])?\s*(.*)$', line)
         if date_m:
             m, d = int(date_m.group(1)), int(date_m.group(2))
@@ -104,6 +111,7 @@ def parse_year_games_from_text(raw_text, target_year):
         if not current_date:
             continue
 
+        # 中止行の検出
         if "中止" in line or "ノーゲーム" in line:
             match_can = re.search(r'([^\s\d]+)\s*(?:中止|ノーゲーム)\s*([^\s\d]+)', line)
             if match_can:
@@ -119,6 +127,7 @@ def parse_year_games_from_text(raw_text, target_year):
                     })
             continue
 
+        # 試合終了行の検出
         match_fin = re.search(r'([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)', line)
         if match_fin:
             h = normalize_team(match_fin.group(1))
@@ -150,6 +159,7 @@ def parse_year_games_from_text(raw_text, target_year):
                 })
             continue
 
+        # 予告先発・予定行の検出
         match_sched = re.search(r'([^\s\d]+)\s*-\s*([^\s\d]+)', line)
         if match_sched:
             h = normalize_team(match_sched.group(1))
@@ -174,7 +184,6 @@ def load_all_games():
     games_2025 = []
     games_2026_master = []
 
-    # 1. マスターテキストファイルの読み込み
     active_master = TEXT_LOG_FILE if os.path.exists(TEXT_LOG_FILE) else "npb_games_clean.csv"
     if os.path.exists(active_master):
         with open(active_master, "r", encoding="utf-8") as f:
@@ -182,7 +191,6 @@ def load_all_games():
         games_2025 = parse_year_games_from_text(raw_text, 2025)
         games_2026_master = parse_year_games_from_text(raw_text, 2026)
 
-    # 2. 手動暫定DB（games_db.json）とのマージ
     if os.path.exists(MANUAL_DB_FILE):
         try:
             with open(MANUAL_DB_FILE, "r", encoding="utf-8") as f:
@@ -221,7 +229,6 @@ def load_all_games():
             for mg_orig in games_2026_master:
                 k = (mg_orig["date"], mg_orig["home"], mg_orig["away"])
                 if k in manual_map:
-                    # 手動DBにデータがあればそちらで上書き（予告先発等）
                     merged_2026.append(manual_map[k])
                     applied_keys.add(k)
                 else:
@@ -788,19 +795,25 @@ def build_all_history_with_predictions(games_2025, games_2026):
             history_snapshots[d]["central"] = attach_probs(history_snapshots[d]["central"], c_rank_matrix)
             history_snapshots[d]["pacific"] = attach_probs(history_snapshots[d]["pacific"], p_rank_matrix)
 
+    # 決定日確率テーブル（npb.eikai.co.jp準拠＋球場名・累計確率算出）
     def build_filtered_clinch_schedule(team_name, future_matches, clinch_date_map, champ_prob):
-        all_future_dates = sorted(list({m["date"] for m in future_matches}))
+        all_future_dates = sorted(list({m["date"] for m in future_matches} | set(clinch_date_map.keys())))
         all_rows = []
 
         for d in all_future_dates:
             team_m = next((m for m in future_matches if m["date"] == d and (m["home"] == team_name or m["away"] == team_name)), None)
             prob_raw = clinch_date_map.get(d, 0.0)
 
+            m_int, d_int = int(d.split('-')[1]), int(d.split('-')[2])
+            is_tentative = (m_int == 10 and d_int >= 7)
+            date_display = f"({m_int}/{d_int})" if is_tentative else f"{m_int}/{d_int}"
+
             if team_m:
                 is_home = (team_m["home"] == team_name)
                 opp = team_m["away"] if is_home else team_m["home"]
-                ground = "甲子園" if (team_name == "阪神" and is_home) else ("東京D" if (team_name == "巨人" and is_home) else ("横浜" if (team_name == "ＤｅＮＡ" and is_home) else ("神宮" if (opp == "ヤクルト" and not is_home) else ("敵地"))))
-                
+                host = team_m["home"]
+                ground = STADIUM_NAMES.get(host, "球場")
+
                 p_opp = get_rolling_recent_strength(latest_team_histories[opp], prior_stats[opp])
                 p_self = get_rolling_recent_strength(latest_team_histories[team_name], prior_stats[team_name])
                 if is_home:
@@ -814,7 +827,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
                 win_expect_str = "-"
 
             all_rows.append({
-                "date": f"{int(d.split('-')[1])}/{int(d.split('-')[2])}",
+                "date": date_display,
                 "raw_date": d,
                 "opp": opp,
                 "ground": ground,
@@ -822,19 +835,9 @@ def build_all_history_with_predictions(games_2025, games_2026):
                 "win_expect": win_expect_str
             })
 
-        first_positive_idx = None
-        for i, item in enumerate(all_rows):
-            if item["clinch_prob_val"] > 0.0001:
-                first_positive_idx = i
-                break
-
-        if first_positive_idx is not None:
-            trimmed = all_rows[first_positive_idx:]
-            last_pos_idx = 0
-            for i, item in enumerate(trimmed):
-                if item["clinch_prob_val"] > 0.0001:
-                    last_pos_idx = i
-            trimmed = trimmed[:last_pos_idx + 1]
+        first_idx = next((i for i, item in enumerate(all_rows) if item["clinch_prob_val"] > 0.001), None)
+        if first_idx is not None:
+            trimmed = all_rows[first_idx:]
         else:
             trimmed = [r for r in all_rows if r["opp"] != "-"][-8:]
 
@@ -842,8 +845,20 @@ def build_all_history_with_predictions(games_2025, games_2026):
         for item in trimmed:
             val = item["clinch_prob_val"]
             cum += val
-            item["clinch_prob_str"] = format_prob_sig1(val)
-            item["cum_prob_str"] = format_prob_sig1(cum)
+
+            if val < 0.001:
+                item["clinch_prob_str"] = "-"
+            elif val < 1.0:
+                item["clinch_prob_str"] = f"{val:.1f}%" if val >= 0.1 else f"{val:.2f}%"
+            else:
+                item["clinch_prob_str"] = f"{int(round(val))}%"
+
+            if cum < 0.001:
+                item["cum_prob_str"] = "-"
+            elif cum < 1.0:
+                item["cum_prob_str"] = f"{cum:.1f}%" if cum >= 0.1 else f"{cum:.2f}%"
+            else:
+                item["cum_prob_str"] = f"{int(round(cum))}%"
 
         return trimmed
 
@@ -865,7 +880,6 @@ def build_all_history_with_predictions(games_2025, games_2026):
         "pacific_lines_grid": p_lines_grid
     }
 
-    # 基準日の初期値：日本時間当日（9/21）が存在すればそれを使用
     jst_today = (datetime.datetime.utcnow() + datetime.timedelta(hours=9)).strftime("%Y-%m-%d")
     default_display_date = jst_today if jst_today in all_dates else last_eval_date
 
@@ -885,7 +899,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了（決定日確率・累積確率完全同期）：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
