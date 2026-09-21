@@ -12,59 +12,675 @@
       --home:#2563eb; --draw:#64748b; --away:#dc2626;
       --current:#15803d; --climb:#f87171; --potential:#fecaca; --drop:#bae6fd;
     }
-    *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
-    body{background:var(--bg);color:var(--text);padding:18px 12px 60px}
-    .container{max-width:1120px;margin:0 auto}
-    header{text-align:center;margin-bottom:16px}
-    header h1{font-size:1.5rem;font-weight:800;color:#1e3a8a}
-    header p{font-size:.84rem;color:var(--sub);margin-top:5px;line-height:1.6}
-    .banner{background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:14px 18px;margin-bottom:18px;color:#1e3a8a;line-height:1.65}
-    .banner-title{font-weight:800;margin-bottom:4px}
-    .panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:20px;box-shadow:0 2px 5px rgba(0,0,0,.03)}
-    .controls{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px}
-    .date-box{display:flex;align-items:center;gap:9px;font-weight:700}
-    .date-box input{padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:.95rem;font-weight:700}
-    .tabs{display:flex;gap:8px}
-    .tab{border:1px solid var(--border);background:#fff;padding:8px 20px;border-radius:20px;font-weight:800;cursor:pointer}
-    .tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-    .model-status{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:12px}
-    .status-item{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.78rem}
-    .status-label{display:block;color:var(--sub);margin-bottom:2px}.status-value{font-weight:800;color:#1e293b}
-    .section-title{font-size:1.12rem;font-weight:800;color:#1e3a8a;margin:26px 0 12px 3px}
-    .section-title .desc{font-size:.78rem;color:var(--sub);font-weight:400;margin-left:6px}
-    .table-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow-x:auto;box-shadow:0 2px 5px rgba(0,0,0,.03);margin-bottom:12px}
-    table{width:100%;border-collapse:collapse;text-align:center;font-size:.86rem;min-width:820px}
-    th,td{padding:10px 7px;border-bottom:1px solid var(--border)}
-    th{background:#f1f5f9;color:var(--sub);font-size:.78rem;font-weight:700}
-    tr:last-child td{border-bottom:none}
-    .team{text-align:left;font-weight:800;white-space:nowrap}.rank{font-weight:800;color:var(--sub)}
-    .rem{font-weight:800;background:#f8fafc}.prob{font-weight:800;color:#1e3a8a}.prob-high{color:var(--red)}
-    .badge{display:inline-block;min-width:31px;padding:3px 7px;border-radius:11px;font-size:.76rem;font-weight:800}
-    .badge-fixed{background:#d1fae5;color:#065f46}.badge-magic{background:#fee2e2;color:#991b1b}
-    .badge-elim{background:#fff1f2;color:#be123c;border:1.4px dashed #f43f5e;border-radius:6px}
-    .badge-dash{color:#94a3b8;font-size:1.05rem;font-weight:800}
-    .guide{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:10px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:18px}
-    .guide-item{display:flex;gap:10px;align-items:flex-start;font-size:.79rem;line-height:1.5;color:#475569}.guide-badge{flex:0 0 50px;text-align:center}
-    .prediction-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:15px}
-    .pred-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:15px 17px;box-shadow:0 2px 5px rgba(0,0,0,.03)}
-    .pred-head{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin-bottom:8px}.pred-team{font-weight:800}.pred-team.right{text-align:right}.role{font-size:.68rem;color:var(--sub);font-weight:700}.starter{font-size:.78rem;color:#334155;margin-top:2px}
-    .vs{font-weight:800;color:#94a3b8;font-size:.78rem}
-    .outcome-values{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;font-size:.92rem;font-weight:800;margin:9px 0 7px}.home-p{color:var(--home)}.draw-p{color:var(--draw)}.away-p{color:var(--away)}
-    .bar{height:10px;border-radius:6px;overflow:hidden;background:#e2e8f0;display:flex}.bar-home{background:var(--home)}.bar-draw{background:var(--draw)}.bar-away{background:var(--away)}
-    .expected{text-align:center;color:var(--sub);font-size:.74rem;margin-top:8px}.result{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-top:10px}.score{font-size:1.55rem;font-weight:800}.score.right{text-align:right}.winner{color:var(--green)}.loser{color:#64748b}.draw-result{color:var(--draw)}
-    .pregame{margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);font-size:.72rem;color:var(--sub);text-align:center}
-    .notice{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:10px 13px;border-radius:8px;font-size:.78rem;font-weight:700;margin:0 0 14px;text-align:center;line-height:1.5}
-    .dimmed{opacity:.55}
-    .matrix{min-width:500px;max-width:680px;margin:0 auto}.matrix th{background:#3b82f6;color:#fff}.cell{display:inline-flex;width:54px;height:36px;align-items:center;justify-content:center;border-radius:4px;font-weight:800;font-size:.88rem}.cell-current{background:var(--current);color:#fff;border:3px solid var(--red)}.cell-climb{background:var(--climb);color:#fff}.cell-pot{background:var(--potential);color:#991b1b}.cell-drop{background:var(--drop);color:#0369a1}.legend{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;padding:10px;background:#fff;border:1px solid var(--border);font-size:.77rem;font-weight:700}.legend-item{display:flex;align-items:center;gap:5px}.legend-box{width:16px;height:16px;border-radius:3px}
-    .clinch-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px}.clinch-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:15px 17px;overflow-x:auto}.clinch-card h3{display:flex;justify-content:space-between;gap:10px;border-bottom:2px solid var(--border);padding-bottom:7px;margin-bottom:10px;font-size:1.05rem;color:#166534}.champ-tag{font-size:.82rem;color:#15803d}.clinch-table{min-width:330px}.clinch-table th{background:transparent;border-bottom:2px solid #475569}.val-clinch{font-weight:800;color:var(--red)}.val-cum{font-weight:800;color:#15803d}
-    .line-table{min-width:680px}.banner-team{color:#fff;font-size:1rem}.banner-h{background:#eab308}.banner-g{background:#ea580c}.banner-db{background:#0284c7}.banner-sub{background:#fef08a!important;color:#854d0e!important;font-weight:800}.line-highlight{background:#fef9c3!important;font-weight:800}
-    .h2h{min-width:1050px}.h2h th{font-size:.74rem}.self{background:#f8fafc;color:#94a3b8;font-weight:800}.draw-sub{display:block;font-size:.69rem;color:#64748b}
-    .notes{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;font-size:.79rem;line-height:1.7;color:#334155}.notes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:18px}.notes dt{font-weight:800;color:#1e3a8a;margin-bottom:3px}.notes dd{margin:0 0 10px;color:#475569}.foot{margin-top:16px;text-align:center;color:#94a3b8;font-size:.7rem}
-    @media(max-width:650px){body{padding:12px 7px 50px}header h1{font-size:1.28rem}.prediction-grid{grid-template-columns:1fr}.section-title{font-size:1rem}.guide{grid-template-columns:1fr}.model-status{grid-template-columns:1fr 1fr}.controls{align-items:stretch}.tabs{width:100%}.tab{flex:1}}
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif
+    }
+
+    body{
+      background:var(--bg);
+      color:var(--text);
+      padding:18px 12px 60px
+    }
+
+    .container{
+      max-width:1120px;
+      margin:0 auto
+    }
+
+    header{
+      text-align:center;
+      margin-bottom:16px
+    }
+
+    header h1{
+      font-size:1.5rem;
+      font-weight:800;
+      color:#1e3a8a
+    }
+
+    header p{
+      font-size:.84rem;
+      color:var(--sub);
+      margin-top:5px;
+      line-height:1.6
+    }
+
+    .banner{
+      background:#eff6ff;
+      border:1px solid #bfdbfe;
+      border-radius:12px;
+      padding:14px 18px;
+      margin-bottom:18px;
+      color:#1e3a8a;
+      line-height:1.65
+    }
+
+    .banner-title{
+      font-weight:800;
+      margin-bottom:4px
+    }
+
+    .panel{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:14px 18px;
+      margin-bottom:20px;
+      box-shadow:0 2px 5px rgba(0,0,0,.03)
+    }
+
+    .controls{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px
+    }
+
+    .date-box{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      font-weight:700
+    }
+
+    .date-box input{
+      padding:6px 10px;
+      border:1px solid var(--border);
+      border-radius:8px;
+      font-size:.95rem;
+      font-weight:700
+    }
+
+    .tabs{
+      display:flex;
+      gap:8px
+    }
+
+    .tab{
+      border:1px solid var(--border);
+      background:#fff;
+      padding:8px 20px;
+      border-radius:20px;
+      font-weight:800;
+      cursor:pointer
+    }
+
+    .tab.active{
+      background:var(--primary);
+      color:#fff;
+      border-color:var(--primary)
+    }
+
+    .model-status{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+      gap:8px;
+      margin-top:12px
+    }
+
+    .status-item{
+      background:#f8fafc;
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:8px 10px;
+      font-size:.78rem
+    }
+
+    .status-label{
+      display:block;
+      color:var(--sub);
+      margin-bottom:2px
+    }
+
+    .status-value{
+      font-weight:800;
+      color:#1e293b
+    }
+
+    .section-title{
+      font-size:1.12rem;
+      font-weight:800;
+      color:#1e3a8a;
+      margin:26px 0 12px 3px
+    }
+
+    .section-title .desc{
+      font-size:.78rem;
+      color:var(--sub);
+      font-weight:400;
+      margin-left:6px
+    }
+
+    .table-wrap{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:12px;
+      overflow-x:auto;
+      box-shadow:0 2px 5px rgba(0,0,0,.03);
+      margin-bottom:12px
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      text-align:center;
+      font-size:.86rem;
+      min-width:820px
+    }
+
+    th,td{
+      padding:10px 7px;
+      border-bottom:1px solid var(--border)
+    }
+
+    th{
+      background:#f1f5f9;
+      color:var(--sub);
+      font-size:.78rem;
+      font-weight:700
+    }
+
+    tr:last-child td{
+      border-bottom:none
+    }
+
+    .team{
+      text-align:left;
+      font-weight:800;
+      white-space:nowrap
+    }
+
+    .rank{
+      font-weight:800;
+      color:var(--sub)
+    }
+
+    .rem{
+      font-weight:800;
+      background:#f8fafc
+    }
+
+    .prob{
+      font-weight:800;
+      color:#1e3a8a
+    }
+
+    .prob-high{
+      color:var(--red)
+    }
+
+    .badge{
+      display:inline-block;
+      min-width:31px;
+      padding:3px 7px;
+      border-radius:11px;
+      font-size:.76rem;
+      font-weight:800
+    }
+
+    .badge-fixed{
+      background:#d1fae5;
+      color:#065f46
+    }
+
+    .badge-magic{
+      background:#fee2e2;
+      color:#991b1b
+    }
+
+    .badge-elim{
+      background:#fff1f2;
+      color:#be123c;
+      border:1.4px dashed #f43f5e;
+      border-radius:6px
+    }
+
+    .badge-dash{
+      color:#94a3b8;
+      font-size:1.05rem;
+      font-weight:800
+    }
+
+    .guide{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(290px,1fr));
+      gap:10px;
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:12px;
+      margin-bottom:18px
+    }
+
+    .guide-item{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      font-size:.79rem;
+      line-height:1.5;
+      color:#475569
+    }
+
+    .guide-badge{
+      flex:0 0 50px;
+      text-align:center
+    }
+
+    .prediction-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(330px,1fr));
+      gap:15px
+    }
+
+    .pred-card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:15px 17px;
+      box-shadow:0 2px 5px rgba(0,0,0,.03)
+    }
+
+    .pred-head{
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      align-items:center;
+      gap:8px;
+      margin-bottom:8px
+    }
+
+    .pred-team{
+      font-weight:800
+    }
+
+    .pred-team.right{
+      text-align:right
+    }
+
+    .role{
+      font-size:.68rem;
+      color:var(--sub);
+      font-weight:700
+    }
+
+    .starter{
+      font-size:.78rem;
+      color:#334155;
+      margin-top:2px
+    }
+
+    .vs{
+      font-weight:800;
+      color:#94a3b8;
+      font-size:.78rem
+    }
+
+    .outcome-values{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:6px;
+      text-align:center;
+      font-size:.92rem;
+      font-weight:800;
+      margin:9px 0 7px
+    }
+
+    .home-p{
+      color:var(--home)
+    }
+
+    .draw-p{
+      color:var(--draw)
+    }
+
+    .away-p{
+      color:var(--away)
+    }
+
+    /*
+      確率バーの重要修正:
+      flex-shrink:0 により、3区画が親要素の幅に応じて
+      勝手に圧縮されるのを防ぐ。
+    */
+    .bar{
+      height:10px;
+      border-radius:6px;
+      overflow:hidden;
+      background:#e2e8f0;
+      display:flex;
+      width:100%
+    }
+
+    .bar-home,
+    .bar-draw,
+    .bar-away{
+      flex:0 0 auto;
+      height:100%
+    }
+
+    .bar-home{
+      background:var(--home)
+    }
+
+    .bar-draw{
+      background:var(--draw)
+    }
+
+    .bar-away{
+      background:var(--away)
+    }
+
+    .expected{
+      text-align:center;
+      color:var(--sub);
+      font-size:.74rem;
+      margin-top:8px
+    }
+
+    .result{
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      align-items:center;
+      gap:10px;
+      margin-top:10px
+    }
+
+    .score{
+      font-size:1.55rem;
+      font-weight:800
+    }
+
+    .score.right{
+      text-align:right
+    }
+
+    .winner{
+      color:var(--green)
+    }
+
+    .loser{
+      color:#64748b
+    }
+
+    .draw-result{
+      color:var(--draw)
+    }
+
+    .pregame{
+      margin-top:8px;
+      padding-top:8px;
+      border-top:1px dashed var(--border);
+      font-size:.72rem;
+      color:var(--sub);
+      text-align:center
+    }
+
+    .notice{
+      background:#eff6ff;
+      border:1px solid #bfdbfe;
+      color:#1e40af;
+      padding:10px 13px;
+      border-radius:8px;
+      font-size:.78rem;
+      font-weight:700;
+      margin:0 0 14px;
+      text-align:center;
+      line-height:1.5
+    }
+
+    .dimmed{
+      opacity:.55
+    }
+
+    .matrix{
+      min-width:500px;
+      max-width:680px;
+      margin:0 auto
+    }
+
+    .matrix th{
+      background:#3b82f6;
+      color:#fff
+    }
+
+    .cell{
+      display:inline-flex;
+      width:54px;
+      height:36px;
+      align-items:center;
+      justify-content:center;
+      border-radius:4px;
+      font-weight:800;
+      font-size:.88rem
+    }
+
+    .cell-current{
+      background:var(--current);
+      color:#fff;
+      border:3px solid var(--red)
+    }
+
+    .cell-climb{
+      background:var(--climb);
+      color:#fff
+    }
+
+    .cell-pot{
+      background:var(--potential);
+      color:#991b1b
+    }
+
+    .cell-drop{
+      background:var(--drop);
+      color:#0369a1
+    }
+
+    .legend{
+      display:flex;
+      flex-wrap:wrap;
+      gap:14px;
+      justify-content:center;
+      padding:10px;
+      background:#fff;
+      border:1px solid var(--border);
+      font-size:.77rem;
+      font-weight:700
+    }
+
+    .legend-item{
+      display:flex;
+      align-items:center;
+      gap:5px
+    }
+
+    .legend-box{
+      width:16px;
+      height:16px;
+      border-radius:3px
+    }
+
+    .clinch-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+      gap:18px
+    }
+
+    .clinch-card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:15px 17px;
+      overflow-x:auto
+    }
+
+    .clinch-card h3{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom:2px solid var(--border);
+      padding-bottom:7px;
+      margin-bottom:10px;
+      font-size:1.05rem;
+      color:#166534
+    }
+
+    .champ-tag{
+      font-size:.82rem;
+      color:#15803d
+    }
+
+    .clinch-table{
+      min-width:330px
+    }
+
+    .clinch-table th{
+      background:transparent;
+      border-bottom:2px solid #475569
+    }
+
+    .val-clinch{
+      font-weight:800;
+      color:var(--red)
+    }
+
+    .val-cum{
+      font-weight:800;
+      color:#15803d
+    }
+
+    .line-table{
+      min-width:680px
+    }
+
+    .banner-team{
+      color:#fff;
+      font-size:1rem
+    }
+
+    .banner-h{
+      background:#eab308
+    }
+
+    .banner-g{
+      background:#ea580c
+    }
+
+    .banner-db{
+      background:#0284c7
+    }
+
+    .banner-sub{
+      background:#fef08a!important;
+      color:#854d0e!important;
+      font-weight:800
+    }
+
+    .line-highlight{
+      background:#fef9c3!important;
+      font-weight:800
+    }
+
+    .h2h{
+      min-width:1050px
+    }
+
+    .h2h th{
+      font-size:.74rem
+    }
+
+    .self{
+      background:#f8fafc;
+      color:#94a3b8;
+      font-weight:800
+    }
+
+    .draw-sub{
+      display:block;
+      font-size:.69rem;
+      color:#64748b
+    }
+
+    .notes{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:20px;
+      font-size:.79rem;
+      line-height:1.7;
+      color:#334155
+    }
+
+    .notes-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(310px,1fr));
+      gap:18px
+    }
+
+    .notes dt{
+      font-weight:800;
+      color:#1e3a8a;
+      margin-bottom:3px
+    }
+
+    .notes dd{
+      margin:0 0 10px;
+      color:#475569
+    }
+
+    .foot{
+      margin-top:16px;
+      text-align:center;
+      color:#94a3b8;
+      font-size:.7rem
+    }
+
+    @media(max-width:650px){
+      body{
+        padding:12px 7px 50px
+      }
+
+      header h1{
+        font-size:1.28rem
+      }
+
+      .prediction-grid{
+        grid-template-columns:1fr
+      }
+
+      .section-title{
+        font-size:1rem
+      }
+
+      .guide{
+        grid-template-columns:1fr
+      }
+
+      .model-status{
+        grid-template-columns:1fr 1fr
+      }
+
+      .controls{
+        align-items:stretch
+      }
+
+      .tabs{
+        width:100%
+      }
+
+      .tab{
+        flex:1
+      }
+    }
   </style>
 </head>
+
 <body>
 <div class="container">
+
   <header>
     <h1>プロ野球チャンピョンシップナンバー＆対戦成績解析</h1>
     <p>チャンピョンシップナンバー・試合別勝/分/敗確率・143試合完走シミュレーション・優勝/CS確率・対戦成績</p>
@@ -72,90 +688,249 @@
 
   <div class="banner">
     <div class="banner-title">💡 チャンピョンシップナンバー（CN）とは？</div>
-    <div>CNは、他球団の自力優勝の有無だけに依存せず、残り日程と勝率を踏まえて「その順位を確定するために必要な勝利数」を計算する独自指標です。自力確定可能な数値、他力を要する◇付き数値、数学的に消滅した「-」、順位確定の「確定」を表示します。</div>
+    <div>
+      CNは、他球団の自力優勝の有無だけに依存せず、残り日程と勝率を踏まえて「その順位を確定するために必要な勝利数」を計算する独自指標です。
+      自力確定可能な数値、他力を要する◇付き数値、数学的に消滅した「-」、順位確定の「確定」を表示します。
+    </div>
   </div>
 
   <div class="panel">
     <div class="controls">
-      <div class="date-box"><label for="date-picker">基準日:</label><input type="date" id="date-picker"></div>
+      <div class="date-box">
+        <label for="date-picker">基準日:</label>
+        <input type="date" id="date-picker">
+      </div>
+
       <div class="tabs">
         <button class="tab active" onclick="switchLeague('central',this)">セ・リーグ</button>
         <button class="tab" onclick="switchLeague('pacific',this)">パ・リーグ</button>
       </div>
     </div>
+
     <div class="model-status" id="model-status"></div>
   </div>
 
-  <div class="section-title">📊 順位表・チャンピョンシップナンバー＆優勝/CS確率</div>
-  <div class="table-wrap"><table>
-    <thead><tr><th>順位</th><th style="text-align:left">球団</th><th>試</th><th>勝</th><th>敗</th><th>分</th><th>残</th><th>勝率</th><th>差</th><th>1位CN</th><th>2位CN</th><th>3位CN</th><th>優勝確率</th><th>CS確率</th></tr></thead>
-    <tbody id="standings-body"><tr><td colspan="14" style="padding:24px">データを読み込み中...</td></tr></tbody>
-  </table></div>
-
-  <div class="guide">
-    <div class="guide-item"><div class="guide-badge"><span class="badge badge-magic">11</span></div><div><strong>自力確定可能</strong>：自チームの勝利だけでその順位を確定できる必要勝利数。</div></div>
-    <div class="guide-item"><div class="guide-badge"><span class="badge badge-elim">◇13◇</span></div><div><strong>自力消滅（可能性あり）</strong>：残り試合数を超える勝数が必要だが、他球団の結果次第では到達可能。</div></div>
-    <div class="guide-item"><div class="guide-badge"><span class="badge-dash">-</span></div><div><strong>数学的消滅</strong>：自チーム全勝・他球団全敗でもその順位に届かない状態。</div></div>
-    <div class="guide-item"><div class="guide-badge"><span class="badge badge-fixed">確定</span></div><div><strong>順位確定</strong>：他チームの残り結果にかかわらず、その順位以上が確定した状態。</div></div>
+  <div class="section-title">
+    📊 順位表・チャンピョンシップナンバー＆優勝/CS確率
   </div>
 
-  <div class="section-title" id="pred-title">🎯 試合別予想勝/分/敗確率 <span class="desc" id="pred-subtitle"></span></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>順位</th>
+          <th style="text-align:left">球団</th>
+          <th>試</th>
+          <th>勝</th>
+          <th>敗</th>
+          <th>分</th>
+          <th>残</th>
+          <th>勝率</th>
+          <th>差</th>
+          <th>1位CN</th>
+          <th>2位CN</th>
+          <th>3位CN</th>
+          <th>優勝確率</th>
+          <th>CS確率</th>
+        </tr>
+      </thead>
+      <tbody id="standings-body">
+        <tr>
+          <td colspan="14" style="padding:24px">データを読み込み中...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="guide">
+    <div class="guide-item">
+      <div class="guide-badge">
+        <span class="badge badge-magic">11</span>
+      </div>
+      <div>
+        <strong>自力確定可能</strong>：自チームの勝利だけでその順位を確定できる必要勝利数。
+      </div>
+    </div>
+
+    <div class="guide-item">
+      <div class="guide-badge">
+        <span class="badge badge-elim">◇13◇</span>
+      </div>
+      <div>
+        <strong>自力消滅（可能性あり）</strong>：残り試合数を超える勝数が必要だが、他球団の結果次第では到達可能。
+      </div>
+    </div>
+
+    <div class="guide-item">
+      <div class="guide-badge">
+        <span class="badge-dash">-</span>
+      </div>
+      <div>
+        <strong>数学的消滅</strong>：自チーム全勝・他球団全敗でもその順位に届かない状態。
+      </div>
+    </div>
+
+    <div class="guide-item">
+      <div class="guide-badge">
+        <span class="badge badge-fixed">確定</span>
+      </div>
+      <div>
+        <strong>順位確定</strong>：他チームの残り結果にかかわらず、その順位以上が確定した状態。
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title" id="pred-title">
+    🎯 試合別予想勝/分/敗確率
+    <span class="desc" id="pred-subtitle"></span>
+  </div>
+
   <div class="prediction-grid" id="prediction-grid"></div>
 
   <div id="history-notice" class="notice" style="display:none"></div>
 
   <div id="future-sections-wrapper">
-    <div class="section-title">📋 最終順位可能性早見表 <span class="desc">（全143試合完走Monte Carlo）</span></div>
+
+    <div class="section-title">
+      📋 最終順位可能性早見表
+      <span class="desc">（全143試合完走Monte Carlo）</span>
+    </div>
+
     <div class="table-wrap" style="padding:14px 0">
-      <table class="matrix"><thead id="rank-matrix-head"></thead><tbody id="rank-matrix-body"></tbody></table>
+      <table class="matrix">
+        <thead id="rank-matrix-head"></thead>
+        <tbody id="rank-matrix-body"></tbody>
+      </table>
+
       <div class="legend">
-        <div class="legend-item"><span class="legend-box" style="background:var(--current);border:2px solid #dc2626"></span>現在の順位</div>
-        <div class="legend-item"><span class="legend-box" style="background:var(--climb)"></span>自力で上位進出可能</div>
-        <div class="legend-item"><span class="legend-box" style="background:var(--potential)"></span>上位進出可能性あり</div>
-        <div class="legend-item"><span class="legend-box" style="background:var(--drop)"></span>下位転落可能性あり</div>
+        <div class="legend-item">
+          <span class="legend-box" style="background:var(--current);border:2px solid #dc2626"></span>
+          現在の順位
+        </div>
+        <div class="legend-item">
+          <span class="legend-box" style="background:var(--climb)"></span>
+          自力で上位進出可能
+        </div>
+        <div class="legend-item">
+          <span class="legend-box" style="background:var(--potential)"></span>
+          上位進出可能性あり
+        </div>
+        <div class="legend-item">
+          <span class="legend-box" style="background:var(--drop)"></span>
+          下位転落可能性あり
+        </div>
       </div>
     </div>
 
-    <div class="section-title">📅 優勝決定日確率 <span class="desc">（決定確率・累計・その日の予想勝率）</span></div>
+    <div class="section-title">
+      📅 優勝決定日確率
+      <span class="desc">（決定確率・累計・その日の予想勝率）</span>
+    </div>
+
     <div class="clinch-grid" id="clinch-schedule-container"></div>
 
-    <div class="section-title">🏁 優勝ラインテーブル <span class="desc">（残り試合の勝敗パターン別勝率）</span></div>
-    <div class="table-wrap"><table class="line-table" id="line-grid-table"><thead id="line-grid-head"></thead><tbody id="line-grid-body"></tbody></table></div>
+    <div class="section-title">
+      🏁 優勝ラインテーブル
+      <span class="desc">（残り試合の勝敗パターン別勝率）</span>
+    </div>
+
+    <div class="table-wrap">
+      <table class="line-table" id="line-grid-table">
+        <thead id="line-grid-head"></thead>
+        <tbody id="line-grid-body"></tbody>
+      </table>
+    </div>
+
   </div>
 
-  <div class="section-title">⚾ 対戦成績表（カード別・ホーム/ロード・交流戦）</div>
-  <div class="table-wrap"><table class="h2h" id="matrix-table"><thead id="matrix-head"></thead><tbody id="matrix-body"><tr><td colspan="15" style="padding:24px">データを読み込み中...</td></tr></tbody></table></div>
+  <div class="section-title">
+    ⚾ 対戦成績表（カード別・ホーム/ロード・交流戦）
+  </div>
+
+  <div class="table-wrap">
+    <table class="h2h" id="matrix-table">
+      <thead id="matrix-head"></thead>
+      <tbody id="matrix-body">
+        <tr>
+          <td colspan="15" style="padding:24px">データを読み込み中...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <div class="notes">
-    <div style="font-weight:800;font-size:.95rem;margin-bottom:12px">ℹ️ 項目および数理モデルの解説</div>
+
+    <div style="font-weight:800;font-size:.95rem;margin-bottom:12px">
+      ℹ️ 項目および数理モデルの解説
+    </div>
+
     <div class="notes-grid">
+
       <div>
         <dl>
           <dt>試合別確率モデル</dt>
-          <dd>2016～2025年の複数年データを事前分布として利用し、2026年は直近の試合ほど重くなる指数加重（半減期）で攻撃力・守備力を更新します。得点をPoisson分布でモデル化し、ホームアドバンテージ、球場の得点環境、休養日数差を反映してホーム勝利・引分・ビジター勝利の3確率を同時に算出します。</dd>
+          <dd>
+            2016～2025年の複数年データを事前分布として利用し、
+            2026年は直近の試合ほど重くなる指数加重（半減期）で攻撃力・守備力を更新します。
+            得点をPoisson分布でモデル化し、ホームアドバンテージ、球場の得点環境、休養日数差を反映してホーム勝利・引分・ビジター勝利の3確率を算出します。
+          </dd>
+
+          <dt>引き分け確率モデル</dt>
+          <dd>
+            2016～2019年および2022～2025年のNPB公式戦を基準に、
+            160引き分け / 6,864試合 = 約2.33%を基準率として使用します。
+            2020～2021年は試合数・延長ルール等が通常年と異なるため基準から除外しています。
+            各試合ではPoisson得点分布から同点になりやすさを算出し、基準率を試合ごとに補正します。
+          </dd>
+
           <dt>先発投手補正</dt>
-          <dd>現在のデータベースで「先発が確認済み」と記録された試合のみ使用します。投手勝敗はチーム力の影響を強く受けるため、補正幅は小さく縮約しています。</dd>
+          <dd>
+            現在のデータベースで「先発が確認済み」と記録された試合のみ使用します。
+            投手勝敗はチーム力の影響を強く受けるため、補正幅は小さく縮約しています。
+          </dd>
         </dl>
       </div>
+
       <div>
         <dl>
           <dt>全143試合完走Monte Carlo</dt>
-          <dd>未消化の日程を、各試合のホーム勝利・引分・ビジター勝利確率からシミュレーションします。残り試合ごとの結果により最終順位を決定し、その到達頻度から優勝確率・CS確率を算出します。</dd>
+          <dd>
+            未消化の日程を、各試合のホーム勝利・引分・ビジター勝利確率からシミュレーションします。
+            残り試合ごとの結果により最終順位を決定し、その到達頻度から優勝確率・CS確率を算出します。
+          </dd>
+
           <dt>将来の先発投手</dt>
-          <dd>将来の予告先発が確定していない試合では、先発投手補正を使用しません。これにより、未来の情報を予測に混入させない設計にしています。</dd>
+          <dd>
+            将来の予告先発が確定していない試合では、先発投手補正を使用しません。
+            これにより、未来の情報を予測に混入させない設計にしています。
+          </dd>
         </dl>
       </div>
+
       <div>
         <dl>
           <dt>過去日付の優勝確率</dt>
-          <dd>過去の日付を選択した場合、その日より後の試合結果は使わず、その時点の情報だけから再計算した優勝確率を表示します。下段の「最終順位早見表」「優勝決定日確率」「優勝ライン」は、最新日のシーズン完走シミュレーションです。</dd>
+          <dd>
+            過去の日付を選択した場合、その日より後の試合結果は使わず、
+            その時点の情報だけから再計算した優勝確率を表示します。
+            下段の「最終順位早見表」「優勝決定日確率」「優勝ライン」は、最新日のシーズン完走シミュレーションです。
+          </dd>
+
           <dt>注意</dt>
-          <dd>これは統計モデルによる確率推定であり、実際の試合結果を保証するものではありません。Monte Carloによる標本誤差も含まれます。</dd>
+          <dd>
+            これは統計モデルによる確率推定であり、実際の試合結果を保証するものではありません。
+            Monte Carloによる標本誤差も含まれます。
+          </dd>
         </dl>
       </div>
+
     </div>
   </div>
-  <div class="foot">データはリポジトリ内の試合結果・日程データから自動生成されています。</div>
+
+  <div class="foot">
+    データはリポジトリ内の試合結果・日程データから自動生成されています。
+  </div>
+
 </div>
 
 <script>
@@ -164,80 +939,265 @@
   let selectedDate = '';
 
   const SHORT_CODE = {
-    "阪神":"T","巨人":"G","ＤｅＮＡ":"DB","ヤクルト":"S","中日":"D","広島":"C",
-    "ソフトバンク":"H","日本ハム":"F","ロッテ":"M","楽天":"E","オリックス":"B","西武":"L"
+    "阪神":"T",
+    "巨人":"G",
+    "ＤｅＮＡ":"DB",
+    "ヤクルト":"S",
+    "中日":"D",
+    "広島":"C",
+    "ソフトバンク":"H",
+    "日本ハム":"F",
+    "ロッテ":"M",
+    "楽天":"E",
+    "オリックス":"B",
+    "西武":"L"
   };
+
   const SHORT_NAMES = {
-    "阪神":"対神","巨人":"対巨","ＤｅＮＡ":"対デ","ヤクルト":"対ヤ","中日":"対中","広島":"対広",
-    "ソフトバンク":"対ソ","日本ハム":"対日","ロッテ":"対ロ","楽天":"対楽","オリックス":"対オ","西武":"対西"
+    "阪神":"対神",
+    "巨人":"対巨",
+    "ＤｅＮＡ":"対デ",
+    "ヤクルト":"対ヤ",
+    "中日":"対中",
+    "広島":"対広",
+    "ソフトバンク":"対ソ",
+    "日本ハム":"対日",
+    "ロッテ":"対ロ",
+    "楽天":"対楽",
+    "オリックス":"対オ",
+    "西武":"対西"
   };
+
   const FULL_NAMES = {
-    "阪神":"阪神タイガース","巨人":"読売ジャイアンツ","ＤｅＮＡ":"横浜DeNAベイスターズ","ヤクルト":"東京ヤクルトスワローズ",
-    "中日":"中日ドラゴンズ","広島":"広島東洋カープ","ソフトバンク":"福岡ソフトバンクホークス","日本ハム":"北海道日本ハムファイターズ",
-    "ロッテ":"千葉ロッテマリーンズ","楽天":"東北楽天ゴールデンイーグルス","オリックス":"オリックス・バファローズ","西武":"埼玉西武ライオンズ"
+    "阪神":"阪神タイガース",
+    "巨人":"読売ジャイアンツ",
+    "ＤｅＮＡ":"横浜DeNAベイスターズ",
+    "ヤクルト":"東京ヤクルトスワローズ",
+    "中日":"中日ドラゴンズ",
+    "広島":"広島東洋カープ",
+    "ソフトバンク":"福岡ソフトバンクホークス",
+    "日本ハム":"北海道日本ハムファイターズ",
+    "ロッテ":"千葉ロッテマリーンズ",
+    "楽天":"東北楽天ゴールデンイーグルス",
+    "オリックス":"オリックス・バファローズ",
+    "西武":"埼玉西武ライオンズ"
   };
 
   function esc(v) {
-    return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    return String(v ?? '')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;');
   }
+
   function fmtPct(v) {
     const n = Number(v || 0);
-    if (Math.abs(n - Math.round(n)) < 0.05) return `${Math.round(n)}%`;
+
+    if (Math.abs(n - Math.round(n)) < 0.05) {
+      return `${Math.round(n)}%`;
+    }
+
     return `${n.toFixed(1)}%`;
   }
+
   function formatRecord(w,l,d) {
     let s = `${w}-${l}`;
-    if (Number(d) > 0) s += `<span class="draw-sub">(${d})</span>`;
+
+    if (Number(d) > 0) {
+      s += `<span class="draw-sub">(${d})</span>`;
+    }
+
     return s;
   }
+
   function badge(v, rem) {
-    if (v === '確定') return '<span class="badge badge-fixed">確定</span>';
+    if (v === '確定') {
+      return '<span class="badge badge-fixed">確定</span>';
+    }
+
     if (typeof v === 'number') {
-      if (v > rem) return `<span class="badge badge-elim">◇${v}◇</span>`;
+      if (v > rem) {
+        return `<span class="badge badge-elim">◇${v}◇</span>`;
+      }
+
       return `<span class="badge badge-magic">${v}</span>`;
     }
+
     return '<span class="badge-dash">-</span>';
   }
+
   function getJstDate() {
-    const s = new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+    const s = new Intl.DateTimeFormat(
+      'en-CA',
+      {
+        timeZone:'Asia/Tokyo',
+        year:'numeric',
+        month:'2-digit',
+        day:'2-digit'
+      }
+    ).format(new Date());
+
     return s;
   }
+
   function currentList() {
-    return rawData && rawData.history && rawData.history[selectedDate] ? rawData.history[selectedDate][currentLeague] : null;
+    return rawData &&
+      rawData.history &&
+      rawData.history[selectedDate]
+      ? rawData.history[selectedDate][currentLeague]
+      : null;
   }
+
   function modelMeta() {
     return rawData?.simulation?.model || {};
+  }
+
+  function drawModelMeta() {
+    const m = modelMeta();
+    return m.draw_model || {};
   }
 
   function renderModelStatus() {
     const m = modelMeta();
     const env = m.environment || {};
+    const dm = drawModelMeta();
+
+    const baselineRate =
+      dm.baseline_draw_rate !== undefined &&
+      dm.baseline_draw_rate !== null
+        ? `${(Number(dm.baseline_draw_rate) * 100).toFixed(2)}%`
+        : '-';
+
+    const baselinePeriod =
+      dm.baseline_period || '-';
+
+    const baselineGames =
+      dm.baseline_games !== undefined
+        ? dm.baseline_games
+        : '-';
+
+    const baselineDraws =
+      dm.baseline_draws !== undefined
+        ? dm.baseline_draws
+        : '-';
+
     document.getElementById('model-status').innerHTML = `
-      <div class="status-item"><span class="status-label">モデル</span><span class="status-value">${esc(m.version || '不明')}</span></div>
-      <div class="status-item"><span class="status-label">最新基準日</span><span class="status-value">${esc(rawData?.latest_date || '-')}</span></div>
-      <div class="status-item"><span class="status-label">完走シミュレーション</span><span class="status-value">${esc(m.main_simulations || '-')}回</span></div>
-      <div class="status-item"><span class="status-label">過去日シミュレーション</span><span class="status-value">${esc(m.historical_simulations || '-')}回</span></div>
-      <div class="status-item"><span class="status-label">直近データ半減期</span><span class="status-value">${esc(m.recency_half_life_days || '-')}日</span></div>
-      <div class="status-item"><span class="status-label">球場補正</span><span class="status-value">過去実績から推定</span></div>
+      <div class="status-item">
+        <span class="status-label">モデル</span>
+        <span class="status-value">${esc(m.version || '不明')}</span>
+      </div>
+
+      <div class="status-item">
+        <span class="status-label">最新基準日</span>
+        <span class="status-value">${esc(rawData?.latest_date || '-')}</span>
+      </div>
+
+      <div class="status-item">
+        <span class="status-label">完走シミュレーション</span>
+        <span class="status-value">${esc(m.main_simulations || '-')}回</span>
+      </div>
+
+      <div class="status-item">
+        <span class="status-label">過去日シミュレーション</span>
+        <span class="status-value">${esc(m.historical_simulations || '-')}回</span>
+      </div>
+
+      <div class="status-item">
+        <span class="status-label">直近データ半減期</span>
+        <span class="status-value">${esc(m.recency_half_life_days || '-')}日</span>
+      </div>
+
+      <div class="status-item">
+        <span class="status-label">引分基準率</span>
+        <span class="status-value">${esc(baselineRate)}</span>
+      </div>
+
+      <div class="status-item">
+        <span class="status-label">引分基準期間</span>
+        <span class="status-value">${esc(baselinePeriod)}</span>
+      </div>
+
+      <div class="status-item">
+        <span class="status-label">引分実績</span>
+        <span class="status-value">${esc(baselineDraws)} / ${esc(baselineGames)}</span>
+      </div>
+
+      <div class="status-item">
+        <span class="status-label">球場補正</span>
+        <span class="status-value">過去実績から推定</span>
+      </div>
     `;
   }
 
   function renderStandings(list) {
     const body = document.getElementById('standings-body');
     body.innerHTML = '';
+
     list.forEach(t => {
       const rem = t.remaining ?? (143 - t.games);
       const champP = t.champ_prob ?? 0;
-      const csP = t.magic_3rd === '確定' ? 100 : (t.cs_prob ?? 0);
+      const csP = t.magic_3rd === '確定'
+        ? 100
+        : (t.cs_prob ?? 0);
+
       body.insertAdjacentHTML('beforeend', `
         <tr>
-          <td class="rank">${esc(t.rank)}</td><td class="team">${esc(t.team)}</td>
-          <td>${esc(t.games)}</td><td>${esc(t.win)}</td><td>${esc(t.lose)}</td><td>${esc(t.draw)}</td><td class="rem">${esc(rem)}</td>
-          <td>${Number(t.rate || 0).toFixed(3).replace('0.','.')}</td><td>${t.diff === 0 ? '--' : Number(t.diff || 0).toFixed(1)}</td>
-          <td>${badge(t.magic_1st,rem)}</td><td>${badge(t.magic_2nd,rem)}</td><td>${badge(t.magic_3rd,rem)}</td>
-          <td class="prob ${champP > 50 ? 'prob-high':''}">${fmtPct(champP)}</td><td class="prob">${fmtPct(csP)}</td>
-        </tr>`);
+          <td class="rank">${esc(t.rank)}</td>
+          <td class="team">${esc(t.team)}</td>
+          <td>${esc(t.games)}</td>
+          <td>${esc(t.win)}</td>
+          <td>${esc(t.lose)}</td>
+          <td>${esc(t.draw)}</td>
+          <td class="rem">${esc(rem)}</td>
+          <td>${Number(t.rate || 0).toFixed(3).replace('0.','.')}</td>
+          <td>${t.diff === 0 ? '--' : Number(t.diff || 0).toFixed(1)}</td>
+          <td>${badge(t.magic_1st,rem)}</td>
+          <td>${badge(t.magic_2nd,rem)}</td>
+          <td>${badge(t.magic_3rd,rem)}</td>
+          <td class="prob ${champP > 50 ? 'prob-high':''}">
+            ${fmtPct(champP)}
+          </td>
+          <td class="prob">
+            ${fmtPct(csP)}
+          </td>
+        </tr>
+      `);
     });
+  }
+
+  /*
+    表示用確率をバー幅へ変換。
+
+    Python側では各確率を小数第1位に丸めてhistory_standings.jsonへ
+    保存しているため、例えば 58.4 + 2.3 + 39.4 = 100.1 のように
+    合計が100.0からわずかにずれることがある。
+
+    バーについては、3値の比率を維持したまま合計を100%へ正規化する。
+    これにより、Flexboxによる縮小や余白発生を防ぎ、バー全体を
+    常に100%の幅として表示する。
+  */
+  function getBarWidths(home, draw, away) {
+    const h = Math.max(0, Number(home) || 0);
+    const d = Math.max(0, Number(draw) || 0);
+    const a = Math.max(0, Number(away) || 0);
+
+    const total = h + d + a;
+
+    if (total <= 0) {
+      return {
+        home: 0,
+        draw: 0,
+        away: 0
+      };
+    }
+
+    return {
+      home: h / total * 100,
+      draw: d / total * 100,
+      away: a / total * 100
+    };
   }
 
   function renderPredictions(list, day) {
@@ -245,37 +1205,166 @@
     const title = document.getElementById('pred-title');
     const sub = document.getElementById('pred-subtitle');
     const preds = day.predictions || [];
-    const hasFinished = preds.some(p => p.is_finished);
-    title.firstChild.textContent = hasFinished ? '⚾ 試合結果 ' : '🎯 試合別予想勝/分/敗確率 ';
-    sub.textContent = hasFinished ? `（${selectedDate}の結果。試合前モデル確率も併記）` : `（${selectedDate}の試合予測）`;
 
-    const teamSet = new Set(list.map(t => t.team));
-    const filtered = preds.filter(p => teamSet.has(p.home) || teamSet.has(p.away));
+    const hasFinished = preds.some(
+      p => p.is_finished
+    );
+
+    title.firstChild.textContent =
+      hasFinished
+        ? '⚾ 試合結果 '
+        : '🎯 試合別予想勝/分/敗確率 ';
+
+    sub.textContent =
+      hasFinished
+        ? `（${selectedDate}の結果。試合前モデル確率も併記）`
+        : `（${selectedDate}の試合予測）`;
+
+    const teamSet = new Set(
+      list.map(t => t.team)
+    );
+
+    const filtered = preds.filter(
+      p =>
+        teamSet.has(p.home) ||
+        teamSet.has(p.away)
+    );
+
     if (!filtered.length) {
-      grid.innerHTML = '<div style="grid-column:1/-1;padding:18px;text-align:center;color:#64748b;background:#fff;border:1px solid var(--border);border-radius:12px">この日の該当リーグの試合予定・結果はありません。</div>';
+      grid.innerHTML =
+        '<div style="grid-column:1/-1;padding:18px;text-align:center;color:#64748b;background:#fff;border:1px solid var(--border);border-radius:12px">この日の該当リーグの試合予定・結果はありません。</div>';
       return;
     }
+
     grid.innerHTML = '';
+
     filtered.forEach(p => {
-      const hp = Number(p.home_prob || 0), dp = Number(p.draw_prob || 0), ap = Number(p.away_prob || 0);
-      const card = document.createElement('div'); card.className = 'pred-card';
-      if (p.is_finished && p.actual_home_score !== null && p.actual_away_score !== null) {
-        const hs = Number(p.actual_home_score), as = Number(p.actual_away_score);
-        const hw = hs > as, aw = as > hs, dr = hs === as;
+      const hp = Number(p.home_prob || 0);
+      const dp = Number(p.draw_prob || 0);
+      const ap = Number(p.away_prob || 0);
+
+      const barWidths = getBarWidths(
+        hp,
+        dp,
+        ap
+      );
+
+      const card = document.createElement('div');
+      card.className = 'pred-card';
+
+      if (
+        p.is_finished &&
+        p.actual_home_score !== null &&
+        p.actual_away_score !== null
+      ) {
+        const hs = Number(p.actual_home_score);
+        const as = Number(p.actual_away_score);
+
+        const hw = hs > as;
+        const aw = as > hs;
+        const dr = hs === as;
+
         card.innerHTML = `
-          <div class="pred-head"><div class="pred-team"><div class="role">ホーム</div>${esc(p.home)}</div><div class="vs">VS</div><div class="pred-team right"><div class="role">ビジター</div>${esc(p.away)}</div></div>
-          <div class="result"><div class="score ${hw?'winner':(dr?'draw-result':'loser')}">${hs}</div><div class="vs">-</div><div class="score right ${aw?'winner':(dr?'draw-result':'loser')}">${as}</div></div>
-          <div class="pregame">試合前モデル：<span class="home-p">H ${hp.toFixed(1)}%</span> / <span class="draw-p">D ${dp.toFixed(1)}%</span> / <span class="away-p">A ${ap.toFixed(1)}%</span></div>
+          <div class="pred-head">
+            <div class="pred-team">
+              <div class="role">ホーム</div>
+              ${esc(p.home)}
+            </div>
+
+            <div class="vs">VS</div>
+
+            <div class="pred-team right">
+              <div class="role">ビジター</div>
+              ${esc(p.away)}
+            </div>
+          </div>
+
+          <div class="result">
+            <div class="score ${hw?'winner':(dr?'draw-result':'loser')}">
+              ${hs}
+            </div>
+
+            <div class="vs">-</div>
+
+            <div class="score right ${aw?'winner':(dr?'draw-result':'loser')}">
+              ${as}
+            </div>
+          </div>
+
+          <div class="pregame">
+            試合前モデル：
+            <span class="home-p">H ${hp.toFixed(1)}%</span>
+            /
+            <span class="draw-p">D ${dp.toFixed(1)}%</span>
+            /
+            <span class="away-p">A ${ap.toFixed(1)}%</span>
+          </div>
         `;
       } else {
         card.innerHTML = `
-          <div class="pred-head"><div class="pred-team"><div class="role">ホーム</div>${esc(p.home)}<div class="starter">${esc(p.home_status_text || '')}</div></div><div class="vs">VS</div><div class="pred-team right"><div class="role">ビジター</div>${esc(p.away)}<div class="starter">${esc(p.away_status_text || '')}</div></div></div>
-          <div class="outcome-values"><span class="home-p">${hp.toFixed(1)}%</span><span class="draw-p">${dp.toFixed(1)}%</span><span class="away-p">${ap.toFixed(1)}%</span></div>
-          <div class="bar"><div class="bar-home" style="width:${hp}%"></div><div class="bar-draw" style="width:${dp}%"></div><div class="bar-away" style="width:${ap}%"></div></div>
-          <div class="outcome-values" style="font-size:.67rem;font-weight:700;margin-top:4px"><span>ホーム勝</span><span>引分</span><span>ビジター勝</span></div>
-          <div class="expected">予想得点：${Number(p.expected_home_runs || 0).toFixed(2)} - ${Number(p.expected_away_runs || 0).toFixed(2)}</div>
+          <div class="pred-head">
+            <div class="pred-team">
+              <div class="role">ホーム</div>
+              ${esc(p.home)}
+              <div class="starter">
+                ${esc(p.home_status_text || '')}
+              </div>
+            </div>
+
+            <div class="vs">VS</div>
+
+            <div class="pred-team right">
+              <div class="role">ビジター</div>
+              ${esc(p.away)}
+              <div class="starter">
+                ${esc(p.away_status_text || '')}
+              </div>
+            </div>
+          </div>
+
+          <div class="outcome-values">
+            <span class="home-p">${hp.toFixed(1)}%</span>
+            <span class="draw-p">${dp.toFixed(1)}%</span>
+            <span class="away-p">${ap.toFixed(1)}%</span>
+          </div>
+
+          <div class="bar"
+               role="img"
+               aria-label="ホーム勝 ${hp.toFixed(1)}%、引分 ${dp.toFixed(1)}%、ビジター勝 ${ap.toFixed(1)}%">
+            <div
+              class="bar-home"
+              style="width:${barWidths.home}%"
+            ></div>
+
+            <div
+              class="bar-draw"
+              style="width:${barWidths.draw}%"
+            ></div>
+
+            <div
+              class="bar-away"
+              style="width:${barWidths.away}%"
+            ></div>
+          </div>
+
+          <div
+            class="outcome-values"
+            style="font-size:.67rem;font-weight:700;margin-top:4px"
+          >
+            <span>ホーム勝</span>
+            <span>引分</span>
+            <span>ビジター勝</span>
+          </div>
+
+          <div class="expected">
+            予想得点：
+            ${Number(p.expected_home_runs || 0).toFixed(2)}
+            -
+            ${Number(p.expected_away_runs || 0).toFixed(2)}
+          </div>
         `;
       }
+
       grid.appendChild(card);
     });
   }
@@ -283,104 +1372,593 @@
   function renderHistoryNotice() {
     const notice = document.getElementById('history-notice');
     const latest = rawData?.latest_date || '';
-    if (selectedDate && latest && selectedDate !== latest) {
+
+    if (
+      selectedDate &&
+      latest &&
+      selectedDate !== latest
+    ) {
       notice.style.display = 'block';
-      notice.textContent = `※ ${selectedDate}を参照中。上段の優勝確率は、その日より後の結果を使わず当時の情報だけで再計算しています。下段の最終順位早見表・優勝決定日確率・優勝ラインは、最新基準日（${latest}）のシーズン完走シミュレーションです。`;
-      document.getElementById('future-sections-wrapper').classList.add('dimmed');
+
+      notice.textContent =
+        `※ ${selectedDate}を参照中。上段の優勝確率は、その日より後の結果を使わず当時の情報だけで再計算しています。下段の最終順位早見表・優勝決定日確率・優勝ラインは、最新基準日（${latest}）のシーズン完走シミュレーションです。`;
+
+      document
+        .getElementById('future-sections-wrapper')
+        .classList
+        .add('dimmed');
     } else {
       notice.style.display = 'none';
-      document.getElementById('future-sections-wrapper').classList.remove('dimmed');
+
+      document
+        .getElementById('future-sections-wrapper')
+        .classList
+        .remove('dimmed');
     }
   }
 
   function renderRankMatrix(list) {
-    const head = document.getElementById('rank-matrix-head'), body = document.getElementById('rank-matrix-body');
-    head.innerHTML=''; body.innerHTML='';
-    const key = currentLeague === 'central' ? 'central_rank_matrix' : 'pacific_rank_matrix';
-    const mat = rawData?.simulation?.[key] || {};
-    const teams = list.map(t=>t.team);
-    head.innerHTML = `<tr><th></th>${teams.map(t=>`<th>${esc(SHORT_CODE[t]||t)}</th>`).join('')}<th></th></tr>`;
-    for(let r=1;r<=6;r++){
-      let html=`<tr><td style="font-weight:800">${r}</td>`;
-      teams.forEach(t=>{
-        const obj=list.find(x=>x.team===t); const cur=obj?.rank||0; const prob=mat[t]?.[r] ?? 0;
-        let cls='';
-        if(r===cur) cls='cell-current';
-        else if(r<cur && prob>0){
-          const key2=r===1?'magic_1st':r===2?'magic_2nd':'magic_3rd';
-          const mv=obj?.[key2]; cls=(typeof mv==='number' && mv<=obj.remaining)?'cell-climb':'cell-pot';
-        } else if(r>cur && prob>0) cls='cell-drop';
-        html += `<td><span class="cell ${cls}">${prob>0?fmtPct(prob):(r===cur?'0%':'-')}</span></td>`;
+    const head = document.getElementById('rank-matrix-head');
+    const body = document.getElementById('rank-matrix-body');
+
+    head.innerHTML = '';
+    body.innerHTML = '';
+
+    const key =
+      currentLeague === 'central'
+        ? 'central_rank_matrix'
+        : 'pacific_rank_matrix';
+
+    const mat =
+      rawData?.simulation?.[key] || {};
+
+    const teams = list.map(
+      t => t.team
+    );
+
+    head.innerHTML = `
+      <tr>
+        <th></th>
+        ${teams.map(
+          t => `<th>${esc(SHORT_CODE[t]||t)}</th>`
+        ).join('')}
+        <th></th>
+      </tr>
+    `;
+
+    for (let r = 1; r <= 6; r++) {
+      let html =
+        `<tr><td style="font-weight:800">${r}</td>`;
+
+      teams.forEach(t => {
+        const obj = list.find(
+          x => x.team === t
+        );
+
+        const cur = obj?.rank || 0;
+        const prob =
+          mat[t]?.[r] ?? 0;
+
+        let cls = '';
+
+        if (r === cur) {
+          cls = 'cell-current';
+        } else if (r < cur && prob > 0) {
+          const key2 =
+            r === 1
+              ? 'magic_1st'
+              : r === 2
+                ? 'magic_2nd'
+                : 'magic_3rd';
+
+          const mv = obj?.[key2];
+
+          cls =
+            typeof mv === 'number' &&
+            mv <= obj.remaining
+              ? 'cell-climb'
+              : 'cell-pot';
+
+        } else if (
+          r > cur &&
+          prob > 0
+        ) {
+          cls = 'cell-drop';
+        }
+
+        html += `
+          <td>
+            <span class="cell ${cls}">
+              ${
+                prob > 0
+                  ? fmtPct(prob)
+                  : (r === cur ? '0%' : '-')
+              }
+            </span>
+          </td>
+        `;
       });
-      html += `<td style="font-weight:800">${r}</td></tr>`; body.insertAdjacentHTML('beforeend',html);
+
+      html += `
+        <td style="font-weight:800">${r}</td>
+      </tr>
+      `;
+
+      body.insertAdjacentHTML(
+        'beforeend',
+        html
+      );
     }
   }
 
-  function renderClinch(list){
-    const container=document.getElementById('clinch-schedule-container'); container.innerHTML='';
-    const key=currentLeague==='central'?'central_clinch_schedules':'pacific_clinch_schedules';
-    const sched=rawData?.simulation?.[key]||{};
-    list.slice(0,3).forEach(t=>{
-      const rows=sched[t.team]||[]; if(!rows.length) return;
-      let body='';
-      rows.forEach(x=>{const has=x.clinch_prob_str!=='-'; body+=`<tr><td><b>${esc(x.date)}</b></td><td><b>${esc(x.opp)}</b></td><td>${esc(x.ground)}</td><td class="${has?'val-clinch':''}">${esc(x.clinch_prob_str)}</td><td class="${x.cum_prob_str!=='-'?'val-cum':''}">${esc(x.cum_prob_str)}</td><td><b>${esc(x.win_expect)}%</b></td></tr>`});
-      const card=document.createElement('div'); card.className='clinch-card';
-      card.innerHTML=`<h3><span>${esc(t.team)}</span><span class="champ-tag">優勝確率 ${fmtPct(t.champ_prob)}</span></h3><table class="clinch-table"><thead><tr><th>月日</th><th>対戦</th><th>開催地</th><th>決定確率</th><th>累計</th><th>見込勝率</th></tr></thead><tbody>${body}</tbody></table><div style="text-align:right;font-size:.7rem;color:#94a3b8;margin-top:7px">※モデル設定：${esc(modelMeta().main_simulations||'-')}回完走解析</div>`;
+  function renderClinch(list) {
+    const container =
+      document.getElementById(
+        'clinch-schedule-container'
+      );
+
+    container.innerHTML = '';
+
+    const key =
+      currentLeague === 'central'
+        ? 'central_clinch_schedules'
+        : 'pacific_clinch_schedules';
+
+    const sched =
+      rawData?.simulation?.[key] || {};
+
+    list.slice(0,3).forEach(t => {
+      const rows =
+        sched[t.team] || [];
+
+      if (!rows.length) {
+        return;
+      }
+
+      let body = '';
+
+      rows.forEach(x => {
+        const has =
+          x.clinch_prob_str !== '-';
+
+        body += `
+          <tr>
+            <td><b>${esc(x.date)}</b></td>
+            <td><b>${esc(x.opp)}</b></td>
+            <td>${esc(x.ground)}</td>
+            <td class="${has?'val-clinch':''}">
+              ${esc(x.clinch_prob_str)}
+            </td>
+            <td class="${x.cum_prob_str!=='-'?'val-cum':''}">
+              ${esc(x.cum_prob_str)}
+            </td>
+            <td>
+              <b>${esc(x.win_expect)}%</b>
+            </td>
+          </tr>
+        `;
+      });
+
+      const card =
+        document.createElement('div');
+
+      card.className =
+        'clinch-card';
+
+      card.innerHTML = `
+        <h3>
+          <span>${esc(t.team)}</span>
+          <span class="champ-tag">
+            優勝確率 ${fmtPct(t.champ_prob)}
+          </span>
+        </h3>
+
+        <table class="clinch-table">
+          <thead>
+            <tr>
+              <th>月日</th>
+              <th>対戦</th>
+              <th>開催地</th>
+              <th>決定確率</th>
+              <th>累計</th>
+              <th>見込勝率</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            ${body}
+          </tbody>
+        </table>
+
+        <div style="text-align:right;font-size:.7rem;color:#94a3b8;margin-top:7px">
+          ※モデル設定：
+          ${esc(modelMeta().main_simulations||'-')}
+          回完走解析
+        </div>
+      `;
+
       container.appendChild(card);
     });
   }
 
-  function renderLineGrid(){
-    const head=document.getElementById('line-grid-head'), body=document.getElementById('line-grid-body'); head.innerHTML=''; body.innerHTML='';
-    const key=currentLeague==='central'?'central_lines_grid':'pacific_lines_grid'; const data=rawData?.simulation?.[key];
-    if(!data?.headers?.length) return;
-    const cls=['banner-h','banner-g','banner-db'];
-    let top='<tr>', sub='<tr>', cols='<tr>';
-    data.headers.forEach((h,i)=>{top+=`<th colspan="3" class="banner-team ${cls[i]||'banner-g'}">${esc(h.team)}</th>`;sub+=`<th colspan="3" class="banner-sub">残り${h.remaining}試合（現在${h.current_w}勝${h.current_l}敗）</th>`;cols+='<th>勝</th><th>敗</th><th>勝率</th>'});
-    head.innerHTML=top+'</tr>'+sub+'</tr>'+cols+'</tr>';
-    data.rows.forEach(row=>{
-      let tr='<tr>'; row.forEach(cell=>{if(cell){const hi=cell.rate>=.540&&cell.rate<=.550;tr+=`<td class="${hi?'line-highlight':''}">${cell.w}</td><td class="${hi?'line-highlight':''}">${cell.l}</td><td class="${hi?'line-highlight':''}">${esc(cell.rate_str)}</td>`}else tr+='<td>-</td><td>-</td><td>-</td>'});tr+='</tr>';body.insertAdjacentHTML('beforeend',tr);
-    });
-  }
+  function renderLineGrid() {
+    const head =
+      document.getElementById(
+        'line-grid-head'
+      );
 
-  function renderH2H(list){
-    const th=document.getElementById('matrix-head'), tb=document.getElementById('matrix-body'); th.innerHTML='';tb.innerHTML='';
-    const teams=list.map(t=>t.team);
-    th.innerHTML=`<tr><th style="min-width:140px;text-align:left;padding-left:12px">チーム</th><th>試合</th><th>勝</th><th>敗</th><th>分</th><th>勝率</th><th>差</th><th>ホーム</th><th>ロード</th>${teams.map(t=>`<th>${esc(SHORT_NAMES[t]||t)}</th>`).join('')}<th>交流戦</th></tr>`;
-    list.forEach(t=>{
-      let row=`<tr><td class="team" style="padding-left:12px">${esc(FULL_NAMES[t.team]||t.team)}</td><td>${t.games}</td><td>${t.win}</td><td>${t.lose}</td><td>${t.draw}</td><td>${Number(t.rate||0).toFixed(3).replace('0.','.')}</td><td>${t.diff===0?'--':Number(t.diff||0).toFixed(1)}</td><td>${formatRecord(t.home.win,t.home.lose,t.home.draw)}</td><td>${formatRecord(t.away.win,t.away.lose,t.away.draw)}</td>`;
-      teams.forEach(o=>{if(o===t.team) row+='<td class="self">***</td>';else{const x=t.h2h?.[o]||{win:0,lose:0,draw:0};row+=`<td>${formatRecord(x.win,x.lose,x.draw)}</td>`}});
-      row+=`<td>${formatRecord(t.interleague.win,t.interleague.lose,t.interleague.draw)}</td></tr>`;
-      tb.insertAdjacentHTML('beforeend',row);
-    });
-  }
+    const body =
+      document.getElementById(
+        'line-grid-body'
+      );
 
-  function render(){
-    if(!rawData?.history) return;
-    if(!rawData.history[selectedDate]){
-      const ds=rawData.available_dates||[]; const past=ds.filter(d=>d<=selectedDate); selectedDate=past.length?past[past.length-1]:(ds[0]||''); document.getElementById('date-picker').value=selectedDate;
+    head.innerHTML = '';
+    body.innerHTML = '';
+
+    const key =
+      currentLeague === 'central'
+        ? 'central_lines_grid'
+        : 'pacific_lines_grid';
+
+    const data =
+      rawData?.simulation?.[key];
+
+    if (!data?.headers?.length) {
+      return;
     }
-    const day=rawData.history[selectedDate]; if(!day) return; const list=day[currentLeague]; if(!list) return;
-    renderStandings(list); renderPredictions(list,day); renderHistoryNotice(); renderRankMatrix(list); renderClinch(list); renderLineGrid(); renderH2H(list);
+
+    const cls = [
+      'banner-h',
+      'banner-g',
+      'banner-db'
+    ];
+
+    let top = '<tr>';
+    let sub = '<tr>';
+    let cols = '<tr>';
+
+    data.headers.forEach((h,i) => {
+      top += `
+        <th
+          colspan="3"
+          class="banner-team ${cls[i]||'banner-g'}"
+        >
+          ${esc(h.team)}
+        </th>
+      `;
+
+      sub += `
+        <th
+          colspan="3"
+          class="banner-sub"
+        >
+          残り${h.remaining}試合
+          （現在${h.current_w}勝${h.current_l}敗）
+        </th>
+      `;
+
+      cols +=
+        '<th>勝</th>' +
+        '<th>敗</th>' +
+        '<th>勝率</th>';
+    });
+
+    head.innerHTML =
+      top + '</tr>' +
+      sub + '</tr>' +
+      cols + '</tr>';
+
+    data.rows.forEach(row => {
+      let tr = '<tr>';
+
+      row.forEach(cell => {
+        if (cell) {
+          const hi =
+            cell.rate >= .540 &&
+            cell.rate <= .550;
+
+          tr += `
+            <td class="${hi?'line-highlight':''}">
+              ${cell.w}
+            </td>
+
+            <td class="${hi?'line-highlight':''}">
+              ${cell.l}
+            </td>
+
+            <td class="${hi?'line-highlight':''}">
+              ${esc(cell.rate_str)}
+            </td>
+          `;
+        } else {
+          tr +=
+            '<td>-</td>' +
+            '<td>-</td>' +
+            '<td>-</td>';
+        }
+      });
+
+      tr += '</tr>';
+
+      body.insertAdjacentHTML(
+        'beforeend',
+        tr
+      );
+    });
   }
 
-  function switchLeague(league,button){
-    currentLeague=league; document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); if(button) button.classList.add('active'); render();
+  function renderH2H(list) {
+    const th =
+      document.getElementById(
+        'matrix-head'
+      );
+
+    const tb =
+      document.getElementById(
+        'matrix-body'
+      );
+
+    th.innerHTML = '';
+    tb.innerHTML = '';
+
+    const teams =
+      list.map(t => t.team);
+
+    th.innerHTML = `
+      <tr>
+        <th style="min-width:140px;text-align:left;padding-left:12px">
+          チーム
+        </th>
+        <th>試合</th>
+        <th>勝</th>
+        <th>敗</th>
+        <th>分</th>
+        <th>勝率</th>
+        <th>差</th>
+        <th>ホーム</th>
+        <th>ロード</th>
+        ${teams.map(
+          t =>
+            `<th>${esc(SHORT_NAMES[t]||t)}</th>`
+        ).join('')}
+        <th>交流戦</th>
+      </tr>
+    `;
+
+    list.forEach(t => {
+      let row = `
+        <tr>
+          <td
+            class="team"
+            style="padding-left:12px"
+          >
+            ${esc(FULL_NAMES[t.team]||t.team)}
+          </td>
+
+          <td>${t.games}</td>
+          <td>${t.win}</td>
+          <td>${t.lose}</td>
+          <td>${t.draw}</td>
+
+          <td>
+            ${Number(t.rate||0)
+              .toFixed(3)
+              .replace('0','.')}
+          </td>
+
+          <td>
+            ${
+              t.diff===0
+                ? '--'
+                : Number(t.diff||0)
+                    .toFixed(1)
+            }
+          </td>
+
+          <td>
+            ${formatRecord(
+              t.home.win,
+              t.home.lose,
+              t.home.draw
+            )}
+          </td>
+
+          <td>
+            ${formatRecord(
+              t.away.win,
+              t.away.lose,
+              t.away.draw
+            )}
+          </td>
+      `;
+
+      teams.forEach(o => {
+        if (o === t.team) {
+          row +=
+            '<td class="self">***</td>';
+        } else {
+          const x =
+            t.h2h?.[o] ||
+            {
+              win:0,
+              lose:0,
+              draw:0
+            };
+
+          row += `
+            <td>
+              ${formatRecord(
+                x.win,
+                x.lose,
+                x.draw
+              )}
+            </td>
+          `;
+        }
+      });
+
+      row += `
+          <td>
+            ${formatRecord(
+              t.interleague.win,
+              t.interleague.lose,
+              t.interleague.draw
+            )}
+          </td>
+        </tr>
+      `;
+
+      tb.insertAdjacentHTML(
+        'beforeend',
+        row
+      );
+    });
   }
 
-  async function init(){
-    try{
-      const res=await fetch(`history_standings.json?t=${Date.now()}`,{cache:'no-store'}); if(!res.ok) throw new Error(`HTTP ${res.status}`); rawData=await res.json(); renderModelStatus();
-      const dates=rawData.available_dates||[]; const picker=document.getElementById('date-picker');
-      if(dates.length){picker.min=dates[0];picker.max=dates[dates.length-1]}
-      const today=getJstDate(); selectedDate=dates.includes(today)?today:(rawData.latest_date||dates[dates.length-1]||''); picker.value=selectedDate;
-      picker.addEventListener('change',e=>{selectedDate=e.target.value;render()});
+  function render() {
+    if (!rawData?.history) {
+      return;
+    }
+
+    if (!rawData.history[selectedDate]) {
+      const ds =
+        rawData.available_dates || [];
+
+      const past =
+        ds.filter(
+          d => d <= selectedDate
+        );
+
+      selectedDate =
+        past.length
+          ? past[past.length - 1]
+          : (ds[0] || '');
+
+      document.getElementById(
+        'date-picker'
+      ).value = selectedDate;
+    }
+
+    const day =
+      rawData.history[selectedDate];
+
+    if (!day) {
+      return;
+    }
+
+    const list =
+      day[currentLeague];
+
+    if (!list) {
+      return;
+    }
+
+    renderStandings(list);
+    renderPredictions(list,day);
+    renderHistoryNotice();
+    renderRankMatrix(list);
+    renderClinch(list);
+    renderLineGrid();
+    renderH2H(list);
+  }
+
+  function switchLeague(
+    league,
+    button
+  ) {
+    currentLeague = league;
+
+    document
+      .querySelectorAll('.tab')
+      .forEach(
+        x => x.classList.remove('active')
+      );
+
+    if (button) {
+      button.classList.add('active');
+    }
+
+    render();
+  }
+
+  async function init() {
+    try {
+      const res = await fetch(
+        `history_standings.json?t=${Date.now()}`,
+        {
+          cache:'no-store'
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error(
+          `HTTP ${res.status}`
+        );
+      }
+
+      rawData = await res.json();
+
+      renderModelStatus();
+
+      const dates =
+        rawData.available_dates || [];
+
+      const picker =
+        document.getElementById(
+          'date-picker'
+        );
+
+      if (dates.length) {
+        picker.min = dates[0];
+        picker.max =
+          dates[dates.length - 1];
+      }
+
+      const today = getJstDate();
+
+      selectedDate =
+        dates.includes(today)
+          ? today
+          : (
+              rawData.latest_date ||
+              dates[dates.length - 1] ||
+              ''
+            );
+
+      picker.value =
+        selectedDate;
+
+      picker.addEventListener(
+        'change',
+        e => {
+          selectedDate =
+            e.target.value;
+
+          render();
+        }
+      );
+
       render();
-    }catch(err){
-      document.getElementById('standings-body').innerHTML=`<tr><td colspan="14" style="padding:24px;color:#dc2626">データ読み込みに失敗しました。<br>${esc(err.message||err)}</td></tr>`;
+
+    } catch(err) {
+      document.getElementById(
+        'standings-body'
+      ).innerHTML = `
+        <tr>
+          <td
+            colspan="14"
+            style="padding:24px;color:#dc2626"
+          >
+            データ読み込みに失敗しました。<br>
+            ${esc(err.message||err)}
+          </td>
+        </tr>
+      `;
     }
   }
+
   init();
 </script>
+
 </body>
 </html>
