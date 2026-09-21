@@ -48,27 +48,16 @@ def calc_win_rate(w, l):
     return (w / decided) if decided > 0 else 0.0
 
 def normalize_probabilities_to_100(prob_dict):
-    """
-    最大剰余方式（ヘアー・ニーマイヤー法）
-    各チームの浮動小数点確率の合計を厳密に整数の100%に正規化する。
-    """
     total_val = sum(prob_dict.values())
     if total_val <= 0:
         return {k: 0 for k in prob_dict}
-    
-    # 全体を100にスケーリング
     scaled = {k: (v / total_val) * 100.0 for k, v in prob_dict.items()}
     floored = {k: int(math.floor(v)) for k, v in scaled.items()}
     remainder = {k: scaled[k] - floored[k] for k in scaled}
-    
     remaining_sum = 100 - sum(floored.values())
-    # 端数が大きい順に1%を配分
     sorted_by_remainder = sorted(remainder.keys(), key=lambda k: remainder[k], reverse=True)
-    
     for i in range(remaining_sum):
-        team = sorted_by_remainder[i]
-        floored[team] += 1
-        
+        floored[sorted_by_remainder[i]] += 1
     return floored
 
 def parse_year_games_from_text(raw_text, target_year):
@@ -123,7 +112,7 @@ def parse_year_games_from_text(raw_text, target_year):
                     })
                 continue
 
-        # テキスト形式
+        # テキスト形式（日付行）
         date_m = re.match(r'^(\d{1,2})\/(\d{1,2})(?:[（(][日月火水木金土][）)])?\s*(.*)$', line)
         if date_m:
             m, d = int(date_m.group(1)), int(date_m.group(2))
@@ -135,6 +124,7 @@ def parse_year_games_from_text(raw_text, target_year):
         if not current_date:
             continue
 
+        # 中止行の検出
         if "中止" in line or "ノーゲーム" in line:
             match_can = re.search(r'([^\s\d]+)\s*(?:中止|ノーゲーム)\s*([^\s\d]+)', line)
             if match_can:
@@ -150,6 +140,7 @@ def parse_year_games_from_text(raw_text, target_year):
                     })
             continue
 
+        # 試合終了行の検出
         match_fin = re.search(r'([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)', line)
         if match_fin:
             h = normalize_team(match_fin.group(1))
@@ -181,12 +172,13 @@ def parse_year_games_from_text(raw_text, target_year):
                 })
             continue
 
+        # 予告先発・予定行の検出（柔軟な正規表現に対応）
         match_sched = re.search(r'([^\s\d]+)\s*-\s*([^\s\d]+)', line)
         if match_sched:
             h = normalize_team(match_sched.group(1))
             a = normalize_team(match_sched.group(2))
             if h in all_teams and a in all_teams:
-                starters = re.findall(r'先発[:：]\s*([^\s,，]+)', line)
+                starters = re.findall(r'(?:先発|予告)[:：]?\s*([^\s,，()（）]+)', line)
                 h_starter = starters[0] if len(starters) > 0 else "未定"
                 a_starter = starters[1] if len(starters) > 1 else "未定"
 
@@ -496,9 +488,7 @@ def simulate_full_season_probabilities(league_teams, current_standings, remainin
         for idx, item in enumerate(sim_rates):
             rank_counts[item[0]][idx + 1] += 1
 
-    # 生の確率（%）
     raw_champ_probs = {t: (rank_counts[t][1] / NUM_SIMS) * 100.0 for t in league_teams}
-    # ★ 合計が厳密に100%になるように正規化（最大剰余方式）
     norm_champ_probs = normalize_probabilities_to_100(raw_champ_probs)
 
     final_rank_matrix = {}
@@ -802,7 +792,10 @@ def build_all_history_with_predictions(games_2025, games_2026):
             latest_team_histories[h].append({"rs": int(g["home_score"]), "ra": int(g["away_score"])})
             latest_team_histories[a].append({"rs": int(g["away_score"]), "ra": int(g["home_score"])})
 
+    actual_future_matches = [g for g in games_2026 if g.get("home_score") is None and g.get("status"] != "cancelled" if "status" in g else True]
+    # 安全にフィルタリング
     actual_future_matches = [g for g in games_2026 if g.get("home_score") is None and g.get("status") != "cancelled"]
+
     c_future = [g for g in actual_future_matches if g["home"] in CENTRAL_TEAMS or g["away"] in CENTRAL_TEAMS]
     p_future = [g for g in actual_future_matches if g["home"] in PACIFIC_TEAMS or g["away"] in PACIFIC_TEAMS]
 
@@ -929,7 +922,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了（優勝確率合計100%正規化適用）：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了（先発パース・確率合計100%対応）：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
