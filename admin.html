@@ -44,7 +44,7 @@
       display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
     }
     .date-panel .date-box { display: flex; align-items: center; gap: 10px; font-weight: 700; }
-    .date-panel input[type="date"] { font-size: 1.05rem; font-weight: 700; padding: 6px 12px; }
+    .date-panel input[type="date"] { font-size: 1.05rem; font-weight: 700; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); }
 
     .btn-action {
       padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s;
@@ -52,7 +52,6 @@
     }
     .btn-action:hover { background: #f1f5f9; border-color: var(--primary); color: var(--primary); }
 
-    /* 試合カード */
     .match-card {
       background: #f8fafc; border: 1px solid var(--border); border-radius: 10px;
       padding: 14px 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px;
@@ -125,7 +124,7 @@
           <input type="text" id="repo-name" value="sumgithu/npb-predictor">
         </div>
         <div class="form-group">
-          <label>GitHub Personal Access Token (repo権限)</label>
+          <label>GitHub Personal Access Token (repo権限必須)</label>
           <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
         </div>
       </div>
@@ -151,10 +150,18 @@
   <script>
     const TEAMS = ["阪神", "巨人", "ＤｅＮＡ", "ヤクルト", "中日", "広島", "ソフトバンク", "日本ハム", "ロッテ", "楽天", "オリックス", "西武"];
     const TEAM_ALIASES = {
-      "DeNA": "ＤｅＮＡ", "横浜": "ＤｅＮＡ", "ソフトバンク": "ソフトバンク",
-      "ロッテ": "ロッテ", "楽天": "楽天", "オリックス": "オリックス",
-      "日本ハム": "日本ハム", "西武": "西武", "阪神": "阪神",
-      "巨人": "巨人", "広島": "広島", "ヤクルト": "ヤクルト", "中日": "中日"
+      "DeNA": "ＤｅＮＡ", "横浜": "ＤｅＮＡ", "横浜DeNA": "ＤｅＮＡ", "横浜ＤｅＮＡ": "ＤｅＮＡ",
+      "ソフトバンク": "ソフトバンク", "福岡ソフトバンク": "ソフトバンク", "福岡": "ソフトバンク",
+      "ロッテ": "ロッテ", "千葉ロッテ": "ロッテ",
+      "楽天": "楽天", "東北楽天": "楽天",
+      "オリックス": "オリックス", "オリックス・バファローズ": "オリックス",
+      "日本ハム": "日本ハム", "北海道日本ハム": "日本ハム", "日ハム": "日本ハム",
+      "西武": "西武", "埼玉西武": "西武",
+      "阪神": "阪神", "阪神タイガース": "阪神",
+      "巨人": "巨人", "読売": "巨人", "読売ジャイアンツ": "巨人",
+      "広島": "広島", "広島東洋": "広島",
+      "ヤクルト": "ヤクルト", "東京ヤクルト": "ヤクルト",
+      "中日": "中日", "中日ドラゴンズ": "中日"
     };
 
     function normalizeTeam(t) {
@@ -178,9 +185,8 @@
       repoInput.value = savedRepo;
       tokenInput.value = localStorage.getItem('npb_admin_token') || '';
 
-      // JST本日を取得
-      const today = new Date().toISOString().split('T')[0];
-      dateInput.value = today;
+      // 本日日付
+      dateInput.value = "2026-09-21";
 
       repoInput.addEventListener('change', () => {
         let val = repoInput.value.trim();
@@ -188,7 +194,10 @@
         repoInput.value = val;
         localStorage.setItem('npb_admin_repo', val);
       });
-      tokenInput.addEventListener('change', () => localStorage.setItem('npb_admin_token', tokenInput.value.trim()));
+      tokenInput.addEventListener('change', () => {
+        localStorage.setItem('npb_admin_token', tokenInput.value.trim());
+        loadAllSources();
+      });
       
       dateInput.addEventListener('change', () => renderDateMatches());
       dateInput.addEventListener('input', () => renderDateMatches());
@@ -208,13 +217,15 @@
 
       const token = tokenInput.value.trim();
       if (!repo || !token) {
-        showStatus("リポジトリ名とGitHubトークンを入力してください", "error");
+        showStatus("リポジトリ名とGitHub Personal Access Tokenを入力してください", "error");
+        renderDateMatches();
         return;
       }
 
-      showStatus("GitHubよりデータを同期中...", "");
+      showStatus("GitHubより最新データを同期中...", "");
+
       try {
-        // 1. games_db.json の読み込み
+        // 1. games_db.json の読み込み（API認証経由）
         const resDb = await fetch(`https://api.github.com/repos/${repo}/contents/games_db.json?t=${Date.now()}`, {
           headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
         });
@@ -224,7 +235,6 @@
           fileSha = data.sha;
           const decoded = decodeURIComponent(escape(atob(data.content)));
           const parsed = JSON.parse(decoded);
-          // games配列を確実に抽出（ルートが配列の場合とオブジェクトの場合の両方に対応）
           if (Array.isArray(parsed)) {
             gamesDbList = parsed;
           } else if (parsed && Array.isArray(parsed.games)) {
@@ -234,9 +244,9 @@
           }
         }
 
-        // 2. マスターテキストの読み込み
-        const txtFilename = encodeURIComponent("2016-2026プロ野球レギュラーシーズン結果.txt");
-        const resTxt = await fetch(`https://api.github.com/repos/${repo}/contents/${txtFilename}?t=${Date.now()}`, {
+        // 2. マスターテキスト（2016-2026プロ野球レギュラーシーズン結果.txt）の読み込み（API認証経由・URLエンコード必須）
+        const encodedFilename = encodeURIComponent("2016-2026プロ野球レギュラーシーズン結果.txt");
+        const resTxt = await fetch(`https://api.github.com/repos/${repo}/contents/${encodedFilename}?t=${Date.now()}`, {
           headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
         });
 
@@ -244,14 +254,26 @@
           const txtData = await resTxt.json();
           const decodedTxt = decodeURIComponent(escape(atob(txtData.content)));
           parseMasterText(decodedTxt);
-          showStatus("完全同期完了", "success");
+          showStatus("マスター日程および手動DBの完全同期完了", "success");
         } else {
-          showStatus("手動DB同期完了（テキストログはローカルキャッシュを使用）", "success");
+          // フォールバック（npb_games_clean.csv）
+          const resCsv = await fetch(`https://api.github.com/repos/${repo}/contents/npb_games_clean.csv?t=${Date.now()}`, {
+            headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+          });
+          if (resCsv.ok) {
+            const csvData = await resCsv.json();
+            const decodedCsv = decodeURIComponent(escape(atob(csvData.content)));
+            parseMasterText(decodedCsv);
+            showStatus("CSV日程および手動DBの完全同期完了", "success");
+          } else {
+            showStatus("手動DB同期完了（マスターテキストの取得に失敗しました）", "error");
+          }
         }
 
         renderDateMatches();
       } catch (e) {
         showStatus("同期通信エラー: " + e.message, "error");
+        renderDateMatches();
       }
     }
 
@@ -289,7 +311,7 @@
           }
         }
 
-        // 通常テキスト形式
+        // テキスト形式
         const dateMatch = line.match(/^(\d{1,2})\/(\d{1,2})(?:[\s\S]*?[（(][日月火水木金土][）)])?\s*(.*)$/);
         if (dateMatch && parseInt(dateMatch[1], 10) <= 12 && parseInt(dateMatch[2], 10) <= 31) {
           const m = parseInt(dateMatch[1], 10);
@@ -341,7 +363,7 @@
           const h = normalizeTeam(schedM[1]);
           const a = normalizeTeam(schedM[2]);
           if (TEAMS.includes(h) && TEAMS.includes(a)) {
-            const starters = [...line.matchAll(/先発：([^\s]+)/g)].map(m => m[1]);
+            const starters = [...line.matchAll(/先発[:：]\s*([^\s,，]+)/g)].map(m => m[1]);
             textScheduleMap[curDate].push({
               home: h, away: a,
               home_score: null, away_score: null,
@@ -360,7 +382,7 @@
       const container = document.getElementById('matches-container');
       container.innerHTML = '';
 
-      // 1. 手動管理DBに対象日付のデータがあるか
+      // 1. 手動DBに対象日のデータがあるか
       const manualDayGames = gamesDbList.filter(g => g && g.date === date);
       if (manualDayGames.length > 0) {
         manualDayGames.forEach(g => addMatchCard(g));
@@ -407,8 +429,8 @@
       const card = document.createElement('div');
       card.className = `match-card ${isCancelled ? 'is-cancelled' : ''}`;
 
-      const selHome = data && data.home ? normalizeTeam(data.home) : "巨人";
-      const selAway = data && data.away ? normalizeTeam(data.away) : "ヤクルト";
+      const selHome = data && data.home ? normalizeTeam(data.home) : "阪神";
+      const selAway = data && data.away ? normalizeTeam(data.away) : "ＤｅＮＡ";
 
       const homeOptions = TEAMS.map(t => `<option value="${t}" ${selHome === t ? 'selected' : ''}>${t}</option>`).join('');
       const awayOptions = TEAMS.map(t => `<option value="${t}" ${selAway === t ? 'selected' : ''}>${t}</option>`).join('');
@@ -463,7 +485,7 @@
       const date = dateInput.value;
 
       if (!repo || !token || !date) {
-        showStatus("リポジトリ名とGitHubトークンを入力してください", "error");
+        showStatus("リポジトリ名とGitHub Personal Access Tokenを入力してください", "error");
         return;
       }
 
@@ -507,7 +529,6 @@
         });
       }
 
-      // 既存リストから当日分を除去し、今回保存分を追加
       gamesDbList = gamesDbList.filter(g => g && g.date !== date);
       gamesDbList.push(...newDayGames);
       gamesDbList.sort((a, b) => a.date.localeCompare(b.date));
