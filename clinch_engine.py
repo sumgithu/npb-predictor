@@ -37,20 +37,10 @@ STADIUM_NAMES = {
     "楽天": "楽天モバイル", "オリックス": "京セラ", "西武": "ベルーナ"
 }
 
-# NPB各本拠地球場の得点パークファクター（基準値1.00）
 PARK_FACTORS = {
-    "神宮": 1.15,
-    "横浜": 1.10,
-    "エスコンF": 1.06,
-    "ZOZO": 1.02,
-    "東京D": 1.00,
-    "マツダS": 0.97,
-    "PayPay": 0.96,
-    "京セラ": 0.95,
-    "楽天モバイル": 0.95,
-    "ベルーナ": 0.90,
-    "甲子園": 0.88,
-    "バンテリン": 0.84
+    "神宮": 1.15, "横浜": 1.10, "エスコンF": 1.06, "ZOZO": 1.02,
+    "東京D": 1.00, "マツダS": 0.97, "PayPay": 0.96, "京セラ": 0.95,
+    "楽天モバイル": 0.95, "ベルーナ": 0.90, "甲子園": 0.88, "バンテリン": 0.84
 }
 
 def normalize_team(name):
@@ -367,15 +357,11 @@ def validate_and_assert_standings(teams):
 BASE_PYTHAGOREAN_EXP = 1.83
 HOME_ODDS_ADVANTAGE = 1.15
 
-# ★ パークファクター（球場環境）連動のピタゴラス期待勝率計算
 def calc_pythagorean_rate(rs, ra, stadium_name="東京D"):
     if rs <= 0 and ra <= 0:
         return 0.5
-    
     pf = PARK_FACTORS.get(stadium_name, 1.00)
-    # 打撃戦球場（PF大）ほど実力差が広がり、投手戦球場（PF小）ほど番狂わせが起きやすい指数補正
     eff_exp = BASE_PYTHAGOREAN_EXP * math.pow(pf, 0.25)
-
     rs_pow = math.pow(max(0.1, rs), eff_exp)
     ra_pow = math.pow(max(0.1, ra), eff_exp)
     return rs_pow / (rs_pow + ra_pow)
@@ -395,7 +381,6 @@ def get_season_true_strength(team_total_rs, team_total_ra, games_played, prior_s
 
     return calc_pythagorean_rate(final_rs, final_ra, stadium_name)
 
-# ★ パークファクター連動の先発投手補正
 def get_pitcher_multiplier(pitcher_name, pitcher_stats, stadium_name="東京D"):
     if not pitcher_name or pitcher_name == "未定":
         return 1.0
@@ -404,13 +389,11 @@ def get_pitcher_multiplier(pitcher_name, pitcher_stats, stadium_name="東京D"):
     shrunken_rate = (w + 4.0) / (w + l + 8.0)
     odds = shrunken_rate / (1.0 - shrunken_rate)
 
-    # 投手有利球場（バンテリン・甲子園等）では好投手の支配力（レバレッジ）がさらに強まる
     pf = PARK_FACTORS.get(stadium_name, 1.00)
     stadium_pitcher_leverage = 0.25 / math.pow(pf, 0.5)
 
     return math.pow(odds, stadium_pitcher_leverage)
 
-# ★ パークファクターを組み込んだLog5対戦予想
 def calc_log5_matchup(p_away, p_home, away_pitcher, home_pitcher, pitcher_stats, stadium_name="東京D"):
     denom = p_away + p_home - (2.0 * p_away * p_home)
     p_neutral_away = 0.5 if denom <= 0 else (p_away - (p_away * p_home)) / denom
@@ -524,6 +507,7 @@ def simulate_full_season_probabilities(league_teams, current_standings, remainin
 
     return final_rank_matrix, clinch_date_probs
 
+# ★ 重複行（9-0や0-9の連続）を排除した優勝ラインテーブル生成
 def build_aligned_championship_grid(top_teams_standings):
     teams_data = []
     for t in top_teams_standings[:3]:
@@ -548,23 +532,38 @@ def build_aligned_championship_grid(top_teams_standings):
     base_team = teams_data[0]
     team3_max_rate = teams_data[2]["patterns"][0]["rate"] if len(teams_data) > 2 else 1.0
 
+    seen_patterns_t2 = set()
+    seen_patterns_t3 = set()
+
     for i in range(len(base_team["patterns"])):
         base_p = base_team["patterns"][i]
         target_rate = base_p["rate"]
         row = [base_p]
 
+        # 2位チームの選定（既出パターンの重複排除）
         if len(teams_data) > 1:
             best_match_t2 = min(teams_data[1]["patterns"], key=lambda x: abs(x["rate"] - target_rate))
-            row.append(best_match_t2)
+            t2_key = (best_match_t2["w"], best_match_t2["l"])
+            if t2_key in seen_patterns_t2:
+                row.append(None)
+            else:
+                seen_patterns_t2.add(t2_key)
+                row.append(best_match_t2)
         else:
             row.append(None)
 
+        # 3位チームの選定（既出パターンの重複排除）
         if len(teams_data) > 2:
             if target_rate > team3_max_rate + 0.005:
                 row.append(None)
             else:
                 best_match_t3 = min(teams_data[2]["patterns"], key=lambda x: abs(x["rate"] - target_rate))
-                row.append(best_match_t3)
+                t3_key = (best_match_t3["w"], best_match_t3["l"])
+                if t3_key in seen_patterns_t3:
+                    row.append(None)
+                else:
+                    seen_patterns_t3.add(t3_key)
+                    row.append(best_match_t3)
         else:
             row.append(None)
 
@@ -663,7 +662,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
                     records[a]["lose"] += 1
                     records[a]["away"]["lose"] += 1
                     h2h_details[h][a]["win"] += 1
-                    h2h_details[h][a]["lose"] += 1
+                    h2h_details[a][h]["lose"] += 1
                     if is_inter:
                         records[h]["interleague"]["win"] += 1
                         records[a]["interleague"]["lose"] += 1
@@ -955,7 +954,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了（パークファクター組込版）：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了（重複行排除・パークファクター組込版）：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
