@@ -137,37 +137,37 @@
     .legend-item { display: flex; align-items: center; gap: 6px; }
     .legend-color { width: 18px; height: 18px; border-radius: 4px; display: inline-block; }
 
-    /* 4. 優勝決定日確率テーブル（npb.eikai.co.jpスタイル） */
+    /* 4. 優勝決定日確率テーブル（npb.eikai.co.jpスタイル完全準拠） */
     .clinch-schedule-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 24px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; margin-bottom: 24px;
     }
     .clinch-card {
       background: #ffffff; border: 1px solid var(--border); border-radius: 12px;
-      padding: 16px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      padding: 18px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); overflow-x: auto;
     }
     .clinch-card h3 {
-      font-size: 1.15rem; font-weight: 800; color: #2e7d32; margin-bottom: 12px;
+      font-size: 1.18rem; font-weight: 800; color: #2e7d32; margin-bottom: 12px;
       border-bottom: 2px solid #e2e8f0; padding-bottom: 6px;
       display: flex; justify-content: space-between; align-items: baseline;
     }
     .clinch-card h3 .champ-tag {
-      font-size: 0.95rem; font-weight: 700; color: #15803d;
+      font-size: 0.98rem; font-weight: 800; color: #15803d;
     }
     .clinch-subtable {
-      width: 100%; border-collapse: collapse; font-size: 0.9rem; text-align: center;
+      width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: center; min-width: 320px;
     }
     .clinch-subtable th {
       background: transparent; color: #475569; font-weight: 700;
-      border-bottom: 1.5px solid #64748b; padding: 8px 4px;
+      border-bottom: 2px solid #475569; padding: 6px 4px; font-size: 0.82rem;
     }
     .clinch-subtable td {
       padding: 8px 4px; border-bottom: 1px solid #e2e8f0;
     }
     .clinch-subtable tr:last-child td {
-      border-bottom: 1.5px solid #64748b;
+      border-bottom: 2px solid #475569;
     }
     .val-clinch { font-weight: 800; color: #dc2626; }
-    .val-cum { font-weight: 800; color: #166534; }
+    .val-cum { font-weight: 800; color: #15803d; }
 
     /* 5. 優勝ラインテーブル */
     .line-grid-table { min-width: 700px; }
@@ -270,7 +270,7 @@
       </div>
     </div>
 
-    <!-- 4. 優勝決定日確率テーブル（npb.eikai.co.jp準拠） -->
+    <!-- 4. 優勝決定日確率テーブル（完全均等配置） -->
     <div class="section-title">
       📅 優勝決定日確率
       <span class="section-desc">（可能性が生じる初日から表示・対戦カード・開催地・決定確率・累計・見込勝率）</span>
@@ -556,7 +556,7 @@
         }
       }
 
-      // 4. 優勝決定日確率テーブル（npb.eikai.co.jp準拠＋球場名・累計確率）
+      // 4. 優勝決定日確率テーブル（完全均等配置・全セル同期）
       const clinchContainer = document.getElementById('clinch-schedule-container');
       clinchContainer.innerHTML = '';
 
@@ -577,7 +577,7 @@
             const hasClinch = (item.clinch_prob_str !== '-');
             rowsHtml += `
               <tr>
-                <td style="font-weight:600;">${item.date}</td>
+                <td style="font-weight:700;">${item.date}</td>
                 <td style="font-weight:700;">${item.opp}</td>
                 <td>${item.ground}</td>
                 <td class="${hasClinch ? 'val-clinch' : ''}">${item.clinch_prob_str}</td>
@@ -732,7 +732,6 @@
           picker.max = dates[dates.length - 1];
         }
 
-        // 本日（2026-09-21）または latest_date を初期選択
         if (dates.includes("2026-09-21")) {
           selectedDate = "2026-09-21";
         } else if (rawData.latest_date) {
