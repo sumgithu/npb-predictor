@@ -151,6 +151,8 @@
     .cell-can-climb { background-color: var(--cell-can-climb); color: #fff; }
     .cell-potential { background-color: var(--cell-potential); color: #991b1b; }
     .cell-drop { background-color: var(--cell-drop); color: #0369a1; }
+    
+    /* 凡例ラベルの適正化（昇格・降格を上位進出・下位転落へ修正） */
     .matrix-legend {
       display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.82rem; font-weight: 700;
       padding: 12px; justify-content: center; background: #fff; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border);
@@ -318,9 +320,9 @@
         </table>
         <div class="matrix-legend">
           <div class="legend-item"><span class="legend-color" style="background-color: var(--cell-current); border: 2px solid #dc2626;"></span> 現在の順位</div>
-          <div class="legend-item"><span class="legend-color" style="background-color: var(--cell-can-climb);"></span> 自力で昇格可能</div>
-          <div class="legend-item"><span class="legend-color" style="background-color: var(--cell-potential);"></span> 昇格可能性あり</div>
-          <div class="legend-item"><span class="legend-color" style="background-color: var(--cell-drop);"></span> 降格可能性あり</div>
+          <div class="legend-item"><span class="legend-color" style="background-color: var(--cell-can-climb);"></span> 自力で上位進出可能</div>
+          <div class="legend-item"><span class="legend-color" style="background-color: var(--cell-potential);"></span> 上位進出可能性あり</div>
+          <div class="legend-item"><span class="legend-color" style="background-color: var(--cell-drop);"></span> 下位転落可能性あり</div>
         </div>
       </div>
 
@@ -355,7 +357,7 @@
       </table>
     </div>
 
-    <!-- 7. 欄外注釈パネル（コードと完全に一致させた解説） -->
+    <!-- 7. 欄外注釈パネル -->
     <div class="notes-card">
       <div class="notes-title">
         <span>ℹ️</span> 項目および数理モデルの解説
@@ -363,11 +365,11 @@
       <div class="notes-grid">
         <div class="note-item">
           <dl>
-            <dt>予想勝利確率（独自Log5予測モデル）</dt>
-            <dd>シーズン通算の総得失点力を基礎とし、前年度実績によるベイズ事前分布回帰、球場パークファクター補正、NPBホームアドバンテージ（勝率約53.5%）、および登板実績に基づく予告先発投手の動的ベイズ補正を反映して各試合の勝率を算出しています。</dd>
+            <dt>試合別予想勝利確率（独自Log5予測モデル）</dt>
+            <dd>シーズン通算の得失点力に基づくピタゴラス期待勝率（球場パークファクター連動）を基礎とし、NPBホームアドバンテージ補正（勝率約53.5%）および登板実績に基づく予告先発投手の動的ベイズ補正を反映して各試合の勝率を算出しています。</dd>
 
             <dt>全143試合完走モンテカルロ・シミュレーション（優勝確率・CS確率）</dt>
-            <dd>未確定の全日程について、チーム通算得失点力・残日程・ホームアドバンテージ・球場特性を考慮して3,000回のシーズン完走シミュレーションを実行。順位確定確率を導出しています（※シーズンシミュレーションはチーム基礎力評価モデルに基づき、先発投手の予測は使用していません。また過去日付表示時は試合数に応じたベイズ事前分布回帰モデルにより算出されます）。</dd>
+            <dd>未確定の全日程について、チーム通算得失点力・残日程・ホームアドバンテージ・球場特性、および実測引き分け率（約4.5%）を考慮して3,000回のシーズン完走シミュレーションを実行。順位確定確率を導出しています（※将来の予告先発投手は未確定のため、シミュレーション内では投手補正を使用せずチーム基礎力モデルで一貫評価しています。また過去日付参照時の優勝確率は、当時の順位・試合数に基づくベイズ参考推定値です）。</dd>
           </dl>
         </div>
 
