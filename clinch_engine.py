@@ -172,7 +172,7 @@ def parse_year_games_from_text(raw_text, target_year):
                 })
             continue
 
-        # 予告先発・予定行の検出（柔軟な正規表現に対応）
+        # 予告先発・予定行の検出
         match_sched = re.search(r'([^\s\d]+)\s*-\s*([^\s\d]+)', line)
         if match_sched:
             h = normalize_team(match_sched.group(1))
@@ -623,6 +623,8 @@ def build_all_history_with_predictions(games_2025, games_2026):
         h2h_details = {t1: {t2: {"win": 0, "lose": 0, "draw": 0} for t2 in all_teams} for t1 in all_teams}
 
         for g in games_2026:
+            if g.get("status"] == "cancelled" if "status" in g else False or g.get("home_score") is None or g.get("away_score") is None:
+                continue
             if g.get("status") == "cancelled" or g.get("home_score") is None or g.get("away_score") is None:
                 continue
             h, a = g["home"], g["away"]
@@ -792,17 +794,15 @@ def build_all_history_with_predictions(games_2025, games_2026):
             latest_team_histories[h].append({"rs": int(g["home_score"]), "ra": int(g["away_score"])})
             latest_team_histories[a].append({"rs": int(g["away_score"]), "ra": int(g["home_score"])})
 
-    actual_future_matches = [g for g in games_2026 if g.get("home_score") is None and g.get("status"] != "cancelled" if "status" in g else True]
-    # 安全にフィルタリング
     actual_future_matches = [g for g in games_2026 if g.get("home_score") is None and g.get("status") != "cancelled"]
-
     c_future = [g for g in actual_future_matches if g["home"] in CENTRAL_TEAMS or g["away"] in CENTRAL_TEAMS]
     p_future = [g for g in actual_future_matches if g["home"] in PACIFIC_TEAMS or g["away"] in PACIFIC_TEAMS]
 
     dates_with_finished = [d for d in all_dates if any(g["date"] == d and g.get("home_score") is not None for g in games_2026)]
     last_eval_date = dates_with_finished[-1] if dates_with_finished else all_dates[0]
-    eval_c_table = history_snapshots[last_eval_date]["central"]
-    eval_p_table = history_snapshots[last_eval_date]["pacific"]
+    eval_c_file = history_snapshots.get(last_eval_date, history_snapshots[all_dates[0]])
+    eval_c_table = eval_c_file["central"]
+    eval_p_table = eval_c_file["pacific"]
 
     c_rank_matrix, c_clinch_dates = simulate_full_season_probabilities(CENTRAL_TEAMS, eval_c_table, c_future, latest_team_histories, prior_stats)
     p_rank_matrix, p_clinch_dates = simulate_full_season_probabilities(PACIFIC_TEAMS, eval_p_table, p_future, latest_team_histories, prior_stats)
@@ -922,7 +922,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了（先発パース・確率合計100%対応）：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
