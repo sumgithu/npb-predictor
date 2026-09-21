@@ -421,7 +421,7 @@ def calc_log5_matchup(p_away, p_home, away_pitcher, home_pitcher, pitcher_stats)
     return round(final_p_away * 100.0, 1), round(final_p_home * 100.0, 1)
 
 def simulate_full_season_probabilities(league_teams, current_standings, remaining_matches, team_match_histories, prior_stats):
-    NUM_SIMS = 5000
+    NUM_SIMS = 3000
     rank_counts = {t: {r: 0 for r in range(1, 7)} for t in league_teams}
     clinch_date_counts = {t: {} for t in league_teams}
 
@@ -800,17 +800,41 @@ def build_all_history_with_predictions(games_2025, games_2026):
     c_rank_matrix, c_clinch_dates = simulate_full_season_probabilities(CENTRAL_TEAMS, eval_c_table, c_future, latest_team_histories, prior_stats)
     p_rank_matrix, p_clinch_dates = simulate_full_season_probabilities(PACIFIC_TEAMS, eval_p_table, p_future, latest_team_histories, prior_stats)
 
-    def attach_probs(table, rank_mat):
+    # ★ 過去日付にも適切な優勝確率を付与（全日シミュレーション負荷を抑えつつ、過去日付時点の勝率・順位に基づく動的確率算出）
+    def attach_probs_for_snapshot(table, is_latest):
+        if is_latest:
+            rank_mat = c_rank_matrix if table[0]["team"] in CENTRAL_TEAMS else p_rank_matrix
+            for t in table:
+                probs = rank_mat.get(t["team"], {})
+                t["champ_prob"] = 100 if t.get("magic_1st") == "確定" else probs.get(1, 0)
+                t["cs_prob"] = 100 if t.get("magic_3rd") == "確定" else (probs.get(1, 0) + probs.get(2, 0) + probs.get(3, 0))
+            return table
+
+        # 過去日付の場合：その時点の順位表・ゲーム差・残り試合数から妥当な確率分布を直接算出
+        raw_map = {}
         for t in table:
-            probs = rank_mat.get(t["team"], {})
-            t["champ_prob"] = 100 if t.get("magic_1st") == "確定" else probs.get(1, 0)
-            t["cs_prob"] = 100 if t.get("magic_3rd") == "確定" else (probs.get(1, 0) + probs.get(2, 0) + probs.get(3, 0))
+            w, l, rem = t["win"], t["lose"], t["remaining"]
+            rate = t["rate"]
+            diff = t["diff"]
+            # 序盤〜中盤の勝率とゲーム差に応じた指数配分
+            power = math.exp(max(-5.0, (rate - 0.500) * 12.0 - (diff * 0.45)))
+            raw_map[t["team"]] = power
+
+        norm_map = normalize_probabilities_to_100(raw_map)
+        for t in table:
+            t["champ_prob"] = norm_map.get(t["team"], 0)
+            # CS進出確率も順位とゲーム差に応じて妥当に算出
+            if t["rank"] <= 3:
+                t["cs_prob"] = min(100, max(60, 100 - int(t["diff"] * 8)))
+            else:
+                t["cs_prob"] = max(0, int((4.0 - (t["rank"] - 3)) * 20 - t["diff"] * 5))
         return table
 
     for d in all_dates:
         if d in history_snapshots:
-            history_snapshots[d]["central"] = attach_probs(history_snapshots[d]["central"], c_rank_matrix)
-            history_snapshots[d]["pacific"] = attach_probs(history_snapshots[d]["pacific"], p_rank_matrix)
+            is_latest = (d >= last_eval_date)
+            history_snapshots[d]["central"] = attach_probs_for_snapshot(history_snapshots[d]["central"], is_latest)
+            history_snapshots[d]["pacific"] = attach_probs_for_snapshot(history_snapshots[d]["pacific"], is_latest)
 
     def build_filtered_clinch_schedule(team_name, future_matches, clinch_date_map, champ_prob):
         all_future_dates = sorted(list({m["date"] for m in future_matches} | set(clinch_date_map.keys())))
@@ -915,7 +939,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了（構文エラー解消版）：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了（過去日付動的確率化・構文エラー解消）：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
