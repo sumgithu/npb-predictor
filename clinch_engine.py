@@ -16,10 +16,18 @@ CENTRAL_TEAMS = ["阪神", "巨人", "ＤｅＮＡ", "ヤクルト", "中日", "
 PACIFIC_TEAMS = ["ソフトバンク", "日本ハム", "ロッテ", "楽天", "オリックス", "西武"]
 
 TEAM_ALIASES = {
-    "DeNA": "ＤｅＮＡ", "横浜": "ＤｅＮＡ", "ソフトバンク": "ソフトバンク",
-    "ロッテ": "ロッテ", "楽天": "楽天", "オリックス": "オリックス",
-    "日本ハム": "日本ハム", "西武": "西武", "阪神": "阪神",
-    "巨人": "巨人", "広島": "広島", "ヤクルト": "ヤクルト", "中日": "中日"
+    "DeNA": "ＤｅＮＡ", "横浜": "ＤｅＮＡ", "横浜DeNA": "ＤｅＮＡ", "横浜ＤｅＮＡ": "ＤｅＮＡ",
+    "ソフトバンク": "ソフトバンク", "福岡ソフトバンク": "ソフトバンク", "福岡": "ソフトバンク",
+    "ロッテ": "ロッテ", "千葉ロッテ": "ロッテ",
+    "楽天": "楽天", "東北楽天": "楽天",
+    "オリックス": "オリックス", "オリックス・バファローズ": "オリックス",
+    "日本ハム": "日本ハム", "北海道日本ハム": "日本ハム", "日ハム": "日本ハム",
+    "西武": "西武", "埼玉西武": "西武",
+    "阪神": "阪神", "阪神タイガース": "阪神",
+    "巨人": "巨人", "読売": "巨人", "読売ジャイアンツ": "巨人",
+    "広島": "広島", "広島東洋": "広島",
+    "ヤクルト": "ヤクルト", "東京ヤクルト": "ヤクルト",
+    "中日": "中日", "中日ドラゴンズ": "中日"
 }
 
 def normalize_team(name):
@@ -56,7 +64,7 @@ def parse_year_games_from_text(raw_text, target_year):
         if not line:
             continue
 
-        # 1. カンマ区切り（CSV形式）への対応
+        # CSV形式
         csv_parts = [p.strip() for p in line.split(',')]
         if len(csv_parts) >= 6 and re.match(r'^\d{4}-\d{2}-\d{2}$', csv_parts[0]):
             c_date, h_raw, a_raw = csv_parts[0], csv_parts[1], csv_parts[2]
@@ -84,7 +92,7 @@ def parse_year_games_from_text(raw_text, target_year):
                     })
                 continue
 
-        # 2. テキスト形式（日付行の検出: 例 9/20（日）など）
+        # テキスト形式
         date_m = re.match(r'^(\d{1,2})\/(\d{1,2})(?:[（(][日月火水木金土][）)])?\s*(.*)$', line)
         if date_m:
             m, d = int(date_m.group(1)), int(date_m.group(2))
@@ -96,7 +104,6 @@ def parse_year_games_from_text(raw_text, target_year):
         if not current_date:
             continue
 
-        # 中止行の検出
         if "中止" in line or "ノーゲーム" in line:
             match_can = re.search(r'([^\s\d]+)\s*(?:中止|ノーゲーム)\s*([^\s\d]+)', line)
             if match_can:
@@ -112,7 +119,6 @@ def parse_year_games_from_text(raw_text, target_year):
                     })
             continue
 
-        # 試合終了行の検出（スコア・勝敗投手・天気の抽出）
         match_fin = re.search(r'([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)', line)
         if match_fin:
             h = normalize_team(match_fin.group(1))
@@ -144,7 +150,6 @@ def parse_year_games_from_text(raw_text, target_year):
                 })
             continue
 
-        # 予告先発・予定行の検出
         match_sched = re.search(r'([^\s\d]+)\s*-\s*([^\s\d]+)', line)
         if match_sched:
             h = normalize_team(match_sched.group(1))
@@ -169,15 +174,15 @@ def load_all_games():
     games_2025 = []
     games_2026_master = []
 
-    # マスターテキストファイルの読み込み
-    if os.path.exists(TEXT_LOG_FILE):
-        with open(TEXT_LOG_FILE, "r", encoding="utf-8") as f:
+    # マスターテキストファイルの読み込み（存在しない場合は npb_games_clean.csv をフォールバック参照）
+    active_master_file = TEXT_LOG_FILE if os.path.exists(TEXT_LOG_FILE) else "npb_games_clean.csv"
+    if os.path.exists(active_master_file):
+        with open(active_master_file, "r", encoding="utf-8") as f:
             raw_text = f.read()
         games_2025 = parse_year_games_from_text(raw_text, 2025)
         games_2026_master = parse_year_games_from_text(raw_text, 2026)
 
-    # 手動暫定DB（games_db.json）との差分マージ
-    # 原則：テキストがマスター。直近の日付で手動側にスコア等があれば上書き結合
+    # 手動暫定DB（games_db.json）との厳密重複排除マージ
     if os.path.exists(MANUAL_DB_FILE):
         try:
             with open(MANUAL_DB_FILE, "r", encoding="utf-8") as f:
@@ -190,15 +195,32 @@ def load_all_games():
             else:
                 manual_games = []
 
+            # チーム名を完全正規化してマップ化
             manual_map = {}
             for mg in manual_games:
                 if not mg or "date" not in mg or "home" not in mg or "away" not in mg:
                     continue
-                k = (mg["date"], normalize_team(mg["home"]), normalize_team(mg["away"]))
-                if mg.get("home_score") is not None and mg.get("away_score") is not None and str(mg.get("home_score")).strip() != "" and str(mg.get("away_score")).strip() != "":
-                    mg["home_score"] = int(mg["home_score"])
-                    mg["away_score"] = int(mg["away_score"])
+                norm_h = normalize_team(mg["home"])
+                norm_a = normalize_team(mg["away"])
+                mg["home"] = norm_h
+                mg["away"] = norm_a
+
+                # スコア判定
+                hs_raw = str(mg.get("home_score", "")).strip()
+                as_raw = str(mg.get("away_score", "")).strip()
+                if hs_raw != "" and as_raw != "" and hs_raw != "null" and as_raw != "null":
+                    mg["home_score"] = int(hs_raw)
+                    mg["away_score"] = int(as_raw)
                     mg["status"] = "finished"
+                elif mg.get("status") == "cancelled":
+                    mg["home_score"] = None
+                    mg["away_score"] = None
+                else:
+                    mg["home_score"] = None
+                    mg["away_score"] = None
+                    mg["status"] = "scheduled"
+
+                k = (mg["date"], norm_h, norm_a)
                 manual_map[k] = mg
 
             merged_2026 = []
@@ -207,11 +229,13 @@ def load_all_games():
             for mg_orig in games_2026_master:
                 k = (mg_orig["date"], mg_orig["home"], mg_orig["away"])
                 if k in manual_map:
+                    # 手動暫定側に有効なデータがあれば差し替え
                     merged_2026.append(manual_map[k])
                     applied_keys.add(k)
                 else:
                     merged_2026.append(mg_orig)
 
+            # テキスト日程にない追加カードのみをマージ
             for k, mg in manual_map.items():
                 if k not in applied_keys:
                     merged_2026.append(mg)
@@ -580,7 +604,8 @@ def build_all_history_with_predictions(games_2025, games_2026):
         h2h_details = {t1: {t2: {"win": 0, "lose": 0, "draw": 0} for t2 in all_teams} for t1 in all_teams}
 
         for g in games_2026:
-            if g.get("home_score") is None or g.get("away_score") is None:
+            # スコアが入っていない・中止のカードは勝敗に算入しない
+            if g.get("status") == "cancelled" or g.get("home_score") is None or g.get("away_score") is None:
                 continue
             h, a = g["home"], g["away"]
             hs, as_ = int(g["home_score"]), int(g["away_score"])
@@ -744,7 +769,7 @@ def build_all_history_with_predictions(games_2025, games_2026):
 
     latest_team_histories = {t: [] for t in all_teams}
     for g in games_2026:
-        if g.get("home_score") is not None and g.get("away_score") is not None:
+        if g.get("status") == "finished" and g.get("home_score") is not None and g.get("away_score") is not None:
             h, a = g["home"], g["away"]
             latest_team_histories[h].append({"rs": int(g["home_score"]), "ra": int(g["away_score"])})
             latest_team_histories[a].append({"rs": int(g["away_score"]), "ra": int(g["home_score"])})
@@ -869,7 +894,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了（マスターテキスト優先結合）：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了（パ・リーグ厳密重複排除適用）：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
