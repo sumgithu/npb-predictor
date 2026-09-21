@@ -44,8 +44,8 @@ PARK_FACTORS = {
     "楽天モバイル": 0.95, "ベルーナ": 0.90, "甲子園": 0.88, "バンテリン": 0.84
 }
 
-# 2016-2025年NPBレギュラーシーズンの実測平均引き分け率（約4.5%）
-NPB_DRAW_RATE = 0.045
+# 2016-2025年NPBレギュラーシーズン実測引き分け率（382引分 / 8,580試合 = 約4.45%）
+NPB_DRAW_RATE = 0.0445
 
 def normalize_team(name):
     if not name:
@@ -428,7 +428,7 @@ def calc_log5_matchup(p_away, p_home, away_pitcher, home_pitcher, pitcher_stats,
 
     return round(final_p_away * 100.0, 1), round(final_p_home * 100.0, 1)
 
-# ★ 修正①: 優勝決定日判定を「勝数」から「NPB勝率ルール W/(W+L)」に完全移行
+# ★ 修正①: 優勝決定日判定を「NPB公式勝率ルール＋タイブレーク条件」に完全移行
 def simulate_full_season_probabilities(league_teams, current_standings, remaining_matches, team_total_stats, prior_stats):
     NUM_SIMS = 3000
     rank_counts = {t: {r: 0 for r in range(1, 7)} for t in league_teams}
@@ -446,6 +446,8 @@ def simulate_full_season_probabilities(league_teams, current_standings, remainin
 
     base_wins = {t["team"]: t["win"] for t in current_standings}
     base_loses = {t["team"]: t["lose"] for t in current_standings}
+    base_draws = {t["team"]: t["draw"] for t in current_standings}
+    
     sorted_matches = sorted([m for m in remaining_matches if m.get("status") == "scheduled"], key=lambda x: x["date"])
 
     matches_by_date = {}
@@ -457,7 +459,7 @@ def simulate_full_season_probabilities(league_teams, current_standings, remainin
 
     sorted_dates = sorted(matches_by_date.keys())
 
-    # 各チームの残り試合総数を把握
+    # 各チームの残り試合総数を算出
     team_future_game_counts = {t: 0 for t in league_teams}
     for m in sorted_matches:
         team_future_game_counts[m["home"]] += 1
@@ -466,6 +468,7 @@ def simulate_full_season_probabilities(league_teams, current_standings, remainin
     for _ in range(NUM_SIMS):
         sim_w = dict(base_wins)
         sim_l = dict(base_loses)
+        sim_d = dict(base_draws)
         sim_played_future = {t: 0 for t in league_teams}
         clinched_day = {t: None for t in league_teams}
 
@@ -479,8 +482,8 @@ def simulate_full_season_probabilities(league_teams, current_standings, remainin
 
                 rnd = random.random()
                 if rnd < NPB_DRAW_RATE:
-                    # 引き分け
-                    pass
+                    sim_d[h] += 1
+                    sim_d[a] += 1
                 else:
                     if random.random() < p_home_decided:
                         sim_w[h] += 1
@@ -489,30 +492,33 @@ def simulate_full_season_probabilities(league_teams, current_standings, remainin
                         sim_w[a] += 1
                         sim_l[h] += 1
 
-            # 勝率ベースでのクリンチ判定
+            # NPB公式勝率ルール（W / (W + L)）に基づく順位付け
             sim_rates = sorted([(t, calc_win_rate(sim_w[t], sim_l[t]), sim_w[t]) for t in league_teams],
                                key=lambda x: (x[1], x[2]), reverse=True)
             leader = sim_rates[0][0]
 
+            # 厳密なクリンチ判定（首位チームが残り全敗した時の最低保証勝率 vs 2位以下の残り全勝時の最高到達勝率）
             if clinched_day[leader] is None:
-                # 首位チームがこれ以上1勝もできずに残り全敗した場合の最低保証勝率
                 leader_rem = team_future_game_counts[leader] - sim_played_future[leader]
-                leader_min_final_rate = calc_win_rate(sim_w[leader], sim_l[leader] + leader_rem)
-
-                # 2位以下の全チームが残り全勝した場合の最高到達勝率
-                can_any_overtake = False
+                leader_min_rate = calc_win_rate(sim_w[leader], sim_l[leader] + leader_rem)
+                
+                can_overtake = False
                 for ot in league_teams:
                     if ot == leader:
                         continue
                     ot_rem = team_future_game_counts[ot] - sim_played_future[ot]
-                    ot_max_final_rate = calc_win_rate(sim_w[ot] + ot_rem, sim_l[ot])
+                    ot_max_rate = calc_win_rate(sim_w[ot] + ot_rem, sim_l[ot])
 
-                    # 同率の場合は勝数優先
-                    if ot_max_final_rate > leader_min_final_rate or (abs(ot_max_final_rate - leader_min_final_rate) < 1e-6 and (sim_w[ot] + ot_rem) >= sim_w[leader]):
-                        can_any_overtake = True
+                    # 勝率で上回る、または同率で勝数が上回る可能性がある場合は未確定
+                    if ot_max_rate > leader_min_rate + 1e-6:
+                        can_overtake = True
                         break
+                    elif abs(ot_max_rate - leader_min_rate) <= 1e-6:
+                        if (sim_w[ot] + ot_rem) >= sim_w[leader]:
+                            can_overtake = True
+                            break
 
-                if not can_any_overtake:
+                if not can_overtake:
                     clinched_day[leader] = d
 
         sim_rates = sorted([(t, calc_win_rate(sim_w[t], sim_l[t]), sim_w[t]) for t in league_teams],
@@ -986,7 +992,6 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    # ★ 修正②: 旧 standings.json も同時に最新状態で自動同期生成
     latest_snapshot = history.get(default_latest, history[dates[-1]])
     standings_legacy_payload = {
         "updated_at": f"{default_latest} (Auto Sync)",
@@ -996,7 +1001,7 @@ def main():
     with open(STANDINGS_FILE, "w", encoding="utf-8") as f:
         json.dump(standings_legacy_payload, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了（勝率ベース優勝決定日・standings.json自動同期）：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了（NPB公式勝率規定クリンチ判定・実測引分率同期）：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
