@@ -30,9 +30,17 @@
     body { background-color: var(--bg); color: var(--text-main); padding: 20px 12px 60px; }
     .container { max-width: 1100px; margin: 0 auto; }
 
-    header { text-align: center; margin-bottom: 24px; }
+    header { text-align: center; margin-bottom: 16px; }
     header h1 { font-size: 1.55rem; font-weight: 800; color: #1e3a8a; }
     header p { font-size: 0.85rem; color: var(--text-sub); margin-top: 4px; }
+
+    /* タイトル直下のCN概念解説バナー */
+    .cn-concept-banner {
+      background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 12px;
+      padding: 14px 18px; margin-bottom: 20px; font-size: 0.88rem; line-height: 1.6; color: #1e3a8a;
+    }
+    .cn-concept-title { font-weight: 800; font-size: 0.95rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+    .cn-concept-desc { color: #334155; font-size: 0.84rem; }
     
     .control-panel {
       background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
@@ -61,7 +69,7 @@
     /* 1. 順位表 */
     .table-wrapper {
       background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border);
-      overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04); margin-bottom: 24px;
+      overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04); margin-bottom: 12px;
     }
     table { width: 100%; border-collapse: collapse; min-width: 820px; text-align: center; font-size: 0.88rem; }
     th, td { padding: 12px 8px; border-bottom: 1px solid var(--border); }
@@ -85,6 +93,16 @@
       border: 1.5px dashed #f43f5e; border-radius: 6px; padding: 1px 6px; font-weight: 800;
     }
     .badge-dash { color: #94a3b8; font-weight: 500; }
+
+    /* 順位表直下のバッジ解説ガイド */
+    .badge-guide-panel {
+      background: #ffffff; border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 16px; margin-bottom: 24px; font-size: 0.82rem; color: #334155;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .badge-guide-item { display: flex; align-items: center; gap: 8px; line-height: 1.4; }
+    .badge-guide-item .desc { color: #475569; }
 
     /* 2. 予想勝利確率／試合結果カード */
     .prediction-grid {
@@ -194,6 +212,12 @@
     .notes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
     .note-item dt { font-weight: 800; color: #1e3a8a; margin-bottom: 3px; font-size: 0.88rem; }
     .note-item dd { margin: 0 0 12px 0; color: #475569; }
+
+    .history-mode-notice {
+      background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af;
+      padding: 12px 16px; border-radius: 8px; font-weight: 700; font-size: 0.88rem;
+      margin-bottom: 16px; text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -203,6 +227,17 @@
       <h1>プロ野球チャンピョンシップナンバー＆対戦成績解析</h1>
       <p>マジックナンバー・143試合完走優勝確率・CS進出確率・対戦成績完全解析</p>
     </header>
+
+    <!-- タイトル直下のCN概要説明 -->
+    <div class="cn-concept-banner">
+      <div class="cn-concept-title">
+        <span>💡</span> チャンピョンシップナンバー（CN）とは？ マジックナンバーとの違い
+      </div>
+      <div class="cn-concept-desc">
+        従来のマジックナンバーは「他球団の自力優勝がすべて消滅した瞬間」に初めて点灯しますが、<strong>CN（クリンチナンバー）は他球団の自力優勝の有無にかかわらず、全球団を対象に常時計算・点灯</strong>します。<br>
+        自力優勝が消滅して自チームの残り試合数以上の勝利が必要になった場合でも、数学的な優勝・進出可能性が完全消滅（エリミネーション）しない限り、<strong>「優勝（あるいは順位確定）への全体的な近さ・必要な勝数」を表す指標</strong>として表示され続けます。
+      </div>
+    </div>
 
     <div class="control-panel">
       <div class="date-select-box">
@@ -243,6 +278,26 @@
       </table>
     </div>
 
+    <!-- 順位表直下のCNバッジ凡例ガイド -->
+    <div class="badge-guide-panel">
+      <div class="badge-guide-item">
+        <span class="badge badge-magic">11</span>
+        <div class="desc"><strong>自力確定可能</strong>：残り試合数の範囲内であり、自チームの勝利のみで確定できる必要勝利数。</div>
+      </div>
+      <div class="badge-guide-item">
+        <span class="badge badge-eliminated">◇13◇</span>
+        <div class="desc"><strong>自力消滅（可能性あり）</strong>：残り試合数を超える勝数が必要。自力確定は消滅したが他力アシストで逆転可能な状態。</div>
+      </div>
+      <div class="badge-guide-item">
+        <span class="badge-dash" style="font-size:1.1rem; font-weight:800; min-width:28px; text-align:center;">-</span>
+        <div class="desc"><strong>完全消滅（エリミネーション）</strong>：相手が全敗し自チームが全勝しても届かない数学的消滅状態。</div>
+      </div>
+      <div class="badge-guide-item">
+        <span class="badge badge-fixed">確定</span>
+        <div class="desc"><strong>順位確定</strong>：他チームの結果を問わず、その順位以上（またはCS進出）が数学的に100%決定した状態。</div>
+      </div>
+    </div>
+
     <!-- 2. 予想勝利確率／試合結果カード -->
     <div id="pred-section">
       <div class="section-title" id="pred-header-title">
@@ -252,41 +307,43 @@
       <div class="prediction-grid" id="prediction-grid"></div>
     </div>
 
-    <!-- 3. 最終順位可能性早見表 -->
-    <div class="section-title">
-      📋 最終順位可能性早見表
-      <span class="section-desc">（全143試合完走モンテカルロ・シミュレーション到達確率）</span>
-    </div>
-    <div class="table-wrapper" style="padding: 16px 0;">
-      <table class="rank-matrix-table">
-        <thead id="rank-matrix-head"></thead>
-        <tbody id="rank-matrix-body"></tbody>
-      </table>
-      <div class="matrix-legend">
-        <div class="legend-item"><span class="legend-color" style="background-color: var(--cell-current); border: 2px solid #dc2626;"></span> 現在の順位</div>
-        <div class="legend-item"><span class="legend-color" style="background-color: var(--cell-can-climb);"></span> 自力で昇格可能</div>
-        <div class="legend-item"><span class="legend-color" style="background-color: var(--cell-potential);"></span> 昇格可能性あり</div>
-        <div class="legend-item"><span class="legend-color" style="background-color: var(--cell-drop);"></span> 降格可能性あり</div>
+    <div id="future-sections-wrapper">
+      <!-- 3. 最終順位可能性早見表 -->
+      <div class="section-title">
+        📋 最終順位可能性早見表
+        <span class="section-desc">（全143試合完走モンテカルロ・シミュレーション到達確率）</span>
       </div>
-    </div>
+      <div class="table-wrapper" style="padding: 16px 0;">
+        <table class="rank-matrix-table">
+          <thead id="rank-matrix-head"></thead>
+          <tbody id="rank-matrix-body"></tbody>
+        </table>
+        <div class="matrix-legend">
+          <div class="legend-item"><span class="legend-color" style="background-color: var(--cell-current); border: 2px solid #dc2626;"></span> 現在の順位</div>
+          <div class="legend-item"><span class="legend-color" style="background-color: var(--cell-can-climb);"></span> 自力で昇格可能</div>
+          <div class="legend-item"><span class="legend-color" style="background-color: var(--cell-potential);"></span> 昇格可能性あり</div>
+          <div class="legend-item"><span class="legend-color" style="background-color: var(--cell-drop);"></span> 降格可能性あり</div>
+        </div>
+      </div>
 
-    <!-- 4. 優勝決定日確率テーブル -->
-    <div class="section-title">
-      📅 優勝決定日確率
-      <span class="section-desc">（可能性が生じる初日から表示・対戦カード・開催地・決定確率・累計・見込勝率）</span>
-    </div>
-    <div class="clinch-schedule-grid" id="clinch-schedule-container"></div>
+      <!-- 4. 優勝決定日確率テーブル -->
+      <div class="section-title">
+        📅 優勝決定日確率
+        <span class="section-desc">（可能性が生じる初日から表示・対戦カード・開催地・決定確率・累計・見込勝率）</span>
+      </div>
+      <div class="clinch-schedule-grid" id="clinch-schedule-container"></div>
 
-    <!-- 5. 優勝ラインテーブル -->
-    <div class="section-title">
-      🏁 優勝ラインテーブル
-      <span class="section-desc">（同等勝率横並び比較・残り試合勝敗パターン一覧表）</span>
-    </div>
-    <div class="table-wrapper">
-      <table class="line-grid-table" id="line-grid-table">
-        <thead id="line-grid-head"></thead>
-        <tbody id="line-grid-body"></tbody>
-      </table>
+      <!-- 5. 優勝ラインテーブル -->
+      <div class="section-title">
+        🏁 優勝ラインテーブル
+        <span class="section-desc">（同等勝率横並び比較・残り試合勝敗パターン一覧表）</span>
+      </div>
+      <div class="table-wrapper">
+        <table class="line-grid-table" id="line-grid-table">
+          <thead id="line-grid-head"></thead>
+          <tbody id="line-grid-body"></tbody>
+        </table>
+      </div>
     </div>
 
     <!-- 6. 対戦成績表 -->
@@ -300,7 +357,7 @@
       </table>
     </div>
 
-    <!-- 7. 欄外注釈パネル（モデル差異を明記） -->
+    <!-- 7. 欄外注釈パネル -->
     <div class="notes-card">
       <div class="notes-title">
         <span>ℹ️</span> 項目および数理モデルの解説
@@ -309,29 +366,17 @@
         <div class="note-item">
           <dl>
             <dt>予想勝利確率（独自Log5予測モデル）</dt>
-            <dd>直近65試合の加重得失点差から求めたピタゴラス期待勝率を土台に、NPBホームアドバンテージ補正および当日の予告先発投手の個人成績（ベイズ補正）を乗算して各試合の勝率を算出しています。</dd>
+            <dd>シーズン通算の得失点力から求めたピタゴラス期待勝率を基礎とし、NPBホームアドバンテージ補正および登板実績に基づく先発投手の動的ベイズ補正を反映して各試合の勝率を算出しています。</dd>
 
             <dt>全143試合完走モンテカルロ・シミュレーション（優勝確率・CS確率）</dt>
-            <dd>未確定の全日程について、チーム直近状態・残日程・ホームアドバンテージを考慮して5,000回のシーズン完走シミュレーションを実行。順位確定確率を導出しています（※シーズンシミュレーションはチーム基礎力評価モデルに基づきます）。</dd>
-
-            <dt>CN（チャンピョンシップナンバー）</dt>
-            <dd>首位チームが自力でリーグ優勝（1位）を確定させるために必要な最小勝利数（マジックナンバー）です。</dd>
+            <dd>未確定の全日程について、チーム通算得失点力・残日程・ホームアドバンテージを考慮して3,000回のシーズン完走シミュレーションを実行。順位確定確率を導出しています（※過去日付表示時は試合数に応じたベイズ事前分布回帰モデルにより算出）。</dd>
           </dl>
         </div>
 
         <div class="note-item">
           <dl>
-            <dt><span class="badge badge-fixed">確定</span></dt>
-            <dd>他チームが残り全勝しても自チームを逆転できない、数学的に順位が確定した状態です。</dd>
-
-            <dt><span class="badge badge-magic">13</span>（通常数値）</dt>
-            <dd><strong>自力確定可能</strong>：残り試合数の範囲内で、自チームの勝利のみによって自力確定できる必要勝利数です。</dd>
-
-            <dt><span class="badge badge-eliminated">◇14◇</span>（ひし形枠＋赤文字）</dt>
-            <dd><strong>自力消滅（可能性あり）</strong>：残り試合数以上の勝利が必要な状態です。自チーム全勝に加え、他力のアシストが必要ですが、数学的な逆転可能性は残っています。</dd>
-
-            <dt><span class="badge-dash">-</span>（ハイフン）</dt>
-            <dd><strong>完全消滅（エリミネーション）</strong>：相手チームが残り全敗し、自チームが残り全勝しても届かない状態です。</dd>
+            <dt>自力優勝とマジックナンバーの関係</dt>
+            <dd>CNは自チームの勝利のみで確定できる場合は通常の数値（赤文字）で表示され、自力確定が消滅した場合は他力が必要であることを示す◇枠囲み数値に自動移行します。残り全敗でも他チームが追いつけない場合は「確定」となります。</dd>
           </dl>
         </div>
       </div>
@@ -507,6 +552,27 @@
           }
           predGrid.appendChild(card);
         });
+      }
+
+      // 過去日付表示時の下部テーブル整合性ガード
+      const isLatest = (selectedDate >= (rawData.latest_date || "2026-09-20"));
+      const futureWrapper = document.getElementById('future-sections-wrapper');
+
+      if (!isLatest) {
+        futureWrapper.style.opacity = "0.5";
+        let notice = document.getElementById('history-notice');
+        if (!notice) {
+          notice = document.createElement('div');
+          notice.id = 'history-notice';
+          notice.className = 'history-mode-notice';
+          futureWrapper.parentNode.insertBefore(notice, futureWrapper);
+        }
+        notice.innerText = `※ 過去の日時（${selectedDate}）を参照中です。以下の「最終順位早見表」「優勝決定日確率」「優勝ライン」はシーズン終盤（最新データ）に基づくシミュレーションです。`;
+        notice.style.display = "block";
+      } else {
+        futureWrapper.style.opacity = "1.0";
+        const notice = document.getElementById('history-notice');
+        if (notice) notice.style.display = "none";
       }
 
       // 3. 最終順位可能性早見表
@@ -732,8 +798,18 @@
           picker.max = dates[dates.length - 1];
         }
 
-        // ★ 修正⑦: 2026-09-21固定を廃止し、最新日（latest_date）に完全自動追従
-        selectedDate = rawData.latest_date || dates[dates.length - 1] || "";
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        const todayStr = `${y}-${m}-${d}`;
+
+        if (dates.includes(todayStr)) {
+          selectedDate = todayStr;
+        } else {
+          selectedDate = rawData.latest_date || dates[dates.length - 1] || "";
+        }
+
         picker.value = selectedDate;
 
         picker.addEventListener('change', (e) => {
