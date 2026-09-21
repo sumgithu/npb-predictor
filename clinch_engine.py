@@ -507,7 +507,7 @@ def simulate_full_season_probabilities(league_teams, current_standings, remainin
 
     return final_rank_matrix, clinch_date_probs
 
-# ★ 重複行（9-0や0-9の連続）を排除した優勝ラインテーブル生成
+# ★ 優勝ラインテーブル（1段目は「-」、2段目から9-0が完全連続で整列）
 def build_aligned_championship_grid(top_teams_standings):
     teams_data = []
     for t in top_teams_standings[:3]:
@@ -528,46 +528,32 @@ def build_aligned_championship_grid(top_teams_standings):
             "patterns": pats
         })
 
-    aligned_rows = []
     base_team = teams_data[0]
-    team3_max_rate = teams_data[2]["patterns"][0]["rate"] if len(teams_data) > 2 else 1.0
+    base_patterns = base_team["patterns"]
+    num_rows = len(base_patterns)
 
-    seen_patterns_t2 = set()
-    seen_patterns_t3 = set()
+    aligned_rows = [[base_p] for base_p in base_patterns]
 
-    for i in range(len(base_team["patterns"])):
-        base_p = base_team["patterns"][i]
-        target_rate = base_p["rate"]
-        row = [base_p]
+    # 各チームの全パターンを最も近い勝率の開始位置から隙間なく連続配置
+    for td in teams_data[1:]:
+        pats = td["patterns"]
+        t_max_rate = pats[0]["rate"]
 
-        # 2位チームの選定（既出パターンの重複排除）
-        if len(teams_data) > 1:
-            best_match_t2 = min(teams_data[1]["patterns"], key=lambda x: abs(x["rate"] - target_rate))
-            t2_key = (best_match_t2["w"], best_match_t2["l"])
-            if t2_key in seen_patterns_t2:
-                row.append(None)
-            else:
-                seen_patterns_t2.add(t2_key)
-                row.append(best_match_t2)
-        else:
-            row.append(None)
+        # 9-0 の勝率（.582）に最も近い阪神の行（11-1の.585）を開始インデックスとする
+        best_start = min(range(num_rows), key=lambda r: abs(base_patterns[r]["rate"] - t_max_rate))
 
-        # 3位チームの選定（既出パターンの重複排除）
-        if len(teams_data) > 2:
-            if target_rate > team3_max_rate + 0.005:
-                row.append(None)
-            else:
-                best_match_t3 = min(teams_data[2]["patterns"], key=lambda x: abs(x["rate"] - target_rate))
-                t3_key = (best_match_t3["w"], best_match_t3["l"])
-                if t3_key in seen_patterns_t3:
-                    row.append(None)
-                else:
-                    seen_patterns_t3.add(t3_key)
-                    row.append(best_match_t3)
-        else:
-            row.append(None)
+        assigned = [None] * num_rows
+        for p_idx, p in enumerate(pats):
+            row_pos = best_start + p_idx
+            if row_pos < num_rows:
+                assigned[row_pos] = p
 
-        aligned_rows.append(row)
+        for r_idx in range(num_rows):
+            aligned_rows[r_idx].append(assigned[r_idx])
+
+    for r in aligned_rows:
+        while len(r) < len(teams_data):
+            r.append(None)
 
     return {
         "headers": [{"team": td["team"], "remaining": td["remaining"], "current_w": td["current_w"], "current_l": td["current_l"]} for td in teams_data],
@@ -954,7 +940,7 @@ def main():
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"解析＆シミュレーション更新完了（重複行排除・パークファクター組込版）：{dates[0]} 〜 {dates[-1]}")
+    print(f"解析＆シミュレーション更新完了（優勝ライン完全連続化・パークファクター組込版）：{dates[0]} 〜 {dates[-1]}")
 
 if __name__ == "__main__":
     main()
