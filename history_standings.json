@@ -147707,24 +147707,24 @@
         "2": 0,
         "3": 0,
         "4": 34,
-        "5": 52,
-        "6": 14
+        "5": 54,
+        "6": 12
       },
       "中日": {
         "1": 0,
         "2": 0,
         "3": 0,
         "4": 64,
-        "5": 33,
-        "6": 3
+        "5": 32,
+        "6": 4
       },
       "広島": {
         "1": 0,
         "2": 0,
         "3": 0,
         "4": 2,
-        "5": 15,
-        "6": 83
+        "5": 14,
+        "6": 84
       }
     },
     "pacific_rank_matrix": {
@@ -147738,8 +147738,8 @@
       },
       "日本ハム": {
         "1": 0,
-        "2": 24,
-        "3": 76,
+        "2": 25,
+        "3": 75,
         "4": 0,
         "5": 0,
         "6": 0
@@ -147770,8 +147770,8 @@
       },
       "西武": {
         "1": 0,
-        "2": 76,
-        "3": 24,
+        "2": 75,
+        "3": 25,
         "4": 0,
         "5": 0,
         "6": 0
@@ -147784,19 +147784,19 @@
           "raw_date": "2026-10-01",
           "opp": "巨人",
           "ground": "甲子園",
-          "clinch_prob_val": 0.7000000000000001,
+          "clinch_prob_val": 0.5666666666666667,
           "win_expect": "56",
-          "clinch_prob_str": "0.7%",
-          "cum_prob_str": "0.7%"
+          "clinch_prob_str": "0.6%",
+          "cum_prob_str": "0.6%"
         },
         {
           "date": "10/2",
           "raw_date": "2026-10-02",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 0.4333333333333333,
+          "clinch_prob_val": 0.5666666666666667,
           "win_expect": "-",
-          "clinch_prob_str": "0.4%",
+          "clinch_prob_str": "0.6%",
           "cum_prob_str": "1%"
         },
         {
@@ -147804,10 +147804,10 @@
           "raw_date": "2026-10-03",
           "opp": "広島",
           "ground": "マツダS",
-          "clinch_prob_val": 3.5999999999999996,
+          "clinch_prob_val": 4.766666666666667,
           "win_expect": "64",
-          "clinch_prob_str": "4%",
-          "cum_prob_str": "5%"
+          "clinch_prob_str": "5%",
+          "cum_prob_str": "6%"
         },
         {
           "date": "10/4",
@@ -147817,29 +147817,19 @@
           "clinch_prob_val": 4.433333333333334,
           "win_expect": "50",
           "clinch_prob_str": "4%",
-          "cum_prob_str": "9%"
+          "cum_prob_str": "10%"
         }
       ],
       "巨人": [
-        {
-          "date": "10/1",
-          "raw_date": "2026-10-01",
-          "opp": "阪神",
-          "ground": "甲子園",
-          "clinch_prob_val": 0.16666666666666669,
-          "win_expect": "44",
-          "clinch_prob_str": "0.2%",
-          "cum_prob_str": "0.2%"
-        },
         {
           "date": "10/2",
           "raw_date": "2026-10-02",
           "opp": "ヤクルト",
           "ground": "神宮",
-          "clinch_prob_val": 0.2,
+          "clinch_prob_val": 0.33333333333333337,
           "win_expect": "61",
-          "clinch_prob_str": "0.2%",
-          "cum_prob_str": "0.4%"
+          "clinch_prob_str": "0.3%",
+          "cum_prob_str": "0.3%"
         },
         {
           "date": "10/3",
@@ -147856,10 +147846,10 @@
           "raw_date": "2026-10-04",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 1.0999999999999999,
+          "clinch_prob_val": 1.7666666666666668,
           "win_expect": "-",
-          "clinch_prob_str": "1%",
-          "cum_prob_str": "3%"
+          "clinch_prob_str": "2%",
+          "cum_prob_str": "4%"
         }
       ],
       "ＤｅＮＡ": [
@@ -148178,7 +148168,7 @@
           "raw_date": "2026-09-23",
           "opp": "西武",
           "ground": "PayPay",
-          "clinch_prob_val": 41.266666666666666,
+          "clinch_prob_val": 41.3,
           "win_expect": "68",
           "clinch_prob_str": "41%",
           "cum_prob_str": "41%"
@@ -148188,9 +148178,9 @@
           "raw_date": "2026-09-24",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 1.4333333333333333,
+          "clinch_prob_val": 1.5,
           "win_expect": "-",
-          "clinch_prob_str": "1%",
+          "clinch_prob_str": "2%",
           "cum_prob_str": "43%"
         },
         {
@@ -148198,19 +148188,19 @@
           "raw_date": "2026-09-25",
           "opp": "オリックス",
           "ground": "京セラ",
-          "clinch_prob_val": 11.566666666666666,
+          "clinch_prob_val": 11.933333333333334,
           "win_expect": "72",
           "clinch_prob_str": "12%",
-          "cum_prob_str": "54%"
+          "cum_prob_str": "55%"
         },
         {
           "date": "9/26",
           "raw_date": "2026-09-26",
           "opp": "楽天",
           "ground": "PayPay",
-          "clinch_prob_val": 22.566666666666666,
+          "clinch_prob_val": 22.466666666666665,
           "win_expect": "77",
-          "clinch_prob_str": "23%",
+          "clinch_prob_str": "22%",
           "cum_prob_str": "77%"
         },
         {
@@ -148218,7 +148208,7 @@
           "raw_date": "2026-09-27",
           "opp": "オリックス",
           "ground": "PayPay",
-          "clinch_prob_val": 12.3,
+          "clinch_prob_val": 12.266666666666666,
           "win_expect": "78",
           "clinch_prob_str": "12%",
           "cum_prob_str": "89%"
@@ -148228,20 +148218,20 @@
           "raw_date": "2026-09-28",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 2.033333333333333,
+          "clinch_prob_val": 2.3,
           "win_expect": "-",
           "clinch_prob_str": "2%",
-          "cum_prob_str": "91%"
+          "cum_prob_str": "92%"
         },
         {
           "date": "9/29",
           "raw_date": "2026-09-29",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 2.1,
+          "clinch_prob_val": 1.9333333333333333,
           "win_expect": "-",
           "clinch_prob_str": "2%",
-          "cum_prob_str": "93%"
+          "cum_prob_str": "94%"
         },
         {
           "date": "9/30",
@@ -148251,24 +148241,24 @@
           "clinch_prob_val": 0.0,
           "win_expect": "-",
           "clinch_prob_str": "-",
-          "cum_prob_str": "93%"
+          "cum_prob_str": "94%"
         },
         {
           "date": "10/1",
           "raw_date": "2026-10-01",
           "opp": "楽天",
           "ground": "楽天モバイル",
-          "clinch_prob_val": 3.3000000000000003,
+          "clinch_prob_val": 2.7666666666666666,
           "win_expect": "72",
           "clinch_prob_str": "3%",
-          "cum_prob_str": "97%"
+          "cum_prob_str": "96%"
         },
         {
           "date": "10/2",
           "raw_date": "2026-10-02",
           "opp": "ロッテ",
           "ground": "ZOZO",
-          "clinch_prob_val": 1.5666666666666667,
+          "clinch_prob_val": 1.9666666666666666,
           "win_expect": "72",
           "clinch_prob_str": "2%",
           "cum_prob_str": "98%"
@@ -148278,9 +148268,9 @@
           "raw_date": "2026-10-03",
           "opp": "ロッテ",
           "ground": "ZOZO",
-          "clinch_prob_val": 0.7333333333333333,
+          "clinch_prob_val": 0.8666666666666666,
           "win_expect": "72",
-          "clinch_prob_str": "0.7%",
+          "clinch_prob_str": "0.9%",
           "cum_prob_str": "99%"
         },
         {
