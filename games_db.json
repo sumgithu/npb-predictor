@@ -17,13 +17,13 @@
       "date": "2026-09-21",
       "home": "阪神",
       "away": "ＤｅＮＡ",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 3,
+      "away_score": 2,
       "home_starter": "ルーカス",
       "away_starter": "平良",
       "home_pitcher": "ルーカス",
       "away_pitcher": "平良",
-      "status": "scheduled"
+      "status": "finished"
     },
     {
       "date": "2026-09-21",
