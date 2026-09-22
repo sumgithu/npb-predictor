@@ -39,8 +39,8 @@ TEXT_LOG_FILE = "2016-2026プロ野球レギュラーシーズン結果.txt"
 FALLBACK_CSV_FILE = "npb_games_clean.csv"
 
 # Simulation
-MAIN_NUM_SIMS = 10000
-HISTORICAL_NUM_SIMS = 600
+MAIN_NUM_SIMS = 5000
+HISTORICAL_NUM_SIMS = 300
 RANDOM_SEED = 20260921
 
 # Early/mid-season model-uncertainty band.
@@ -49,8 +49,8 @@ RANDOM_SEED = 20260921
 # then rerun smaller season simulations. The public page uses the 10th-90th
 # percentile of these scenario results while more than one team still has
 # a self-clinchable path to 1st place.
-UNCERTAINTY_MODEL_SIMS = 16
-UNCERTAINTY_SEASON_SIMS = 100
+UNCERTAINTY_MODEL_SIMS = 10
+UNCERTAINTY_SEASON_SIMS = 60
 UNCERTAINTY_LOW_Q = 0.10
 UNCERTAINTY_HIGH_Q = 0.90
 MODEL_UNCERTAINTY_INFLATION = 1.35
