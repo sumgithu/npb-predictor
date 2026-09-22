@@ -925,45 +925,17 @@ def get_remaining_h2h(t1, t2, h2h_played, rem_1, rem_2):
 
 
 def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
-    """Calculate championship/CS magic numbers.
+    """Calculate Championship Numbers / clinch numbers for each target rank.
 
-    For 1st place, use the conventional current-leader magic-number definition:
-    compare the current leader with the current 2nd-place team's maximum
-    possible win total. This intentionally does not use detailed H2H forcing,
-    so an early-April theoretical self-clinch path is not displayed as an
-    active magic number.
-
-    For 2nd-5th place, retain the existing conservative H2H-aware calculation.
+    For 1st place, this deliberately calculates a CN candidate for every team.
+    Whether it is displayed with the special ``M`` marker is decided by the
+    presentation layer: only when exactly one team remains self-clinchable for
+    1st place is that team's 1st-place CN shown as M.
     """
     ta = team_a["team"]
-    rem_a = int(team_a["remaining"])
-    a_w, a_l = int(team_a["win"]), int(team_a["lose"])
+    rem_a = team_a["remaining"]
+    a_w, a_l = team_a["win"], team_a["lose"]
 
-    # Championship magic number: only the current 1st-place team gets an
-    # active 1st-place M. Before it is reachable within remaining games, show
-    # no magic number rather than a theoretical value.
-    if target_k == 1:
-        if int(team_a.get("rank", 99)) != 1:
-            return "-"
-
-        challengers = [t for t in all_teams if int(t.get("rank", 99)) == 2]
-        if not challengers:
-            return "-"
-        border = challengers[0]
-        b_w = int(border["win"])
-        rem_b = int(border["remaining"])
-
-        # Leader needs one more win than the maximum final wins available to
-        # the current 2nd-place team.
-        magic = b_w + rem_b - a_w + 1
-
-        if magic <= 0:
-            return "確定"
-        if magic <= rem_a:
-            return magic
-        return "-"
-
-    # Existing H2H-aware calculation for 2nd through 5th place.
     a_max_rate = calc_win_rate(a_w + rem_a, a_l)
     a_min_rate = calc_win_rate(a_w, a_l + rem_a)
 
@@ -984,7 +956,13 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
     if threats < target_k:
         return "確定"
 
+    # For any target rank, use the nearest relevant border team and the
+    # remaining H2H series to derive the minimum number of wins needed.
     if target_k == 1:
+        # The current leader is compared with the current 2nd place; a trailing
+        # team is compared with the current leader. This preserves a CN value
+        # for every team, which is needed to identify the sole self-clinchable
+        # team later.
         border = all_teams[1] if team_a["rank"] == 1 else all_teams[0]
     else:
         border = all_teams[target_k] if team_a["rank"] <= target_k else all_teams[target_k - 1]
