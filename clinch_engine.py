@@ -46,14 +46,14 @@ RANDOM_SEED = 20260921
 # Early/mid-season model-uncertainty band.
 # This is separate from Monte Carlo sampling error. We perturb the fitted
 # attack/defense parameters using a Laplace-style diagonal approximation and
-# then rerun smaller season simulations. The public page uses the 10th-90th
+# then rerun smaller season simulations. The public page uses the 20th-80th
 # percentile of these scenario results while more than one team still has
 # a self-clinchable path to 1st place.
 UNCERTAINTY_MODEL_SIMS = 10
 UNCERTAINTY_SEASON_SIMS = 60
-UNCERTAINTY_LOW_Q = 0.10
-UNCERTAINTY_HIGH_Q = 0.90
-MODEL_UNCERTAINTY_INFLATION = 1.35
+UNCERTAINTY_LOW_Q = 0.20
+UNCERTAINTY_HIGH_Q = 0.80
+MODEL_UNCERTAINTY_INFLATION = 0.70
 
 # Run model hyperparameters.
 # 50日程度の半減期なら、4月の試合を9月時点で強く引きずりすぎない。
@@ -925,10 +925,45 @@ def get_remaining_h2h(t1, t2, h2h_played, rem_1, rem_2):
 
 
 def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
-    ta = team_a["team"]
-    rem_a = team_a["remaining"]
-    a_w, a_l = team_a["win"], team_a["lose"]
+    """Calculate championship/CS magic numbers.
 
+    For 1st place, use the conventional current-leader magic-number definition:
+    compare the current leader with the current 2nd-place team's maximum
+    possible win total. This intentionally does not use detailed H2H forcing,
+    so an early-April theoretical self-clinch path is not displayed as an
+    active magic number.
+
+    For 2nd-5th place, retain the existing conservative H2H-aware calculation.
+    """
+    ta = team_a["team"]
+    rem_a = int(team_a["remaining"])
+    a_w, a_l = int(team_a["win"]), int(team_a["lose"])
+
+    # Championship magic number: only the current 1st-place team gets an
+    # active 1st-place M. Before it is reachable within remaining games, show
+    # no magic number rather than a theoretical value.
+    if target_k == 1:
+        if int(team_a.get("rank", 99)) != 1:
+            return "-"
+
+        challengers = [t for t in all_teams if int(t.get("rank", 99)) == 2]
+        if not challengers:
+            return "-"
+        border = challengers[0]
+        b_w = int(border["win"])
+        rem_b = int(border["remaining"])
+
+        # Leader needs one more win than the maximum final wins available to
+        # the current 2nd-place team.
+        magic = b_w + rem_b - a_w + 1
+
+        if magic <= 0:
+            return "確定"
+        if magic <= rem_a:
+            return magic
+        return "-"
+
+    # Existing H2H-aware calculation for 2nd through 5th place.
     a_max_rate = calc_win_rate(a_w + rem_a, a_l)
     a_min_rate = calc_win_rate(a_w, a_l + rem_a)
 
@@ -975,7 +1010,6 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
         if a_rate > b_abs_max_rate:
             return x
     return rem_a + 1
-
 
 def validate_and_assert_standings(teams):
     keys = ["magic_1st", "magic_2nd", "magic_3rd", "magic_4th", "magic_5th"]
@@ -1211,7 +1245,13 @@ def simulate_championship_probability_band(
 
 
 def self_clinchable_first_count(table):
-    """Number of teams that can still secure 1st place by own wins alone."""
+    """Number of teams that can still win 1st place by their own wins alone.
+
+    This is the key trigger for the Championship Number (CN).  A numeric
+    magic_1st value is considered active only when it can actually be achieved
+    within the team's remaining games.  The current rank is irrelevant: a
+    trailing team may still be the only team with a self-clinchable path.
+    """
     count = 0
     for t in table:
         v = t.get("magic_1st")
