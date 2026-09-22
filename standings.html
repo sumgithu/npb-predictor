@@ -212,14 +212,12 @@
   function badge(v, rem, targetRank, showChampionshipM) {
     if (v === '確定') return '<span class="badge badge-fixed">確定</span>';
     if (typeof v === 'number') {
-      // 1位欄だけは通常のマジックナンバーとして表示しない。
-      // 自力優勝可能チームが1球団だけになった場合、その球団の
-      // チャンピョンシップナンバーとして Mxx を表示する。
-      if (targetRank === 1) {
-        if (!showChampionshipM || v > rem) return '<span class="badge-dash">-</span>';
+      if (v > rem) return `<span class="badge badge-elim">◇${v}◇</span>`;
+      // 1位のCNは常に数値を表示する。自力優勝可能チームが1球団だけ
+      // になった時だけ、その球団のCNに「M」を付ける。
+      if (targetRank === 1 && showChampionshipM) {
         return `<span class="badge badge-magic">M${v}</span>`;
       }
-      if (v > rem) return `<span class="badge badge-elim">◇${v}◇</span>`;
       return `<span class="badge badge-magic">${v}</span>`;
     }
     return '<span class="badge-dash">-</span>';
