@@ -64,49 +64,65 @@
       "date": "2026-09-22",
       "home": "ＤｅＮＡ",
       "away": "中日",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 7,
+      "away_score": 3,
       "home_starter": "東",
       "away_starter": "マラー",
+      "status": "finished",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "横　浜 18:00 くもり時々雨",
       "home_pitcher": "東",
       "away_pitcher": "マラー",
-      "status": "scheduled"
+      "source": "manual"
     },
     {
       "date": "2026-09-22",
       "home": "ソフトバンク",
       "away": "西武",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 6,
+      "away_score": 5,
       "home_starter": "上茶谷",
       "away_starter": "佐藤爽",
+      "status": "finished",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "みずほPayPay 18:00 晴れ時々くもり",
       "home_pitcher": "上茶谷",
       "away_pitcher": "佐藤爽",
-      "status": "scheduled"
+      "source": "manual"
     },
     {
       "date": "2026-09-22",
       "home": "ヤクルト",
       "away": "阪神",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 7,
+      "away_score": 9,
       "home_starter": "松本健",
       "away_starter": "伊藤将",
+      "status": "finished",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "神　宮 18:00 くもり",
       "home_pitcher": "松本健",
       "away_pitcher": "伊藤将",
-      "status": "scheduled"
+      "source": "manual"
     },
     {
       "date": "2026-09-22",
       "home": "ロッテ",
       "away": "オリックス",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 4,
+      "away_score": 6,
       "home_starter": "ジャクソン",
       "away_starter": "東松",
+      "status": "finished",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "ZOZOマリン 18:00 くもり時々雨",
       "home_pitcher": "ジャクソン",
       "away_pitcher": "東松",
-      "status": "scheduled"
+      "source": "manual"
     },
     {
       "date": "2026-09-22",
@@ -116,21 +132,29 @@
       "away_score": 1,
       "home_starter": "玉村",
       "away_starter": "戸郷",
+      "status": "finished",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "マツダスタジアム 15:00 晴れ時々くもり",
       "home_pitcher": "玉村",
       "away_pitcher": "戸郷",
-      "status": "finished"
+      "source": "manual"
     },
     {
       "date": "2026-09-22",
       "home": "日本ハム",
       "away": "楽天",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 6,
+      "away_score": 5,
       "home_starter": "北山",
       "away_starter": "伊藤樹",
+      "status": "finished",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "エスコンＦ 18:00 くもり時々晴れ",
       "home_pitcher": "北山",
       "away_pitcher": "伊藤樹",
-      "status": "scheduled"
+      "source": "manual"
     }
   ]
 }
