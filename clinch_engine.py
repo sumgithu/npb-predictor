@@ -92,6 +92,54 @@ TEAM_ALIASES = {
     "中日": "中日", "中日ドラゴンズ": "中日",
 }
 
+# ------------------------------------------------------------
+# Historical championship prior / early-season shrinkage
+# ------------------------------------------------------------
+# These 2005-2024 final-rank histories are the user's 20-year reference
+# dataset.  They are used ONLY to construct the preseason/early-season
+# championship prior.  The current-game Poisson model is kept separate.
+#
+# For a 2026 forecast, the previous-season (2025) rank is derived from the
+# actual 2025 results loaded from the master game log, while the historical
+# prior itself uses the 2005-2024 20-year reference period.
+
+HISTORICAL_RANK_YEARS = list(range(2005, 2025))
+
+CENTRAL_HISTORICAL_RANKS = {
+    "巨人":     [5,4,1,1,1,3,3,1,1,1,2,2,4,3,1,1,3,4,4,1],
+    "阪神":     [1,2,3,2,4,2,4,5,2,2,3,4,2,6,3,2,2,3,1,2],
+    "ＤｅＮＡ": [3,6,4,6,6,6,6,6,5,5,6,3,3,4,2,4,6,2,3,3],
+    "広島":     [6,5,5,4,5,5,5,4,3,3,4,1,1,1,4,5,4,5,2,4],
+    "ヤクルト": [4,3,6,5,3,4,2,3,6,6,1,5,6,2,6,6,1,1,5,5],
+    "中日":     [2,1,2,3,2,1,1,2,4,4,5,6,5,5,5,3,5,6,6,6],
+}
+
+PACIFIC_HISTORICAL_RANKS = {
+    "ソフトバンク": [2,3,3,6,3,1,1,3,4,1,1,2,1,2,2,1,4,2,3,1],
+    "日本ハム":     [5,1,1,3,1,4,2,1,6,3,2,1,5,3,5,5,5,6,6,2],
+    "ロッテ":       [1,4,2,4,5,3,6,5,3,4,3,3,6,5,4,2,2,5,2,3],
+    "楽天":         [6,6,4,5,2,6,5,4,1,6,6,5,3,6,3,4,3,4,4,4],
+    "オリックス":   [4,5,6,2,6,5,4,6,5,2,5,6,4,4,6,6,1,1,1,5],
+    "西武":         [3,2,5,1,4,2,3,2,2,5,4,4,2,1,1,3,6,3,5,6],
+}
+
+# Smoothing strength for historical rates.  A value of 3 means that each
+# rank/category receives three pseudo-observations with a league-wide title
+# rate of 1/6.  This prevents small historical cells such as "0 of 19" from
+# producing a literal 0% preseason prior.
+HISTORICAL_PRIOR_SMOOTHING = 3.0
+
+# Mix the two historical signals: (A) next-year champion rate conditional on
+# previous rank, and (B) the team's own 20-year championship rate.
+HISTORICAL_RANK_PRIOR_MIX = 0.70
+HISTORICAL_TEAM_PRIOR_MIX = 0.30
+
+# Weight given to the current-season Poisson/Monte-Carlo championship model.
+# It starts low and rises smoothly as more 2026 games accumulate.
+EARLY_SEASON_CURRENT_WEIGHT_MIN = 0.08
+EARLY_SEASON_CURRENT_WEIGHT_MAX = 0.95
+EARLY_SEASON_CURRENT_WEIGHT_SCALE = 45.0
+
 STADIUM_NAMES = {
     "阪神": "甲子園", "巨人": "東京D", "ＤｅＮＡ": "横浜",
     "ヤクルト": "神宮", "中日": "バンテリン", "広島": "マツダS",
@@ -417,6 +465,188 @@ def load_all_games():
 # ------------------------------------------------------------
 # Historical prior / environment estimation
 # ------------------------------------------------------------
+
+def _smooth_binomial_rate(successes, trials, prior_strength=HISTORICAL_PRIOR_SMOOTHING):
+    """Empirical-Bayes smoothing toward the six-team baseline of 1/6."""
+    prior_mean = 1.0 / 6.0
+    return (float(successes) + prior_strength * prior_mean) / (float(trials) + prior_strength) if (trials + prior_strength) > 0 else prior_mean
+
+
+def _league_historical_rank_map(league_teams):
+    if set(league_teams) == set(CENTRAL_TEAMS):
+        return CENTRAL_HISTORICAL_RANKS
+    if set(league_teams) == set(PACIFIC_TEAMS):
+        return PACIFIC_HISTORICAL_RANKS
+    raise ValueError("未知のリーグです")
+
+
+def derive_final_rank_from_games(games, year, league_teams):
+    """Derive a completed season's final rank from actual historical games."""
+    rec = {t: {"win": 0, "lose": 0, "draw": 0} for t in league_teams}
+    for g in games:
+        if int(g.get("date", "0000")[:4]) != year or not is_finished(g):
+            continue
+        h, a = g["home"], g["away"]
+        if h not in league_teams or a not in league_teams:
+            continue
+        hs, as_ = int(g["home_score"]), int(g["away_score"])
+        if hs > as_:
+            rec[h]["win"] += 1; rec[a]["lose"] += 1
+        elif hs < as_:
+            rec[a]["win"] += 1; rec[h]["lose"] += 1
+        else:
+            rec[h]["draw"] += 1; rec[a]["draw"] += 1
+    ordered = sorted(league_teams, key=lambda t: (calc_win_rate(rec[t]["win"], rec[t]["lose"]), rec[t]["win"]), reverse=True)
+    return {team: idx + 1 for idx, team in enumerate(ordered)}
+
+
+def previous_season_ranks_for_target(target_year, historical_games, league_teams):
+    """Return the best available previous-season final ranks without leakage."""
+    prev_year = target_year - 1
+    rank_map = _league_historical_rank_map(league_teams)
+    if prev_year in HISTORICAL_RANK_YEARS:
+        idx = prev_year - HISTORICAL_RANK_YEARS[0]
+        return {team: rank_map[team][idx] for team in league_teams}
+    # 2025 is available from the actual 2016-2025 historical game log.
+    derived = derive_final_rank_from_games(historical_games, prev_year, league_teams)
+    if all(derived[t] is not None for t in league_teams):
+        return derived
+    raise ValueError(f"{prev_year}年の前年順位を取得できません")
+
+
+def build_historical_championship_prior(target_year, historical_games, league_teams):
+    """Build a six-team championship prior for a target season.
+
+    Uses only rank-history data that would have been known before target_year:
+      A. P(champion next year | previous-year rank)
+      B. Each team's historical championship rate
+    The two are smoothed and mixed, then normalized.
+    """
+    rank_map = _league_historical_rank_map(league_teams)
+    max_hist_year = min(2024, target_year - 1)
+    available_years = [y for y in HISTORICAL_RANK_YEARS if y <= max_hist_year]
+    if len(available_years) < 2:
+        # Not enough reference history: equal prior.
+        return {t: 1.0 / len(league_teams) for t in league_teams}
+
+    # A: next-year champion rate conditional on previous rank.
+    next_champ_by_prev_rank = {r: 0 for r in range(1, 7)}
+    transition_count_by_prev_rank = {r: 0 for r in range(1, 7)}
+    for i in range(len(available_years) - 1):
+        y = available_years[i]
+        y_next = available_years[i + 1]
+        if y_next != y + 1:
+            continue
+        for team in league_teams:
+            prev_rank = rank_map[team][y - HISTORICAL_RANK_YEARS[0]]
+            next_rank = rank_map[team][y_next - HISTORICAL_RANK_YEARS[0]]
+            transition_count_by_prev_rank[prev_rank] += 1
+            if next_rank == 1:
+                next_champ_by_prev_rank[prev_rank] += 1
+
+    rank_rate = {}
+    for r in range(1, 7):
+        rank_rate[r] = _smooth_binomial_rate(
+            next_champ_by_prev_rank[r],
+            transition_count_by_prev_rank[r],
+        )
+
+    # B: team's own title rate in the historical reference period.
+    title_rate = {}
+    trials = len(available_years)
+    for team in league_teams:
+        titles = sum(1 for y in available_years if rank_map[team][y - HISTORICAL_RANK_YEARS[0]] == 1)
+        title_rate[team] = _smooth_binomial_rate(titles, trials)
+
+    prev_ranks = previous_season_ranks_for_target(target_year, historical_games, league_teams)
+    raw_rank_prior = {team: rank_rate[prev_ranks[team]] for team in league_teams}
+    raw_team_prior = {team: title_rate[team] for team in league_teams}
+
+    rank_total = sum(raw_rank_prior.values())
+    team_total = sum(raw_team_prior.values())
+    if rank_total <= 0 or team_total <= 0:
+        return {t: 1.0 / len(league_teams) for t in league_teams}
+
+    rank_prior = {t: raw_rank_prior[t] / rank_total for t in league_teams}
+    team_prior = {t: raw_team_prior[t] / team_total for t in league_teams}
+
+    combined = {
+        t: HISTORICAL_RANK_PRIOR_MIX * rank_prior[t]
+        + HISTORICAL_TEAM_PRIOR_MIX * team_prior[t]
+        for t in league_teams
+    }
+    total = sum(combined.values())
+    return {t: combined[t] / total for t in league_teams}
+
+
+def current_season_information_weight(completed_games_per_team):
+    """Increase current-season influence smoothly from the April prior toward 1."""
+    n = max(0.0, float(completed_games_per_team))
+    growth = 1.0 - math.exp(-n / EARLY_SEASON_CURRENT_WEIGHT_SCALE)
+    return EARLY_SEASON_CURRENT_WEIGHT_MIN + (
+        EARLY_SEASON_CURRENT_WEIGHT_MAX - EARLY_SEASON_CURRENT_WEIGHT_MIN
+    ) * growth
+
+
+def apply_championship_prior_shrinkage(table, league_teams, raw_champ_probs, raw_bands, target_year, historical_games):
+    """Shrink early-season championship probabilities toward historical prior.
+
+    This layer does NOT alter individual game win/draw/loss probabilities.
+    It only regularizes the season-long championship forecast, which prevents
+    4-5 games in April from overwhelming the 20-year historical baseline.
+    The influence of the current-season model rises automatically as games
+    accumulate.
+    """
+    prior = build_historical_championship_prior(target_year, historical_games, league_teams)
+    completed_avg = sum(float(t.get("games", 0)) for t in table) / max(1, len(table))
+    current_weight = current_season_information_weight(completed_avg)
+    prior_weight = 1.0 - current_weight
+
+    # Mathematical clinch overrides every probabilistic layer.
+    confirmed = [t["team"] for t in table if t.get("magic_1st") == "確定"]
+    if confirmed:
+        clinch_team = confirmed[0]
+        for t in table:
+            t["championship_prior"] = round(prior.get(t["team"], 1.0 / len(league_teams)) * 100.0, 3)
+            t["championship_current_weight"] = round(current_weight, 4)
+            t["champ_prob_raw"] = 100.0 if t["team"] == clinch_team else 0.0
+            t["champ_prob"] = 100.0 if t["team"] == clinch_team else 0.0
+            t["champ_prob_low"] = 100.0 if t["team"] == clinch_team else 0.0
+            t["champ_prob_high"] = 100.0 if t["team"] == clinch_team else 0.0
+        return prior, current_weight
+
+    blended = {}
+    for t in table:
+        team = t["team"]
+        p0 = prior.get(team, 1.0 / len(league_teams)) * 100.0
+        raw = float(raw_champ_probs.get(team, 0.0))
+        blended_p = prior_weight * p0 + current_weight * raw
+        blended[team] = blended_p
+        t["championship_prior"] = round(p0, 3)
+        t["champ_prob_raw"] = round(raw, 3)
+        t["champ_prob"] = round(blended_p, 3)
+        t["champ_prob_prior_weight"] = round(prior_weight, 4)
+        t["champ_prob_current_weight"] = round(current_weight, 4)
+
+        band = raw_bands.get(team) if raw_bands else None
+        if band:
+            low = prior_weight * p0 + current_weight * float(band.get("low", raw))
+            high = prior_weight * p0 + current_weight * float(band.get("high", raw))
+            t["champ_prob_low"] = round(min(low, high), 3)
+            t["champ_prob_high"] = round(max(low, high), 3)
+        else:
+            t["champ_prob_low"] = round(blended_p, 3)
+            t["champ_prob_high"] = round(blended_p, 3)
+
+    # Numerical normalization of the point estimates.
+    total_blended = sum(t["champ_prob"] for t in table)
+    if total_blended > 0:
+        scale = 100.0 / total_blended
+        for t in table:
+            t["champ_prob"] = round(t["champ_prob"] * scale, 3)
+
+    return prior, current_weight
+
 
 def estimate_multi_year_prior(historical_games):
     """Build preseason priors from 2016-2025.
@@ -1635,13 +1865,40 @@ def build_all_history_with_predictions(historical_games, games_2026):
                 HISTORICAL_NUM_SIMS,
             )
 
+        # Raw Monte-Carlo championship probabilities.
+        c_raw = {t["team"]: (100.0 if t.get("magic_1st") == "確定" else float(c_mat[t["team"]][1])) for t in snap["central"]}
+        p_raw = {t["team"]: (100.0 if t.get("magic_1st") == "確定" else float(p_mat[t["team"]][1])) for t in snap["pacific"]}
+
+        # Apply the early-season historical prior/shrinkage ONLY to the
+        # championship forecast.  The underlying game probabilities remain
+        # the existing Poisson model.
+        c_band_raw = {}
+        p_band_raw = {}
+        for t in snap["central"]:
+            if "champ_prob_low" in t and "champ_prob_high" in t:
+                c_band_raw[t["team"]] = {
+                    "low": float(t["champ_prob_low"]),
+                    "high": float(t["champ_prob_high"]),
+                }
+        for t in snap["pacific"]:
+            if "champ_prob_low" in t and "champ_prob_high" in t:
+                p_band_raw[t["team"]] = {
+                    "low": float(t["champ_prob_low"]),
+                    "high": float(t["champ_prob_high"]),
+                }
+
+        c_prior, c_weight = apply_championship_prior_shrinkage(
+            snap["central"], CENTRAL_TEAMS, c_raw, c_band_raw, int(d[:4]), historical_games
+        )
+        p_prior, p_weight = apply_championship_prior_shrinkage(
+            snap["pacific"], PACIFIC_TEAMS, p_raw, p_band_raw, int(d[:4]), historical_games
+        )
+
         for t in snap["central"]:
             mat = c_mat[t["team"]]
-            t["champ_prob"] = 100 if t.get("magic_1st") == "確定" else mat[1]
             t["cs_prob"] = 100 if t.get("magic_3rd") == "確定" else sum(mat[r] for r in (1, 2, 3))
         for t in snap["pacific"]:
             mat = p_mat[t["team"]]
-            t["champ_prob"] = 100 if t.get("magic_1st") == "確定" else mat[1]
             t["cs_prob"] = 100 if t.get("magic_3rd") == "確定" else sum(mat[r] for r in (1, 2, 3))
 
         del snap["_model"]
@@ -1752,7 +2009,14 @@ def build_all_history_with_predictions(historical_games, games_2026):
             "starter_policy": "confirmed manual starter information only; strong shrinkage",
             "draw_model": "score distribution derived; no fixed 4.5% assumption",
             "championship_band": {
-                "method": "parameter-uncertainty scenarios + reduced Monte Carlo",
+                "method": "historical-prior shrinkage + parameter-uncertainty scenarios + reduced Monte Carlo",
+                "historical_prior_period": "2005-2024 rank-history reference; historical snapshots use only years available before the target season",
+                "historical_rank_prior_mix": HISTORICAL_RANK_PRIOR_MIX,
+                "historical_team_prior_mix": HISTORICAL_TEAM_PRIOR_MIX,
+                "historical_prior_smoothing": HISTORICAL_PRIOR_SMOOTHING,
+                "current_weight_min": EARLY_SEASON_CURRENT_WEIGHT_MIN,
+                "current_weight_max": EARLY_SEASON_CURRENT_WEIGHT_MAX,
+                "current_weight_scale_games": EARLY_SEASON_CURRENT_WEIGHT_SCALE,
                 "low_quantile": UNCERTAINTY_LOW_Q,
                 "high_quantile": UNCERTAINTY_HIGH_Q,
                 "model_sims": UNCERTAINTY_MODEL_SIMS,
