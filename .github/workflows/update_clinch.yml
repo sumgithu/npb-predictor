@@ -6,7 +6,11 @@ on:
     - cron: '0 21 * * *'
     - cron: '0 13 * * *'
     - cron: '30 14 * * *'
-  workflow_dispatch: # 手動実行トリガー
+
+  # 手動実行
+  workflow_dispatch:
+
+  # 指定ファイルがmainにpushされたとき
   push:
     branches:
       - main
@@ -15,6 +19,11 @@ on:
       - 'games_db.json'
       - 'clinch_engine.py'
       - 'convert_log.py'
+
+# 同じWorkflowが同時に複数走らないようにする
+concurrency:
+  group: npb-predictor-engine
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -34,18 +43,75 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Convert Raw Log to Clean CSV (if exists)
+      - name: Generate and Push Results Safely
         run: |
-          if [ -f convert_log.py ]; then
-            python convert_log.py
-          fi
+          set -euo pipefail
 
-      - name: Run Clinch Engine
-        run: python clinch_engine.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Commit and Push changes
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add npb_games_clean.csv history_standings.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto update standings and clean CSV [skip ci]" && git push)
+          MAX_RETRIES=5
+
+          for attempt in $(seq 1 $MAX_RETRIES); do
+            echo "========================================"
+            echo "Attempt ${attempt}/${MAX_RETRIES}"
+            echo "========================================"
+
+            # 最新のmainを取得
+            git fetch origin main
+
+            # GitHub上の最新mainを作業ツリーに反映
+            # ここで一度リセットしてから再計算することが重要
+            git reset --hard origin/main
+
+            echo "Current commit:"
+            git rev-parse HEAD
+
+            echo ""
+            echo "Running convert_log.py ..."
+
+            if [ -f convert_log.py ]; then
+              python convert_log.py
+            fi
+
+            echo ""
+            echo "Running clinch_engine.py ..."
+
+            python clinch_engine.py
+
+            echo ""
+            echo "Checking generated files ..."
+
+            git add npb_games_clean.csv history_standings.json
+
+            # 変更がなければ終了
+            if git diff --cached --quiet; then
+              echo "No changes to commit."
+              exit 0
+            fi
+
+            echo ""
+            echo "Committing changes ..."
+
+            git commit -m "Auto update standings and clean CSV [skip ci]"
+
+            echo ""
+            echo "Attempting push ..."
+
+            if git push origin HEAD:main; then
+              echo ""
+              echo "Push succeeded."
+              exit 0
+            fi
+
+            echo ""
+            echo "Push failed because remote main advanced."
+            echo "The latest main will be fetched and the engine will be run again."
+
+            # 次の試行前に少し待つ
+            sleep 2
+          done
+
+          echo ""
+          echo "Push failed after ${MAX_RETRIES} attempts."
+          exit 1
