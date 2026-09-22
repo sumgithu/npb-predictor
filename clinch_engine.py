@@ -16,14 +16,13 @@ from copy import deepcopy
 #  2) その確率を用いてレギュラーシーズン完走をMonte Carloする
 #  3) 既存 history_standings.json の構造をできるだけ維持する
 #
-# 主要モデル:
+# 旧モデルからの主要変更:
 #  - Pythagorean + Log5 を主モデルから外し、得失点を直接使う
-#    opponent-adjusted の Poisson attack/defense model
+#    opponent-adjusted の Poisson attack/defense model に変更
 #  - 2026年の直近試合を指数加重して「最近の強さ」を反映
 #  - 2016-2025 を複数年priorとして利用（2025だけに依存しない）
 #  - ホームアドバンテージと球場run environmentを過去データから推定
-#  - Poisson score distributionから勝/分/敗を直接計算
-#  - 引き分け率は、NPB実測ベースラインをPoisson同点確率で試合別補正
+#  - Poisson score distributionから勝/分/敗を直接計算（固定4.5%引分を廃止）
 #  - 先発補正は「実際に先発情報が確認できるmanual DB」のみ利用
 #  - 日付からrest effectを過去データで推定
 #  - H2Hは予測モデルへ二重計上せず、順位確定計算にのみ使用
@@ -44,6 +43,18 @@ MAIN_NUM_SIMS = 10000
 HISTORICAL_NUM_SIMS = 600
 RANDOM_SEED = 20260921
 
+# Early/mid-season model-uncertainty band.
+# This is separate from Monte Carlo sampling error. We perturb the fitted
+# attack/defense parameters using a Laplace-style diagonal approximation and
+# then rerun smaller season simulations. The public page uses the 10th-90th
+# percentile of these scenario results while more than one team still has
+# a self-clinchable path to 1st place.
+UNCERTAINTY_MODEL_SIMS = 16
+UNCERTAINTY_SEASON_SIMS = 100
+UNCERTAINTY_LOW_Q = 0.10
+UNCERTAINTY_HIGH_Q = 0.90
+MODEL_UNCERTAINTY_INFLATION = 1.35
+
 # Run model hyperparameters.
 # 50日程度の半減期なら、4月の試合を9月時点で強く引きずりすぎない。
 RECENCY_HALF_LIFE_DAYS = 50.0
@@ -60,31 +71,6 @@ MAX_PITCHER_LOG_RUN_EFFECT = 0.08
 # Poisson tail. MLB/NPB game scores above 20 are extremely rare; the remaining
 # tail is renormalized automatically.
 MAX_RUNS = 24
-
-# ------------------------------------------------------------
-# Draw-rate model
-# ------------------------------------------------------------
-# NPB実績の引き分け率を基準値として使用する。
-#
-# 対象期間:
-#   2016-2019 + 2022-2025
-#
-# 引き分け試合数:
-#   18 + 16 + 16 + 22 + 16 + 19 + 30 + 23 = 160
-#
-# 総試合数:
-#   858 * 8 = 6,864
-#
-# 実測引き分け率:
-#   160 / 6,864 = 0.02331...
-#
-# 2020-2021は試合数・延長ルール等が通常年と異なるため、
-# 現在のNPB通常シーズンに近い基準値を作る目的で除外する。
-BASE_DRAW_RATE = 0.0233
-
-# 試合ごとの補正後に極端な値にならないための上下限。
-MIN_DRAW_RATE = 0.010
-MAX_DRAW_RATE = 0.060
 
 # Teams and canonical names
 CENTRAL_TEAMS = ["阪神", "巨人", "ＤｅＮＡ", "ヤクルト", "中日", "広島"]
@@ -163,11 +149,7 @@ def normalize_probabilities_to_100(prob_dict):
     floored = {k: int(math.floor(v)) for k, v in scaled.items()}
     remainder = {k: scaled[k] - floored[k] for k in scaled}
     remaining_sum = 100 - sum(floored.values())
-    sorted_by_remainder = sorted(
-        remainder.keys(),
-        key=lambda k: remainder[k],
-        reverse=True
-    )
+    sorted_by_remainder = sorted(remainder.keys(), key=lambda k: remainder[k], reverse=True)
     for i in range(max(0, remaining_sum)):
         floored[sorted_by_remainder[i]] += 1
     return floored
@@ -244,10 +226,7 @@ def parse_year_games_from_text(raw_text, target_year):
                     })
                 continue
 
-        date_m = re.match(
-            r"^(\d{1,2})\/(\d{1,2})(?:[（(][日月火水木金土][）)])?\s*(.*)$",
-            line
-        )
+        date_m = re.match(r"^(\d{1,2})\/(\d{1,2})(?:[（(][日月火水木金土][）)])?\s*(.*)$", line)
         if date_m:
             month, day = int(date_m.group(1)), int(date_m.group(2))
             current_date = f"{target_year}-{month:02d}-{day:02d}"
@@ -259,10 +238,7 @@ def parse_year_games_from_text(raw_text, target_year):
             continue
 
         if "中止" in line or "ノーゲーム" in line:
-            match_can = re.search(
-                r"([^\s\d]+)\s*(?:中止|ノーゲーム)\s*([^\s\d]+)",
-                line
-            )
+            match_can = re.search(r"([^\s\d]+)\s*(?:中止|ノーゲーム)\s*([^\s\d]+)", line)
             if match_can:
                 h, a = normalize_team(match_can.group(1)), normalize_team(match_can.group(2))
                 if h in ALL_TEAMS and a in ALL_TEAMS:
@@ -279,10 +255,7 @@ def parse_year_games_from_text(raw_text, target_year):
 
         # Example:
         # 阪神 3 - 2 DeNA 甲子園 18:00 勝：A 敗：B
-        match_fin = re.search(
-            r"([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)",
-            line
-        )
+        match_fin = re.search(r"([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)", line)
         if match_fin:
             h = normalize_team(match_fin.group(1))
             hs = int(match_fin.group(2))
@@ -316,15 +289,32 @@ def parse_year_games_from_text(raw_text, target_year):
                 })
             continue
 
+        # Postponement/reserve-day notation used in the master text:
+        #   DeNA (予備日) 中日
+        # Treat it as the scheduled matchup DeNA - 中日.
+        match_reserve = re.search(r"^(.+?)\s*\(\s*予備日\s*\)\s*(.+?)(?:\s+.*)?$", line)
+        if match_reserve:
+            h = normalize_team(match_reserve.group(1).strip())
+            a = normalize_team(match_reserve.group(2).strip())
+            if h in ALL_TEAMS and a in ALL_TEAMS:
+                games.append({
+                    "date": current_date, "home": h, "away": a,
+                    "home_score": None, "away_score": None,
+                    "home_pitcher": "", "away_pitcher": "",
+                    "home_starter": "未定", "away_starter": "未定",
+                    "starter_confirmed": False,
+                    "status": "scheduled",
+                    "source": "text",
+                    "reserve_day": True,
+                })
+            continue
+
         match_sched = re.search(r"([^\s\d]+)\s*-\s*([^\s\d]+)", line)
         if match_sched:
             h = normalize_team(match_sched.group(1))
             a = normalize_team(match_sched.group(2))
             if h in ALL_TEAMS and a in ALL_TEAMS:
-                starters = re.findall(
-                    r"(?:先発|予告)[:：]?\s*([^\s,，()（）]+)",
-                    line
-                )
+                starters = re.findall(r"(?:先発|予告)[:：]?\s*([^\s,，()（）]+)", line)
                 h_starter = starters[0] if len(starters) > 0 else "未定"
                 a_starter = starters[1] if len(starters) > 1 else "未定"
                 confirmed = h_starter != "未定" or a_starter != "未定"
@@ -345,7 +335,6 @@ def parse_year_games_from_text(raw_text, target_year):
 def _normalize_manual_entry(mg):
     if not mg or "date" not in mg or "home" not in mg or "away" not in mg:
         return None
-
     h, a = normalize_team(mg["home"]), normalize_team(mg["away"])
     entry = dict(mg)
     entry["home"] = h
@@ -354,7 +343,6 @@ def _normalize_manual_entry(mg):
     hs_val = mg.get("home_score")
     as_val = mg.get("away_score")
     is_fin = False
-
     if hs_val is not None and as_val is not None:
         hs_s, as_s = str(hs_val).strip(), str(as_val).strip()
         if hs_s not in ("", "null") and as_s not in ("", "null"):
@@ -391,10 +379,8 @@ def load_all_games():
     if os.path.exists(active_master):
         with open(active_master, "r", encoding="utf-8") as f:
             raw_text = f.read()
-
         for year in range(2016, 2026):
             historical_games.extend(parse_year_games_from_text(raw_text, year))
-
         games_2026_master = parse_year_games_from_text(raw_text, 2026)
 
     manual_map = {}
@@ -402,26 +388,16 @@ def load_all_games():
         try:
             with open(MANUAL_DB_FILE, "r", encoding="utf-8") as f:
                 manual_payload = json.load(f)
-
-            manual_games = (
-                manual_payload
-                if isinstance(manual_payload, list)
-                else manual_payload.get("games", [])
-            )
-
+            manual_games = manual_payload if isinstance(manual_payload, list) else manual_payload.get("games", [])
             for mg in manual_games:
                 entry = _normalize_manual_entry(mg)
                 if entry:
-                    manual_map[
-                        (entry["date"], entry["home"], entry["away"])
-                    ] = entry
-
+                    manual_map[(entry["date"], entry["home"], entry["away"])] = entry
         except Exception as exc:
             print(f"games_db.json 読込警告: {exc}")
 
     merged_2026 = []
     applied_keys = set()
-
     for master in games_2026_master:
         key = (master["date"], master["home"], master["away"])
         if key in manual_map:
@@ -436,7 +412,6 @@ def load_all_games():
 
     merged_2026.sort(key=lambda x: (x["date"], x["home"], x["away"]))
     historical_games.sort(key=lambda x: (x["date"], x["home"], x["away"]))
-
     return historical_games, merged_2026
 
 # ------------------------------------------------------------
@@ -450,54 +425,38 @@ def estimate_multi_year_prior(historical_games):
     older seasons exponentially. This is deliberately much weaker than
     current-season evidence.
     """
-    season_stats = defaultdict(
-        lambda: {
-            t: {"rs": 0.0, "ra": 0.0, "g": 0}
-            for t in ALL_TEAMS
-        }
-    )
+    season_stats = defaultdict(lambda: {t: {"rs": 0.0, "ra": 0.0, "g": 0} for t in ALL_TEAMS})
     season_total_runs = defaultdict(float)
     season_games = defaultdict(int)
 
     for g in historical_games:
         if not is_finished(g):
             continue
-
         year = int(g["date"][:4])
         h, a = g["home"], g["away"]
         hs, as_ = float(g["home_score"]), float(g["away_score"])
-
         season_stats[year][h]["rs"] += hs
         season_stats[year][h]["ra"] += as_
         season_stats[year][h]["g"] += 1
-
         season_stats[year][a]["rs"] += as_
         season_stats[year][a]["ra"] += hs
         season_stats[year][a]["g"] += 1
-
         season_total_runs[year] += hs + as_
         season_games[year] += 1
 
     latest_prior_year = 2025
-    weighted = {
-        t: {"attack": 0.0, "defense": 0.0, "weight": 0.0}
-        for t in ALL_TEAMS
-    }
-
+    weighted = {t: {"attack": 0.0, "defense": 0.0, "weight": 0.0} for t in ALL_TEAMS}
     league_log_mean_num = 0.0
     league_log_mean_den = 0.0
 
     for year, teams in season_stats.items():
         if year > latest_prior_year:
             continue
-
         if season_games[year] <= 0:
             continue
-
         league_rpg = season_total_runs[year] / (2.0 * season_games[year])
         if league_rpg <= 0:
             continue
-
         season_weight = PRIOR_SEASON_DECAY ** (latest_prior_year - year)
         league_log_mean_num += season_weight * math.log(league_rpg)
         league_log_mean_den += season_weight
@@ -506,49 +465,28 @@ def estimate_multi_year_prior(historical_games):
             gcount = teams[team]["g"]
             if gcount <= 0:
                 continue
-
             rs_g = max(0.1, teams[team]["rs"] / gcount)
             ra_g = max(0.1, teams[team]["ra"] / gcount)
-
             attack = math.log(rs_g / league_rpg)
             defense = math.log(league_rpg / ra_g)
-
             weighted[team]["attack"] += season_weight * attack
             weighted[team]["defense"] += season_weight * defense
             weighted[team]["weight"] += season_weight
 
     prior_attack = {t: 0.0 for t in ALL_TEAMS}
     prior_defense = {t: 0.0 for t in ALL_TEAMS}
-
     for team in ALL_TEAMS:
         if weighted[team]["weight"] > 0:
-            prior_attack[team] = (
-                weighted[team]["attack"] /
-                weighted[team]["weight"]
-            )
-            prior_defense[team] = (
-                weighted[team]["defense"] /
-                weighted[team]["weight"]
-            )
+            prior_attack[team] = weighted[team]["attack"] / weighted[team]["weight"]
+            prior_defense[team] = weighted[team]["defense"] / weighted[team]["weight"]
 
     # Center the parameters so that intercept remains interpretable.
     mean_attack = sum(prior_attack.values()) / len(ALL_TEAMS)
     mean_defense = sum(prior_defense.values()) / len(ALL_TEAMS)
-
-    prior_attack = {
-        t: prior_attack[t] - mean_attack
-        for t in ALL_TEAMS
-    }
-
-    prior_defense = {
-        t: prior_defense[t] - mean_defense
-        for t in ALL_TEAMS
-    }
-
+    prior_attack = {t: prior_attack[t] - mean_attack for t in ALL_TEAMS}
+    prior_defense = {t: prior_defense[t] - mean_defense for t in ALL_TEAMS}
     prior_intercept = (
-        league_log_mean_num / league_log_mean_den
-        if league_log_mean_den > 0
-        else math.log(3.5)
+        league_log_mean_num / league_log_mean_den if league_log_mean_den > 0 else math.log(3.5)
     )
 
     return {
@@ -564,73 +502,66 @@ def estimate_environment(historical_games):
     away_runs = 0.0
     total_runs = 0.0
     total_games = 0
-
     park_totals = defaultdict(float)
     park_games = defaultdict(int)
 
     for g in historical_games:
         if not is_finished(g):
             continue
-
         h, a = g["home"], g["away"]
         hs, as_ = float(g["home_score"]), float(g["away_score"])
         park = STADIUM_NAMES.get(h, "東京D")
-
         home_runs += hs
         away_runs += as_
         total_runs += hs + as_
         total_games += 1
-
         park_totals[park] += hs + as_
         park_games[park] += 1
 
     if total_games <= 0:
-        return {
-            "home_adv_log": 0.08,
-            "park_log": {
-                s: 0.0 for s in set(STADIUM_NAMES.values())
-            },
-            "league_rpg": 3.5,
-        }
+        return {"home_adv_log": 0.08, "park_log": {s: 0.0 for s in set(STADIUM_NAMES.values())}, "league_rpg": 3.5}
 
     league_rpg = total_runs / (2.0 * total_games)
-
-    home_adv_log = (
-        math.log(max(0.5, home_runs) /
-                 max(0.5, away_runs))
-    )
-
+    home_adv_log = math.log(max(0.5, home_runs) / max(0.5, away_runs))
     # Heavy shrinkage because park and home effects are partially confounded.
     home_adv_log *= 0.70
 
     park_log = {}
-
     for stadium in set(STADIUM_NAMES.values()):
         n = park_games.get(stadium, 0)
-
         if n <= 0:
             park_log[stadium] = 0.0
             continue
-
         park_rpg = park_totals[stadium] / (2.0 * n)
-        raw = math.log(
-            max(0.75, park_rpg) /
-            max(0.75, league_rpg)
-        )
+        raw = math.log(max(0.75, park_rpg) / max(0.75, league_rpg))
         shrink = n / (n + 180.0)
         park_log[stadium] = raw * shrink
 
     mean_park = sum(park_log.values()) / max(1, len(park_log))
-    park_log = {
-        k: v - mean_park
-        for k, v in park_log.items()
-    }
+    park_log = {k: v - mean_park for k, v in park_log.items()}
 
     return {
         "home_adv_log": max(-0.05, min(0.20, home_adv_log)),
         "park_log": park_log,
         "league_rpg": league_rpg,
     }
+
+def estimate_historical_draw_rate(historical_games):
+    """Descriptive draw baseline from completed 2016-2025 games.
+
+    The prediction model does NOT use this as a fixed draw probability.
+    It is reported only as a reference metric for users.
+    """
+    total = 0
+    draws = 0
+    for g in historical_games:
+        if not is_finished(g):
+            continue
+        total += 1
+        if int(g["home_score"]) == int(g["away_score"]):
+            draws += 1
+    return (draws / total * 100.0) if total else None
+
 
 # ------------------------------------------------------------
 # Rest effect estimation
@@ -639,92 +570,58 @@ def estimate_environment(historical_games):
 def _build_rest_samples(games):
     previous = {}
     samples = []
-
-    sorted_games = sorted(
-        [g for g in games if is_finished(g)],
-        key=lambda x: (x["date"], x["home"], x["away"])
-    )
-
+    sorted_games = sorted([g for g in games if is_finished(g)], key=lambda x: (x["date"], x["home"], x["away"]))
     for g in sorted_games:
         h, a = g["home"], g["away"]
         h_prev = previous.get(h)
         a_prev = previous.get(a)
-
         if h_prev and a_prev:
-            h_rest = max(
-                0,
-                (parse_date(g["date"]) - parse_date(h_prev)).days - 1
-            )
-            a_rest = max(
-                0,
-                (parse_date(g["date"]) - parse_date(a_prev)).days - 1
-            )
-
-            x = max(
-                -4.0,
-                min(4.0, float(h_rest - a_rest))
-            )
-
+            h_rest = max(0, (parse_date(g["date"]) - parse_date(h_prev)).days - 1)
+            a_rest = max(0, (parse_date(g["date"]) - parse_date(a_prev)).days - 1)
+            x = max(-4.0, min(4.0, float(h_rest - a_rest)))
             hs, as_ = int(g["home_score"]), int(g["away_score"])
-
             if hs != as_:
-                samples.append(
-                    (x, 1.0 if hs > as_ else 0.0)
-                )
-
+                samples.append((x, 1.0 if hs > as_ else 0.0))
         previous[h] = g["date"]
         previous[a] = g["date"]
-
     return samples
 
 
 def estimate_rest_effect(historical_games):
     samples = _build_rest_samples(historical_games)
-
     if len(samples) < 100:
         return 0.0
 
     b0 = 0.10
     b1 = 0.0
     ridge = 15.0
-
     for _ in range(18):
         g0 = 0.0
         g1 = -ridge * b1
-
         h00 = -ridge * 0.000001
         h01 = 0.0
         h11 = -ridge
-
         for x, y in samples:
             p = sigmoid(b0 + b1 * x)
             e = y - p
             w = p * (1.0 - p)
-
             g0 += e
             g1 += x * e
-
             h00 -= w
             h01 -= x * w
             h11 -= x * x * w
 
         det = h00 * h11 - h01 * h01
-
         if abs(det) < 1e-10:
             break
-
         # Newton step: H * delta = -grad
         d0 = (-g0 * h11 + h01 * g1) / det
         d1 = (h01 * g0 - h00 * g1) / det
-
         b0 += d0
         b1 += d1
-
         b1 = max(-0.12, min(0.12, b1))
-
         if abs(d0) + abs(d1) < 1e-7:
             break
-
     return b1
 
 # ------------------------------------------------------------
@@ -732,40 +629,37 @@ def estimate_rest_effect(historical_games):
 # ------------------------------------------------------------
 
 def _model_weight(game_date, target_date):
-    age = max(
-        0,
-        (parse_date(target_date) - parse_date(game_date)).days
-    )
-    return math.exp(
-        -math.log(2.0) * age / RECENCY_HALF_LIFE_DAYS
-    )
+    age = max(0, (parse_date(target_date) - parse_date(game_date)).days)
+    return math.exp(-math.log(2.0) * age / RECENCY_HALF_LIFE_DAYS)
 
 
 def fit_run_model(games_2026, target_date, prior, environment):
     """Fit 2026 attack/defense parameters using only games before target_date."""
-    completed = [
-        g for g in games_2026
-        if is_finished(g) and g["date"] < target_date
-    ]
+    completed = [g for g in games_2026 if is_finished(g) and g["date"] < target_date]
 
     attack = dict(prior["attack"])
     defense = dict(prior["defense"])
     intercept = prior["intercept"]
 
     if not completed:
+        base_sd = math.sqrt(1.0 / max(1e-9, PRIOR_L2))
         return {
             "attack": attack,
             "defense": defense,
             "intercept": intercept,
             "home_adv_log": environment["home_adv_log"],
             "park_log": environment["park_log"],
+            "uncertainty": {
+                "attack_sd": {t: base_sd * MODEL_UNCERTAINTY_INFLATION for t in ALL_TEAMS},
+                "defense_sd": {t: base_sd * MODEL_UNCERTAINTY_INFLATION for t in ALL_TEAMS},
+                "intercept_sd": base_sd * 0.35 * MODEL_UNCERTAINTY_INFLATION,
+            },
         }
 
     # Adam optimizer. Pure standard-library implementation so GitHub Actions
     # does not require numpy/scipy.
     m = {"intercept": 0.0}
     v = {"intercept": 0.0}
-
     for t in ALL_TEAMS:
         m[f"a:{t}"] = 0.0
         v[f"a:{t}"] = 0.0
@@ -782,92 +676,43 @@ def fit_run_model(games_2026, target_date, prior, environment):
 
         for g in completed:
             w = _model_weight(g["date"], target_date)
-
             if w <= 1e-5:
                 continue
-
             h, a = g["home"], g["away"]
             hs = float(g["home_score"])
             as_ = float(g["away_score"])
+            park = environment["park_log"].get(STADIUM_NAMES.get(h, "東京D"), 0.0)
 
-            park = environment["park_log"].get(
-                STADIUM_NAMES.get(h, "東京D"),
-                0.0
-            )
-
-            log_h = (
-                intercept
-                + environment["home_adv_log"]
-                + park
-                + attack[h]
-                - defense[a]
-            )
-
-            log_a = (
-                intercept
-                + park
-                + attack[a]
-                - defense[h]
-            )
-
+            log_h = intercept + environment["home_adv_log"] + park + attack[h] - defense[a]
+            log_a = intercept + park + attack[a] - defense[h]
             lam_h = safe_exp(log_h)
             lam_a = safe_exp(log_a)
 
             r_h = w * (hs - lam_h)
             r_a = w * (as_ - lam_a)
-
             grad_i += r_h + r_a
-
             grad_a[h] += r_h
             grad_d[a] -= r_h
-
             grad_a[a] += r_a
             grad_d[h] -= r_a
 
         # Gaussian prior regularization toward multi-year strength.
-        grad_i -= PRIOR_L2 * (
-            intercept - prior["intercept"]
-        )
-
+        grad_i -= PRIOR_L2 * (intercept - prior["intercept"])
         for t in ALL_TEAMS:
-            grad_a[t] -= PRIOR_L2 * (
-                attack[t] - prior["attack"][t]
-            )
-            grad_d[t] -= PRIOR_L2 * (
-                defense[t] - prior["defense"][t]
-            )
+            grad_a[t] -= PRIOR_L2 * (attack[t] - prior["attack"][t])
+            grad_d[t] -= PRIOR_L2 * (defense[t] - prior["defense"][t])
 
         grads = {"intercept": grad_i}
-
         for t in ALL_TEAMS:
             grads[f"a:{t}"] = grad_a[t]
             grads[f"d:{t}"] = grad_d[t]
 
         for key, gval in grads.items():
-            m[key] = (
-                beta1 * m[key] +
-                (1.0 - beta1) * gval
-            )
-
-            v[key] = (
-                beta2 * v[key] +
-                (1.0 - beta2) * (gval * gval)
-            )
-
-            mhat = m[key] / (
-                1.0 - beta1 ** iteration
-            )
-
-            vhat = v[key] / (
-                1.0 - beta2 ** iteration
-            )
-
-            step = (
-                FIT_LEARNING_RATE
-                * mhat
-                / (math.sqrt(vhat) + eps)
-            )
-
+            m[key] = beta1 * m[key] + (1.0 - beta1) * gval
+            v[key] = beta2 * v[key] + (1.0 - beta2) * (gval * gval)
+            mhat = m[key] / (1.0 - beta1 ** iteration)
+            vhat = v[key] / (1.0 - beta2 ** iteration)
+            step = FIT_LEARNING_RATE * mhat / (math.sqrt(vhat) + eps)
             if key == "intercept":
                 intercept += step
             elif key.startswith("a:"):
@@ -877,18 +722,46 @@ def fit_run_model(games_2026, target_date, prior, environment):
 
         # Identifiability constraints: mean attack = mean defense = 0.
         mean_a = sum(attack.values()) / len(ALL_TEAMS)
-
         for t in ALL_TEAMS:
             attack[t] -= mean_a
-
         intercept += mean_a
 
         mean_d = sum(defense.values()) / len(ALL_TEAMS)
-
         for t in ALL_TEAMS:
             defense[t] -= mean_d
-
         intercept -= mean_d
+
+    # Diagonal observed-information approximation for parameter uncertainty.
+    # Covariances are deliberately ignored here; the public range is a
+    # sensitivity band, not a formal Bayesian credible interval.
+    attack_info = {t: PRIOR_L2 for t in ALL_TEAMS}
+    defense_info = {t: PRIOR_L2 for t in ALL_TEAMS}
+    intercept_info = PRIOR_L2
+    for g in completed:
+        w = _model_weight(g["date"], target_date)
+        h, a = g["home"], g["away"]
+        park = environment["park_log"].get(STADIUM_NAMES.get(h, "東京D"), 0.0)
+        log_h = intercept + environment["home_adv_log"] + park + attack[h] - defense[a]
+        log_a = intercept + park + attack[a] - defense[h]
+        lam_h = safe_exp(log_h)
+        lam_a = safe_exp(log_a)
+        attack_info[h] += w * lam_h
+        defense_info[a] += w * lam_h
+        attack_info[a] += w * lam_a
+        defense_info[h] += w * lam_a
+        intercept_info += w * (lam_h + lam_a)
+
+    uncertainty = {
+        "attack_sd": {
+            t: MODEL_UNCERTAINTY_INFLATION / math.sqrt(max(1e-9, attack_info[t]))
+            for t in ALL_TEAMS
+        },
+        "defense_sd": {
+            t: MODEL_UNCERTAINTY_INFLATION / math.sqrt(max(1e-9, defense_info[t]))
+            for t in ALL_TEAMS
+        },
+        "intercept_sd": MODEL_UNCERTAINTY_INFLATION / math.sqrt(max(1e-9, intercept_info)),
+    }
 
     return {
         "attack": attack,
@@ -896,6 +769,7 @@ def fit_run_model(games_2026, target_date, prior, environment):
         "intercept": intercept,
         "home_adv_log": environment["home_adv_log"],
         "park_log": environment["park_log"],
+        "uncertainty": uncertainty,
     }
 
 # ------------------------------------------------------------
@@ -904,362 +778,131 @@ def fit_run_model(games_2026, target_date, prior, environment):
 
 def build_pitcher_start_stats(games_2026, target_date):
     stats = {}
-
     for g in games_2026:
         if not is_finished(g) or g["date"] >= target_date:
             continue
-
         if not g.get("starter_confirmed"):
             continue
-
         hs, as_ = int(g["home_score"]), int(g["away_score"])
-
         for side, team_score, opp_score in (
             ("home", hs, as_),
             ("away", as_, hs),
         ):
-            pitcher = (
-                g.get(f"{side}_starter") or ""
-            ).strip()
-
+            pitcher = (g.get(f"{side}_starter") or "").strip()
             if not pitcher or pitcher == "未定":
                 continue
-
-            st = stats.setdefault(
-                pitcher,
-                {
-                    "starts": 0,
-                    "wins": 0,
-                    "losses": 0,
-                    "margin": 0.0,
-                }
-            )
-
+            st = stats.setdefault(pitcher, {"starts": 0, "wins": 0, "losses": 0, "margin": 0.0})
             st["starts"] += 1
             st["margin"] += team_score - opp_score
-
             if team_score > opp_score:
                 st["wins"] += 1
             elif team_score < opp_score:
                 st["losses"] += 1
-
     return stats
 
 
 def get_pitcher_run_effect(pitcher_name, pitcher_stats):
     if not pitcher_name or pitcher_name in ("未定", "未確認"):
         return 0.0
-
     st = pitcher_stats.get(pitcher_name)
-
     if not st or st["starts"] <= 0:
         return 0.0
 
     starts = st["starts"]
-
     # Very strong shrinkage because starter results are contaminated by team
     # offense/defense and because current manual starter history is sparse.
-    shrunk_win = (
-        st["wins"] +
-        0.5 * PITCHER_PRIOR_STARTS
-    ) / (
-        starts +
-        PITCHER_PRIOR_STARTS
-    )
-
+    shrunk_win = (st["wins"] + 0.5 * PITCHER_PRIOR_STARTS) / (starts + PITCHER_PRIOR_STARTS)
     effect = (shrunk_win - 0.5) * 0.30
-
-    return max(
-        -MAX_PITCHER_LOG_RUN_EFFECT,
-        min(MAX_PITCHER_LOG_RUN_EFFECT, effect)
-    )
+    return max(-MAX_PITCHER_LOG_RUN_EFFECT, min(MAX_PITCHER_LOG_RUN_EFFECT, effect))
 
 # ------------------------------------------------------------
 # Rest calculation and three-way score probabilities
 # ------------------------------------------------------------
 
-def build_last_known_game_dates(
-    games,
-    cutoff_date=None,
-    include_scheduled=False
-):
+def build_last_known_game_dates(games, cutoff_date=None, include_scheduled=False):
     latest = {}
-
-    for g in sorted(
-        games,
-        key=lambda x: (x["date"], x["home"], x["away"])
-    ):
+    for g in sorted(games, key=lambda x: (x["date"], x["home"], x["away"])):
         if cutoff_date is not None and g["date"] >= cutoff_date:
             continue
-
         if is_cancelled(g):
             continue
-
-        if is_finished(g) or (
-            include_scheduled and
-            g.get("status") == "scheduled"
-        ):
+        if is_finished(g) or (include_scheduled and g.get("status") == "scheduled"):
             latest[g["home"]] = g["date"]
             latest[g["away"]] = g["date"]
-
     return latest
 
 
-def rest_difference_for_game(
-    game,
-    all_games,
-    as_of_date=None
-):
+def rest_difference_for_game(game, all_games, as_of_date=None):
     target = game["date"]
-
     last_dates = build_last_known_game_dates(
         all_games,
-        cutoff_date=(
-            target
-            if as_of_date is None
-            else as_of_date
-        ),
+        cutoff_date=target if as_of_date is None else as_of_date,
         include_scheduled=(as_of_date is None),
     )
-
     h_prev = last_dates.get(game["home"])
     a_prev = last_dates.get(game["away"])
-
     if not h_prev or not a_prev:
         return 0.0
-
-    h_rest = max(
-        0,
-        (parse_date(target) - parse_date(h_prev)).days - 1
-    )
-
-    a_rest = max(
-        0,
-        (parse_date(target) - parse_date(a_prev)).days - 1
-    )
-
-    return float(
-        max(-4, min(4, h_rest - a_rest))
-    )
+    h_rest = max(0, (parse_date(target) - parse_date(h_prev)).days - 1)
+    a_rest = max(0, (parse_date(target) - parse_date(a_prev)).days - 1)
+    return float(max(-4, min(4, h_rest - a_rest)))
 
 
 def poisson_pmf(k, lam):
     if k < 0:
         return 0.0
-
     if lam <= 0:
         return 1.0 if k == 0 else 0.0
-
-    return math.exp(
-        -lam +
-        k * math.log(lam) -
-        math.lgamma(k + 1.0)
-    )
+    return math.exp(-lam + k * math.log(lam) - math.lgamma(k + 1.0))
 
 
 def three_way_from_scores(lam_home, lam_away):
-    """
-    Poisson得点分布から勝・分・敗の確率を算出する。
-
-    Poissonの同点確率は「9回終了時点の同点確率」に近い概念であり、
-    NPBの最終的な引き分け率とは一致しないため、そのまま
-    引き分け確率には使用しない。
-
-    NPBの実測引き分け率を基準値とし、
-    その試合が平均的な試合より引き分けになりやすいかどうかを
-    Poissonの同点確率から相対的に補正する。
-
-    基準値:
-        2016-2019 + 2022-2025
-        160引き分け / 6,864試合 = 約2.33%
-
-    2020-2021は試合数・延長ルール等が通常年と異なるため除外。
-    """
-
-    ph = pa = pd_raw = 0.0
-
-    home_pmf = [
-        poisson_pmf(k, lam_home)
-        for k in range(MAX_RUNS + 1)
-    ]
-
-    away_pmf = [
-        poisson_pmf(k, lam_away)
-        for k in range(MAX_RUNS + 1)
-    ]
-
+    ph = pa = pd = 0.0
+    home_pmf = [poisson_pmf(k, lam_home) for k in range(MAX_RUNS + 1)]
+    away_pmf = [poisson_pmf(k, lam_away) for k in range(MAX_RUNS + 1)]
     for h, hp in enumerate(home_pmf):
         for a, ap in enumerate(away_pmf):
             p = hp * ap
-
             if h > a:
                 ph += p
             elif h < a:
                 pa += p
             else:
-                pd_raw += p
-
-    total = ph + pd_raw + pa
-
+                pd += p
+    total = ph + pd + pa
     if total <= 0:
         return 0.5, 0.0, 0.5
-
-    ph /= total
-    pd_raw /= total
-    pa /= total
-
-    # --------------------------------------------------------
-    # NPB実績を基準にした引き分け率の校正
-    #
-    # 2016-2019 + 2022-2025:
-    #   引き分け 160試合
-    #   総試合   6,864試合
-    #   160 / 6864 = 0.02331...
-    #
-    # 2020-2021は特殊ルール年のため除外。
-    # --------------------------------------------------------
-
-    # 平均的な得点環境でのPoisson同点確率を基準にする。
-    # 1チーム平均得点を概ね3.5点として設定。
-    reference_lambda = 3.5
-
-    reference_pmf = [
-        poisson_pmf(k, reference_lambda)
-        for k in range(MAX_RUNS + 1)
-    ]
-
-    reference_draw = sum(
-        p * p for p in reference_pmf
-    )
-
-    # 現在の試合が平均的な試合よりどの程度
-    # 「同点になりやすいか」を相対評価する。
-    relative_draw = (
-        pd_raw /
-        max(1e-9, reference_draw)
-    )
-
-    # 極端な変動を抑えるため0.65乗で縮小。
-    relative_draw = relative_draw ** 0.65
-
-    # NPB実測ベースライン2.33%を中心に補正。
-    p_draw = BASE_DRAW_RATE * relative_draw
-
-    # 極端な確率にならないよう上下限を設定。
-    p_draw = max(
-        MIN_DRAW_RATE,
-        min(MAX_DRAW_RATE, p_draw)
-    )
-
-    # 残りの確率をPoissonによる勝敗比率に従って配分。
-    decision_mass = 1.0 - p_draw
-    decided_total = ph + pa
-
-    if decided_total <= 0:
-        p_home = decision_mass * 0.5
-        p_away = decision_mass * 0.5
-    else:
-        p_home = (
-            decision_mass *
-            ph /
-            decided_total
-        )
-        p_away = (
-            decision_mass *
-            pa /
-            decided_total
-        )
-
-    return p_home, p_draw, p_away
+    return ph / total, pd / total, pa / total
 
 
-def apply_conditional_logit_adjustment(
-    p_home,
-    p_draw,
-    p_away,
-    log_odds_adjust
-):
-    decision_mass = max(
-        1e-9,
-        p_home + p_away
-    )
-
+def apply_conditional_logit_adjustment(p_home, p_draw, p_away, log_odds_adjust):
+    decision_mass = max(1e-9, p_home + p_away)
     cond_home = p_home / decision_mass
-
-    new_cond_home = sigmoid(
-        logit(cond_home) +
-        log_odds_adjust
-    )
-
+    new_cond_home = sigmoid(logit(cond_home) + log_odds_adjust)
     new_home = decision_mass * new_cond_home
-    new_away = decision_mass * (
-        1.0 - new_cond_home
-    )
-
+    new_away = decision_mass * (1.0 - new_cond_home)
     return new_home, p_draw, new_away
 
 
-def predict_game(
-    model,
-    home,
-    away,
-    stadium,
-    home_starter,
-    away_starter,
-    pitcher_stats,
-    rest_diff,
-    rest_effect
-):
-    park = model["park_log"].get(
-        stadium,
-        0.0
-    )
+def predict_game(model, home, away, stadium, home_starter, away_starter, pitcher_stats, rest_diff, rest_effect):
+    park = model["park_log"].get(stadium, 0.0)
+    home_log = model["intercept"] + model["home_adv_log"] + park + model["attack"][home] - model["defense"][away]
+    away_log = model["intercept"] + park + model["attack"][away] - model["defense"][home]
 
-    home_log = (
-        model["intercept"]
-        + model["home_adv_log"]
-        + park
-        + model["attack"][home]
-        - model["defense"][away]
-    )
-
-    away_log = (
-        model["intercept"]
-        + park
-        + model["attack"][away]
-        - model["defense"][home]
-    )
-
-    # A good home starter suppresses the away team's scoring;
-    # a good away starter suppresses the home team's scoring.
-    home_log -= get_pitcher_run_effect(
-        away_starter,
-        pitcher_stats
-    )
-
-    away_log -= get_pitcher_run_effect(
-        home_starter,
-        pitcher_stats
-    )
+    # A good home starter suppresses the away team's scoring; a good away
+    # starter suppresses the home team's scoring.
+    home_log -= get_pitcher_run_effect(away_starter, pitcher_stats)
+    away_log -= get_pitcher_run_effect(home_starter, pitcher_stats)
 
     lam_home = safe_exp(home_log)
     lam_away = safe_exp(away_log)
-
-    p_home, p_draw, p_away = three_way_from_scores(
-        lam_home,
-        lam_away
-    )
+    p_home, p_draw, p_away = three_way_from_scores(lam_home, lam_away)
 
     # Data-derived rest adjustment, applied only to the decided-game odds so
     # that draw probability remains tied to the score distribution.
     if rest_effect and abs(rest_diff) > 0:
-        p_home, p_draw, p_away = (
-            apply_conditional_logit_adjustment(
-                p_home,
-                p_draw,
-                p_away,
-                rest_effect * rest_diff
-            )
+        p_home, p_draw, p_away = apply_conditional_logit_adjustment(
+            p_home, p_draw, p_away, rest_effect * rest_diff
         )
 
     return {
@@ -1274,193 +917,70 @@ def predict_game(
 # Standings / H2H / CN
 # ------------------------------------------------------------
 
-def get_remaining_h2h(
-    t1,
-    t2,
-    h2h_played,
-    rem_1,
-    rem_2
-):
-    played = h2h_played.get(
-        t1,
-        {}
-    ).get(
-        t2,
-        0
-    )
-
-    is_intra = (
-        (
-            t1 in CENTRAL_TEAMS and
-            t2 in CENTRAL_TEAMS
-        )
-        or
-        (
-            t1 in PACIFIC_TEAMS and
-            t2 in PACIFIC_TEAMS
-        )
-    )
-
-    max_games = (
-        GAMES_INTRA
-        if is_intra
-        else GAMES_INTER
-    )
-
-    return max(
-        0,
-        min(
-            max_games - played,
-            rem_1,
-            rem_2
-        )
-    )
+def get_remaining_h2h(t1, t2, h2h_played, rem_1, rem_2):
+    played = h2h_played.get(t1, {}).get(t2, 0)
+    is_intra = (t1 in CENTRAL_TEAMS and t2 in CENTRAL_TEAMS) or (t1 in PACIFIC_TEAMS and t2 in PACIFIC_TEAMS)
+    max_games = GAMES_INTRA if is_intra else GAMES_INTER
+    return max(0, min(max_games - played, rem_1, rem_2))
 
 
-def evaluate_clinch_target(
-    team_a,
-    target_k,
-    all_teams,
-    h2h_played
-):
+def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
     ta = team_a["team"]
     rem_a = team_a["remaining"]
     a_w, a_l = team_a["win"], team_a["lose"]
 
-    a_max_rate = calc_win_rate(
-        a_w + rem_a,
-        a_l
-    )
+    a_max_rate = calc_win_rate(a_w + rem_a, a_l)
+    a_min_rate = calc_win_rate(a_w, a_l + rem_a)
 
-    a_min_rate = calc_win_rate(
-        a_w,
-        a_l + rem_a
-    )
-
-    others = [
-        ot for ot in all_teams
-        if ot["team"] != ta
-    ]
-
+    others = [ot for ot in all_teams if ot["team"] != ta]
     guaranteed_higher = 0
-
     for ot in others:
-        ot_min_rate = calc_win_rate(
-            ot["win"],
-            ot["lose"] + ot["remaining"]
-        )
-
+        ot_min_rate = calc_win_rate(ot["win"], ot["lose"] + ot["remaining"])
         if ot_min_rate > a_max_rate:
             guaranteed_higher += 1
-
     if guaranteed_higher >= target_k:
         return "-"
 
     threats = 0
-
     for ot in others:
-        ot_max_rate = calc_win_rate(
-            ot["win"] + ot["remaining"],
-            ot["lose"]
-        )
-
+        ot_max_rate = calc_win_rate(ot["win"] + ot["remaining"], ot["lose"])
         if ot_max_rate >= a_min_rate:
             threats += 1
-
     if threats < target_k:
         return "確定"
 
     if target_k == 1:
-        border = (
-            all_teams[1]
-            if team_a["rank"] == 1
-            else all_teams[0]
-        )
+        border = all_teams[1] if team_a["rank"] == 1 else all_teams[0]
     else:
-        border = (
-            all_teams[target_k]
-            if team_a["rank"] <= target_k
-            else all_teams[target_k - 1]
-        )
+        border = all_teams[target_k] if team_a["rank"] <= target_k else all_teams[target_k - 1]
 
     tb = border["team"]
     rem_b = border["remaining"]
     b_w, b_l = border["win"], border["lose"]
-
-    rem_h2h = get_remaining_h2h(
-        ta,
-        tb,
-        h2h_played,
-        rem_a,
-        rem_b
-    )
+    rem_h2h = get_remaining_h2h(ta, tb, h2h_played, rem_a, rem_b)
 
     for x in range(0, rem_a + 1):
         a_losses = rem_a - x
-        forced_b_losses = max(
-            0,
-            rem_h2h - a_losses
-        )
-
-        b_max_win = (
-            b_w +
-            (rem_b - forced_b_losses)
-        )
-
-        b_max_lose = (
-            b_l +
-            forced_b_losses
-        )
-
-        b_max_rate = calc_win_rate(
-            b_max_win,
-            b_max_lose
-        )
-
-        a_rate = calc_win_rate(
-            a_w + x,
-            a_l + a_losses
-        )
-
+        forced_b_losses = max(0, rem_h2h - a_losses)
+        b_max_win = b_w + (rem_b - forced_b_losses)
+        b_max_lose = b_l + forced_b_losses
+        b_max_rate = calc_win_rate(b_max_win, b_max_lose)
+        a_rate = calc_win_rate(a_w + x, a_l + a_losses)
         if a_rate > b_max_rate:
-            return (
-                "確定"
-                if x == 0
-                else x
-            )
+            return "確定" if x == 0 else x
 
-    b_abs_max_rate = calc_win_rate(
-        b_w + rem_b,
-        b_l
-    )
-
-    for x in range(
-        rem_a + 1,
-        rem_a + 40
-    ):
-        a_rate = calc_win_rate(
-            a_w + x,
-            a_l
-        )
-
+    b_abs_max_rate = calc_win_rate(b_w + rem_b, b_l)
+    for x in range(rem_a + 1, rem_a + 40):
+        a_rate = calc_win_rate(a_w + x, a_l)
         if a_rate > b_abs_max_rate:
             return x
-
     return rem_a + 1
 
 
 def validate_and_assert_standings(teams):
-    keys = [
-        "magic_1st",
-        "magic_2nd",
-        "magic_3rd",
-        "magic_4th",
-        "magic_5th"
-    ]
-
+    keys = ["magic_1st", "magic_2nd", "magic_3rd", "magic_4th", "magic_5th"]
     for t in teams:
         confirmed = False
-
         for k in keys:
             if t[k] == "確定":
                 confirmed = True
@@ -1468,7 +988,6 @@ def validate_and_assert_standings(teams):
                 t[k] = "確定"
 
         eliminated = False
-
         for k in reversed(keys):
             if t[k] == "-":
                 eliminated = True
@@ -1476,249 +995,99 @@ def validate_and_assert_standings(teams):
                 t[k] = "-"
 
         last_val = 0
-
         for k in reversed(keys):
             val = t[k]
-
             if isinstance(val, int):
                 if val < last_val:
                     t[k] = last_val
                 else:
                     last_val = val
-
     return teams
 
 # ------------------------------------------------------------
 # Monte Carlo
 # ------------------------------------------------------------
 
-def build_future_probabilities(
-    league_teams,
-    remaining_matches,
-    model,
-    pitcher_stats,
-    rest_effect,
-    all_games
-):
+def build_future_probabilities(league_teams, remaining_matches, model, pitcher_stats, rest_effect, all_games):
     result = []
-
-    for match in sorted(
-        [
-            m for m in remaining_matches
-            if m.get("status") == "scheduled"
-        ],
-        key=lambda x: (
-            x["date"],
-            x["home"],
-            x["away"]
-        )
-    ):
+    for match in sorted([m for m in remaining_matches if m.get("status") == "scheduled"], key=lambda x: (x["date"], x["home"], x["away"])):
         h, a = match["home"], match["away"]
-
         if h not in league_teams or a not in league_teams:
             continue
-
-        stadium = STADIUM_NAMES.get(
-            h,
-            "東京D"
-        )
-
-        h_start = (
-            match.get("home_starter")
-            if match.get("starter_confirmed")
-            else "未定"
-        )
-
-        a_start = (
-            match.get("away_starter")
-            if match.get("starter_confirmed")
-            else "未定"
-        )
-
+        stadium = STADIUM_NAMES.get(h, "東京D")
+        h_start = match.get("home_starter") if match.get("starter_confirmed") else "未定"
+        a_start = match.get("away_starter") if match.get("starter_confirmed") else "未定"
         h_start = h_start or "未定"
         a_start = a_start or "未定"
-
         # For future games, use the current schedule to determine expected rest.
-        rest_diff = rest_difference_for_game(
-            match,
-            all_games,
-            as_of_date=None
-        )
-
-        probs = predict_game(
-            model,
-            h,
-            a,
-            stadium,
-            h_start,
-            a_start,
-            pitcher_stats,
-            rest_diff,
-            rest_effect
-        )
-
+        rest_diff = rest_difference_for_game(match, all_games, as_of_date=None)
+        probs = predict_game(model, h, a, stadium, h_start, a_start, pitcher_stats, rest_diff, rest_effect)
         result.append({
             "match": match,
             "p_home": probs["home"],
             "p_draw": probs["draw"],
             "p_away": probs["away"],
         })
-
     return result
 
 
-def determine_clinched(
-    leader,
-    teams,
-    sim_w,
-    sim_l,
-    remaining_after_date
-):
+def determine_clinched(leader, teams, sim_w, sim_l, remaining_after_date):
     # Conservative, win-percentage-consistent clinch test.
-    leader_min = calc_win_rate(
-        sim_w[leader],
-        sim_l[leader] +
-        remaining_after_date.get(
-            leader,
-            0
-        )
-    )
-
+    leader_min = calc_win_rate(sim_w[leader], sim_l[leader] + remaining_after_date.get(leader, 0))
     for team in teams:
         if team == leader:
             continue
-
-        opp_max = calc_win_rate(
-            sim_w[team] +
-            remaining_after_date.get(
-                team,
-                0
-            ),
-            sim_l[team]
-        )
-
+        opp_max = calc_win_rate(sim_w[team] + remaining_after_date.get(team, 0), sim_l[team])
         if opp_max >= leader_min:
             return False
-
     return True
 
 
-def simulate_full_season_probabilities(
-    league_teams,
-    current_standings,
-    remaining_matches,
-    model,
-    pitcher_stats,
-    rest_effect,
-    all_games,
-    num_sims=MAIN_NUM_SIMS
-):
-    rank_counts = {
-        t: {
-            r: 0 for r in range(1, 7)
-        }
-        for t in league_teams
-    }
+def simulate_full_season_probabilities(league_teams, current_standings, remaining_matches, model, pitcher_stats, rest_effect, all_games, num_sims=MAIN_NUM_SIMS, rng=None):
+    rank_counts = {t: {r: 0 for r in range(1, 7)} for t in league_teams}
+    clinch_date_counts = {t: {} for t in league_teams}
+    base_wins = {t["team"]: t["win"] for t in current_standings}
+    base_losses = {t["team"]: t["lose"] for t in current_standings}
 
-    clinch_date_counts = {
-        t: {} for t in league_teams
-    }
-
-    base_wins = {
-        t["team"]: t["win"]
-        for t in current_standings
-    }
-
-    base_losses = {
-        t["team"]: t["lose"]
-        for t in current_standings
-    }
-
-    future_probs = build_future_probabilities(
-        league_teams,
-        remaining_matches,
-        model,
-        pitcher_stats,
-        rest_effect,
-        all_games
-    )
-
+    future_probs = build_future_probabilities(league_teams, remaining_matches, model, pitcher_stats, rest_effect, all_games)
+    rng = rng or random
     matches_by_date = defaultdict(list)
-
     for fp in future_probs:
-        matches_by_date[
-            fp["match"]["date"]
-        ].append(fp)
-
-    sorted_dates = sorted(
-        matches_by_date.keys()
-    )
+        matches_by_date[fp["match"]["date"]].append(fp)
+    sorted_dates = sorted(matches_by_date.keys())
 
     # Pre-compute the number of scheduled games strictly after each date.
-    future_after = {
-        d: {
-            t: 0 for t in league_teams
-        }
-        for d in sorted_dates
-    }
-
-    remaining_counts = {
-        t: 0 for t in league_teams
-    }
-
-    total_future = {
-        t: 0 for t in league_teams
-    }
-
+    future_after = {d: {t: 0 for t in league_teams} for d in sorted_dates}
+    remaining_counts = {t: 0 for t in league_teams}
+    total_future = {t: 0 for t in league_teams}
     for fp in future_probs:
         h = fp["match"]["home"]
         a = fp["match"]["away"]
-
         total_future[h] += 1
         total_future[a] += 1
-
     remaining_counts = dict(total_future)
-
     for d in sorted_dates:
         # Remove today's games first; the remainder is strictly after d.
         for fp in matches_by_date[d]:
             h = fp["match"]["home"]
             a = fp["match"]["away"]
-
             remaining_counts[h] -= 1
             remaining_counts[a] -= 1
-
-        future_after[d] = dict(
-            remaining_counts
-        )
+        future_after[d] = dict(remaining_counts)
 
     for _ in range(num_sims):
         sim_w = dict(base_wins)
         sim_l = dict(base_losses)
-
-        clinched_day = {
-            t: None
-            for t in league_teams
-        }
+        clinched_day = {t: None for t in league_teams}
 
         for d in sorted_dates:
             for fp in matches_by_date[d]:
                 h = fp["match"]["home"]
                 a = fp["match"]["away"]
-
-                rnd = random.random()
-
+                rnd = rng.random()
                 if rnd < fp["p_draw"]:
                     continue
-
-                if random.random() < (
-                    fp["p_home"] /
-                    max(
-                        1e-9,
-                        fp["p_home"] +
-                        fp["p_away"]
-                    )
-                ):
+                if rng.random() < (fp["p_home"] / max(1e-9, fp["p_home"] + fp["p_away"])):
                     sim_w[h] += 1
                     sim_l[a] += 1
                 else:
@@ -1726,144 +1095,133 @@ def simulate_full_season_probabilities(
                     sim_l[h] += 1
 
             sim_rates = sorted(
-                [
-                    (
-                        t,
-                        calc_win_rate(
-                            sim_w[t],
-                            sim_l[t]
-                        ),
-                        sim_w[t]
-                    )
-                    for t in league_teams
-                ],
-                key=lambda x: (
-                    x[1],
-                    x[2]
-                ),
+                [(t, calc_win_rate(sim_w[t], sim_l[t]), sim_w[t]) for t in league_teams],
+                key=lambda x: (x[1], x[2]),
                 reverse=True,
             )
-
             leader = sim_rates[0][0]
-
-            remaining_after = dict(
-                future_after.get(
-                    d,
-                    {
-                        t: 0
-                        for t in league_teams
-                    }
-                )
-            )
-
-            if (
-                determine_clinched(
-                    leader,
-                    league_teams,
-                    sim_w,
-                    sim_l,
-                    remaining_after
-                )
-                and
-                clinched_day[leader] is None
-            ):
+            remaining_after = dict(future_after.get(d, {t: 0 for t in league_teams}))
+            if determine_clinched(leader, league_teams, sim_w, sim_l, remaining_after) and clinched_day[leader] is None:
                 clinched_day[leader] = d
 
         final_rates = sorted(
-            [
-                (
-                    t,
-                    calc_win_rate(
-                        sim_w[t],
-                        sim_l[t]
-                    ),
-                    sim_w[t]
-                )
-                for t in league_teams
-            ],
-            key=lambda x: (
-                x[1],
-                x[2]
-            ),
+            [(t, calc_win_rate(sim_w[t], sim_l[t]), sim_w[t]) for t in league_teams],
+            key=lambda x: (x[1], x[2]),
             reverse=True,
         )
-
         champ = final_rates[0][0]
-
         if clinched_day[champ] is not None:
-            clinch_date_counts[champ][
-                clinched_day[champ]
-            ] = (
-                clinch_date_counts[champ].get(
-                    clinched_day[champ],
-                    0
-                ) + 1
-            )
-
+            clinch_date_counts[champ][clinched_day[champ]] = clinch_date_counts[champ].get(clinched_day[champ], 0) + 1
         for idx, item in enumerate(final_rates):
-            rank_counts[item[0]][
-                idx + 1
-            ] += 1
+            rank_counts[item[0]][idx + 1] += 1
 
-    champ_raw = {
-        t:
-        rank_counts[t][1] /
-        num_sims *
-        100.0
-        for t in league_teams
-    }
-
-    champ_norm = normalize_probabilities_to_100(
-        champ_raw
-    )
+    champ_raw = {t: rank_counts[t][1] / num_sims * 100.0 for t in league_teams}
+    champ_norm = normalize_probabilities_to_100(champ_raw)
 
     final_rank_matrix = {}
-
     for t in league_teams:
-        final_rank_matrix[t] = {
-            1: champ_norm[t]
-        }
-
+        final_rank_matrix[t] = {1: champ_norm[t]}
         for r in range(2, 7):
-            final_rank_matrix[t][r] = int(
-                round(
-                    rank_counts[t][r] /
-                    num_sims *
-                    100.0
-                )
-            )
+            final_rank_matrix[t][r] = int(round(rank_counts[t][r] / num_sims * 100.0))
 
     # Keep the matrix internally coherent for UI percentages.
     for t in league_teams:
-        total = sum(
-            final_rank_matrix[t].values()
-        )
-
+        total = sum(final_rank_matrix[t].values())
         if total != 100:
             # distribute the residual to the modal rank
-            modal_rank = max(
-                final_rank_matrix[t],
-                key=final_rank_matrix[t].get
-            )
-
-            final_rank_matrix[t][modal_rank] += (
-                100 - total
-            )
+            modal_rank = max(final_rank_matrix[t], key=final_rank_matrix[t].get)
+            final_rank_matrix[t][modal_rank] += 100 - total
 
     clinch_date_probs = {}
-
     for t in league_teams:
-        clinch_date_probs[t] = {
-            d:
-            (count / num_sims) * 100.0
-            for d, count
-            in clinch_date_counts[t].items()
-        }
+        clinch_date_probs[t] = {d: (count / num_sims) * 100.0 for d, count in clinch_date_counts[t].items()}
 
-    return (
-        final_rank_matrix,
-        clinch_date_probs
-    )
+    return final_rank_matrix, clinch_date_probs
+
+def sample_model_variant(model, rng):
+    """Sample an approximate plausible model state for the uncertainty band."""
+    variant = {
+        "attack": {},
+        "defense": {},
+        "intercept": model["intercept"],
+        "home_adv_log": model["home_adv_log"],
+        "park_log": dict(model["park_log"]),
+    }
+    unc = model.get("uncertainty", {})
+    a_sd = unc.get("attack_sd", {})
+    d_sd = unc.get("defense_sd", {})
+
+    for t in ALL_TEAMS:
+        variant["attack"][t] = model["attack"][t] + rng.gauss(0.0, float(a_sd.get(t, 0.0)))
+        variant["defense"][t] = model["defense"][t] + rng.gauss(0.0, float(d_sd.get(t, 0.0)))
+
+    mean_a = sum(variant["attack"].values()) / len(ALL_TEAMS)
+    mean_d = sum(variant["defense"].values()) / len(ALL_TEAMS)
+    for t in ALL_TEAMS:
+        variant["attack"][t] -= mean_a
+        variant["defense"][t] -= mean_d
+    variant["intercept"] += mean_a - mean_d
+    return variant
+
+
+def simulate_championship_probability_band(
+    league_teams,
+    current_standings,
+    remaining_matches,
+    model,
+    pitcher_stats,
+    rest_effect,
+    all_games,
+    seed_offset=0,
+):
+    """Compute a model-uncertainty sensitivity band for championship probability."""
+    samples = {t: [] for t in league_teams}
+    future_matches = [m for m in remaining_matches if m.get("status") == "scheduled"]
+    if not future_matches:
+        return {t: None for t in league_teams}
+
+    base_seed = RANDOM_SEED + int(seed_offset) + len(league_teams) * 1000
+    for s in range(UNCERTAINTY_MODEL_SIMS):
+        rng = random.Random(base_seed + s * 7919)
+        variant = sample_model_variant(model, rng)
+        mat, _ = simulate_full_season_probabilities(
+            league_teams,
+            current_standings,
+            future_matches,
+            variant,
+            pitcher_stats,
+            rest_effect,
+            all_games,
+            UNCERTAINTY_SEASON_SIMS,
+            rng=rng,
+        )
+        for t in league_teams:
+            samples[t].append(float(mat[t][1]))
+
+    result = {}
+    for t in league_teams:
+        vals = sorted(samples[t])
+        if not vals:
+            result[t] = None
+            continue
+        low_idx = max(0, min(len(vals) - 1, int(math.floor((len(vals) - 1) * UNCERTAINTY_LOW_Q))))
+        high_idx = max(0, min(len(vals) - 1, int(math.ceil((len(vals) - 1) * UNCERTAINTY_HIGH_Q))))
+        result[t] = {"low": vals[low_idx], "high": vals[high_idx], "samples": len(vals)}
+    return result
+
+
+def self_clinchable_first_count(table):
+    """Number of teams that can still secure 1st place by own wins alone."""
+    count = 0
+    for t in table:
+        v = t.get("magic_1st")
+        rem = int(t.get("remaining", 0))
+        if v == "確定":
+            count += 1
+        elif isinstance(v, int) and v <= rem:
+            count += 1
+    return count
+
 
 # ------------------------------------------------------------
 # Presentation helpers
@@ -1871,29 +1229,20 @@ def simulate_full_season_probabilities(
 
 def build_aligned_championship_grid(top_teams_standings):
     teams_data = []
-
     for t in top_teams_standings[:3]:
         rem = t["remaining"]
         cur_w = t["win"]
         cur_l = t["lose"]
-
         patterns = []
-
         for w in range(rem, -1, -1):
             l = rem - w
-
-            rate = calc_win_rate(
-                cur_w + w,
-                cur_l + l
-            )
-
+            rate = calc_win_rate(cur_w + w, cur_l + l)
             patterns.append({
                 "w": w,
                 "l": l,
                 "rate": round(rate, 3),
                 "rate_str": f".{round(rate * 1000):03d}",
             })
-
         teams_data.append({
             "team": t["team"],
             "remaining": rem,
@@ -1903,47 +1252,23 @@ def build_aligned_championship_grid(top_teams_standings):
         })
 
     if not teams_data:
-        return {
-            "headers": [],
-            "rows": []
-        }
+        return {"headers": [], "rows": []}
 
     base_patterns = teams_data[0]["patterns"]
     num_rows = len(base_patterns)
-
-    aligned_rows = [
-        [p] for p in base_patterns
-    ]
+    aligned_rows = [[p] for p in base_patterns]
 
     for td in teams_data[1:]:
         pats = td["patterns"]
-
-        t_max_rate = (
-            pats[0]["rate"]
-            if pats
-            else 0.0
-        )
-
-        best_start = min(
-            range(num_rows),
-            key=lambda r: abs(
-                base_patterns[r]["rate"] -
-                t_max_rate
-            )
-        )
-
+        t_max_rate = pats[0]["rate"] if pats else 0.0
+        best_start = min(range(num_rows), key=lambda r: abs(base_patterns[r]["rate"] - t_max_rate))
         assigned = [None] * num_rows
-
         for p_idx, p in enumerate(pats):
             row_pos = best_start + p_idx
-
             if row_pos < num_rows:
                 assigned[row_pos] = p
-
         for r_idx in range(num_rows):
-            aligned_rows[r_idx].append(
-                assigned[r_idx]
-            )
+            aligned_rows[r_idx].append(assigned[r_idx])
 
     for row in aligned_rows:
         while len(row) < len(teams_data):
@@ -1963,114 +1288,40 @@ def build_aligned_championship_grid(top_teams_standings):
     }
 
 
-def format_league(
-    records,
-    league_teams,
-    h2h_played,
-    h2h_details
-):
+def format_league(records, league_teams, h2h_played, h2h_details):
     table = []
-
     for team in league_teams:
         r = records[team]
-
-        r["remaining"] = (
-            TOTAL_GAMES -
-            r["games"]
-        )
-
-        r["rate"] = calc_win_rate(
-            r["win"],
-            r["lose"]
-        )
-
-        r["h2h"] = {
-            opp: h2h_details[team][opp]
-            for opp in league_teams
-        }
-
+        r["remaining"] = TOTAL_GAMES - r["games"]
+        r["rate"] = calc_win_rate(r["win"], r["lose"])
+        r["h2h"] = {opp: h2h_details[team][opp] for opp in league_teams}
         table.append(r)
 
-    table.sort(
-        key=lambda x: (
-            x["rate"],
-            x["win"]
-        ),
-        reverse=True
-    )
-
-    top_w = table[0]["win"]
-    top_l = table[0]["lose"]
-
+    table.sort(key=lambda x: (x["rate"], x["win"]), reverse=True)
+    top_w, top_l = table[0]["win"], table[0]["lose"]
     for idx, t in enumerate(table):
         t["rank"] = idx + 1
+        diff = ((top_w - t["win"]) + (t["lose"] - top_l)) / 2.0
+        t["diff"] = max(0.0, diff) if idx > 0 else 0.0
 
-        diff = (
-            (
-                top_w -
-                t["win"]
-            )
-            +
-            (
-                t["lose"] -
-                top_l
-            )
-        ) / 2.0
-
-        t["diff"] = (
-            max(0.0, diff)
-            if idx > 0
-            else 0.0
-        )
-
-    magic_names = {
-        1: "magic_1st",
-        2: "magic_2nd",
-        3: "magic_3rd",
-        4: "magic_4th",
-        5: "magic_5th"
-    }
-
+    magic_names = {1: "magic_1st", 2: "magic_2nd", 3: "magic_3rd", 4: "magic_4th", 5: "magic_5th"}
     for t in table:
         for rank in range(1, 6):
-            t[magic_names[rank]] = (
-                evaluate_clinch_target(
-                    t,
-                    rank,
-                    table,
-                    h2h_played
-                )
-            )
-
+            t[magic_names[rank]] = evaluate_clinch_target(t, rank, table, h2h_played)
     return validate_and_assert_standings(table)
 
 # ------------------------------------------------------------
 # Full history build
 # ------------------------------------------------------------
 
-def build_all_history_with_predictions(
-    historical_games,
-    games_2026
-):
-    prior = estimate_multi_year_prior(
-        historical_games
-    )
+def build_all_history_with_predictions(historical_games, games_2026):
+    prior = estimate_multi_year_prior(historical_games)
+    environment = estimate_environment(historical_games)
+    rest_effect = estimate_rest_effect(historical_games)
+    draw_baseline_rate = estimate_historical_draw_rate(historical_games)
 
-    environment = estimate_environment(
-        historical_games
-    )
-
-    rest_effect = estimate_rest_effect(
-        historical_games
-    )
-
-    all_dates = sorted({
-        g["date"]
-        for g in games_2026
-    })
-
+    all_dates = sorted({g["date"] for g in games_2026})
     history_snapshots = {}
-
     random.seed(RANDOM_SEED)
 
     for target_date in all_dates:
@@ -2083,77 +1334,28 @@ def build_all_history_with_predictions(
                 "draw": 0,
                 "rs": 0,
                 "ra": 0,
-                "home": {
-                    "win": 0,
-                    "lose": 0,
-                    "draw": 0
-                },
-                "away": {
-                    "win": 0,
-                    "lose": 0,
-                    "draw": 0
-                },
-                "interleague": {
-                    "win": 0,
-                    "lose": 0,
-                    "draw": 0
-                },
+                "home": {"win": 0, "lose": 0, "draw": 0},
+                "away": {"win": 0, "lose": 0, "draw": 0},
+                "interleague": {"win": 0, "lose": 0, "draw": 0},
             }
             for t in ALL_TEAMS
         }
-
-        team_total_stats_before_today = {
-            t: {
-                "rs": 0,
-                "ra": 0,
-                "games": 0
-            }
-            for t in ALL_TEAMS
-        }
-
-        h2h_played = {
-            t1: {
-                t2: 0
-                for t2 in ALL_TEAMS
-            }
-            for t1 in ALL_TEAMS
-        }
-
+        team_total_stats_before_today = {t: {"rs": 0, "ra": 0, "games": 0} for t in ALL_TEAMS}
+        h2h_played = {t1: {t2: 0 for t2 in ALL_TEAMS} for t1 in ALL_TEAMS}
         h2h_details = {
-            t1: {
-                t2: {
-                    "win": 0,
-                    "lose": 0,
-                    "draw": 0
-                }
-                for t2 in ALL_TEAMS
-            }
+            t1: {t2: {"win": 0, "lose": 0, "draw": 0} for t2 in ALL_TEAMS}
             for t1 in ALL_TEAMS
         }
 
         # Strictly pre-target-date information for the prediction model.
-        pitcher_stats = build_pitcher_start_stats(
-            games_2026,
-            target_date
-        )
-
-        model = fit_run_model(
-            games_2026,
-            target_date,
-            prior,
-            environment
-        )
+        pitcher_stats = build_pitcher_start_stats(games_2026, target_date)
+        model = fit_run_model(games_2026, target_date, prior, environment)
 
         for g in games_2026:
             if not is_finished(g):
                 continue
-
             h, a = g["home"], g["away"]
-            hs, as_ = (
-                int(g["home_score"]),
-                int(g["away_score"])
-            )
-
+            hs, as_ = int(g["home_score"]), int(g["away_score"])
             g_date = g["date"]
 
             # Pre-game model totals: strict < target_date only.
@@ -2161,7 +1363,6 @@ def build_all_history_with_predictions(
                 team_total_stats_before_today[h]["rs"] += hs
                 team_total_stats_before_today[h]["ra"] += as_
                 team_total_stats_before_today[h]["games"] += 1
-
                 team_total_stats_before_today[a]["rs"] += as_
                 team_total_stats_before_today[a]["ra"] += hs
                 team_total_stats_before_today[a]["games"] += 1
@@ -2170,192 +1371,82 @@ def build_all_history_with_predictions(
             if g_date <= target_date:
                 records[h]["games"] += 1
                 records[a]["games"] += 1
-
                 records[h]["rs"] += hs
                 records[h]["ra"] += as_
-
                 records[a]["rs"] += as_
                 records[a]["ra"] += hs
-
                 h2h_played[h][a] += 1
                 h2h_played[a][h] += 1
 
-                is_inter = (
-                    (
-                        h in CENTRAL_TEAMS and
-                        a in PACIFIC_TEAMS
-                    )
-                    or
-                    (
-                        h in PACIFIC_TEAMS and
-                        a in CENTRAL_TEAMS
-                    )
-                )
-
+                is_inter = (h in CENTRAL_TEAMS and a in PACIFIC_TEAMS) or (h in PACIFIC_TEAMS and a in CENTRAL_TEAMS)
                 if hs > as_:
                     records[h]["win"] += 1
                     records[h]["home"]["win"] += 1
-
                     records[a]["lose"] += 1
                     records[a]["away"]["lose"] += 1
-
                     h2h_details[h][a]["win"] += 1
                     h2h_details[a][h]["lose"] += 1
-
                     if is_inter:
                         records[h]["interleague"]["win"] += 1
                         records[a]["interleague"]["lose"] += 1
-
                 elif hs < as_:
                     records[a]["win"] += 1
                     records[a]["away"]["win"] += 1
-
                     records[h]["lose"] += 1
                     records[h]["home"]["lose"] += 1
-
                     h2h_details[a][h]["win"] += 1
                     h2h_details[h][a]["lose"] += 1
-
                     if is_inter:
                         records[a]["interleague"]["win"] += 1
                         records[h]["interleague"]["lose"] += 1
-
                 else:
                     records[h]["draw"] += 1
                     records[h]["home"]["draw"] += 1
-
                     records[a]["draw"] += 1
                     records[a]["away"]["draw"] += 1
-
                     h2h_details[h][a]["draw"] += 1
                     h2h_details[a][h]["draw"] += 1
-
                     if is_inter:
                         records[h]["interleague"]["draw"] += 1
                         records[a]["interleague"]["draw"] += 1
 
-        c_table = format_league(
-            records,
-            CENTRAL_TEAMS,
-            h2h_played,
-            h2h_details
-        )
-
-        p_table = format_league(
-            records,
-            PACIFIC_TEAMS,
-            h2h_played,
-            h2h_details
-        )
+        c_table = format_league(records, CENTRAL_TEAMS, h2h_played, h2h_details)
+        p_table = format_league(records, PACIFIC_TEAMS, h2h_played, h2h_details)
 
         day_predictions = []
         processed_pairs = set()
-
         for g in reversed(games_2026):
             if g["date"] != target_date:
                 continue
-
             h, a = g["home"], g["away"]
             pair_key = (h, a)
-
             if pair_key in processed_pairs:
                 continue
-
             processed_pairs.add(pair_key)
-
             if is_cancelled(g):
                 continue
 
-            stadium = STADIUM_NAMES.get(
-                h,
-                "東京D"
-            )
-
-            h_start = (
-                g.get("home_starter")
-                if g.get("starter_confirmed")
-                else "未定"
-            )
-
-            a_start = (
-                g.get("away_starter")
-                if g.get("starter_confirmed")
-                else "未定"
-            )
-
+            stadium = STADIUM_NAMES.get(h, "東京D")
+            h_start = g.get("home_starter") if g.get("starter_confirmed") else "未定"
+            a_start = g.get("away_starter") if g.get("starter_confirmed") else "未定"
             h_start = h_start or "未定"
             a_start = a_start or "未定"
+            rest_diff = rest_difference_for_game(g, games_2026, as_of_date=target_date)
+            probs = predict_game(model, h, a, stadium, h_start, a_start, pitcher_stats, rest_diff, rest_effect)
 
-            rest_diff = rest_difference_for_game(
-                g,
-                games_2026,
-                as_of_date=target_date
-            )
-
-            probs = predict_game(
-                model,
-                h,
-                a,
-                stadium,
-                h_start,
-                a_start,
-                pitcher_stats,
-                rest_diff,
-                rest_effect
-            )
-
-            hs, as_ = (
-                g.get("home_score"),
-                g.get("away_score")
-            )
-
+            hs, as_ = g.get("home_score"), g.get("away_score")
             finished = is_finished(g)
-
             if finished:
-                hs_int, as_int = (
-                    int(hs),
-                    int(as_)
-                )
-
+                hs_int, as_int = int(hs), int(as_)
                 if hs_int > as_int:
-                    h_label = (
-                        f"勝利: {h_start}"
-                        if h_start not in ("未定", "未確認")
-                        else "勝利"
-                    )
-
-                    a_label = (
-                        f"敗戦: {a_start}"
-                        if a_start not in ("未定", "未確認")
-                        else "敗戦"
-                    )
-
+                    h_label = f"勝利: {h_start}" if h_start not in ("未定", "未確認") else "勝利"
+                    a_label = f"敗戦: {a_start}" if a_start not in ("未定", "未確認") else "敗戦"
                 elif hs_int < as_int:
-                    h_label = (
-                        f"敗戦: {h_start}"
-                        if h_start not in ("未定", "未確認")
-                        else "敗戦"
-                    )
-
-                    a_label = (
-                        f"勝利: {a_start}"
-                        if a_start not in ("未定", "未確認")
-                        else "勝利"
-                    )
-
+                    h_label = f"敗戦: {h_start}" if h_start not in ("未定", "未確認") else "敗戦"
+                    a_label = f"勝利: {a_start}" if a_start not in ("未定", "未確認") else "勝利"
                 else:
-                    h_label = (
-                        f"引分: {h_start}"
-                        if h_start not in ("未定", "未確認")
-                        else "引分"
-                    )
-
-                    a_label = (
-                        f"引分: {a_start}"
-                        if a_start not in ("未定", "未確認")
-                        else "引分"
-                    )
-
+                    h_label = f"引分: {h_start}" if h_start not in ("未定", "未確認") else "引分"
+                    a_label = f"引分: {a_start}" if a_start not in ("未定", "未確認") else "引分"
             else:
                 h_label = f"先発: {h_start}"
                 a_label = f"先発: {a_start}"
@@ -2367,40 +1458,64 @@ def build_all_history_with_predictions(
                 "away_starter": a_start,
                 "home_status_text": h_label,
                 "away_status_text": a_label,
-                "home_prob": round(
-                    probs["home"] * 100.0,
-                    1
-                ),
-                "away_prob": round(
-                    probs["away"] * 100.0,
-                    1
-                ),
-                "draw_prob": round(
-                    probs["draw"] * 100.0,
-                    1
-                ),
-                "expected_home_runs": round(
-                    probs["lambda_home"],
-                    2
-                ),
-                "expected_away_runs": round(
-                    probs["lambda_away"],
-                    2
-                ),
-                "actual_home_score": (
-                    int(hs)
-                    if finished
-                    else None
-                ),
-                "actual_away_score": (
-                    int(as_)
-                    if finished
-                    else None
-                ),
+                "home_prob": round(probs["home"] * 100.0, 1),
+                "away_prob": round(probs["away"] * 100.0, 1),
+                "draw_prob": round(probs["draw"] * 100.0, 1),
+                "expected_home_runs": round(probs["lambda_home"], 2),
+                "expected_away_runs": round(probs["lambda_away"], 2),
+                "actual_home_score": int(hs) if finished else None,
+                "actual_away_score": int(as_) if finished else None,
                 "is_finished": finished,
             })
 
         day_predictions.reverse()
+
+        c_self_clinchable = self_clinchable_first_count(c_table)
+        p_self_clinchable = self_clinchable_first_count(p_table)
+
+        c_band = None
+        p_band = None
+        if c_self_clinchable != 1:
+            c_future_d = [
+                g for g in games_2026
+                if g["date"] > target_date
+                and g["home"] in CENTRAL_TEAMS and g["away"] in CENTRAL_TEAMS
+                and g.get("home_score") is None and g.get("away_score") is None
+                and not is_cancelled(g)
+            ]
+            if c_future_d:
+                c_band = simulate_championship_probability_band(
+                    CENTRAL_TEAMS, c_table, c_future_d, model, pitcher_stats, rest_effect,
+                    games_2026, seed_offset=int(target_date[5:7] + target_date[8:10])
+                )
+
+        if p_self_clinchable != 1:
+            p_future_d = [
+                g for g in games_2026
+                if g["date"] > target_date
+                and g["home"] in PACIFIC_TEAMS and g["away"] in PACIFIC_TEAMS
+                and g.get("home_score") is None and g.get("away_score") is None
+                and not is_cancelled(g)
+            ]
+            if p_future_d:
+                p_band = simulate_championship_probability_band(
+                    PACIFIC_TEAMS, p_table, p_future_d, model, pitcher_stats, rest_effect,
+                    games_2026, seed_offset=int(target_date[5:7] + target_date[8:10]) + 500
+                )
+
+        for t in c_table:
+            info = c_band.get(t["team"]) if c_band else None
+            if info:
+                t["champ_prob_low"] = round(info["low"], 1)
+                t["champ_prob_high"] = round(info["high"], 1)
+                t["champ_prob_band_n"] = info["samples"]
+
+        for t in p_table:
+            info = p_band.get(t["team"]) if p_band else None
+            if info:
+                t["champ_prob_low"] = round(info["low"], 1)
+                t["champ_prob_high"] = round(info["high"], 1)
+                t["champ_prob_band_n"] = info["samples"]
 
         history_snapshots[target_date] = {
             "central": c_table,
@@ -2414,330 +1529,139 @@ def build_all_history_with_predictions(
 
     # Latest evaluation point.
     dates_with_finished = [
-        d for d in all_dates
-        if any(
-            g["date"] == d and is_finished(g)
-            for g in games_2026
-        )
+        d for d in all_dates if any(g["date"] == d and is_finished(g) for g in games_2026)
     ]
-
-    last_eval_date = (
-        dates_with_finished[-1]
-        if dates_with_finished
-        else all_dates[0]
-    )
-
+    last_eval_date = dates_with_finished[-1] if dates_with_finished else all_dates[0]
     latest_snapshot = history_snapshots[last_eval_date]
-
     latest_model = latest_snapshot["_model"]
     latest_pitcher_stats = latest_snapshot["_pitcher_stats"]
 
     # Current/future matches = games without results and not cancelled.
     future_matches = [
         g for g in games_2026
-        if (
-            g.get("home_score") is None and
-            g.get("away_score") is None and
-            not is_cancelled(g)
-        )
+        if g.get("home_score") is None and g.get("away_score") is None and not is_cancelled(g)
     ]
+    c_future = [g for g in future_matches if g["home"] in CENTRAL_TEAMS and g["away"] in CENTRAL_TEAMS]
+    p_future = [g for g in future_matches if g["home"] in PACIFIC_TEAMS and g["away"] in PACIFIC_TEAMS]
+    # Only league games remain in each league's standings simulation; interleague
+    # should not exist after the regular interleague phase in this dataset, but
+    # filtering here is safer if the source contains odd records.
 
-    c_future = [
-        g for g in future_matches
-        if (
-            g["home"] in CENTRAL_TEAMS and
-            g["away"] in CENTRAL_TEAMS
-        )
-    ]
-
-    p_future = [
-        g for g in future_matches
-        if (
-            g["home"] in PACIFIC_TEAMS and
-            g["away"] in PACIFIC_TEAMS
-        )
-    ]
-
-    # Only league games remain in each league's standings simulation;
-    # interleague should not exist after the regular interleague phase
-    # in this dataset, but filtering here is safer if the source contains
-    # odd records.
-
-    c_rank_matrix, c_clinch_dates = (
-        simulate_full_season_probabilities(
-            CENTRAL_TEAMS,
-            latest_snapshot["central"],
-            c_future,
-            latest_model,
-            latest_pitcher_stats,
-            rest_effect,
-            games_2026,
-            MAIN_NUM_SIMS,
-        )
+    c_rank_matrix, c_clinch_dates = simulate_full_season_probabilities(
+        CENTRAL_TEAMS,
+        latest_snapshot["central"],
+        c_future,
+        latest_model,
+        latest_pitcher_stats,
+        rest_effect,
+        games_2026,
+        MAIN_NUM_SIMS,
     )
-
-    p_rank_matrix, p_clinch_dates = (
-        simulate_full_season_probabilities(
-            PACIFIC_TEAMS,
-            latest_snapshot["pacific"],
-            p_future,
-            latest_model,
-            latest_pitcher_stats,
-            rest_effect,
-            games_2026,
-            MAIN_NUM_SIMS,
-        )
+    p_rank_matrix, p_clinch_dates = simulate_full_season_probabilities(
+        PACIFIC_TEAMS,
+        latest_snapshot["pacific"],
+        p_future,
+        latest_model,
+        latest_pitcher_stats,
+        rest_effect,
+        games_2026,
+        MAIN_NUM_SIMS,
     )
 
     # Historical as-of-date champion/CS probabilities.
     # These are now genuine model-based probabilities rather than a heuristic.
     for d in all_dates:
         snap = history_snapshots[d]
-
         model_d = snap["_model"]
         pitcher_d = snap["_pitcher_stats"]
-
-        # Historical simulation must treat ALL games after d as future,
-        # even if those games have since been completed in the live database.
+        # Historical simulation must treat ALL games after d as future, even
+        # if those games have since been completed in the live database.
         # Do not leak future results or future starter announcements.
         future_d = []
-
         for g in games_2026:
             if g["date"] <= d or is_cancelled(g):
                 continue
-
             future_copy = dict(g)
-
             future_copy["home_score"] = None
             future_copy["away_score"] = None
             future_copy["status"] = "scheduled"
             future_copy["starter_confirmed"] = False
             future_copy["home_starter"] = "未定"
             future_copy["away_starter"] = "未定"
-
             future_d.append(future_copy)
-
-        c_future_d = [
-            g for g in future_d
-            if (
-                g["home"] in CENTRAL_TEAMS and
-                g["away"] in CENTRAL_TEAMS
-            )
-        ]
-
-        p_future_d = [
-            g for g in future_d
-            if (
-                g["home"] in PACIFIC_TEAMS and
-                g["away"] in PACIFIC_TEAMS
-            )
-        ]
+        c_future_d = [g for g in future_d if g["home"] in CENTRAL_TEAMS and g["away"] in CENTRAL_TEAMS]
+        p_future_d = [g for g in future_d if g["home"] in PACIFIC_TEAMS and g["away"] in PACIFIC_TEAMS]
 
         if d == last_eval_date:
-            c_mat, _ = (
-                c_rank_matrix,
-                c_clinch_dates
-            )
-
-            p_mat, _ = (
-                p_rank_matrix,
-                p_clinch_dates
-            )
-
+            c_mat, _ = c_rank_matrix, c_clinch_dates
+            p_mat, _ = p_rank_matrix, p_clinch_dates
         else:
-            c_mat, _ = (
-                simulate_full_season_probabilities(
-                    CENTRAL_TEAMS,
-                    snap["central"],
-                    c_future_d,
-                    model_d,
-                    pitcher_d,
-                    rest_effect,
-                    games_2026,
-                    HISTORICAL_NUM_SIMS,
-                )
+            c_mat, _ = simulate_full_season_probabilities(
+                CENTRAL_TEAMS,
+                snap["central"],
+                c_future_d,
+                model_d,
+                pitcher_d,
+                rest_effect,
+                games_2026,
+                HISTORICAL_NUM_SIMS,
             )
-
-            p_mat, _ = (
-                simulate_full_season_probabilities(
-                    PACIFIC_TEAMS,
-                    snap["pacific"],
-                    p_future_d,
-                    model_d,
-                    pitcher_d,
-                    rest_effect,
-                    games_2026,
-                    HISTORICAL_NUM_SIMS,
-                )
+            p_mat, _ = simulate_full_season_probabilities(
+                PACIFIC_TEAMS,
+                snap["pacific"],
+                p_future_d,
+                model_d,
+                pitcher_d,
+                rest_effect,
+                games_2026,
+                HISTORICAL_NUM_SIMS,
             )
 
         for t in snap["central"]:
             mat = c_mat[t["team"]]
-
-            t["champ_prob"] = (
-                100
-                if t.get("magic_1st") == "確定"
-                else mat[1]
-            )
-
-            t["cs_prob"] = (
-                100
-                if t.get("magic_3rd") == "確定"
-                else sum(
-                    mat[r]
-                    for r in (1, 2, 3)
-                )
-            )
-
+            t["champ_prob"] = 100 if t.get("magic_1st") == "確定" else mat[1]
+            t["cs_prob"] = 100 if t.get("magic_3rd") == "確定" else sum(mat[r] for r in (1, 2, 3))
         for t in snap["pacific"]:
             mat = p_mat[t["team"]]
-
-            t["champ_prob"] = (
-                100
-                if t.get("magic_1st") == "確定"
-                else mat[1]
-            )
-
-            t["cs_prob"] = (
-                100
-                if t.get("magic_3rd") == "確定"
-                else sum(
-                    mat[r]
-                    for r in (1, 2, 3)
-                )
-            )
+            t["champ_prob"] = 100 if t.get("magic_1st") == "確定" else mat[1]
+            t["cs_prob"] = 100 if t.get("magic_3rd") == "確定" else sum(mat[r] for r in (1, 2, 3))
 
         del snap["_model"]
         del snap["_pitcher_stats"]
 
     # Latest schedules for championship-clinch cards.
-    def build_filtered_clinch_schedule(
-        team_name,
-        future_matches_local,
-        clinch_date_map,
-        champ_prob,
-        model,
-        pitcher_stats
-    ):
-        all_future_dates = sorted(
-            set(
-                [m["date"] for m in future_matches_local]
-            )
-            |
-            set(clinch_date_map.keys())
-        )
-
+    def build_filtered_clinch_schedule(team_name, future_matches_local, clinch_date_map, champ_prob, model, pitcher_stats):
+        all_future_dates = sorted(set([m["date"] for m in future_matches_local]) | set(clinch_date_map.keys()))
         rows = []
         cumulative = 0.0
-
         for d in all_future_dates:
             match = next(
-                (
-                    m for m in future_matches_local
-                    if (
-                        m["date"] == d and
-                        (
-                            m["home"] == team_name or
-                            m["away"] == team_name
-                        )
-                    )
-                ),
+                (m for m in future_matches_local if m["date"] == d and (m["home"] == team_name or m["away"] == team_name)),
                 None,
             )
-
-            prob_raw = clinch_date_map.get(
-                d,
-                0.0
-            )
-
-            m_int = int(d[5:7])
-            d_int = int(d[8:10])
-
-            is_tentative = (
-                m_int == 10 and
-                d_int >= 7
-            )
-
-            date_display = (
-                f"({m_int}/{d_int})"
-                if is_tentative
-                else f"{m_int}/{d_int}"
-            )
+            prob_raw = clinch_date_map.get(d, 0.0)
+            m_int, d_int = int(d[5:7]), int(d[8:10])
+            is_tentative = (m_int == 10 and d_int >= 7)
+            date_display = f"({m_int}/{d_int})" if is_tentative else f"{m_int}/{d_int}"
 
             if match:
-                is_home = (
-                    match["home"] == team_name
-                )
-
-                opp = (
-                    match["away"]
-                    if is_home
-                    else match["home"]
-                )
-
+                is_home = match["home"] == team_name
+                opp = match["away"] if is_home else match["home"]
                 host = match["home"]
-
-                ground = STADIUM_NAMES.get(
-                    host,
-                    "球場"
-                )
-
-                stadium = STADIUM_NAMES.get(
-                    host,
-                    "東京D"
-                )
-
-                h_start = (
-                    match.get("home_starter")
-                    if match.get("starter_confirmed")
-                    else "未定"
-                )
-
-                a_start = (
-                    match.get("away_starter")
-                    if match.get("starter_confirmed")
-                    else "未定"
-                )
-
-                rest_diff = rest_difference_for_game(
-                    match,
-                    games_2026,
-                    as_of_date=None
-                )
-
-                probs = predict_game(
-                    model,
-                    match["home"],
-                    match["away"],
-                    stadium,
-                    h_start or "未定",
-                    a_start or "未定",
-                    pitcher_stats,
-                    rest_diff,
-                    rest_effect
-                )
-
-                win_expect = (
-                    probs["home"]
-                    if is_home
-                    else probs["away"]
-                )
-
-                win_expect_str = str(
-                    int(
-                        round(
-                            win_expect * 100.0
-                        )
-                    )
-                )
-
+                ground = STADIUM_NAMES.get(host, "球場")
+                stadium = STADIUM_NAMES.get(host, "東京D")
+                h_start = match.get("home_starter") if match.get("starter_confirmed") else "未定"
+                a_start = match.get("away_starter") if match.get("starter_confirmed") else "未定"
+                rest_diff = rest_difference_for_game(match, games_2026, as_of_date=None)
+                probs = predict_game(model, match["home"], match["away"], stadium, h_start or "未定", a_start or "未定", pitcher_stats, rest_diff, rest_effect)
+                win_expect = probs["home"] if is_home else probs["away"]
+                win_expect_str = str(int(round(win_expect * 100.0)))
             else:
                 opp = "-"
                 ground = "-"
                 win_expect_str = "-"
 
             cumulative += prob_raw
-
             rows.append({
                 "date": date_display,
                 "raw_date": d,
@@ -2747,85 +1671,41 @@ def build_all_history_with_predictions(
                 "win_expect": win_expect_str,
             })
 
-        first_idx = next(
-            (
-                i for i, r in enumerate(rows)
-                if r["clinch_prob_val"] > 0.001
-            ),
-            None
-        )
-
+        first_idx = next((i for i, r in enumerate(rows) if r["clinch_prob_val"] > 0.001), None)
         if first_idx is not None:
             rows = rows[first_idx:]
         else:
-            rows = [
-                r for r in rows
-                if r["opp"] != "-"
-            ][-8:]
+            rows = [r for r in rows if r["opp"] != "-"][-8:]
 
         cum = 0.0
-
         for row in rows:
             val = row["clinch_prob_val"]
             cum += val
-
             if val < 0.001:
                 row["clinch_prob_str"] = "-"
             elif val < 1.0:
-                row["clinch_prob_str"] = (
-                    f"{val:.1f}%"
-                    if val >= 0.1
-                    else f"{val:.2f}%"
-                )
+                row["clinch_prob_str"] = f"{val:.1f}%" if val >= 0.1 else f"{val:.2f}%"
             else:
-                row["clinch_prob_str"] = (
-                    f"{int(round(val))}%"
-                )
-
+                row["clinch_prob_str"] = f"{int(round(val))}%"
             if cum < 0.001:
                 row["cum_prob_str"] = "-"
             elif cum < 1.0:
-                row["cum_prob_str"] = (
-                    f"{cum:.1f}%"
-                    if cum >= 0.1
-                    else f"{cum:.2f}%"
-                )
+                row["cum_prob_str"] = f"{cum:.1f}%" if cum >= 0.1 else f"{cum:.2f}%"
             else:
-                row["cum_prob_str"] = (
-                    f"{int(round(cum))}%"
-                )
-
+                row["cum_prob_str"] = f"{int(round(cum))}%"
         return rows
 
     latest_c = history_snapshots[last_eval_date]["central"]
     latest_p = history_snapshots[last_eval_date]["pacific"]
-
     c_schedules = {
         t["team"]: build_filtered_clinch_schedule(
-            t["team"],
-            c_future,
-            c_clinch_dates.get(
-                t["team"],
-                {}
-            ),
-            t["champ_prob"],
-            latest_model,
-            latest_pitcher_stats
+            t["team"], c_future, c_clinch_dates.get(t["team"], {}), t["champ_prob"], latest_model, latest_pitcher_stats
         )
         for t in latest_c
     }
-
     p_schedules = {
         t["team"]: build_filtered_clinch_schedule(
-            t["team"],
-            p_future,
-            p_clinch_dates.get(
-                t["team"],
-                {}
-            ),
-            t["champ_prob"],
-            latest_model,
-            latest_pitcher_stats
+            t["team"], p_future, p_clinch_dates.get(t["team"], {}), t["champ_prob"], latest_model, latest_pitcher_stats
         )
         for t in latest_p
     }
@@ -2842,67 +1722,31 @@ def build_all_history_with_predictions(
             "main_simulations": MAIN_NUM_SIMS,
             "historical_simulations": HISTORICAL_NUM_SIMS,
             "recency_half_life_days": RECENCY_HALF_LIFE_DAYS,
+            "draw_baseline_rate": round(draw_baseline_rate, 2) if draw_baseline_rate is not None else None,
+            "draw_baseline_period": "2016-2025実績（参考値）",
             "prior_season_decay": PRIOR_SEASON_DECAY,
-            "rest_effect_logit_per_day": round(
-                rest_effect,
-                6
-            ),
+            "rest_effect_logit_per_day": round(rest_effect, 6),
             "environment": {
-                "home_adv_log": round(
-                    environment["home_adv_log"],
-                    6
-                ),
-                "league_run_per_team_game": round(
-                    environment["league_rpg"],
-                    4
-                ),
-                "park_log": {
-                    k: round(v, 6)
-                    for k, v in environment["park_log"].items()
-                },
+                "home_adv_log": round(environment["home_adv_log"], 6),
+                "league_run_per_team_game": round(environment["league_rpg"], 4),
+                "park_log": {k: round(v, 6) for k, v in environment["park_log"].items()},
             },
-            "starter_policy": (
-                "confirmed manual starter information only; "
-                "strong shrinkage"
-            ),
-            "draw_model": {
-                "method": (
-                    "Poisson score-distribution "
-                    "calibrated to empirical NPB draw rate"
-                ),
-                "baseline_draw_rate": BASE_DRAW_RATE,
-                "baseline_period": (
-                    "2016-2019 + 2022-2025"
-                ),
-                "baseline_draws": 160,
-                "baseline_games": 6864,
-                "relative_exponent": 0.65,
-                "min_draw_rate": MIN_DRAW_RATE,
-                "max_draw_rate": MAX_DRAW_RATE,
-                "excluded_period": "2020-2021",
+            "starter_policy": "confirmed manual starter information only; strong shrinkage",
+            "draw_model": "score distribution derived; no fixed 4.5% assumption",
+            "championship_band": {
+                "method": "parameter-uncertainty scenarios + reduced Monte Carlo",
+                "low_quantile": UNCERTAINTY_LOW_Q,
+                "high_quantile": UNCERTAINTY_HIGH_Q,
+                "model_sims": UNCERTAINTY_MODEL_SIMS,
+                "season_sims_per_model": UNCERTAINTY_SEASON_SIMS,
+                "trigger": "two or more teams remain self-clinchable for 1st",
             },
         },
     }
 
-    jst_today = (
-        datetime.datetime.now(
-            datetime.timezone.utc
-        )
-        + datetime.timedelta(hours=9)
-    ).strftime("%Y-%m-%d")
-
-    final_default_date = (
-        jst_today
-        if jst_today in all_dates
-        else last_eval_date
-    )
-
-    return (
-        all_dates,
-        final_default_date,
-        history_snapshots,
-        simulation_payload
-    )
+    jst_today = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=9)).strftime("%Y-%m-%d")
+    final_default_date = jst_today if jst_today in all_dates else last_eval_date
+    return all_dates, final_default_date, history_snapshots, simulation_payload
 
 # ------------------------------------------------------------
 # Main
@@ -2910,13 +1754,7 @@ def build_all_history_with_predictions(
 
 def main():
     historical_games, games_2026 = load_all_games()
-
-    dates, default_latest, history, sim_data = (
-        build_all_history_with_predictions(
-            historical_games,
-            games_2026
-        )
-    )
+    dates, default_latest, history, sim_data = build_all_history_with_predictions(historical_games, games_2026)
 
     output = {
         "latest_date": default_latest,
@@ -2924,25 +1762,13 @@ def main():
         "history": history,
         "simulation": sim_data,
     }
-
-    with open(
-        HISTORY_FILE,
-        "w",
-        encoding="utf-8"
-    ) as f:
-        json.dump(
-            output,
-            f,
-            ensure_ascii=False,
-            indent=2
-        )
+    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+        json.dump(output, f, ensure_ascii=False, indent=2)
 
     print(
         "解析・予測更新完了："
         f"{dates[0]} ～ {dates[-1]} / "
-        f"Poisson攻守モデル + 複数年prior + "
-        f"recency + park/home + starter + rest / "
-        f"引き分け基準率 {BASE_DRAW_RATE:.2%} / "
+        f"Poisson攻守モデル + 複数年prior + recency + park/home + starter + rest / "
         f"Monte Carlo {MAIN_NUM_SIMS}回"
     )
 
