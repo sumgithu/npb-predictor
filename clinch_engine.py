@@ -140,6 +140,23 @@ EARLY_SEASON_CURRENT_WEIGHT_MIN = 0.08
 EARLY_SEASON_CURRENT_WEIGHT_MAX = 0.95
 EARLY_SEASON_CURRENT_WEIGHT_SCALE = 45.0
 
+# ------------------------------------------------------------
+# Draw-probability calibration
+# ------------------------------------------------------------
+# The Poisson score distribution is used to determine the relative
+# home-vs-away strength, but its raw same-score probability is NOT used as
+# the NPB draw probability. At realistic NPB run environments, independent
+# Poisson scoring can imply a draw rate well above the historical league rate.
+# Instead, start from an empirical NPB baseline of about 4.5% and shrink it
+# gradually toward the observed 2026 draw rate as more games are completed.
+# This keeps early-season draw probabilities near the historical baseline and
+# allows them to converge toward the current-season level (around 2.2% in the
+# present 2026 data) without becoming unstable.
+DRAW_PRIOR_RATE = 0.045
+DRAW_PRIOR_EFFECTIVE_GAMES = 40.0
+DRAW_RATE_MIN = 0.020
+DRAW_RATE_MAX = 0.060
+
 STADIUM_NAMES = {
     "阪神": "甲子園", "巨人": "東京D", "ＤｅＮＡ": "横浜",
     "ヤクルト": "神宮", "中日": "バンテリン", "広島": "マツダS",
@@ -779,8 +796,8 @@ def estimate_environment(historical_games):
 def estimate_historical_draw_rate(historical_games):
     """Descriptive draw baseline from completed 2016-2025 games.
 
-    The prediction model does NOT use this as a fixed draw probability.
-    It is reported only as a reference metric for users.
+    Reported only as a reference metric. The forecast uses the calibrated
+    draw-rate function below rather than the raw Poisson same-score rate.
     """
     total = 0
     draws = 0
@@ -791,6 +808,23 @@ def estimate_historical_draw_rate(historical_games):
         if int(g["home_score"]) == int(g["away_score"]):
             draws += 1
     return (draws / total * 100.0) if total else None
+
+
+def estimate_current_draw_rate(games_2026, target_date):
+    """Calibrate the draw probability for a forecast made on target_date.
+
+    A 4.5% historical NPB baseline acts like a small prior sample. As 2026
+    games accumulate, the observed 2026 draw rate gradually replaces that
+    prior. Information after target_date is never used.
+    """
+    completed = [
+        g for g in games_2026
+        if is_finished(g) and g["date"] < target_date
+    ]
+    n = len(completed)
+    draws = sum(1 for g in completed if int(g["home_score"]) == int(g["away_score"]))
+    smoothed = (DRAW_PRIOR_RATE * DRAW_PRIOR_EFFECTIVE_GAMES + draws) / (DRAW_PRIOR_EFFECTIVE_GAMES + n)
+    return max(DRAW_RATE_MIN, min(DRAW_RATE_MAX, smoothed))
 
 
 # ------------------------------------------------------------
@@ -1086,8 +1120,15 @@ def poisson_pmf(k, lam):
     return math.exp(-lam + k * math.log(lam) - math.lgamma(k + 1.0))
 
 
-def three_way_from_scores(lam_home, lam_away):
-    ph = pa = pd = 0.0
+def three_way_from_scores(lam_home, lam_away, draw_rate):
+    """Return H/D/A probabilities with a calibrated NPB draw rate.
+
+    Poisson scoring still supplies the relative home/away odds, but draw is
+    explicitly calibrated to the empirical league/season level. This avoids
+    the severe overprediction of draws caused by treating independent Poisson
+    same-score probability as the actual NPB draw probability.
+    """
+    ph = pa = 0.0
     home_pmf = [poisson_pmf(k, lam_home) for k in range(MAX_RUNS + 1)]
     away_pmf = [poisson_pmf(k, lam_away) for k in range(MAX_RUNS + 1)]
     for h, hp in enumerate(home_pmf):
@@ -1097,12 +1138,16 @@ def three_way_from_scores(lam_home, lam_away):
                 ph += p
             elif h < a:
                 pa += p
-            else:
-                pd += p
-    total = ph + pd + pa
-    if total <= 0:
-        return 0.5, 0.0, 0.5
-    return ph / total, pd / total, pa / total
+
+    decisive_total = ph + pa
+    if decisive_total <= 0:
+        return 0.5 * (1.0 - draw_rate), draw_rate, 0.5 * (1.0 - draw_rate)
+
+    draw_rate = max(DRAW_RATE_MIN, min(DRAW_RATE_MAX, float(draw_rate)))
+    non_draw = 1.0 - draw_rate
+    p_home = non_draw * ph / decisive_total
+    p_away = non_draw * pa / decisive_total
+    return p_home, draw_rate, p_away
 
 
 def apply_conditional_logit_adjustment(p_home, p_draw, p_away, log_odds_adjust):
@@ -1114,7 +1159,7 @@ def apply_conditional_logit_adjustment(p_home, p_draw, p_away, log_odds_adjust):
     return new_home, p_draw, new_away
 
 
-def predict_game(model, home, away, stadium, home_starter, away_starter, pitcher_stats, rest_diff, rest_effect):
+def predict_game(model, home, away, stadium, home_starter, away_starter, pitcher_stats, rest_diff, rest_effect, draw_rate):
     park = model["park_log"].get(stadium, 0.0)
     home_log = model["intercept"] + model["home_adv_log"] + park + model["attack"][home] - model["defense"][away]
     away_log = model["intercept"] + park + model["attack"][away] - model["defense"][home]
@@ -1126,7 +1171,7 @@ def predict_game(model, home, away, stadium, home_starter, away_starter, pitcher
 
     lam_home = safe_exp(home_log)
     lam_away = safe_exp(away_log)
-    p_home, p_draw, p_away = three_way_from_scores(lam_home, lam_away)
+    p_home, p_draw, p_away = three_way_from_scores(lam_home, lam_away, draw_rate)
 
     # Data-derived rest adjustment, applied only to the decided-game odds so
     # that draw probability remains tied to the score distribution.
@@ -1250,7 +1295,7 @@ def validate_and_assert_standings(teams):
 # Monte Carlo
 # ------------------------------------------------------------
 
-def build_future_probabilities(league_teams, remaining_matches, model, pitcher_stats, rest_effect, all_games):
+def build_future_probabilities(league_teams, remaining_matches, model, pitcher_stats, rest_effect, all_games, draw_rate):
     result = []
     for match in sorted([m for m in remaining_matches if m.get("status") == "scheduled"], key=lambda x: (x["date"], x["home"], x["away"])):
         h, a = match["home"], match["away"]
@@ -1263,7 +1308,7 @@ def build_future_probabilities(league_teams, remaining_matches, model, pitcher_s
         a_start = a_start or "未定"
         # For future games, use the current schedule to determine expected rest.
         rest_diff = rest_difference_for_game(match, all_games, as_of_date=None)
-        probs = predict_game(model, h, a, stadium, h_start, a_start, pitcher_stats, rest_diff, rest_effect)
+        probs = predict_game(model, h, a, stadium, h_start, a_start, pitcher_stats, rest_diff, rest_effect, draw_rate)
         result.append({
             "match": match,
             "p_home": probs["home"],
@@ -1285,13 +1330,13 @@ def determine_clinched(leader, teams, sim_w, sim_l, remaining_after_date):
     return True
 
 
-def simulate_full_season_probabilities(league_teams, current_standings, remaining_matches, model, pitcher_stats, rest_effect, all_games, num_sims=MAIN_NUM_SIMS, rng=None):
+def simulate_full_season_probabilities(league_teams, current_standings, remaining_matches, model, pitcher_stats, rest_effect, all_games, draw_rate, num_sims=MAIN_NUM_SIMS, rng=None):
     rank_counts = {t: {r: 0 for r in range(1, 7)} for t in league_teams}
     clinch_date_counts = {t: {} for t in league_teams}
     base_wins = {t["team"]: t["win"] for t in current_standings}
     base_losses = {t["team"]: t["lose"] for t in current_standings}
 
-    future_probs = build_future_probabilities(league_teams, remaining_matches, model, pitcher_stats, rest_effect, all_games)
+    future_probs = build_future_probabilities(league_teams, remaining_matches, model, pitcher_stats, rest_effect, all_games, draw_rate)
     rng = rng or random
     matches_by_date = defaultdict(list)
     for fp in future_probs:
@@ -1414,6 +1459,7 @@ def simulate_championship_probability_band(
     pitcher_stats,
     rest_effect,
     all_games,
+    draw_rate,
     seed_offset=0,
 ):
     """Compute a model-uncertainty sensitivity band for championship probability."""
@@ -1434,6 +1480,7 @@ def simulate_championship_probability_band(
             pitcher_stats,
             rest_effect,
             all_games,
+            draw_rate,
             UNCERTAINTY_SEASON_SIMS,
             rng=rng,
         )
@@ -1598,6 +1645,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
         # Strictly pre-target-date information for the prediction model.
         pitcher_stats = build_pitcher_start_stats(games_2026, target_date)
         model = fit_run_model(games_2026, target_date, prior, environment)
+        draw_rate_target = estimate_current_draw_rate(games_2026, target_date)
 
         for g in games_2026:
             if not is_finished(g):
@@ -1680,7 +1728,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
             h_start = h_start or "未定"
             a_start = a_start or "未定"
             rest_diff = rest_difference_for_game(g, games_2026, as_of_date=target_date)
-            probs = predict_game(model, h, a, stadium, h_start, a_start, pitcher_stats, rest_diff, rest_effect)
+            probs = predict_game(model, h, a, stadium, h_start, a_start, pitcher_stats, rest_diff, rest_effect, draw_rate_target)
 
             hs, as_ = g.get("home_score"), g.get("away_score")
             finished = is_finished(g)
@@ -1734,7 +1782,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
             if c_future_d:
                 c_band = simulate_championship_probability_band(
                     CENTRAL_TEAMS, c_table, c_future_d, model, pitcher_stats, rest_effect,
-                    games_2026, seed_offset=int(target_date[5:7] + target_date[8:10])
+                    games_2026, draw_rate_target, seed_offset=int(target_date[5:7] + target_date[8:10])
                 )
 
         if p_self_clinchable != 1:
@@ -1748,7 +1796,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
             if p_future_d:
                 p_band = simulate_championship_probability_band(
                     PACIFIC_TEAMS, p_table, p_future_d, model, pitcher_stats, rest_effect,
-                    games_2026, seed_offset=int(target_date[5:7] + target_date[8:10]) + 500
+                    games_2026, draw_rate_target, seed_offset=int(target_date[5:7] + target_date[8:10]) + 500
                 )
 
         for t in c_table:
@@ -1774,6 +1822,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
         # Store per-date fitted model privately for historical probability pass.
         history_snapshots[target_date]["_model"] = model
         history_snapshots[target_date]["_pitcher_stats"] = pitcher_stats
+        history_snapshots[target_date]["_draw_rate"] = draw_rate_target
 
     # Latest evaluation point.
     dates_with_finished = [
@@ -1783,6 +1832,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
     latest_snapshot = history_snapshots[last_eval_date]
     latest_model = latest_snapshot["_model"]
     latest_pitcher_stats = latest_snapshot["_pitcher_stats"]
+    latest_draw_rate = latest_snapshot["_draw_rate"]
 
     # Current/future matches = games without results and not cancelled.
     future_matches = [
@@ -1803,6 +1853,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
         latest_pitcher_stats,
         rest_effect,
         games_2026,
+        latest_draw_rate,
         MAIN_NUM_SIMS,
     )
     p_rank_matrix, p_clinch_dates = simulate_full_season_probabilities(
@@ -1813,6 +1864,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
         latest_pitcher_stats,
         rest_effect,
         games_2026,
+        latest_draw_rate,
         MAIN_NUM_SIMS,
     )
 
@@ -1822,6 +1874,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
         snap = history_snapshots[d]
         model_d = snap["_model"]
         pitcher_d = snap["_pitcher_stats"]
+        draw_rate_d = snap["_draw_rate"]
         # Historical simulation must treat ALL games after d as future, even
         # if those games have since been completed in the live database.
         # Do not leak future results or future starter announcements.
@@ -1852,6 +1905,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
                 pitcher_d,
                 rest_effect,
                 games_2026,
+                draw_rate_d,
                 HISTORICAL_NUM_SIMS,
             )
             p_mat, _ = simulate_full_season_probabilities(
@@ -1862,6 +1916,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
                 pitcher_d,
                 rest_effect,
                 games_2026,
+                draw_rate_d,
                 HISTORICAL_NUM_SIMS,
             )
 
@@ -1903,9 +1958,10 @@ def build_all_history_with_predictions(historical_games, games_2026):
 
         del snap["_model"]
         del snap["_pitcher_stats"]
+        del snap["_draw_rate"]
 
     # Latest schedules for championship-clinch cards.
-    def build_filtered_clinch_schedule(team_name, future_matches_local, clinch_date_map, champ_prob, model, pitcher_stats):
+    def build_filtered_clinch_schedule(team_name, future_matches_local, clinch_date_map, champ_prob, model, pitcher_stats, draw_rate):
         all_future_dates = sorted(set([m["date"] for m in future_matches_local]) | set(clinch_date_map.keys()))
         rows = []
         cumulative = 0.0
@@ -1928,7 +1984,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
                 h_start = match.get("home_starter") if match.get("starter_confirmed") else "未定"
                 a_start = match.get("away_starter") if match.get("starter_confirmed") else "未定"
                 rest_diff = rest_difference_for_game(match, games_2026, as_of_date=None)
-                probs = predict_game(model, match["home"], match["away"], stadium, h_start or "未定", a_start or "未定", pitcher_stats, rest_diff, rest_effect)
+                probs = predict_game(model, match["home"], match["away"], stadium, h_start or "未定", a_start or "未定", pitcher_stats, rest_diff, rest_effect, draw_rate)
                 win_expect = probs["home"] if is_home else probs["away"]
                 win_expect_str = str(int(round(win_expect * 100.0)))
             else:
@@ -1974,13 +2030,13 @@ def build_all_history_with_predictions(historical_games, games_2026):
     latest_p = history_snapshots[last_eval_date]["pacific"]
     c_schedules = {
         t["team"]: build_filtered_clinch_schedule(
-            t["team"], c_future, c_clinch_dates.get(t["team"], {}), t["champ_prob"], latest_model, latest_pitcher_stats
+            t["team"], c_future, c_clinch_dates.get(t["team"], {}), t["champ_prob"], latest_model, latest_pitcher_stats, latest_draw_rate
         )
         for t in latest_c
     }
     p_schedules = {
         t["team"]: build_filtered_clinch_schedule(
-            t["team"], p_future, p_clinch_dates.get(t["team"], {}), t["champ_prob"], latest_model, latest_pitcher_stats
+            t["team"], p_future, p_clinch_dates.get(t["team"], {}), t["champ_prob"], latest_model, latest_pitcher_stats, latest_draw_rate
         )
         for t in latest_p
     }
@@ -1998,6 +2054,10 @@ def build_all_history_with_predictions(historical_games, games_2026):
             "historical_simulations": HISTORICAL_NUM_SIMS,
             "recency_half_life_days": RECENCY_HALF_LIFE_DAYS,
             "draw_baseline_rate": round(draw_baseline_rate, 2) if draw_baseline_rate is not None else None,
+            "draw_calibrated_rate_latest": round(latest_draw_rate * 100.0, 2),
+            "draw_prior_rate": DRAW_PRIOR_RATE * 100.0,
+            "draw_prior_effective_games": DRAW_PRIOR_EFFECTIVE_GAMES,
+            "draw_rate_bounds": [DRAW_RATE_MIN * 100.0, DRAW_RATE_MAX * 100.0],
             "draw_baseline_period": "2016-2025実績（参考値）",
             "prior_season_decay": PRIOR_SEASON_DECAY,
             "rest_effect_logit_per_day": round(rest_effect, 6),
@@ -2007,7 +2067,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
                 "park_log": {k: round(v, 6) for k, v in environment["park_log"].items()},
             },
             "starter_policy": "confirmed manual starter information only; strong shrinkage",
-            "draw_model": "score distribution derived; no fixed 4.5% assumption",
+            "draw_model": "Poisson score model for decisive-game odds + calibrated empirical draw rate",
             "championship_band": {
                 "method": "historical-prior shrinkage + parameter-uncertainty scenarios + reduced Monte Carlo",
                 "historical_prior_period": "2005-2024 rank-history reference; historical snapshots use only years available before the target season",
