@@ -209,11 +209,18 @@
     if (Number(d) > 0) s += `<span class="draw-sub">(${d})</span>`;
     return s;
   }
-  function badge(v, rem, rank) {
+  function badge(v, rem, targetRank, showChampionshipM) {
     if (v === '確定') return '<span class="badge badge-fixed">確定</span>';
     if (typeof v === 'number') {
+      // 1位欄だけは通常のマジックナンバーとして表示しない。
+      // 自力優勝可能チームが1球団だけになった場合、その球団の
+      // チャンピョンシップナンバーとして Mxx を表示する。
+      if (targetRank === 1) {
+        if (!showChampionshipM || v > rem) return '<span class="badge-dash">-</span>';
+        return `<span class="badge badge-magic">M${v}</span>`;
+      }
       if (v > rem) return `<span class="badge badge-elim">◇${v}◇</span>`;
-      return rank === 1 ? `<span class="badge badge-magic">M${v}</span>` : `<span class="badge badge-magic">${v}</span>`;
+      return `<span class="badge badge-magic">${v}</span>`;
     }
     return '<span class="badge-dash">-</span>';
   }
@@ -259,18 +266,26 @@
     const note = document.getElementById('champ-prob-note');
     body.innerHTML = '';
     const rangeMode = list.some(t => isNum(t.champ_prob_low) && isNum(t.champ_prob_high));
-    note.textContent = rangeMode ? '（マジック点灯前：モデル不確実性を含む優勝可能性の幅）' : '';
+    note.textContent = rangeMode ? '（チャンピョンシップナンバー点灯前：モデル不確実性を含む優勝可能性の幅）' : '';
+    const selfClinchable = list.filter(t => {
+      const rem = t.remaining ?? (143 - t.games);
+      const v = t.magic_1st;
+      return v === '確定' || (typeof v === 'number' && v <= rem);
+    });
+    const championshipMTeam = selfClinchable.length === 1 ? selfClinchable[0].team : null;
+
     list.forEach(t => {
       const rem = t.remaining ?? (143 - t.games);
       const champP = t.champ_prob ?? 0;
       const csP = t.magic_3rd === '確定' ? 100 : (t.cs_prob ?? 0);
       const c = teamColor(t.team);
+      const showChampionshipM = championshipMTeam === t.team;
       body.insertAdjacentHTML('beforeend', `
         <tr>
           <td class="rank">${esc(t.rank)}</td><td class="team"><span class="team-dot" style="background:${c.main}"></span>${esc(t.team)}</td>
           <td>${esc(t.games)}</td><td>${esc(t.win)}</td><td>${esc(t.lose)}</td><td>${esc(t.draw)}</td><td class="rem">${esc(rem)}</td>
           <td>${Number(t.rate || 0).toFixed(3).replace('0.','.')}</td><td>${t.diff === 0 ? '--' : Number(t.diff || 0).toFixed(1)}</td>
-          <td>${badge(t.magic_1st,rem,1)}</td><td>${badge(t.magic_2nd,rem,2)}</td><td>${badge(t.magic_3rd,rem,3)}</td>
+          <td>${badge(t.magic_1st,rem,1,showChampionshipM)}</td><td>${badge(t.magic_2nd,rem,2,false)}</td><td>${badge(t.magic_3rd,rem,3,false)}</td>
           <td class="prob ${champP > 50 ? 'prob-high':''}">${champDisplay(t)}</td><td class="prob">${fmtPct(csP)}</td>
         </tr>`);
     });
