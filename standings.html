@@ -401,17 +401,21 @@
   }
 
   function renderClinch(list){
-    var container=document.getElementById('clinch-schedule-container'); container.innerHTML='';
-    var key=currentLeague==='central'?'central_clinch_schedules':'pacific_clinch_schedules';
-    var sched=(rawData && rawData.simulation && rawData.simulation[key]) ? rawData.simulation[key] : {};
-    list.slice(0,3).forEach(function(t){
-      var rows=sched[t.team]||[]; if(!rows.length) return;
-      var body='';
+    var container = document.getElementById('clinch-schedule-container'); 
+    container.innerHTML = '';
+    var key = currentLeague === 'central' ? 'central_clinch_schedules' : 'pacific_clinch_schedules';
+    var sched = (rawData && rawData.simulation && rawData.simulation[key]) ? rawData.simulation[key] : {};
+
+    list.slice(0, 3).forEach(function(t){
+      var rows = sched[t.team] || []; 
+      if (!rows.length) return;
+      var body = '';
       rows.forEach(function(x){
-        var has=x.clinch_prob_str!=='-'; 
-        body += '<tr><td><b>' + esc(x.date) + '</b></td><td><b>' + esc(x.opp) + '</b></td><td>' + esc(x.ground) + '</td><td class="' + (has?'val-clinch':'') + '">' + esc(x.clinch_prob_str) + '</td><td class="' + (x.cum_prob_str!=='-'?'val-cum':'') + '">' + esc(x.cum_prob_str) + '</td><td><b>' + esc(x.win_expect) + '%</b></td></tr>';
+        var has = x.clinch_prob_str !== '-'; 
+        body += '<tr><td><b>' + esc(x.date) + '</b></td><td><b>' + esc(x.opp) + '</b></td><td>' + esc(x.ground) + '</td><td class="' + (has?'val-clinch':'') + '">' + esc(x.clinch_prob_str) + '</td><td class="' + (x.cum_prob_str!=='-'?'val-cum':'') + '">' + esc(x.cum_prob_str) + '</td><td><b>' + (x.win_expect !== '-' ? esc(x.win_expect) + '%' : '-') + '</b></td></tr>';
       });
-      var card=document.createElement('div'); card.className='clinch-card';
+      var card = document.createElement('div'); 
+      card.className = 'clinch-card';
       var hasUndated = rows.some(function(x){ return x.raw_date === '9999-12-31'; });
       var undatedNote = hasUndated ? '<div style="text-align:left;font-size:.72rem;color:#64748b;margin-top:7px">※日程未定の振替試合も完走シミュレーションに含めています。日付未定のため、決定確率は「未定（2試合）」として表示します。</div>' : '';
       card.innerHTML = '<h3><span>' + esc(t.team) + '</span><span class="champ-tag">優勝確率 ' + fmtPct(t.champ_prob) + '</span></h3><table class="clinch-table"><thead><tr><th>月日</th><th>対戦</th><th>開催地</th><th>決定確率</th><th>累計</th><th>見込勝率</th></tr></thead><tbody>' + body + '</tbody></table>' + undatedNote + '<div style="text-align:right;font-size:.7rem;color:#94a3b8;margin-top:7px">※モデル設定：' + esc(modelMeta().main_simulations||'-') + '回完走解析</div>';
@@ -420,36 +424,49 @@
   }
 
   function renderLineGrid(){
-    var head=document.getElementById('line-grid-head'), body=document.getElementById('line-grid-body'); head.innerHTML=''; body.innerHTML='';
-    var key=currentLeague==='central'?'central_lines_grid':'pacific_lines_grid'; var data=(rawData && rawData.simulation && rawData.simulation[key]) ? rawData.simulation[key] : null;
-    if(!data || !data.headers || !data.headers.length) return;
-    var top='<tr>', sub='<tr>', cols='<tr>';
+    var head = document.getElementById('line-grid-head');
+    var body = document.getElementById('line-grid-body');
+    head.innerHTML = ''; 
+    body.innerHTML = '';
+    var key = currentLeague === 'central' ? 'central_lines_grid' : 'pacific_lines_grid'; 
+    var data = (rawData && rawData.simulation && rawData.simulation[key]) ? rawData.simulation[key] : null;
+    if (!data || !data.headers || !data.headers.length) return;
+
+    var top = '<tr>';
+    var sub = '<tr>';
+    var cols = '<tr>';
     data.headers.forEach(function(h){
-      var c=teamColor(h.team);
+      var c = teamColor(h.team);
       top += '<th colspan="3" class="banner-team" style="--team-main:' + c.main + ';background:' + c.light + ';color:' + c.text + '">' + esc(h.team) + '</th>';
       sub += '<th colspan="3" class="banner-sub">残り' + h.remaining + '試合（現在' + h.current_w + '勝' + h.current_l + '敗）</th>';
       cols += '<th>勝</th><th>敗</th><th>勝率</th>';
     });
-    head.innerHTML=top+'</tr>'+sub+'</tr>'+cols+'</tr>';
-    var highlightRates = {};
-    (data.headers || []).forEach(function(h){
-      var totalDecided = Number(h.current_w) + Number(h.current_l);
-      var currentRate = totalDecided > 0 ? Number(h.current_w) / totalDecided : 0;
-      var colIndex = data.headers.indexOf(h);
-      var candidates = (data.rows || [])
-        .map(function(row, idx){ return {idx: idx, cell: row[colIndex]}; })
-        .filter(function(x){ return x.cell; })
-        .filter(function(x){ return x.cell.rate >= currentRate - 1e-9; })
-        .sort(function(a, b){ return a.cell.rate - b.cell.rate; });
-      highlightRates[h.team] = new Set(candidates.slice(0, 3).map(function(x){ return x.idx; }));
+    head.innerHTML = top + '</tr>' + sub + '</tr>' + cols + '</tr>';
+
+    // 首位チーム（headers[0]）の現在の勝率ペースに最も近い「横1行のみ」を特定
+    var leaderCurrentW = Number(data.headers[0].current_w);
+    var leaderCurrentL = Number(data.headers[0].current_l);
+    var leaderCurrentRate = (leaderCurrentW + leaderCurrentL) > 0 ? (leaderCurrentW / (leaderCurrentW + leaderCurrentL)) : 0.5;
+
+    var bestRowIdx = -1;
+    var minDiff = 999;
+    (data.rows || []).forEach(function(row, idx){
+      var cell = row[0]; // 首位チームのセル
+      if (cell) {
+        var diff = Math.abs(cell.rate - leaderCurrentRate);
+        if (diff < minDiff) {
+          minDiff = diff;
+          bestRowIdx = idx;
+        }
+      }
     });
+
     data.rows.forEach(function(row, rowIdx){
       var tr = '<tr>';
-      row.forEach(function(cell, colIdx){
-        if(cell){
-          var team = data.headers[colIdx] ? data.headers[colIdx].team : null;
-          var hi = highlightRates[team] && highlightRates[team].has(rowIdx);
-          tr += '<td class="' + (hi?'line-highlight':'') + '">' + cell.w + '</td><td class="' + (hi?'line-highlight':'') + '">' + cell.l + '</td><td class="' + (hi?'line-highlight':'') + '">' + esc(cell.rate_str) + '</td>';
+      var isHighlightRow = (rowIdx === bestRowIdx);
+      row.forEach(function(cell){
+        if (cell) {
+          tr += '<td class="' + (isHighlightRow ? 'line-highlight' : '') + '">' + cell.w + '</td><td class="' + (isHighlightRow ? 'line-highlight' : '') + '">' + cell.l + '</td><td class="' + (isHighlightRow ? 'line-highlight' : '') + '">' + esc(cell.rate_str) + '</td>';
         } else {
           tr += '<td>-</td><td>-</td><td>-</td>';
         }
@@ -460,18 +477,20 @@
   }
 
   function renderH2H(list){
-    var th=document.getElementById('matrix-head'), tb=document.getElementById('matrix-body'); th.innerHTML='';tb.innerHTML='';
-    var teams=list.map(function(t){ return t.team; });
+    var th = document.getElementById('matrix-head'), tb = document.getElementById('matrix-body'); 
+    th.innerHTML = '';
+    tb.innerHTML = '';
+    var teams = list.map(function(t){ return t.team; });
     var thHtml = '<tr><th style="min-width:140px;text-align:left;padding-left:12px">チーム</th><th>試合</th><th>勝</th><th>敗</th><th>分</th><th>勝率</th><th>差</th><th>ホーム</th><th>ロード</th>';
     teams.forEach(function(t){
-      var c=teamColor(t);
+      var c = teamColor(t);
       thHtml += '<th style="background:' + c.light + ';color:' + c.text + ';border-top:3px solid ' + c.main + '">' + esc(SHORT_NAMES[t]||t) + '</th>';
     });
     thHtml += '<th>交流戦</th></tr>';
     th.innerHTML = thHtml;
 
     list.forEach(function(t){
-      var c=teamColor(t.team);
+      var c = teamColor(t.team);
       var row = '<tr><td class="team" style="padding-left:12px"><span class="team-dot" style="background:' + c.main + '"></span>' + esc(FULL_NAMES[t.team]||t.team) + '</td><td>' + t.games + '</td><td>' + t.win + '</td><td>' + t.lose + '</td><td>' + t.draw + '</td><td>' + Number(t.rate||0).toFixed(3).replace('0.','.') + '</td><td>' + (t.diff===0?'--':Number(t.diff||0).toFixed(1)) + '</td><td>' + formatRecord(t.home.win,t.home.lose,t.home.draw) + '</td><td>' + formatRecord(t.away.win,t.away.lose,t.away.draw) + '</td>';
       teams.forEach(function(o){
         if(o===t.team){
@@ -489,40 +508,48 @@
   function render(){
     if(!rawData || !rawData.history) return;
     if(!rawData.history[selectedDate]){
-      var ds=rawData.available_dates||[];
-      var past=ds.filter(function(d){ return d<=selectedDate; });
-      selectedDate=past.length?past[past.length-1]:(ds[0]||'');
-      document.getElementById('date-picker').value=selectedDate;
+      var ds = rawData.available_dates || []; 
+      var past = ds.filter(function(d){ return d <= selectedDate; });
+      selectedDate = past.length ? past[past.length-1] : (ds[0] || ''); 
+      document.getElementById('date-picker').value = selectedDate;
     }
-    var day=rawData.history[selectedDate]; if(!day) return;
-    var list=day[currentLeague]; if(!list) return;
-    renderStandings(list); renderPredictions(list,day); renderHistoryNotice(); renderRankMatrix(list); renderClinch(list); renderLineGrid(); renderH2H(list);
+    var day = rawData.history[selectedDate]; 
+    if(!day) return; 
+    var list = day[currentLeague]; 
+    if(!list) return;
+    renderStandings(list); 
+    renderPredictions(list,day); 
+    renderHistoryNotice(); 
+    renderRankMatrix(list); 
+    renderClinch(list); 
+    renderLineGrid(); 
+    renderH2H(list);
   }
 
   function switchLeague(league,button){
-    currentLeague=league;
-    var tabs=document.querySelectorAll('.tab');
-    for(var i=0; i<tabs.length; i++) tabs[i].classList.remove('active');
-    if(button) button.classList.add('active');
+    currentLeague = league; 
+    var tabs = document.querySelectorAll('.tab');
+    for(var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+    if(button) button.classList.add('active'); 
     render();
   }
 
   async function init(){
     try{
-      var res=await fetch('history_standings.json?t=' + Date.now(), {cache:'no-store'});
-      if(!res.ok) throw new Error('HTTP ' + res.status);
-      rawData=await res.json();
+      var res = await fetch('history_standings.json?t=' + Date.now(), {cache:'no-store'}); 
+      if(!res.ok) throw new Error('HTTP ' + res.status); 
+      rawData = await res.json(); 
       renderModelMetaFooter();
-      var dates=rawData.available_dates||[];
-      var picker=document.getElementById('date-picker');
+      var dates = rawData.available_dates || []; 
+      var picker = document.getElementById('date-picker');
       if(dates.length){picker.min=dates[0];picker.max=dates[dates.length-1]}
-      var today=getJstDate();
-      selectedDate=dates.includes(today)?today:(rawData.latest_date||dates[dates.length-1]||'');
-      picker.value=selectedDate;
-      picker.addEventListener('change',function(e){selectedDate=e.target.value;render();});
+      var today = getJstDate(); 
+      selectedDate = dates.includes(today) ? today : (rawData.latest_date || dates[dates.length-1] || ''); 
+      picker.value = selectedDate;
+      picker.addEventListener('change', function(e){selectedDate = e.target.value; render();});
       render();
     }catch(err){
-      document.getElementById('standings-body').innerHTML='<tr><td colspan="14" style="padding:24px;color:#dc2626">データ読み込みに失敗しました。<br>' + esc(err.message||err) + '</td></tr>';
+      document.getElementById('standings-body').innerHTML = '<tr><td colspan="14" style="padding:24px;color:#dc2626">データ読み込みに失敗しました。<br>' + esc(err.message||err) + '</td></tr>';
     }
   }
   init();
