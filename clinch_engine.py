@@ -440,50 +440,36 @@ def _normalize_manual_entry(mg):
 
 
 
-@lru_cache(maxsize=1)
-def _git_file_history(path):
-    """Return (commit_sha, commit_timestamp) history for one tracked file.
-
-    GitHub Actions checks out the full history, so this lets historical
-    snapshots use the file version that existed by the end of the target day.
-    Outside a Git checkout (for example a local ad-hoc copy), callers fall back
-    to the current files.
-    """
+@lru_cache(maxsize=8)
+def _load_git_file_timeline(path):
+    """起動時に指定ファイルの全コミット履歴と内容を一度に取得して辞書化する"""
     try:
         proc = subprocess.run(
-            [
-                "git", "log", "--follow", "--format=%H%x09%cI", "--", path
-            ],
-            check=True,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
+            ["git", "log", "--format=%H%x09%cI", "--", path],
+            check=True, capture_output=True, text=True, encoding="utf-8"
         )
     except (OSError, subprocess.CalledProcessError):
         return tuple()
 
-    history = []
+    timeline = []
     for line in proc.stdout.splitlines():
         if "\t" not in line:
             continue
         sha, iso_ts = line.split("\t", 1)
         try:
             ts = datetime.datetime.fromisoformat(iso_ts)
+            timeline.append((sha, ts))
         except ValueError:
             continue
-        history.append((sha, ts))
-    return tuple(history)
+    return tuple(timeline)
 
 
-@lru_cache(maxsize=1024)
-def _git_blob_text(commit_sha, path):
+@lru_cache(maxsize=512)
+def _get_git_blob_content(commit_sha, path):
     try:
         proc = subprocess.run(
             ["git", "show", f"{commit_sha}:{path}"],
-            check=True,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
+            check=True, capture_output=True, text=True, encoding="utf-8"
         )
         return proc.stdout
     except (OSError, subprocess.CalledProcessError, UnicodeDecodeError):
@@ -492,11 +478,12 @@ def _git_blob_text(commit_sha, path):
 
 @lru_cache(maxsize=512)
 def read_tracked_file_as_of_date(path, target_date):
-    """Read a tracked file as it existed by 23:59:59 JST of target_date."""
+    """対象日の23:59:59時点のファイル内容をキャッシュを活用して素早く取得する"""
     cutoff = datetime.datetime.fromisoformat(f"{target_date}T23:59:59+09:00")
-    for commit_sha, commit_ts in _git_file_history(path):
+    timeline = _load_git_file_timeline(path)
+    for commit_sha, commit_ts in timeline:
         if commit_ts <= cutoff:
-            return _git_blob_text(commit_sha, path)
+            return _get_git_blob_content(commit_sha, path)
     return None
 
 
