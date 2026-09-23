@@ -1640,7 +1640,10 @@ def evaluate_clinch_target(
         if threats_for_target_wins(x) < target_k:
             return "確定" if x == 0 else x
 
-    return rem_a + 1
+    # No achievable win total guarantees the requested rank.
+    # The UI should show "-" rather than an impossible sentinel such as
+    # remaining_games + 1 (e.g. CN 9 with only 8 games left).
+    return "-"
 
 def validate_and_assert_standings(teams):
     keys = ["magic_1st", "magic_2nd", "magic_3rd", "magic_4th", "magic_5th"]
@@ -1701,15 +1704,95 @@ def build_future_probabilities(league_teams, remaining_matches, model, pitcher_s
         })
     return result
 
-def determine_clinched(leader, teams, sim_w, sim_l, remaining_after_date):
-    # Conservative, win-percentage-consistent clinch test.
-    leader_min = calc_win_rate(sim_w[leader], sim_l[leader] + remaining_after_date.get(leader, 0))
-    for team in teams:
-        if team == leader:
+def determine_clinched(
+    leader,
+    teams,
+    sim_w,
+    sim_l,
+    sim_league_w,
+    sim_league_l,
+    sim_h2h,
+    remaining_after_date,
+    remaining_league_after_date,
+    remaining_h2h_after_date,
+    previous_rank_map,
+):
+    """Determine mathematical 1st-place clinch after a simulated date.
+
+    The leader is given every remaining win.  For each rival, that rival is
+    given every possible non-leader game as a win and every remaining H2H
+    game against the leader as a loss.  This maximizes the rival's final
+    winning percentage.  Ties are then resolved using the official league
+    tiebreak sequence.  If multiple rivals can simultaneously reach the same
+    winning percentage as the leader, the result remains open because a
+    multi-team tiebreak cannot be certified safely from pairwise extremes.
+    """
+    leader_rem = remaining_after_date.get(leader, 0)
+    leader_final_w = sim_w[leader] + leader_rem
+    leader_final_l = sim_l[leader]
+    leader_rate = calc_win_rate(leader_final_w, leader_final_l)
+
+    equal_rate_rivals = 0
+
+    for rival in teams:
+        if rival == leader:
             continue
-        opp_max = calc_win_rate(sim_w[team] + remaining_after_date.get(team, 0), sim_l[team])
-        if opp_max >= leader_min:
+
+        rival_rem = remaining_after_date.get(rival, 0)
+        h2h_rem = remaining_h2h_after_date.get(leader, {}).get(rival, 0)
+
+        # Rival wins every remaining game except H2H games against the leader.
+        rival_final_w = sim_w[rival] + rival_rem - h2h_rem
+        rival_final_l = sim_l[rival] + h2h_rem
+        rival_rate = calc_win_rate(rival_final_w, rival_final_l)
+
+        if rival_rate > leader_rate:
             return False
+        if rival_rate < leader_rate:
+            continue
+
+        # Exact two-team tiebreak at equal overall winning percentage.
+        leader_h2h_current = sim_h2h.get(leader, {}).get(rival, {})
+        rival_h2h_current = sim_h2h.get(rival, {}).get(leader, {})
+
+        leader_h2h_future_w = h2h_rem
+        rival_h2h_future_w = 0
+
+        leader_league_rem = remaining_league_after_date.get(leader, 0)
+        rival_league_rem = remaining_league_after_date.get(rival, 0)
+
+        leader_league_future_w = leader_league_rem
+        leader_league_future_l = 0
+
+        # H2H games are league games, and rival loses all of them.
+        rival_league_future_w = max(0, rival_league_rem - h2h_rem)
+        rival_league_future_l = h2h_rem
+
+        rival_above = _tie_break_rival_above_target(
+            leader,
+            rival,
+            leader_final_w,
+            leader_final_l,
+            rival_final_w,
+            rival_final_l,
+            int(leader_h2h_current.get("win", 0)) + leader_h2h_future_w,
+            int(rival_h2h_current.get("win", 0)) + rival_h2h_future_w,
+            sim_league_w[leader] + leader_league_future_w,
+            sim_league_l[leader] + leader_league_future_l,
+            sim_league_w[rival] + rival_league_future_w,
+            sim_league_l[rival] + rival_league_future_l,
+            previous_rank_map,
+        )
+        if rival_above:
+            return False
+
+        equal_rate_rivals += 1
+
+    # A three-or-more-team equal-WP case requires aggregate H2H handling.
+    # Keep the clinch open unless the leader has a strict WP advantage over all.
+    if equal_rate_rivals >= 2:
+        return False
+
     return True
 
 
@@ -1789,23 +1872,58 @@ def simulate_full_season_probabilities(
     sorted_dates = sorted(matches_by_date.keys())
 
     future_after = {d: {t: 0 for t in league_teams} for d in sorted_dates}
+    future_league_after = {d: {t: 0 for t in league_teams} for d in sorted_dates}
+    future_h2h_after = {
+        d: {t: {o: 0 for o in league_teams if o != t} for t in league_teams}
+        for d in sorted_dates
+    }
+
     remaining_counts = {t: 0 for t in league_teams}
+    remaining_league_counts = {t: 0 for t in league_teams}
+    remaining_h2h_counts = {
+        t: {o: 0 for o in league_teams if o != t} for t in league_teams
+    }
+
     for fp in future_probs:
         h = fp["match"]["home"]
         a = fp["match"]["away"]
-        if h in remaining_counts:
+        h_in = h in remaining_counts
+        a_in = a in remaining_counts
+
+        if h_in:
             remaining_counts[h] += 1
-        if a in remaining_counts:
+        if a_in:
             remaining_counts[a] += 1
+
+        if h_in and a_in:
+            remaining_league_counts[h] += 1
+            remaining_league_counts[a] += 1
+            remaining_h2h_counts[h][a] += 1
+            remaining_h2h_counts[a][h] += 1
+
     for d in sorted_dates:
         for fp in matches_by_date[d]:
             h = fp["match"]["home"]
             a = fp["match"]["away"]
-            if h in remaining_counts:
+            h_in = h in remaining_counts
+            a_in = a in remaining_counts
+
+            if h_in:
                 remaining_counts[h] -= 1
-            if a in remaining_counts:
+            if a_in:
                 remaining_counts[a] -= 1
+
+            if h_in and a_in:
+                remaining_league_counts[h] -= 1
+                remaining_league_counts[a] -= 1
+                remaining_h2h_counts[h][a] -= 1
+                remaining_h2h_counts[a][h] -= 1
+
         future_after[d] = dict(remaining_counts)
+        future_league_after[d] = dict(remaining_league_counts)
+        future_h2h_after[d] = {
+            t: dict(remaining_h2h_counts[t]) for t in league_teams
+        }
 
     for _ in range(num_sims):
         sim_w = dict(base_wins)
@@ -1870,7 +1988,33 @@ def simulate_full_season_probabilities(
             )
             leader = ranked[0]
             remaining_after = dict(future_after.get(d, {t: 0 for t in league_teams}))
-            if determine_clinched(leader, league_teams, sim_w, sim_l, remaining_after) and clinched_day[leader] is None:
+            remaining_league_after = dict(
+                future_league_after.get(d, {t: 0 for t in league_teams})
+            )
+            remaining_h2h_after = {
+                t: dict(
+                    future_h2h_after.get(d, {}).get(
+                        t, {o: 0 for o in league_teams if o != t}
+                    )
+                )
+                for t in league_teams
+            }
+            if (
+                determine_clinched(
+                    leader,
+                    league_teams,
+                    sim_w,
+                    sim_l,
+                    sim_league_w,
+                    sim_league_l,
+                    sim_h2h,
+                    remaining_after,
+                    remaining_league_after,
+                    remaining_h2h_after,
+                    previous_rank_map,
+                )
+                and clinched_day[leader] is None
+            ):
                 clinched_day[leader] = d
 
         final_order = _rank_simulated_teams(
