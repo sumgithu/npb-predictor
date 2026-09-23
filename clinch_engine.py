@@ -1437,69 +1437,209 @@ def get_remaining_h2h(t1, t2, h2h_played, rem_1, rem_2):
     return max(0, min(max_games - played, rem_1, rem_2))
 
 
-def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played):
-    """Calculate Championship Numbers / clinch numbers for each target rank.
+def _remaining_league_games(team, h2h_played):
+    """Count remaining same-league games from the current H2H ledger."""
+    league = CENTRAL_TEAMS if team in CENTRAL_TEAMS else PACIFIC_TEAMS
+    return sum(
+        max(0, GAMES_INTRA - h2h_played.get(team, {}).get(opp, 0))
+        for opp in league
+        if opp != team
+    )
 
-    For 1st place, this deliberately calculates a CN candidate for every team.
-    Whether it is displayed with the special ``M`` marker is decided by the
-    presentation layer: only when exactly one team remains self-clinchable for
-    1st place is that team's 1st-place CN shown as M.
+
+def _tie_break_rival_above_target(
+    target,
+    rival,
+    target_wins,
+    target_losses,
+    rival_wins,
+    rival_losses,
+    target_h2h_wins,
+    rival_h2h_wins,
+    target_league_wins,
+    target_league_losses,
+    rival_league_wins,
+    rival_league_losses,
+    previous_rank_map,
+):
+    """Apply the official two-team tiebreak sequence after equal overall rate."""
+    target_rate = calc_win_rate(target_wins, target_losses)
+    rival_rate = calc_win_rate(rival_wins, rival_losses)
+
+    if rival_rate > target_rate:
+        return True
+    if rival_rate < target_rate:
+        return False
+
+    is_central = target in CENTRAL_TEAMS and rival in CENTRAL_TEAMS
+
+    # Central League: winning percentage -> wins -> H2H -> previous rank.
+    if is_central:
+        if rival_wins > target_wins:
+            return True
+        if rival_wins < target_wins:
+            return False
+
+    target_h2h_rate = calc_win_rate(target_h2h_wins, rival_h2h_wins)
+    rival_h2h_rate = calc_win_rate(rival_h2h_wins, target_h2h_wins)
+    if rival_h2h_rate > target_h2h_rate:
+        return True
+    if rival_h2h_rate < target_h2h_rate:
+        return False
+
+    # Pacific League: after H2H, compare league-only winning percentage.
+    if not is_central:
+        target_league_rate = calc_win_rate(target_league_wins, target_league_losses)
+        rival_league_rate = calc_win_rate(rival_league_wins, rival_league_losses)
+        if rival_league_rate > target_league_rate:
+            return True
+        if rival_league_rate < target_league_rate:
+            return False
+
+    # Lower previous-season rank number is the official tiebreak advantage.
+    return previous_rank_map.get(rival, 999) < previous_rank_map.get(target, 999)
+
+
+def evaluate_clinch_target(
+    team_a, target_k, all_teams, h2h_played, previous_rank_map=None
+):
+    """Calculate CN / clinch numbers using official tiebreaks.
+
+    A candidate is calculated for every team.  The presentation layer decides
+    whether the sole self-clinchable 1st-place candidate gets the special M.
+    Equal winning percentages are resolved with the league-specific official
+    tiebreak sequence.  Multi-team equal-rate ambiguity is handled
+    conservatively rather than declaring an early false clinch.
     """
+    previous_rank_map = previous_rank_map or {
+        t["team"]: t["rank"] for t in all_teams
+    }
     ta = team_a["team"]
     rem_a = team_a["remaining"]
     a_w, a_l = team_a["win"], team_a["lose"]
 
-    a_max_rate = calc_win_rate(a_w + rem_a, a_l)
-    a_min_rate = calc_win_rate(a_w, a_l + rem_a)
+    def threats_for_target_wins(x):
+        target_future_losses = rem_a - x
+        target_final_wins = a_w + x
+        target_final_losses = a_l + target_future_losses
+        target_rate = calc_win_rate(target_final_wins, target_final_losses)
 
-    others = [ot for ot in all_teams if ot["team"] != ta]
+        strict_threats = 0
+        equal_rate_unresolved = 0
+
+        for rival in all_teams:
+            tb = rival["team"]
+            if tb == ta:
+                continue
+
+            rem_b = rival["remaining"]
+            rem_h2h = get_remaining_h2h(ta, tb, h2h_played, rem_a, rem_b)
+
+            # To maximize the rival, allocate the target's losses to H2H first.
+            # The target therefore wins the minimum feasible number of the
+            # remaining games against this rival.
+            target_h2h_future_wins = max(0, rem_h2h - target_future_losses)
+            target_h2h_future_wins = min(rem_h2h, target_h2h_future_wins)
+            rival_h2h_future_wins = rem_h2h - target_h2h_future_wins
+
+            rival_final_wins = rival["win"] + rem_b - target_h2h_future_wins
+            rival_final_losses = rival["lose"] + target_h2h_future_wins
+            rival_rate = calc_win_rate(rival_final_wins, rival_final_losses)
+
+            if rival_rate > target_rate:
+                strict_threats += 1
+                continue
+            if rival_rate < target_rate:
+                continue
+
+            # At equal overall rate, evaluate the official two-team tiebreak.
+            target_h2h_current_wins = int(
+                team_a.get("h2h", {}).get(tb, {}).get("win", 0)
+            )
+            rival_h2h_current_wins = int(
+                rival.get("h2h", {}).get(ta, {}).get("win", 0)
+            )
+
+            target_league_remaining = _remaining_league_games(ta, h2h_played)
+            rival_league_remaining = _remaining_league_games(tb, h2h_played)
+
+            # For the Pacific tiebreak, minimize the target's league winning
+            # percentage while keeping its total number of wins at x.
+            target_inter_remaining = max(
+                0, rem_a - target_league_remaining
+            )
+            target_league_future_wins = max(
+                target_h2h_future_wins,
+                max(0, x - target_inter_remaining),
+            )
+            target_league_future_wins = min(
+                target_league_remaining, target_league_future_wins
+            )
+            target_league_future_losses = (
+                target_league_remaining - target_league_future_wins
+            )
+
+            # Maximize the rival's league record: every remaining league game
+            # other than mandatory losses to the target is a rival win.
+            rival_league_future_wins = max(
+                0, rival_league_remaining - target_h2h_future_wins
+            )
+            rival_league_future_losses = target_h2h_future_wins
+
+            can_outrank = _tie_break_rival_above_target(
+                ta,
+                tb,
+                target_final_wins,
+                target_final_losses,
+                rival_final_wins,
+                rival_final_losses,
+                target_h2h_current_wins + target_h2h_future_wins,
+                rival_h2h_current_wins + rival_h2h_future_wins,
+                team_a.get("league", {}).get("win", 0)
+                + target_league_future_wins,
+                team_a.get("league", {}).get("lose", 0)
+                + target_league_future_losses,
+                rival.get("league", {}).get("win", 0)
+                + rival_league_future_wins,
+                rival.get("league", {}).get("lose", 0)
+                + rival_league_future_losses,
+                previous_rank_map,
+            )
+
+            if can_outrank:
+                strict_threats += 1
+            else:
+                equal_rate_unresolved += 1
+
+        # With multiple rivals at exactly the same attainable overall rate,
+        # a three-way H2H configuration can affect the result.  Unless the
+        # data prove otherwise, keep the clinch open rather than overstate it.
+        if strict_threats == 0 and equal_rate_unresolved >= 2:
+            strict_threats = equal_rate_unresolved
+
+        return strict_threats
+
+    # Even if the target wins every remaining game, enough rivals may still be
+    # guaranteed above it.  Then the requested rank is mathematically out of
+    # reach.
+    target_max_rate = calc_win_rate(a_w + rem_a, a_l)
     guaranteed_higher = 0
-    for ot in others:
-        ot_min_rate = calc_win_rate(ot["win"], ot["lose"] + ot["remaining"])
-        if ot_min_rate > a_max_rate:
+    for rival in all_teams:
+        if rival["team"] == ta:
+            continue
+        rival_min_rate = calc_win_rate(
+            rival["win"], rival["lose"] + rival["remaining"]
+        )
+        if rival_min_rate > target_max_rate:
             guaranteed_higher += 1
     if guaranteed_higher >= target_k:
         return "-"
 
-    threats = 0
-    for ot in others:
-        ot_max_rate = calc_win_rate(ot["win"] + ot["remaining"], ot["lose"])
-        if ot_max_rate >= a_min_rate:
-            threats += 1
-    if threats < target_k:
-        return "確定"
-
-    # For any target rank, use the nearest relevant border team and the
-    # remaining H2H series to derive the minimum number of wins needed.
-    if target_k == 1:
-        # The current leader is compared with the current 2nd place; a trailing
-        # team is compared with the current leader. This preserves a CN value
-        # for every team, which is needed to identify the sole self-clinchable
-        # team later.
-        border = all_teams[1] if team_a["rank"] == 1 else all_teams[0]
-    else:
-        border = all_teams[target_k] if team_a["rank"] <= target_k else all_teams[target_k - 1]
-
-    tb = border["team"]
-    rem_b = border["remaining"]
-    b_w, b_l = border["win"], border["lose"]
-    rem_h2h = get_remaining_h2h(ta, tb, h2h_played, rem_a, rem_b)
-
+    # Smallest number of wins that guarantees the requested rank.
     for x in range(0, rem_a + 1):
-        a_losses = rem_a - x
-        forced_b_losses = max(0, rem_h2h - a_losses)
-        b_max_win = b_w + (rem_b - forced_b_losses)
-        b_max_lose = b_l + forced_b_losses
-        b_max_rate = calc_win_rate(b_max_win, b_max_lose)
-        a_rate = calc_win_rate(a_w + x, a_l + a_losses)
-        if a_rate > b_max_rate:
+        if threats_for_target_wins(x) < target_k:
             return "確定" if x == 0 else x
 
-    b_abs_max_rate = calc_win_rate(b_w + rem_b, b_l)
-    for x in range(rem_a + 1, rem_a + 40):
-        a_rate = calc_win_rate(a_w + x, a_l)
-        if a_rate > b_abs_max_rate:
-            return x
     return rem_a + 1
 
 def validate_and_assert_standings(teams):
@@ -1953,7 +2093,9 @@ def format_league(records, league_teams, h2h_played, h2h_details, previous_rank_
     magic_names = {1: "magic_1st", 2: "magic_2nd", 3: "magic_3rd", 4: "magic_4th", 5: "magic_5th"}
     for t in table:
         for rank in range(1, 6):
-            t[magic_names[rank]] = evaluate_clinch_target(t, rank, table, h2h_played)
+            t[magic_names[rank]] = evaluate_clinch_target(
+            t, rank, table, h2h_played, previous_rank_map
+        )
     return validate_and_assert_standings(table)
 
 # ------------------------------------------------------------
