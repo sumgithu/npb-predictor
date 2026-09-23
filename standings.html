@@ -406,7 +406,17 @@
     var key = currentLeague === 'central' ? 'central_clinch_schedules' : 'pacific_clinch_schedules';
     var sched = (rawData && rawData.simulation && rawData.simulation[key]) ? rawData.simulation[key] : {};
 
-    list.slice(0, 3).forEach(function(t){
+    // 優勝可能性が残るチーム（magic_1st != "-" かつ 確率 > 0）のみ表示
+    var contenders = list.filter(function(t){
+      return t.magic_1st !== '-' && Number(t.champ_prob || 0) > 0;
+    });
+
+    if (!contenders.length) {
+      container.innerHTML = '<div style="grid-column:1/-1;padding:18px;text-align:center;color:#64748b;background:#fff;border:1px solid var(--border);border-radius:12px">優勝の可能性が残る球団はありません。</div>';
+      return;
+    }
+
+    contenders.forEach(function(t){
       var rows = sched[t.team] || []; 
       if (!rows.length) return;
       var body = '';
@@ -443,7 +453,7 @@
     });
     head.innerHTML = top + '</tr>' + sub + '</tr>' + cols + '</tr>';
 
-    // 首位チーム（headers[0]）の現在の勝率ペースに最も近い「横1行のみ」を特定
+    // 首位チーム（headers[0]）の現在の勝率ペースに最も近い「横1行のみ」を特定してハイライト
     var leaderCurrentW = Number(data.headers[0].current_w);
     var leaderCurrentL = Number(data.headers[0].current_l);
     var leaderCurrentRate = (leaderCurrentW + leaderCurrentL) > 0 ? (leaderCurrentW / (leaderCurrentW + leaderCurrentL)) : 0.5;
