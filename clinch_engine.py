@@ -1598,6 +1598,21 @@ def evaluate_clinch_target(
     rem_a = team_a["remaining"]
     a_w, a_l = team_a["win"], team_a["lose"]
 
+    # --- 自チームが残り全勝しても届かない場合は数学的消滅 ("-") ---
+    max_wins_a = a_w + rem_a
+    max_rate_a = calc_win_rate(max_wins_a, a_l)
+    rivals_already_above = 0
+    for rival in all_teams:
+        if rival["team"] == ta:
+            continue
+        # ライバルの「現在の確定勝利数」と「残り全敗時の敗戦数」での最低勝率
+        min_rate_rival = calc_win_rate(rival["win"], rival["lose"] + rival["remaining"])
+        if min_rate_rival > max_rate_a:
+            rivals_already_above += 1
+
+    if rivals_already_above >= target_k:
+        return "-"
+
     def threats_for_target_wins(x):
         actual_target_wins = min(max(0, x), rem_a)
         target_future_losses = max(0, rem_a - actual_target_wins)
