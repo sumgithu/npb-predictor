@@ -537,6 +537,94 @@ def _merge_2026_master_and_manual(games_2026_master, manual_games):
     return merged
 
 
+def augment_unresolved_postponements(games):
+    """Add undated postponed games that are still missing from the schedule.
+
+    NPB regular-season pairs have a fixed number of scheduled games in the
+    site's model.  A cancelled game that has not yet been replaced by a later
+    scheduled/finished game therefore remains a real future game, even though
+    its date is unknown.  Keeping it out of the season-completion simulation
+    would understate the number of remaining games and can falsely trigger a
+    championship or final-rank clinch.
+
+    The postponed game's original matchup/home stadium are retained, but the
+    date is set to None and starter information is cleared.  The UI can then
+    display these games as "日程未定" without inventing a date.
+    """
+    base = [dict(g) for g in games]
+    existing_undated = {
+        (
+            g.get("home"),
+            g.get("away"),
+            g.get("original_date"),
+        )
+        for g in base
+        if g.get("undated_postponed")
+    }
+
+    def pair_key(home, away):
+        return tuple(sorted((home, away)))
+
+    by_pair = defaultdict(list)
+    for g in base:
+        if g.get("home") in ALL_TEAMS and g.get("away") in ALL_TEAMS:
+            by_pair[pair_key(g["home"], g["away"])].append(g)
+
+    for pair, pair_games in by_pair.items():
+        t1, t2 = pair
+        is_intra = (
+            (t1 in CENTRAL_TEAMS and t2 in CENTRAL_TEAMS)
+            or (t1 in PACIFIC_TEAMS and t2 in PACIFIC_TEAMS)
+        )
+        required = GAMES_INTRA if is_intra else GAMES_INTER
+
+        played_or_scheduled = [
+            g for g in pair_games
+            if is_finished(g) or g.get("status") == "scheduled"
+        ]
+        missing = max(0, required - len(played_or_scheduled))
+        if missing <= 0:
+            continue
+
+        cancelled = sorted(
+            [g for g in pair_games if is_cancelled(g)],
+            key=lambda x: x.get("date") or "",
+        )
+
+        # Use the unresolved cancellations as the source of the missing
+        # matchups.  In the current 2026 data this identifies the two
+        # postponed 阪神-広島 games whose make-up dates are still unknown.
+        for template in cancelled:
+            if missing <= 0:
+                break
+            marker = (
+                template.get("home"),
+                template.get("away"),
+                template.get("date"),
+            )
+            if marker in existing_undated:
+                continue
+
+            future = dict(template)
+            future["original_date"] = template.get("date")
+            future["date"] = None
+            future["status"] = "scheduled"
+            future["home_score"] = None
+            future["away_score"] = None
+            future["home_starter"] = "未定"
+            future["away_starter"] = "未定"
+            future["starter_confirmed"] = False
+            future["home_pitcher"] = ""
+            future["away_pitcher"] = ""
+            future["source"] = "postponed-undated"
+            future["undated_postponed"] = True
+            base.append(future)
+            existing_undated.add(marker)
+            missing -= 1
+
+    return base
+
+
 @lru_cache(maxsize=512)
 def load_2026_games_as_of_date(target_date):
     """Return 2026 games from Git-tracked inputs as of target_date.
@@ -551,7 +639,8 @@ def load_2026_games_as_of_date(target_date):
 
     db_text = read_tracked_file_as_of_date(MANUAL_DB_FILE, target_date)
     manual_games = _parse_manual_games_text(db_text)
-    return _merge_2026_master_and_manual(master_games, manual_games)
+    merged = _merge_2026_master_and_manual(master_games, manual_games)
+    return augment_unresolved_postponements(merged)
 
 
 def load_all_games():
@@ -575,6 +664,7 @@ def load_all_games():
             print(f"games_db.json 読込警告: {exc}")
 
     merged_2026 = _merge_2026_master_and_manual(games_2026_master, manual_games)
+    merged_2026 = augment_unresolved_postponements(merged_2026)
     historical_games.sort(key=lambda x: (x["date"], x["home"], x["away"]))
     return historical_games, merged_2026
 
@@ -1675,10 +1765,17 @@ def validate_and_assert_standings(teams):
 def build_future_probabilities(league_teams, remaining_matches, model, pitcher_stats, rest_effect, all_games, draw_rate):
     result = []
     league_set = set(league_teams)
-    for match in sorted(
-        [m for m in remaining_matches if m.get("status") == "scheduled"],
-        key=lambda x: (x["date"], x["home"], x["away"]),
-    ):
+    scheduled_matches = [
+        m for m in remaining_matches if m.get("status") == "scheduled"
+    ]
+    scheduled_matches.sort(
+        key=lambda x: (
+            x.get("date") or "9999-12-31",
+            x["home"],
+            x["away"],
+        )
+    )
+    for match in scheduled_matches:
         h, a = match["home"], match["away"]
         if h not in league_set and a not in league_set:
             continue
@@ -1687,13 +1784,19 @@ def build_future_probabilities(league_teams, remaining_matches, model, pitcher_s
         a_start = match.get("away_starter") if match.get("starter_confirmed") else "未定"
         h_start = h_start or "未定"
         a_start = a_start or "未定"
-        rest_diff = rest_difference_for_game(match, all_games, as_of_date=None)
+        if match.get("date"):
+            rest_diff = rest_difference_for_game(match, all_games, as_of_date=None)
+        else:
+            # Undated postponed games have no valid rest calendar or confirmed
+            # starter information, so do not manufacture a rest adjustment.
+            rest_diff = 0.0
         probs = predict_game(
             model, h, a, stadium, h_start, a_start,
             pitcher_stats, rest_diff, rest_effect, draw_rate,
         )
         result.append({
             "match": match,
+            "simulation_date": match.get("date") or "9999-12-31",
             "p_home": probs["home"],
             "p_draw": probs["draw"],
             "p_away": probs["away"],
@@ -1864,7 +1967,7 @@ def simulate_full_season_probabilities(
     rng = rng or random
     matches_by_date = defaultdict(list)
     for fp in future_probs:
-        matches_by_date[fp["match"]["date"]].append(fp)
+        matches_by_date[fp["simulation_date"]].append(fp)
     sorted_dates = sorted(matches_by_date.keys())
 
     future_after = {d: {t: 0 for t in league_teams} for d in sorted_dates}
@@ -2630,31 +2733,90 @@ def build_all_history_with_predictions(historical_games, games_2026):
 
     # Latest schedules for championship-clinch cards.
     def build_filtered_clinch_schedule(team_name, future_matches_local, clinch_date_map, champ_prob, model, pitcher_stats, draw_rate):
-        all_future_dates = sorted(set([m["date"] for m in future_matches_local]) | set(clinch_date_map.keys()))
+        known_dates = {
+            m["date"] for m in future_matches_local
+            if m.get("date") and (m["home"] == team_name or m["away"] == team_name)
+        }
+        has_undated = any(
+            m.get("undated_postponed")
+            and (m["home"] == team_name or m["away"] == team_name)
+            for m in future_matches_local
+        )
+        all_future_dates = sorted(known_dates | set(clinch_date_map.keys()))
+        if has_undated:
+            all_future_dates.append("9999-12-31")
+        # Remove duplicates while preserving order.
+        all_future_dates = list(dict.fromkeys(all_future_dates))
         rows = []
         cumulative = 0.0
         for d in all_future_dates:
-            match = next(
-                (m for m in future_matches_local if m["date"] == d and (m["home"] == team_name or m["away"] == team_name)),
-                None,
-            )
+            if d == "9999-12-31":
+                undated = [
+                    m for m in future_matches_local
+                    if m.get("undated_postponed")
+                    and (m["home"] == team_name or m["away"] == team_name)
+                ]
+                match = undated[0] if undated else None
+            else:
+                match = next(
+                    (m for m in future_matches_local if m.get("date") == d and (m["home"] == team_name or m["away"] == team_name)),
+                    None,
+                )
             prob_raw = clinch_date_map.get(d, 0.0)
-            m_int, d_int = int(d[5:7]), int(d[8:10])
-            is_tentative = (m_int == 10 and d_int >= 7)
-            date_display = f"({m_int}/{d_int})" if is_tentative else f"{m_int}/{d_int}"
+            if d == "9999-12-31":
+                date_display = "未定（2試合）"
+            else:
+                m_int, d_int = int(d[5:7]), int(d[8:10])
+                is_tentative = (m_int == 10 and d_int >= 7)
+                date_display = f"({m_int}/{d_int})" if is_tentative else f"{m_int}/{d_int}"
 
             if match:
                 is_home = match["home"] == team_name
-                opp = match["away"] if is_home else match["home"]
-                host = match["home"]
-                ground = STADIUM_NAMES.get(host, "球場")
-                stadium = STADIUM_NAMES.get(host, "東京D")
-                h_start = match.get("home_starter") if match.get("starter_confirmed") else "未定"
+                undated_group = (
+                    d == "9999-12-31"
+                    and match.get("undated_postponed")
+                )
+                if undated_group:
+                    undated_all = [
+                        m for m in future_matches_local
+                        if m.get("undated_postponed")
+                        and (m["home"] == team_name or m["away"] == team_name)
+                    ]
+                    opponents = sorted(
+                        set(
+                            m["away"] if m["home"] == team_name else m["home"]
+                            for m in undated_all
+                        )
+                    )
+                    opp = (
+                        f"{'・'.join(opponents)}（{len(undated_all)}試合）"
+                        if opponents else f"未定（{len(undated_all)}試合）"
+                    )
+                    ground = STADIUM_NAMES.get(match["home"], "球場")
+                    win_expect_str = "-"
+                else:
+                    opp = match["away"] if is_home else match["home"]
+                    host = match["home"]
+                    ground = STADIUM_NAMES.get(host, "球場")
+                    stadium = STADIUM_NAMES.get(host, "東京D")
+                    h_start = match.get("home_starter") if match.get("starter_confirmed") else "未定"
                 a_start = match.get("away_starter") if match.get("starter_confirmed") else "未定"
-                rest_diff = rest_difference_for_game(match, games_2026, as_of_date=None)
-                probs = predict_game(model, match["home"], match["away"], stadium, h_start or "未定", a_start or "未定", pitcher_stats, rest_diff, rest_effect, draw_rate)
-                win_expect = probs["home"] if is_home else probs["away"]
-                win_expect_str = str(int(round(win_expect * 100.0)))
+                if d != "9999-12-31":
+                    rest_diff = rest_difference_for_game(match, games_2026, as_of_date=None)
+                    probs = predict_game(
+                        model,
+                        match["home"],
+                        match["away"],
+                        stadium,
+                        h_start or "未定",
+                        a_start or "未定",
+                        pitcher_stats,
+                        rest_diff,
+                        rest_effect,
+                        draw_rate,
+                    )
+                    win_expect = probs["home"] if is_home else probs["away"]
+                    win_expect_str = str(int(round(win_expect * 100.0)))
             else:
                 opp = "-"
                 ground = "-"
