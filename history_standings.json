@@ -142921,7 +142921,7 @@
           "rank": 6,
           "diff": 27.5,
           "magic_1st": "-",
-          "magic_2nd": 68,
+          "magic_2nd": "-",
           "magic_3rd": 57,
           "magic_4th": 38,
           "magic_5th": 28,
@@ -146179,7 +146179,7 @@
           "magic_5th": 1,
           "championship_prior": 33.488,
           "champ_prob_raw": 80.0,
-          "champ_prob": 75.121,
+          "champ_prob": 76.379,
           "champ_prob_prior_weight": 0.1049,
           "champ_prob_current_weight": 0.8951,
           "champ_prob_low": 75.121,
@@ -146257,7 +146257,7 @@
           "magic_5th": 2,
           "championship_prior": 23.528,
           "champ_prob_raw": 20.0,
-          "champ_prob": 20.37,
+          "champ_prob": 20.711,
           "champ_prob_prior_weight": 0.1049,
           "champ_prob_current_weight": 0.8951,
           "champ_prob_low": 20.37,
@@ -146335,7 +146335,7 @@
           "magic_5th": 11,
           "championship_prior": 8.607,
           "champ_prob_raw": 0.0,
-          "champ_prob": 0.903,
+          "champ_prob": 0.918,
           "champ_prob_prior_weight": 0.1049,
           "champ_prob_current_weight": 0.8951,
           "champ_prob_low": 0.903,
@@ -146413,7 +146413,7 @@
           "magic_5th": 16,
           "championship_prior": 6.156,
           "champ_prob_raw": 0.0,
-          "champ_prob": 0.646,
+          "champ_prob": 0.657,
           "champ_prob_prior_weight": 0.1049,
           "champ_prob_current_weight": 0.8951,
           "champ_prob_low": 0.646,
@@ -146484,18 +146484,18 @@
           },
           "rank": 5,
           "diff": 17.0,
-          "magic_1st": 57,
+          "magic_1st": "-",
           "magic_2nd": 47,
           "magic_3rd": 30,
           "magic_4th": 17,
           "magic_5th": 15,
-          "championship_prior": 15.702,
+          "championship_prior": 0.0,
           "champ_prob_raw": 0.0,
-          "champ_prob": 1.647,
+          "champ_prob": 0.0,
           "champ_prob_prior_weight": 0.1049,
           "champ_prob_current_weight": 0.8951,
-          "champ_prob_low": 1.647,
-          "champ_prob_high": 1.647,
+          "champ_prob_low": 0.0,
+          "champ_prob_high": 0.0,
           "cs_prob": 0
         },
         {
@@ -146569,7 +146569,7 @@
           "magic_5th": 19,
           "championship_prior": 12.52,
           "champ_prob_raw": 0.0,
-          "champ_prob": 1.313,
+          "champ_prob": 1.335,
           "champ_prob_prior_weight": 0.1049,
           "champ_prob_current_weight": 0.8951,
           "champ_prob_low": 1.313,
@@ -152291,7 +152291,7 @@
           "magic_5th": "確定",
           "championship_prior": 33.488,
           "champ_prob_raw": 50.0,
-          "champ_prob": 49.755,
+          "champ_prob": 50.069,
           "champ_prob_prior_weight": 0.0991,
           "champ_prob_current_weight": 0.9009,
           "champ_prob_low": 48.363,
@@ -152369,7 +152369,7 @@
           "magic_5th": "確定",
           "championship_prior": 23.528,
           "champ_prob_raw": 49.0,
-          "champ_prob": 47.813,
+          "champ_prob": 48.115,
           "champ_prob_prior_weight": 0.0991,
           "champ_prob_current_weight": 0.9009,
           "champ_prob_low": 46.475,
@@ -152447,7 +152447,7 @@
           "magic_5th": 3,
           "championship_prior": 8.607,
           "champ_prob_raw": 1.0,
-          "champ_prob": 1.804,
+          "champ_prob": 1.816,
           "champ_prob_prior_weight": 0.0991,
           "champ_prob_current_weight": 0.9009,
           "champ_prob_low": 1.754,
@@ -152518,18 +152518,18 @@
           },
           "rank": 4,
           "diff": 13.5,
-          "magic_1st": 39,
+          "magic_1st": "-",
           "magic_2nd": 35,
           "magic_3rd": 24,
           "magic_4th": 14,
           "magic_5th": 12,
-          "championship_prior": 6.156,
+          "championship_prior": 0.0,
           "champ_prob_raw": 0.0,
-          "champ_prob": 0.628,
+          "champ_prob": 0.0,
           "champ_prob_prior_weight": 0.0991,
           "champ_prob_current_weight": 0.9009,
-          "champ_prob_low": 0.61,
-          "champ_prob_high": 0.61,
+          "champ_prob_low": 0.0,
+          "champ_prob_high": 0.0,
           "cs_prob": 0
         },
         {
@@ -153331,7 +153331,7 @@
           "magic_5th": "確定",
           "championship_prior": 33.488,
           "champ_prob_raw": 68.0,
-          "champ_prob": 66.438,
+          "champ_prob": 66.858,
           "champ_prob_prior_weight": 0.0991,
           "champ_prob_current_weight": 0.9009,
           "champ_prob_low": 64.579,
@@ -153409,7 +153409,7 @@
           "magic_5th": "確定",
           "championship_prior": 23.528,
           "champ_prob_raw": 32.0,
-          "champ_prob": 32.057,
+          "champ_prob": 32.259,
           "champ_prob_prior_weight": 0.0991,
           "champ_prob_current_weight": 0.9009,
           "champ_prob_low": 31.16,
@@ -153487,7 +153487,7 @@
           "magic_5th": 3,
           "championship_prior": 8.607,
           "champ_prob_raw": 0.0,
-          "champ_prob": 0.878,
+          "champ_prob": 0.883,
           "champ_prob_prior_weight": 0.0991,
           "champ_prob_current_weight": 0.9009,
           "champ_prob_low": 0.853,
@@ -153558,18 +153558,18 @@
           },
           "rank": 4,
           "diff": 13.5,
-          "magic_1st": 39,
+          "magic_1st": "-",
           "magic_2nd": 35,
           "magic_3rd": 24,
           "magic_4th": 14,
           "magic_5th": 12,
-          "championship_prior": 6.156,
+          "championship_prior": 0.0,
           "champ_prob_raw": 0.0,
-          "champ_prob": 0.628,
+          "champ_prob": 0.0,
           "champ_prob_prior_weight": 0.0991,
           "champ_prob_current_weight": 0.9009,
-          "champ_prob_low": 0.61,
-          "champ_prob_high": 0.61,
+          "champ_prob_low": 0.0,
+          "champ_prob_high": 0.0,
           "cs_prob": 0
         },
         {
@@ -154187,7 +154187,7 @@
           "magic_1st": "-",
           "magic_2nd": "-",
           "magic_3rd": "-",
-          "magic_4th": 37,
+          "magic_4th": "-",
           "magic_5th": 34,
           "championship_prior": 0.0,
           "champ_prob_raw": 0.0,
@@ -154307,7 +154307,7 @@
           "magic_5th": "確定",
           "championship_prior": 33.488,
           "champ_prob_raw": 73.0,
-          "champ_prob": 71.072,
+          "champ_prob": 71.52,
           "champ_prob_prior_weight": 0.0991,
           "champ_prob_current_weight": 0.9009,
           "champ_prob_low": 69.083,
@@ -154385,7 +154385,7 @@
           "magic_5th": "確定",
           "championship_prior": 23.528,
           "champ_prob_raw": 27.0,
-          "champ_prob": 27.423,
+          "champ_prob": 27.596,
           "champ_prob_prior_weight": 0.0991,
           "champ_prob_current_weight": 0.9009,
           "champ_prob_low": 26.656,
@@ -154463,7 +154463,7 @@
           "magic_5th": 3,
           "championship_prior": 8.607,
           "champ_prob_raw": 0.0,
-          "champ_prob": 0.878,
+          "champ_prob": 0.883,
           "champ_prob_prior_weight": 0.0991,
           "champ_prob_current_weight": 0.9009,
           "champ_prob_low": 0.853,
@@ -154534,18 +154534,18 @@
           },
           "rank": 4,
           "diff": 13.5,
-          "magic_1st": 39,
+          "magic_1st": "-",
           "magic_2nd": 35,
           "magic_3rd": 24,
           "magic_4th": 14,
           "magic_5th": 12,
-          "championship_prior": 6.156,
+          "championship_prior": 0.0,
           "champ_prob_raw": 0.0,
-          "champ_prob": 0.628,
+          "champ_prob": 0.0,
           "champ_prob_prior_weight": 0.0991,
           "champ_prob_current_weight": 0.9009,
-          "champ_prob_low": 0.61,
-          "champ_prob_high": 0.61,
+          "champ_prob_low": 0.0,
+          "champ_prob_high": 0.0,
           "cs_prob": 0
         },
         {
@@ -155163,7 +155163,7 @@
           "magic_1st": "-",
           "magic_2nd": "-",
           "magic_3rd": "-",
-          "magic_4th": 37,
+          "magic_4th": "-",
           "magic_5th": 34,
           "championship_prior": 0.0,
           "champ_prob_raw": 0.0,
@@ -155250,7 +155250,7 @@
           "magic_5th": "確定",
           "championship_prior": 33.488,
           "champ_prob_raw": 61.0,
-          "champ_prob": 59.95,
+          "champ_prob": 60.329,
           "champ_prob_prior_weight": 0.0991,
           "champ_prob_current_weight": 0.9009,
           "champ_prob_low": 58.273,
@@ -155328,7 +155328,7 @@
           "magic_5th": "確定",
           "championship_prior": 23.528,
           "champ_prob_raw": 39.0,
-          "champ_prob": 38.544,
+          "champ_prob": 38.788,
           "champ_prob_prior_weight": 0.0991,
           "champ_prob_current_weight": 0.9009,
           "champ_prob_low": 37.466,
@@ -155406,7 +155406,7 @@
           "magic_5th": 3,
           "championship_prior": 8.607,
           "champ_prob_raw": 0.0,
-          "champ_prob": 0.878,
+          "champ_prob": 0.883,
           "champ_prob_prior_weight": 0.0991,
           "champ_prob_current_weight": 0.9009,
           "champ_prob_low": 0.853,
@@ -155477,18 +155477,18 @@
           },
           "rank": 4,
           "diff": 13.5,
-          "magic_1st": 39,
+          "magic_1st": "-",
           "magic_2nd": 35,
           "magic_3rd": 24,
           "magic_4th": 14,
           "magic_5th": 12,
-          "championship_prior": 6.156,
+          "championship_prior": 0.0,
           "champ_prob_raw": 0.0,
-          "champ_prob": 0.628,
+          "champ_prob": 0.0,
           "champ_prob_prior_weight": 0.0991,
           "champ_prob_current_weight": 0.9009,
-          "champ_prob_low": 0.61,
-          "champ_prob_high": 0.61,
+          "champ_prob_low": 0.0,
+          "champ_prob_high": 0.0,
           "cs_prob": 0
         },
         {
@@ -156106,7 +156106,7 @@
           "magic_1st": "-",
           "magic_2nd": "-",
           "magic_3rd": "-",
-          "magic_4th": 37,
+          "magic_4th": "-",
           "magic_5th": 34,
           "championship_prior": 0.0,
           "champ_prob_raw": 0.0,
@@ -172465,16 +172465,6 @@
           "win_expect": "-",
           "clinch_prob_str": "26%",
           "cum_prob_str": "75%"
-        },
-        {
-          "date": "未定（2試合）",
-          "raw_date": "9999-12-31",
-          "opp": "広島（2試合）",
-          "ground": "マツダS",
-          "clinch_prob_val": 26.119999999999997,
-          "win_expect": "-",
-          "clinch_prob_str": "26%",
-          "cum_prob_str": "101%"
         }
       ],
       "巨人": [
@@ -172597,26 +172587,6 @@
           "win_expect": "-",
           "clinch_prob_str": "6%",
           "cum_prob_str": "15%"
-        },
-        {
-          "date": "未定（2試合）",
-          "raw_date": "9999-12-31",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 10.100000000000001,
-          "win_expect": "-",
-          "clinch_prob_str": "10%",
-          "cum_prob_str": "25%"
-        },
-        {
-          "date": "未定（2試合）",
-          "raw_date": "9999-12-31",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 10.100000000000001,
-          "win_expect": "-",
-          "clinch_prob_str": "10%",
-          "cum_prob_str": "35%"
         }
       ],
       "ＤｅＮＡ": [
@@ -172739,26 +172709,6 @@
           "win_expect": "54",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
-        },
-        {
-          "date": "未定（2試合）",
-          "raw_date": "9999-12-31",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.0,
-          "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "未定（2試合）",
-          "raw_date": "9999-12-31",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.0,
-          "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
         }
       ]
     },
@@ -172772,16 +172722,6 @@
           "clinch_prob_val": 100.0,
           "win_expect": "-",
           "clinch_prob_str": "100%",
-          "cum_prob_str": "100%"
-        },
-        {
-          "date": "9/24",
-          "raw_date": "2026-09-24",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.0,
-          "win_expect": "-",
-          "clinch_prob_str": "-",
           "cum_prob_str": "100%"
         },
         {
@@ -172815,26 +172755,6 @@
           "cum_prob_str": "100%"
         },
         {
-          "date": "9/28",
-          "raw_date": "2026-09-28",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.0,
-          "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "100%"
-        },
-        {
-          "date": "9/29",
-          "raw_date": "2026-09-29",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.0,
-          "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "100%"
-        },
-        {
           "date": "10/1",
           "raw_date": "2026-10-01",
           "opp": "楽天",
@@ -172865,7 +172785,7 @@
           "cum_prob_str": "100%"
         },
         {
-          "date": "未定（2試合）",
+          "date": "未定（1試合）",
           "raw_date": "9999-12-31",
           "opp": "楽天（1試合）",
           "ground": "楽天モバイル",
@@ -172873,230 +172793,6 @@
           "win_expect": "-",
           "clinch_prob_str": "-",
           "cum_prob_str": "100%"
-        }
-      ],
-      "西武": [
-        {
-          "date": "9/23",
-          "raw_date": "2026-09-23",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.0,
-          "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/24",
-          "raw_date": "2026-09-24",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.0,
-          "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/25",
-          "raw_date": "2026-09-25",
-          "opp": "ロッテ",
-          "ground": "ベルーナ",
-          "clinch_prob_val": 0.0,
-          "win_expect": "61",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/26",
-          "raw_date": "2026-09-26",
-          "opp": "ロッテ",
-          "ground": "ベルーナ",
-          "clinch_prob_val": 0.0,
-          "win_expect": "61",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/27",
-          "raw_date": "2026-09-27",
-          "opp": "楽天",
-          "ground": "ベルーナ",
-          "clinch_prob_val": 0.0,
-          "win_expect": "60",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/28",
-          "raw_date": "2026-09-28",
-          "opp": "楽天",
-          "ground": "ベルーナ",
-          "clinch_prob_val": 0.0,
-          "win_expect": "60",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/29",
-          "raw_date": "2026-09-29",
-          "opp": "オリックス",
-          "ground": "ベルーナ",
-          "clinch_prob_val": 0.0,
-          "win_expect": "62",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/1",
-          "raw_date": "2026-10-01",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.0,
-          "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/2",
-          "raw_date": "2026-10-02",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.0,
-          "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/3",
-          "raw_date": "2026-10-03",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.0,
-          "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "未定（2試合）",
-          "raw_date": "9999-12-31",
-          "opp": "ロッテ（2試合）",
-          "ground": "ZOZO",
-          "clinch_prob_val": 0.0,
-          "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        }
-      ],
-      "日本ハム": [
-        {
-          "date": "9/23",
-          "raw_date": "2026-09-23",
-          "opp": "楽天",
-          "ground": "エスコンF",
-          "clinch_prob_val": 0.0,
-          "win_expect": "66",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/24",
-          "raw_date": "2026-09-24",
-          "opp": "楽天",
-          "ground": "エスコンF",
-          "clinch_prob_val": 0.0,
-          "win_expect": "65",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/25",
-          "raw_date": "2026-09-25",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.0,
-          "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/26",
-          "raw_date": "2026-09-26",
-          "opp": "オリックス",
-          "ground": "京セラ",
-          "clinch_prob_val": 0.0,
-          "win_expect": "71",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/27",
-          "raw_date": "2026-09-27",
-          "opp": "ロッテ",
-          "ground": "ZOZO",
-          "clinch_prob_val": 0.0,
-          "win_expect": "66",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/28",
-          "raw_date": "2026-09-28",
-          "opp": "ロッテ",
-          "ground": "ZOZO",
-          "clinch_prob_val": 0.0,
-          "win_expect": "66",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/29",
-          "raw_date": "2026-09-29",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.0,
-          "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/1",
-          "raw_date": "2026-10-01",
-          "opp": "ロッテ",
-          "ground": "ZOZO",
-          "clinch_prob_val": 0.0,
-          "win_expect": "71",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/2",
-          "raw_date": "2026-10-02",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.0,
-          "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/3",
-          "raw_date": "2026-10-03",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.0,
-          "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "未定（2試合）",
-          "raw_date": "9999-12-31",
-          "opp": "-",
-          "ground": "-",
-          "clinch_prob_val": 0.0,
-          "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
         }
       ]
     },
@@ -173276,18 +172972,6 @@
           "remaining": 7,
           "current_w": 86,
           "current_l": 47
-        },
-        {
-          "team": "西武",
-          "remaining": 7,
-          "current_w": 74,
-          "current_l": 58
-        },
-        {
-          "team": "日本ハム",
-          "remaining": 6,
-          "current_w": 75,
-          "current_l": 59
         }
       ],
       "rows": [
@@ -173297,9 +172981,7 @@
             "l": 0,
             "rate": 0.664,
             "rate_str": ".664"
-          },
-          null,
-          null
+          }
         ],
         [
           {
@@ -173307,9 +172989,7 @@
             "l": 1,
             "rate": 0.657,
             "rate_str": ".657"
-          },
-          null,
-          null
+          }
         ],
         [
           {
@@ -173317,9 +172997,7 @@
             "l": 2,
             "rate": 0.65,
             "rate_str": ".650"
-          },
-          null,
-          null
+          }
         ],
         [
           {
@@ -173327,9 +173005,7 @@
             "l": 3,
             "rate": 0.643,
             "rate_str": ".643"
-          },
-          null,
-          null
+          }
         ],
         [
           {
@@ -173337,9 +173013,7 @@
             "l": 4,
             "rate": 0.636,
             "rate_str": ".636"
-          },
-          null,
-          null
+          }
         ],
         [
           {
@@ -173347,9 +173021,7 @@
             "l": 5,
             "rate": 0.629,
             "rate_str": ".629"
-          },
-          null,
-          null
+          }
         ],
         [
           {
@@ -173357,9 +173029,7 @@
             "l": 6,
             "rate": 0.621,
             "rate_str": ".621"
-          },
-          null,
-          null
+          }
         ],
         [
           {
@@ -173367,18 +173037,6 @@
             "l": 7,
             "rate": 0.614,
             "rate_str": ".614"
-          },
-          {
-            "w": 7,
-            "l": 0,
-            "rate": 0.583,
-            "rate_str": ".583"
-          },
-          {
-            "w": 6,
-            "l": 0,
-            "rate": 0.579,
-            "rate_str": ".579"
           }
         ]
       ]
@@ -173403,18 +173061,18 @@
         "home_adv_log": 0.014321,
         "league_run_per_team_game": 3.8032,
         "park_log": {
-          "ベルーナ": 0.042052,
-          "マツダS": 0.023882,
+          "甲子園": -0.082069,
           "PayPay": 0.001619,
-          "エスコンF": -0.010673,
+          "マツダS": 0.023882,
+          "バンテリン": -0.136915,
+          "京セラ": -0.043952,
           "楽天モバイル": 0.002303,
           "横浜": 0.060396,
-          "バンテリン": -0.136915,
-          "東京D": -0.006074,
           "ZOZO": 0.012505,
-          "京セラ": -0.043952,
-          "神宮": 0.136927,
-          "甲子園": -0.082069
+          "ベルーナ": 0.042052,
+          "東京D": -0.006074,
+          "エスコンF": -0.010673,
+          "神宮": 0.136927
         }
       },
       "starter_policy": "confirmed manual starter information only; strong shrinkage",
