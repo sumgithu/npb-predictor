@@ -133,17 +133,8 @@ def calc_win_rate(w, l):
     decided = w + l
     return (w / decided) if decided > 0 else 0.0
 
-def normalize_probabilities_to_100(prob_dict):
-    total_val = sum(prob_dict.values())
-    if total_val <= 0:
-        return {k: 0.0 for k in prob_dict}
-    return {k: round((v / total_val) * 100.0, 1) for k, v in prob_dict.items()}
-
 def parse_date(value):
     return datetime.date.fromisoformat(value)
-
-def days_between(date_a, date_b):
-    return (parse_date(date_a) - parse_date(date_b)).days
 
 def parse_year_games_from_text(raw_text, target_year):
     normalized = raw_text.replace("\r\n", "\n").replace("\r", "\n")
@@ -722,7 +713,7 @@ def apply_championship_prior_shrinkage(table, league_teams, raw_champ_probs, raw
         p0 = prior.get(team, 1.0 / len(league_teams)) * 100.0
         raw = float(raw_champ_probs.get(team, 0.0))
 
-        # 1位の可能性が数学的に消滅（"-"）しているチームは強制的に0%にする
+        # 1位可能性が消滅している球団は強制的に0%固定
         if t.get("magic_1st") == "-":
             blended_p = 0.0
             p0 = 0.0
@@ -1261,18 +1252,58 @@ def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played, previous_ran
     rem_a = team_a["remaining"]
     a_w, a_l = team_a["win"], team_a["lose"]
 
-    # --- 自チームが残り全勝しても届かない場合は数学的消滅 ("-") ---
+    # 1. チームAが残り全勝したときの最大勝率
     max_wins_a = a_w + rem_a
     max_rate_a = calc_win_rate(max_wins_a, a_l)
-    rivals_already_above = 0
-    for rival in all_teams:
-        if rival["team"] == ta:
-            continue
-        min_rate_rival = calc_win_rate(rival["win"], rival["lose"] + rival["remaining"])
-        if min_rate_rival > max_rate_a:
-            rivals_already_above += 1
 
-    if rivals_already_above >= target_k:
+    # 2. 各ライバル球団の最低成績と直接対決の分析
+    rival_teams = [t for t in all_teams if t["team"] != ta]
+    guaranteed_above_count = 0
+    candidate_rivals = []
+
+    for rival in rival_teams:
+        tb = rival["team"]
+        rem_b = rival["remaining"]
+        h2h_a_b = get_remaining_h2h(ta, tb, h2h_played, rem_a, rem_b)
+        rem_other_b = max(0, rem_b - h2h_a_b)
+        min_losses_b = rival["lose"] + h2h_a_b + rem_other_b
+        min_rate_b = calc_win_rate(rival["win"], min_losses_b)
+
+        if min_rate_b > max_rate_a:
+            guaranteed_above_count += 1
+        else:
+            candidate_rivals.append(rival)
+
+    # 3. ライバル間の未消化直接対決による相互排他性の検証
+    # ライバル同士が対戦する場合、どちらかが必ず勝利するため最低勝利数が底上げされる
+    matched_pairs_above = 0
+    used_teams = set()
+    for i in range(len(candidate_rivals)):
+        t1 = candidate_rivals[i]
+        name1 = t1["team"]
+        if name1 in used_teams:
+            continue
+        for j in range(i + 1, len(candidate_rivals)):
+            t2 = candidate_rivals[j]
+            name2 = t2["team"]
+            if name2 in used_teams:
+                continue
+
+            h2h_rem = get_remaining_h2h(name1, name2, h2h_played, t1["remaining"], t2["remaining"])
+            if h2h_rem > 0:
+                # どちらが勝っても（引分含む）少なくとも一方がAを上回るかを検証
+                rate1_wins = calc_win_rate(t1["win"] + h2h_rem, t1["lose"] + t1["remaining"])
+                rate2_wins = calc_win_rate(t2["win"] + h2h_rem, t2["lose"] + t2["remaining"])
+                rate_draw = calc_win_rate(t1["win"], t1["lose"] + t1["remaining"])
+
+                # 直接対決の結果、どちらかが必ずAの最高勝率を上回る場合
+                if (rate1_wins > max_rate_a or rate2_wins > max_rate_a) and (min(rate1_wins, rate2_wins) > max_rate_a or rate2_wins > max_rate_a):
+                    matched_pairs_above += 1
+                    used_teams.add(name1)
+                    used_teams.add(name2)
+                    break
+
+    if (guaranteed_above_count + matched_pairs_above) >= target_k:
         return "-"
 
     def threats_for_target_wins(x):
@@ -1426,18 +1457,15 @@ def determine_clinched(
             continue
 
         rival_rem = remaining_after_date.get(rival, 0)
-        # ライバルは首位との直接対決も含め、残り試合すべてに勝利可能（首位が全敗想定のため）
         rival_final_w = sim_w[rival] + rival_rem
         rival_final_l = sim_l[rival]
         rival_rate = calc_win_rate(rival_final_w, rival_final_l)
 
-        # ライバルが逆転できる可能性がまだ残っているならクリンチ不成立
         if rival_rate > leader_rate:
             return False
         if rival_rate < leader_rate:
             continue
 
-        # 同率の場合のタイブレーク判定
         h2h_rem = remaining_h2h_after_date.get(leader, {}).get(rival, 0)
         leader_h2h_current = sim_h2h.get(leader, {}).get(rival, {})
         rival_h2h_current = sim_h2h.get(rival, {}).get(leader, {})
@@ -1722,9 +1750,10 @@ def self_clinchable_first_count(table):
             count += 1
     return count
 
-def build_aligned_championship_grid(top_teams_standings):
+def build_aligned_championship_grid(contenders_standings):
+    """優勝可能性が残るチームのみを対象とした優勝ラインテーブル"""
     teams_data = []
-    for t in top_teams_standings[:3]:
+    for t in contenders_standings:
         rem = t["remaining"]
         cur_w = t["win"]
         cur_l = t["lose"]
@@ -2136,74 +2165,55 @@ def build_all_history_with_predictions(historical_games, games_2026):
         del snap["_pitcher_stats"]
         del snap["_draw_rate"]
 
-    def build_unified_clinch_schedules(top3_teams, future_matches_local, clinch_dates_dict, champ_probs, model, pitcher_stats, draw_rate):
-        """上位3チームの日程行を完全に同じ日付で揃えて出力する"""
+    def build_unified_clinch_schedules(contenders, future_matches_local, clinch_dates_dict, model, pitcher_stats, draw_rate):
+        """優勝可能性のある球団のみを対象とし、日程行を共通化して出力する"""
+        if not contenders:
+            return {}
+
+        # 共通日程リストの作成（未定試合は各チーム個別判定とするため通常日程のみ集約）
         common_dates = set()
-        for t in top3_teams:
+        for t in contenders:
             known = {m["date"] for m in future_matches_local if m.get("date") and (m["home"] == t or m["away"] == t)}
             common_dates |= known
-            common_dates |= set(clinch_dates_dict.get(t, {}).keys())
-
-        has_undated = any(
-            m.get("undated_postponed") and (m["home"] in top3_teams or m["away"] in top3_teams)
-            for m in future_matches_local
-        )
+            # 未定を示す9999-12-31を除外して集約
+            clinch_dates = {k for k in clinch_dates_dict.get(t, {}).keys() if k != "9999-12-31"}
+            common_dates |= clinch_dates
 
         sorted_common_dates = sorted(common_dates)
-        if has_undated:
-            sorted_common_dates.append("9999-12-31")
 
         schedules = {}
-        for t in top3_teams:
+        for t in contenders:
             clinch_map = clinch_dates_dict.get(t, {})
             rows = []
             cumulative = 0.0
-            for d in sorted_common_dates:
-                if d == "9999-12-31":
-                    undated = [
-                        m for m in future_matches_local
-                        if m.get("undated_postponed") and (m["home"] == t or m["away"] == t)
-                    ]
-                    match = undated[0] if undated else None
-                    date_display = "未定（2試合）"
-                else:
-                    match = next(
-                        (m for m in future_matches_local if m.get("date") == d and (m["home"] == t or m["away"] == t)),
-                        None
-                    )
-                    m_int, d_int = int(d[5:7]), int(d[8:10])
-                    is_tentative = (m_int == 10 and d_int >= 7)
-                    date_display = f"({m_int}/{d_int})" if is_tentative else f"{m_int}/{d_int}"
 
+            # 1. 確定日程の走査
+            for d in sorted_common_dates:
+                match = next(
+                    (m for m in future_matches_local if m.get("date") == d and (m["home"] == t or m["away"] == t)),
+                    None
+                )
+                m_int, d_int = int(d[5:7]), int(d[8:10])
+                is_tentative = (m_int == 10 and d_int >= 7)
+                date_display = f"({m_int}/{d_int})" if is_tentative else f"{m_int}/{d_int}"
                 prob_raw = clinch_map.get(d, 0.0)
 
                 if match:
                     is_home = match["home"] == t
-                    undated_group = (d == "9999-12-31" and match.get("undated_postponed"))
-                    if undated_group:
-                        undated_all = [
-                            m for m in future_matches_local
-                            if m.get("undated_postponed") and (m["home"] == t or m["away"] == t)
-                        ]
-                        opponents = sorted(set(m["away"] if m["home"] == t else m["home"] for m in undated_all))
-                        opp = f"{'・'.join(opponents)}（{len(undated_all)}試合）" if opponents else f"未定（{len(undated_all)}試合）"
-                        ground = STADIUM_NAMES.get(match["home"], "球場")
-                        win_expect_str = "-"
-                    else:
-                        opp = match["away"] if is_home else match["home"]
-                        host = match["home"]
-                        ground = STADIUM_NAMES.get(host, "球場")
-                        stadium = STADIUM_NAMES.get(host, "東京D")
-                        h_start = match.get("home_starter") if match.get("starter_confirmed") else "未定"
-                        a_start = match.get("away_starter") if match.get("starter_confirmed") else "未定"
-                        rest_diff = rest_difference_for_game(match, games_2026, as_of_date=None)
-                        probs = predict_game(
-                            model, match["home"], match["away"], stadium,
-                            h_start or "未定", a_start or "未定", pitcher_stats,
-                            rest_diff, rest_effect, draw_rate,
-                        )
-                        win_expect = probs["home"] if is_home else probs["away"]
-                        win_expect_str = str(int(round(win_expect * 100.0)))
+                    opp = match["away"] if is_home else match["home"]
+                    host = match["home"]
+                    ground = STADIUM_NAMES.get(host, "球場")
+                    stadium = STADIUM_NAMES.get(host, "東京D")
+                    h_start = match.get("home_starter") if match.get("starter_confirmed") else "未定"
+                    a_start = match.get("away_starter") if match.get("starter_confirmed") else "未定"
+                    rest_diff = rest_difference_for_game(match, games_2026, as_of_date=None)
+                    probs = predict_game(
+                        model, match["home"], match["away"], stadium,
+                        h_start or "未定", a_start or "未定", pitcher_stats,
+                        rest_diff, rest_effect, draw_rate,
+                    )
+                    win_expect = probs["home"] if is_home else probs["away"]
+                    win_expect_str = str(int(round(win_expect * 100.0)))
                 else:
                     opp = "-"
                     ground = "-"
@@ -2219,6 +2229,26 @@ def build_all_history_with_predictions(historical_games, games_2026):
                     "win_expect": win_expect_str,
                 })
 
+            # 2. そのチーム自身に関与する未定試合が存在する場合のみ、末尾に「未定」行を追加
+            team_undated = [
+                m for m in future_matches_local
+                if m.get("undated_postponed") and (m["home"] == t or m["away"] == t)
+            ]
+            if team_undated:
+                prob_raw = clinch_map.get("9999-12-31", 0.0)
+                cumulative += prob_raw
+                opponents = sorted(set(m["away"] if m["home"] == t else m["home"] for m in team_undated))
+                opp_str = f"{'・'.join(opponents)}（{len(team_undated)}試合）" if opponents else f"未定（{len(team_undated)}試合）"
+                rows.append({
+                    "date": f"未定（{len(team_undated)}試合）",
+                    "raw_date": "9999-12-31",
+                    "opp": opp_str,
+                    "ground": STADIUM_NAMES.get(team_undated[0]["home"], "球場"),
+                    "clinch_prob_val": prob_raw,
+                    "win_expect": "-",
+                })
+
+            # 確率表記の文字列化
             cum = 0.0
             for row in rows:
                 val = row["clinch_prob_val"]
@@ -2244,16 +2274,15 @@ def build_all_history_with_predictions(historical_games, games_2026):
     latest_c = history_snapshots[last_eval_date]["central"]
     latest_p = history_snapshots[last_eval_date]["pacific"]
 
-    top3_c = [t["team"] for t in latest_c[:3]]
-    top3_p = [t["team"] for t in latest_p[:3]]
+    # 優勝可能性が残るチーム（magic_1st != "-" かつ 確率 > 0）のみを抽出
+    contenders_c = [t["team"] for t in latest_c if t.get("magic_1st") != "-" and float(t.get("champ_prob", 0)) > 0]
+    contenders_p = [t["team"] for t in latest_p if t.get("magic_1st") != "-" and float(t.get("champ_prob", 0)) > 0]
 
     c_schedules = build_unified_clinch_schedules(
-        top3_c, c_future, c_clinch_dates, {t["team"]: t["champ_prob"] for t in latest_c},
-        latest_model, latest_pitcher_stats, latest_draw_rate
+        contenders_c, c_future, c_clinch_dates, latest_model, latest_pitcher_stats, latest_draw_rate
     )
     p_schedules = build_unified_clinch_schedules(
-        top3_p, p_future, p_clinch_dates, {t["team"]: t["champ_prob"] for t in latest_p},
-        latest_model, latest_pitcher_stats, latest_draw_rate
+        contenders_p, p_future, p_clinch_dates, latest_model, latest_pitcher_stats, latest_draw_rate
     )
 
     simulation_payload = {
@@ -2261,8 +2290,8 @@ def build_all_history_with_predictions(historical_games, games_2026):
         "pacific_rank_matrix": p_rank_matrix,
         "central_clinch_schedules": c_schedules,
         "pacific_clinch_schedules": p_schedules,
-        "central_lines_grid": build_aligned_championship_grid(latest_c),
-        "pacific_lines_grid": build_aligned_championship_grid(latest_p),
+        "central_lines_grid": build_aligned_championship_grid([t for t in latest_c if t["team"] in contenders_c]),
+        "pacific_lines_grid": build_aligned_championship_grid([t for t in latest_p if t["team"] in contenders_p]),
         "model": {
             "version": "2026-09 improved Poisson attack-defense",
             "main_simulations": MAIN_NUM_SIMS,
