@@ -348,7 +348,7 @@
     const key = currentLeague === 'central' ? 'central_rank_matrix' : 'pacific_rank_matrix';
     const mat = rawData?.simulation?.[key] || {};
     const teams = list.map(t=>t.team);
-    head.innerHTML = `<tr><th class="corner">最終順位</th>${teams.map(t=>{const c=teamColor(t);return `<th class="team-head" style="--team-main:${c.main};--team-light:${c.light};--team-text:${c.text}" title="${esc(FULL_NAMES[t]||t)}">${esc(SHORT_CODE[t]||t)}</th>`}).join('')}</tr>`;
+    head.innerHTML = `<tr><th class="corner">最終順位</th>${teams.map(t=>{const c=teamColor(t);return `<th class="team-head" style="--team-main:${c.main};--team-light:${c.light};--team-text:${c.text}" title="${esc(FULL_NAMES[t]||t)}">${esc(t)}</th>`}).join('')}</tr>`;
     for(let r=1;r<=6;r++){
       let html=`<tr><td class="rank-label">${r}位</td>`;
       teams.forEach(t=>{
@@ -377,7 +377,9 @@
       let body='';
       rows.forEach(x=>{const has=x.clinch_prob_str!=='-'; body+=`<tr><td><b>${esc(x.date)}</b></td><td><b>${esc(x.opp)}</b></td><td>${esc(x.ground)}</td><td class="${has?'val-clinch':''}">${esc(x.clinch_prob_str)}</td><td class="${x.cum_prob_str!=='-'?'val-cum':''}">${esc(x.cum_prob_str)}</td><td><b>${esc(x.win_expect)}%</b></td></tr>`});
       const card=document.createElement('div'); card.className='clinch-card';
-      card.innerHTML=`<h3><span>${esc(t.team)}</span><span class="champ-tag">優勝確率 ${fmtPct(t.champ_prob)}</span></h3><table class="clinch-table"><thead><tr><th>月日</th><th>対戦</th><th>開催地</th><th>決定確率</th><th>累計</th><th>見込勝率</th></tr></thead><tbody>${body}</tbody></table><div style="text-align:right;font-size:.7rem;color:#94a3b8;margin-top:7px">※モデル設定：${esc(modelMeta().main_simulations||'-')}回完走解析</div>`;
+      const hasUndated = rows.some(x => x.raw_date === '9999-12-31');
+      const undatedNote = hasUndated ? '<div style="text-align:left;font-size:.72rem;color:#64748b;margin-top:7px">※日程未定の振替試合も完走シミュレーションに含めています。日付未定のため、決定確率は「未定（2試合）」として表示します。</div>' : '';
+      card.innerHTML=`<h3><span>${esc(t.team)}</span><span class="champ-tag">優勝確率 ${fmtPct(t.champ_prob)}</span></h3><table class="clinch-table"><thead><tr><th>月日</th><th>対戦</th><th>開催地</th><th>決定確率</th><th>累計</th><th>見込勝率</th></tr></thead><tbody>${body}</tbody></table>${undatedNote}<div style="text-align:right;font-size:.7rem;color:#94a3b8;margin-top:7px">※モデル設定：${esc(modelMeta().main_simulations||'-')}回完走解析</div>`;
       container.appendChild(card);
     });
   }
