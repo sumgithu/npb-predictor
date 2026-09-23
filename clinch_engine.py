@@ -1519,7 +1519,8 @@ def evaluate_clinch_target(
     a_w, a_l = team_a["win"], team_a["lose"]
 
     def threats_for_target_wins(x):
-        target_future_losses = rem_a - x
+        actual_target_wins = min(max(0, x), rem_a)
+        target_future_losses = max(0, rem_a - actual_target_wins)
         target_final_wins = a_w + x
         target_final_losses = a_l + target_future_losses
         target_rate = calc_win_rate(target_final_wins, target_final_losses)
@@ -1619,31 +1620,26 @@ def evaluate_clinch_target(
 
         return strict_threats
 
-    # Even if the target wins every remaining game, enough rivals may still be
-    # guaranteed above it.  Then the requested rank is mathematically out of
-    # reach.
-    target_max_rate = calc_win_rate(a_w + rem_a, a_l)
-    guaranteed_higher = 0
-    for rival in all_teams:
-        if rival["team"] == ta:
-            continue
-        rival_min_rate = calc_win_rate(
-            rival["win"], rival["lose"] + rival["remaining"]
-        )
-        if rival_min_rate > target_max_rate:
-            guaranteed_higher += 1
-    if guaranteed_higher >= target_k:
-        return "-"
-
-    # Smallest number of wins that guarantees the requested rank.
-    for x in range(0, rem_a + 1):
+    # Search beyond the physically remaining games as well.
+    #
+    # This is intentional for this site's Championship Number definition:
+    # CN is a "how many additional wins are needed" indicator, not merely a
+    # conventional magic number constrained to the remaining schedule.
+    # Therefore CN may legitimately exceed the number of games left.  The
+    # presentation layer marks such values as ◇N◇ so that users can see both
+    # the numerical threshold and that it is no longer self-clinchable.
+    #
+    # For x > remaining_games, the extra wins are hypothetical.  All actual
+    # remaining games are treated as wins for the target, while the extra
+    # amount only raises its final win total.
+    search_limit = rem_a + TOTAL_GAMES + 20
+    for x in range(0, search_limit + 1):
         if threats_for_target_wins(x) < target_k:
             return "確定" if x == 0 else x
 
-    # No achievable win total guarantees the requested rank.
-    # The UI should show "-" rather than an impossible sentinel such as
-    # remaining_games + 1 (e.g. CN 9 with only 8 games left).
-    return "-"
+    # A value should be found well before this point because the target's
+    # winning percentage approaches 1 as hypothetical wins increase.
+    return search_limit + 1
 
 def validate_and_assert_standings(teams):
     keys = ["magic_1st", "magic_2nd", "magic_3rd", "magic_4th", "magic_5th"]
