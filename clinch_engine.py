@@ -13,25 +13,6 @@ from copy import deepcopy
 # ============================================================
 # NPB Predictor - improved probability engine
 # ============================================================
-# 目的:
-#  1) 現在利用可能な試合結果・日付・球場・先発情報から
-#     1試合の勝/分/敗確率を推定
-#  2) その確率を用いてレギュラーシーズン完走をMonte Carloする
-#  3) 既存 history_standings.json の構造をできるだけ維持する
-#
-# 旧モデルからの主要変更:
-#  - Pythagorean + Log5 を主モデルから外し、得失点を直接使う
-#    opponent-adjusted の Poisson attack/defense model に変更
-#  - 2026年の直近試合を指数加重して「最近の強さ」を反映
-#  - 2016-2025 を複数年priorとして利用（2025だけに依存しない）
-#  - ホームアドバンテージと球場run environmentを過去データから推定
-#  - Poisson score distributionから勝/分/敗を直接計算（固定4.5%引分を廃止）
-#  - 先発補正は「実際に先発情報が確認できるmanual DB」のみ利用
-#  - 日付からrest effectを過去データで推定
-#  - H2Hは予測モデルへ二重計上せず、順位確定計算にのみ使用
-#  - historical snapshotの優勝確率も、その時点の情報だけでMonte Carlo推定
-#  - 未来情報リークを防止
-# ============================================================
 
 TOTAL_GAMES = 143
 GAMES_INTRA = 25
@@ -46,36 +27,22 @@ MAIN_NUM_SIMS = 5000
 HISTORICAL_NUM_SIMS = 100
 RANDOM_SEED = 20260921
 
-# Early/mid-season model-uncertainty band.
-# This is separate from Monte Carlo sampling error. We perturb the fitted
-# attack/defense parameters using a Laplace-style diagonal approximation and
-# then rerun smaller season simulations. The public page uses the 20th-80th
-# percentile of these scenario results while more than one team still has
-# a self-clinchable path to 1st place.
 UNCERTAINTY_MODEL_SIMS = 10
 UNCERTAINTY_SEASON_SIMS = 60
 UNCERTAINTY_LOW_Q = 0.20
 UNCERTAINTY_HIGH_Q = 0.80
 MODEL_UNCERTAINTY_INFLATION = 0.70
 
-# Run model hyperparameters.
-# 50日程度の半減期なら、4月の試合を9月時点で強く引きずりすぎない。
 RECENCY_HALF_LIFE_DAYS = 50.0
 PRIOR_SEASON_DECAY = 0.55
 PRIOR_L2 = 8.0
 FIT_ITERATIONS = 35
 FIT_LEARNING_RATE = 0.025
 
-# Pitcher information in the current DB is sparse and W/L is noisy.
-# Therefore keep the impact deliberately small.
 PITCHER_PRIOR_STARTS = 8.0
 MAX_PITCHER_LOG_RUN_EFFECT = 0.08
-
-# Poisson tail. MLB/NPB game scores above 20 are extremely rare; the remaining
-# tail is renormalized automatically.
 MAX_RUNS = 24
 
-# Teams and canonical names
 CENTRAL_TEAMS = ["阪神", "巨人", "ＤｅＮＡ", "ヤクルト", "中日", "広島"]
 PACIFIC_TEAMS = ["ソフトバンク", "日本ハム", "ロッテ", "楽天", "オリックス", "西武"]
 ALL_TEAMS = CENTRAL_TEAMS + PACIFIC_TEAMS
@@ -94,17 +61,6 @@ TEAM_ALIASES = {
     "ヤクルト": "ヤクルト", "東京ヤクルト": "ヤクルト",
     "中日": "中日", "中日ドラゴンズ": "中日",
 }
-
-# ------------------------------------------------------------
-# Historical championship prior / early-season shrinkage
-# ------------------------------------------------------------
-# These 2005-2024 final-rank histories are the user's 20-year reference
-# dataset.  They are used ONLY to construct the preseason/early-season
-# championship prior.  The current-game Poisson model is kept separate.
-#
-# For a 2026 forecast, the previous-season (2025) rank is derived from the
-# actual 2025 results loaded from the master game log, while the historical
-# prior itself uses the 2005-2024 20-year reference period.
 
 HISTORICAL_RANK_YEARS = list(range(2005, 2025))
 
@@ -126,35 +82,14 @@ PACIFIC_HISTORICAL_RANKS = {
     "西武":         [3,2,5,1,4,2,3,2,2,5,4,4,2,1,1,3,6,3,5,6],
 }
 
-# Smoothing strength for historical rates.  A value of 3 means that each
-# rank/category receives three pseudo-observations with a league-wide title
-# rate of 1/6.  This prevents small historical cells such as "0 of 19" from
-# producing a literal 0% preseason prior.
 HISTORICAL_PRIOR_SMOOTHING = 3.0
-
-# Mix the two historical signals: (A) next-year champion rate conditional on
-# previous rank, and (B) the team's own 20-year championship rate.
 HISTORICAL_RANK_PRIOR_MIX = 0.70
 HISTORICAL_TEAM_PRIOR_MIX = 0.30
 
-# Weight given to the current-season Poisson/Monte-Carlo championship model.
-# It starts low and rises smoothly as more 2026 games accumulate.
 EARLY_SEASON_CURRENT_WEIGHT_MIN = 0.08
 EARLY_SEASON_CURRENT_WEIGHT_MAX = 0.95
 EARLY_SEASON_CURRENT_WEIGHT_SCALE = 45.0
 
-# ------------------------------------------------------------
-# Draw-probability calibration
-# ------------------------------------------------------------
-# The Poisson score distribution is used to determine the relative
-# home-vs-away strength, but its raw same-score probability is NOT used as
-# the NPB draw probability. At realistic NPB run environments, independent
-# Poisson scoring can imply a draw rate well above the historical league rate.
-# Instead, start from an empirical NPB baseline of about 4.5% and shrink it
-# gradually toward the observed 2026 draw rate as more games are completed.
-# This keeps early-season draw probabilities near the historical baseline and
-# allows them to converge toward the current-season level (around 2.2% in the
-# present 2026 data) without becoming unstable.
 DRAW_PRIOR_RATE = 0.045
 DRAW_PRIOR_EFFECTIVE_GAMES = 40.0
 DRAW_RATE_MIN = 0.020
@@ -167,16 +102,11 @@ STADIUM_NAMES = {
     "楽天": "楽天モバイル", "オリックス": "京セラ", "西武": "ベルーナ",
 }
 
-# ------------------------------------------------------------
-# Generic helpers
-# ------------------------------------------------------------
-
 def normalize_team(name):
     if not name:
         return ""
     clean = str(name).strip()
     return TEAM_ALIASES.get(clean, clean)
-
 
 def is_finished(game):
     return (
@@ -185,62 +115,37 @@ def is_finished(game):
         and game.get("away_score") is not None
     )
 
-
 def is_cancelled(game):
     return game.get("status") == "cancelled"
 
-
 def safe_exp(x):
     return math.exp(max(-8.0, min(8.0, x)))
-
 
 def sigmoid(x):
     x = max(-35.0, min(35.0, x))
     return 1.0 / (1.0 + math.exp(-x))
 
-
 def logit(p):
     p = max(1e-8, min(1.0 - 1e-8, p))
     return math.log(p / (1.0 - p))
-
 
 def calc_win_rate(w, l):
     decided = w + l
     return (w / decided) if decided > 0 else 0.0
 
-
 def normalize_probabilities_to_100(prob_dict):
     total_val = sum(prob_dict.values())
     if total_val <= 0:
-        return {k: 0 for k in prob_dict}
-    scaled = {k: (v / total_val) * 100.0 for k, v in prob_dict.items()}
-    floored = {k: int(math.floor(v)) for k, v in scaled.items()}
-    remainder = {k: scaled[k] - floored[k] for k in scaled}
-    remaining_sum = 100 - sum(floored.values())
-    sorted_by_remainder = sorted(remainder.keys(), key=lambda k: remainder[k], reverse=True)
-    for i in range(max(0, remaining_sum)):
-        floored[sorted_by_remainder[i]] += 1
-    return floored
-
+        return {k: 0.0 for k in prob_dict}
+    return {k: round((v / total_val) * 100.0, 1) for k, v in prob_dict.items()}
 
 def parse_date(value):
     return datetime.date.fromisoformat(value)
 
-
 def days_between(date_a, date_b):
     return (parse_date(date_a) - parse_date(date_b)).days
 
-# ------------------------------------------------------------
-# Input parser
-# ------------------------------------------------------------
-
 def parse_year_games_from_text(raw_text, target_year):
-    """Parse one season from the user's long text log.
-
-    Important: finished games contain winning/losing decision pitchers, not
-    necessarily confirmed starters. They are therefore NOT treated as starter
-    observations. Future games may contain explicit 先発/予告 information.
-    """
     normalized = raw_text.replace("\r\n", "\n").replace("\r", "\n")
     sec_key = f"\n{target_year}\n"
     if sec_key in normalized:
@@ -262,37 +167,6 @@ def parse_year_games_from_text(raw_text, target_year):
         line = raw_line.strip()
         if not line:
             continue
-
-        # A CSV-like format, if present in future data.
-        csv_parts = [p.strip() for p in line.split(",")]
-        if len(csv_parts) >= 6 and re.match(r"^\d{4}-\d{2}-\d{2}$", csv_parts[0]):
-            c_date, h_raw, a_raw = csv_parts[0], csv_parts[1], csv_parts[2]
-            h, a = normalize_team(h_raw), normalize_team(a_raw)
-            if h in ALL_TEAMS and a in ALL_TEAMS:
-                if csv_parts[3] == "" or (len(csv_parts) >= 8 and csv_parts[7] == "1"):
-                    games.append({
-                        "date": c_date, "home": h, "away": a,
-                        "home_score": None, "away_score": None,
-                        "home_pitcher": "", "away_pitcher": "",
-                        "home_starter": "未定", "away_starter": "未定",
-                        "starter_confirmed": False,
-                        "status": "cancelled",
-                        "source": "text",
-                    })
-                else:
-                    hs, as_ = int(csv_parts[3]), int(csv_parts[4])
-                    p_info = csv_parts[5] if len(csv_parts) >= 6 else ""
-                    games.append({
-                        "date": c_date, "home": h, "away": a,
-                        "home_score": hs, "away_score": as_,
-                        # In CSV source this field may be a decision pitcher.
-                        "home_pitcher": p_info, "away_pitcher": p_info,
-                        "home_starter": "未定", "away_starter": "未定",
-                        "starter_confirmed": False,
-                        "status": "finished",
-                        "source": "text",
-                    })
-                continue
 
         date_m = re.match(r"^(\d{1,2})\/(\d{1,2})(?:[（(][日月火水木金土][）)])?\s*(.*)$", line)
         if date_m:
@@ -321,8 +195,6 @@ def parse_year_games_from_text(raw_text, target_year):
                     })
             continue
 
-        # Example:
-        # 阪神 3 - 2 DeNA 甲子園 18:00 勝：A 敗：B
         match_fin = re.search(r"([^\s\d]+)\s+(\d+)\s*-\s*(\d+)\s+([^\s\d]+)", line)
         if match_fin:
             h = normalize_team(match_fin.group(1))
@@ -357,9 +229,6 @@ def parse_year_games_from_text(raw_text, target_year):
                 })
             continue
 
-        # Postponement/reserve-day notation used in the master text:
-        #   DeNA (予備日) 中日
-        # Treat it as the scheduled matchup DeNA - 中日.
         match_reserve = re.search(r"^(.+?)\s*\(\s*予備日\s*\)\s*(.+?)(?:\s+.*)?$", line)
         if match_reserve:
             h = normalize_team(match_reserve.group(1).strip())
@@ -399,7 +268,6 @@ def parse_year_games_from_text(raw_text, target_year):
 
     return games
 
-
 def _normalize_manual_entry(mg):
     if not mg or "date" not in mg or "home" not in mg or "away" not in mg:
         return None
@@ -438,11 +306,8 @@ def _normalize_manual_entry(mg):
     entry["source"] = "manual"
     return entry
 
-
-
 @lru_cache(maxsize=8)
 def _load_git_file_timeline(path):
-    """起動時に指定ファイルの全コミット履歴と内容を一度に取得して辞書化する"""
     try:
         proc = subprocess.run(
             ["git", "log", "--format=%H%x09%cI", "--", path],
@@ -463,7 +328,6 @@ def _load_git_file_timeline(path):
             continue
     return tuple(timeline)
 
-
 @lru_cache(maxsize=512)
 def _get_git_blob_content(commit_sha, path):
     try:
@@ -475,17 +339,14 @@ def _get_git_blob_content(commit_sha, path):
     except (OSError, subprocess.CalledProcessError, UnicodeDecodeError):
         return None
 
-
 @lru_cache(maxsize=512)
 def read_tracked_file_as_of_date(path, target_date):
-    """対象日の23:59:59時点のファイル内容をキャッシュを活用して素早く取得する"""
     cutoff = datetime.datetime.fromisoformat(f"{target_date}T23:59:59+09:00")
     timeline = _load_git_file_timeline(path)
     for commit_sha, commit_ts in timeline:
         if commit_ts <= cutoff:
             return _get_git_blob_content(commit_sha, path)
     return None
-
 
 def _parse_manual_games_text(raw_text):
     if not raw_text or not raw_text.strip():
@@ -501,7 +362,6 @@ def _parse_manual_games_text(raw_text):
         if entry:
             result.append(entry)
     return result
-
 
 def _merge_2026_master_and_manual(games_2026_master, manual_games):
     manual_map = {
@@ -523,30 +383,11 @@ def _merge_2026_master_and_manual(games_2026_master, manual_games):
     merged.sort(key=lambda x: (x["date"], x["home"], x["away"]))
     return merged
 
-
 def augment_unresolved_postponements(games):
-    """Add undated postponed games that are still missing from the schedule.
-
-    NPB regular-season pairs have a fixed number of scheduled games in the
-    site's model.  A cancelled game that has not yet been replaced by a later
-    scheduled/finished game therefore remains a real future game, even though
-    its date is unknown.  Keeping it out of the season-completion simulation
-    would understate the number of remaining games and can falsely trigger a
-    championship or final-rank clinch.
-
-    The postponed game's original matchup/home stadium are retained, but the
-    date is set to None and starter information is cleared.  The UI can then
-    display these games as "日程未定" without inventing a date.
-    """
     base = [dict(g) for g in games]
     existing_undated = {
-        (
-            g.get("home"),
-            g.get("away"),
-            g.get("original_date"),
-        )
-        for g in base
-        if g.get("undated_postponed")
+        (g.get("home"), g.get("away"), g.get("original_date"))
+        for g in base if g.get("undated_postponed")
     }
 
     def pair_key(home, away):
@@ -564,10 +405,8 @@ def augment_unresolved_postponements(games):
             or (t1 in PACIFIC_TEAMS and t2 in PACIFIC_TEAMS)
         )
         required = GAMES_INTRA if is_intra else GAMES_INTER
-
         played_or_scheduled = [
-            g for g in pair_games
-            if is_finished(g) or g.get("status") == "scheduled"
+            g for g in pair_games if is_finished(g) or g.get("status") == "scheduled"
         ]
         missing = max(0, required - len(played_or_scheduled))
         if missing <= 0:
@@ -577,18 +416,10 @@ def augment_unresolved_postponements(games):
             [g for g in pair_games if is_cancelled(g)],
             key=lambda x: x.get("date") or "",
         )
-
-        # Use the unresolved cancellations as the source of the missing
-        # matchups.  In the current 2026 data this identifies the two
-        # postponed 阪神-広島 games whose make-up dates are still unknown.
         for template in cancelled:
             if missing <= 0:
                 break
-            marker = (
-                template.get("home"),
-                template.get("away"),
-                template.get("date"),
-            )
+            marker = (template.get("home"), template.get("away"), template.get("date"))
             if marker in existing_undated:
                 continue
 
@@ -611,24 +442,16 @@ def augment_unresolved_postponements(games):
 
     return base
 
-
 @lru_cache(maxsize=512)
 def load_2026_games_as_of_date(target_date):
-    """Return 2026 games from Git-tracked inputs as of target_date.
-
-    This is used only for historical snapshots.  When Git history is not
-    available, it returns None and the caller falls back to the current input.
-    """
     master_text = read_tracked_file_as_of_date(TEXT_LOG_FILE, target_date)
     if master_text is None:
         return None
     master_games = parse_year_games_from_text(master_text, 2026)
-
     db_text = read_tracked_file_as_of_date(MANUAL_DB_FILE, target_date)
     manual_games = _parse_manual_games_text(db_text)
     merged = _merge_2026_master_and_manual(master_games, manual_games)
     return augment_unresolved_postponements(merged)
-
 
 def load_all_games():
     historical_games = []
@@ -656,10 +479,8 @@ def load_all_games():
     return historical_games, merged_2026
 
 def _smooth_binomial_rate(successes, trials, prior_strength=HISTORICAL_PRIOR_SMOOTHING):
-    """Empirical-Bayes smoothing toward the six-team baseline of 1/6."""
     prior_mean = 1.0 / 6.0
     return (float(successes) + prior_strength * prior_mean) / (float(trials) + prior_strength) if (trials + prior_strength) > 0 else prior_mean
-
 
 def _league_historical_rank_map(league_teams):
     if set(league_teams) == set(CENTRAL_TEAMS):
@@ -668,11 +489,9 @@ def _league_historical_rank_map(league_teams):
         return PACIFIC_HISTORICAL_RANKS
     raise ValueError("未知のリーグです")
 
-
 def _rate_fraction(wins, losses):
     decided = int(wins) + int(losses)
     return Fraction(int(wins), decided) if decided > 0 else Fraction(0, 1)
-
 
 def _group_by_fraction(items, key_func):
     groups = {}
@@ -680,7 +499,6 @@ def _group_by_fraction(items, key_func):
         key = key_func(item)
         groups.setdefault(key, []).append(item)
     return groups
-
 
 def _head_to_head_fraction(team, group, h2h_details):
     wins = losses = 0
@@ -692,7 +510,6 @@ def _head_to_head_fraction(team, group, h2h_details):
         losses += int(rec.get("lose", 0))
     return _rate_fraction(wins, losses)
 
-
 def _pairwise_h2h_signature(team, group, h2h_details):
     rates = []
     for opp in group:
@@ -702,27 +519,12 @@ def _pairwise_h2h_signature(team, group, h2h_details):
         rates.append(_rate_fraction(rec.get("win", 0), rec.get("lose", 0)))
     return tuple(sorted(rates, reverse=True))
 
-
 def _league_record_fraction(team, records, league_teams):
     rec = records[team]
     league = rec.get("league", {})
     return _rate_fraction(league.get("win", 0), league.get("lose", 0))
 
-
 def rank_teams_official(league_teams, records, h2h_details, previous_rank_map):
-    """Rank a league using the NPB regular-season tiebreak structure.
-
-    Central League:
-      overall winning percentage -> wins -> tied-group H2H -> pairwise H2H
-      signature -> previous-season rank.
-
-    Pacific League:
-      overall winning percentage -> tied-group H2H -> league-only winning
-      percentage -> pairwise H2H signature -> previous-season rank.
-
-    The pairwise signature is used only when the preceding group metric is
-    exactly tied, matching the purpose of the published "当該球団間" fallback.
-    """
     league_set = set(league_teams)
     if league_set == set(CENTRAL_TEAMS):
         league_type = "central"
@@ -783,15 +585,10 @@ def rank_teams_official(league_teams, records, h2h_details, previous_rank_map):
         raise AssertionError("公式順位付けでチームが欠落しました")
     return ordered
 
-
 def derive_final_rank_from_games(games, year, league_teams):
-    """Derive a completed season's final rank with the official tiebreaks."""
     rec = {
         t: {
-            "team": t,
-            "win": 0,
-            "lose": 0,
-            "draw": 0,
+            "team": t, "win": 0, "lose": 0, "draw": 0,
             "league": {"win": 0, "lose": 0, "draw": 0},
         }
         for t in league_teams
@@ -830,35 +627,23 @@ def derive_final_rank_from_games(games, year, league_teams):
     return {team: idx + 1 for idx, team in enumerate(ordered)}
 
 def previous_season_ranks_for_target(target_year, historical_games, league_teams):
-    """Return the best available previous-season final ranks without leakage."""
     prev_year = target_year - 1
     rank_map = _league_historical_rank_map(league_teams)
     if prev_year in HISTORICAL_RANK_YEARS:
         idx = prev_year - HISTORICAL_RANK_YEARS[0]
         return {team: rank_map[team][idx] for team in league_teams}
-    # 2025 is available from the actual 2016-2025 historical game log.
     derived = derive_final_rank_from_games(historical_games, prev_year, league_teams)
     if all(derived[t] is not None for t in league_teams):
         return derived
     raise ValueError(f"{prev_year}年の前年順位を取得できません")
 
-
 def build_historical_championship_prior(target_year, historical_games, league_teams):
-    """Build a six-team championship prior for a target season.
-
-    Uses only rank-history data that would have been known before target_year:
-      A. P(champion next year | previous-year rank)
-      B. Each team's historical championship rate
-    The two are smoothed and mixed, then normalized.
-    """
     rank_map = _league_historical_rank_map(league_teams)
     max_hist_year = min(2024, target_year - 1)
     available_years = [y for y in HISTORICAL_RANK_YEARS if y <= max_hist_year]
     if len(available_years) < 2:
-        # Not enough reference history: equal prior.
         return {t: 1.0 / len(league_teams) for t in league_teams}
 
-    # A: next-year champion rate conditional on previous rank.
     next_champ_by_prev_rank = {r: 0 for r in range(1, 7)}
     transition_count_by_prev_rank = {r: 0 for r in range(1, 7)}
     for i in range(len(available_years) - 1):
@@ -880,7 +665,6 @@ def build_historical_championship_prior(target_year, historical_games, league_te
             transition_count_by_prev_rank[r],
         )
 
-    # B: team's own title rate in the historical reference period.
     title_rate = {}
     trials = len(available_years)
     for team in league_teams:
@@ -907,31 +691,19 @@ def build_historical_championship_prior(target_year, historical_games, league_te
     total = sum(combined.values())
     return {t: combined[t] / total for t in league_teams}
 
-
 def current_season_information_weight(completed_games_per_team):
-    """Increase current-season influence smoothly from the April prior toward 1."""
     n = max(0.0, float(completed_games_per_team))
     growth = 1.0 - math.exp(-n / EARLY_SEASON_CURRENT_WEIGHT_SCALE)
     return EARLY_SEASON_CURRENT_WEIGHT_MIN + (
         EARLY_SEASON_CURRENT_WEIGHT_MAX - EARLY_SEASON_CURRENT_WEIGHT_MIN
     ) * growth
 
-
 def apply_championship_prior_shrinkage(table, league_teams, raw_champ_probs, raw_bands, target_year, historical_games):
-    """Shrink early-season championship probabilities toward historical prior.
-
-    This layer does NOT alter individual game win/draw/loss probabilities.
-    It only regularizes the season-long championship forecast, which prevents
-    4-5 games in April from overwhelming the 20-year historical baseline.
-    The influence of the current-season model rises automatically as games
-    accumulate.
-    """
     prior = build_historical_championship_prior(target_year, historical_games, league_teams)
     completed_avg = sum(float(t.get("games", 0)) for t in table) / max(1, len(table))
     current_weight = current_season_information_weight(completed_avg)
     prior_weight = 1.0 - current_weight
 
-    # Mathematical clinch overrides every probabilistic layer.
     confirmed = [t["team"] for t in table if t.get("magic_1st") == "確定"]
     if confirmed:
         clinch_team = confirmed[0]
@@ -949,14 +721,14 @@ def apply_championship_prior_shrinkage(table, league_teams, raw_champ_probs, raw
         team = t["team"]
         p0 = prior.get(team, 1.0 / len(league_teams)) * 100.0
         raw = float(raw_champ_probs.get(team, 0.0))
-        
-        # 1位の自力・他力可能性が数学的に消滅しているチームは強制的に0%
+
+        # 1位の可能性が数学的に消滅（"-"）しているチームは強制的に0%にする
         if t.get("magic_1st") == "-":
             blended_p = 0.0
             p0 = 0.0
         else:
             blended_p = prior_weight * p0 + current_weight * raw
-            
+
         blended[team] = blended_p
         t["championship_prior"] = round(p0, 3)
         t["champ_prob_raw"] = round(raw, 3)
@@ -965,7 +737,7 @@ def apply_championship_prior_shrinkage(table, league_teams, raw_champ_probs, raw
         t["champ_prob_current_weight"] = round(current_weight, 4)
 
         band = raw_bands.get(team) if raw_bands else None
-        if band:
+        if band and t.get("magic_1st") != "-":
             low = prior_weight * p0 + current_weight * float(band.get("low", raw))
             high = prior_weight * p0 + current_weight * float(band.get("high", raw))
             t["champ_prob_low"] = round(min(low, high), 3)
@@ -974,7 +746,6 @@ def apply_championship_prior_shrinkage(table, league_teams, raw_champ_probs, raw
             t["champ_prob_low"] = round(blended_p, 3)
             t["champ_prob_high"] = round(blended_p, 3)
 
-    # Numerical normalization of the point estimates.
     total_blended = sum(t["champ_prob"] for t in table)
     if total_blended > 0:
         scale = 100.0 / total_blended
@@ -983,14 +754,7 @@ def apply_championship_prior_shrinkage(table, league_teams, raw_champ_probs, raw
 
     return prior, current_weight
 
-
 def estimate_multi_year_prior(historical_games):
-    """Build preseason priors from 2016-2025.
-
-    We estimate attack and defense on a log run-rate scale and then shrink
-    older seasons exponentially. This is deliberately much weaker than
-    current-season evidence.
-    """
     season_stats = defaultdict(lambda: {t: {"rs": 0.0, "ra": 0.0, "g": 0} for t in ALL_TEAMS})
     season_total_runs = defaultdict(float)
     season_games = defaultdict(int)
@@ -1016,9 +780,7 @@ def estimate_multi_year_prior(historical_games):
     league_log_mean_den = 0.0
 
     for year, teams in season_stats.items():
-        if year > latest_prior_year:
-            continue
-        if season_games[year] <= 0:
+        if year > latest_prior_year or season_games[year] <= 0:
             continue
         league_rpg = season_total_runs[year] / (2.0 * season_games[year])
         if league_rpg <= 0:
@@ -1046,7 +808,6 @@ def estimate_multi_year_prior(historical_games):
             prior_attack[team] = weighted[team]["attack"] / weighted[team]["weight"]
             prior_defense[team] = weighted[team]["defense"] / weighted[team]["weight"]
 
-    # Center the parameters so that intercept remains interpretable.
     mean_attack = sum(prior_attack.values()) / len(ALL_TEAMS)
     mean_defense = sum(prior_defense.values()) / len(ALL_TEAMS)
     prior_attack = {t: prior_attack[t] - mean_attack for t in ALL_TEAMS}
@@ -1061,9 +822,7 @@ def estimate_multi_year_prior(historical_games):
         "intercept": prior_intercept,
     }
 
-
 def estimate_environment(historical_games):
-    """Estimate home advantage and park run environment from 2016-2025 only."""
     home_runs = 0.0
     away_runs = 0.0
     total_runs = 0.0
@@ -1088,9 +847,7 @@ def estimate_environment(historical_games):
         return {"home_adv_log": 0.08, "park_log": {s: 0.0 for s in set(STADIUM_NAMES.values())}, "league_rpg": 3.5}
 
     league_rpg = total_runs / (2.0 * total_games)
-    home_adv_log = math.log(max(0.5, home_runs) / max(0.5, away_runs))
-    # Heavy shrinkage because park and home effects are partially confounded.
-    home_adv_log *= 0.70
+    home_adv_log = math.log(max(0.5, home_runs) / max(0.5, away_runs)) * 0.70
 
     park_log = {}
     for stadium in set(STADIUM_NAMES.values()):
@@ -1113,11 +870,6 @@ def estimate_environment(historical_games):
     }
 
 def estimate_historical_draw_rate(historical_games):
-    """Descriptive draw baseline from completed 2016-2025 games.
-
-    Reported only as a reference metric. The forecast uses the calibrated
-    draw-rate function below rather than the raw Poisson same-score rate.
-    """
     total = 0
     draws = 0
     for g in historical_games:
@@ -1128,14 +880,7 @@ def estimate_historical_draw_rate(historical_games):
             draws += 1
     return (draws / total * 100.0) if total else None
 
-
 def estimate_current_draw_rate(games_2026, target_date):
-    """Calibrate the draw probability for a forecast made on target_date.
-
-    A 4.5% historical NPB baseline acts like a small prior sample. As 2026
-    games accumulate, the observed 2026 draw rate gradually replaces that
-    prior. Information after target_date is never used.
-    """
     completed = [
         g for g in games_2026
         if is_finished(g) and g["date"] < target_date
@@ -1144,11 +889,6 @@ def estimate_current_draw_rate(games_2026, target_date):
     draws = sum(1 for g in completed if int(g["home_score"]) == int(g["away_score"]))
     smoothed = (DRAW_PRIOR_RATE * DRAW_PRIOR_EFFECTIVE_GAMES + draws) / (DRAW_PRIOR_EFFECTIVE_GAMES + n)
     return max(DRAW_RATE_MIN, min(DRAW_RATE_MAX, smoothed))
-
-
-# ------------------------------------------------------------
-# Rest effect estimation
-# ------------------------------------------------------------
 
 def _build_rest_samples(games):
     previous = {}
@@ -1169,14 +909,12 @@ def _build_rest_samples(games):
         previous[a] = g["date"]
     return samples
 
-
 def estimate_rest_effect(historical_games):
     samples = _build_rest_samples(historical_games)
     if len(samples) < 100:
         return 0.0
 
-    b0 = 0.10
-    b1 = 0.0
+    b0, b1 = 0.10, 0.0
     ridge = 15.0
     for _ in range(18):
         g0 = 0.0
@@ -1197,7 +935,6 @@ def estimate_rest_effect(historical_games):
         det = h00 * h11 - h01 * h01
         if abs(det) < 1e-10:
             break
-        # Newton step: H * delta = -grad
         d0 = (-g0 * h11 + h01 * g1) / det
         d1 = (h01 * g0 - h00 * g1) / det
         b0 += d0
@@ -1207,19 +944,12 @@ def estimate_rest_effect(historical_games):
             break
     return b1
 
-# ------------------------------------------------------------
-# Current-season attack/defense model
-# ------------------------------------------------------------
-
 def _model_weight(game_date, target_date):
     age = max(0, (parse_date(target_date) - parse_date(game_date)).days)
     return math.exp(-math.log(2.0) * age / RECENCY_HALF_LIFE_DAYS)
 
-
 def fit_run_model(games_2026, target_date, prior, environment):
-    """Fit 2026 attack/defense parameters using only games before target_date."""
     completed = [g for g in games_2026 if is_finished(g) and g["date"] < target_date]
-
     attack = dict(prior["attack"])
     defense = dict(prior["defense"])
     intercept = prior["intercept"]
@@ -1239,11 +969,6 @@ def fit_run_model(games_2026, target_date, prior, environment):
             },
         }
 
-    # Adam optimizer. Pure standard-library implementation so GitHub Actions
-    # does not require numpy/scipy.
-    #
-    # Performance: model weights and date parsing are precomputed once per
-    # target date instead of being recomputed on every optimizer iteration.
     weighted_completed = []
     for g in completed:
         w = _model_weight(g["date"], target_date)
@@ -1285,7 +1010,6 @@ def fit_run_model(games_2026, target_date, prior, environment):
             grad_a[a] += r_a
             grad_d[h] -= r_a
 
-        # Gaussian prior regularization toward multi-year strength.
         grad_i -= PRIOR_L2 * (intercept - prior["intercept"])
         for t in ALL_TEAMS:
             grad_a[t] -= PRIOR_L2 * (attack[t] - prior["attack"][t])
@@ -1309,7 +1033,6 @@ def fit_run_model(games_2026, target_date, prior, environment):
             else:
                 defense[key[2:]] += step
 
-        # Identifiability constraints: mean attack = mean defense = 0.
         mean_a = sum(attack.values()) / len(ALL_TEAMS)
         for t in ALL_TEAMS:
             attack[t] -= mean_a
@@ -1320,9 +1043,6 @@ def fit_run_model(games_2026, target_date, prior, environment):
             defense[t] -= mean_d
         intercept -= mean_d
 
-    # Diagonal observed-information approximation for parameter uncertainty.
-    # Covariances are deliberately ignored here; the public range is a
-    # sensitivity band, not a formal Bayesian credible interval.
     attack_info = {t: PRIOR_L2 for t in ALL_TEAMS}
     defense_info = {t: PRIOR_L2 for t in ALL_TEAMS}
     intercept_info = PRIOR_L2
@@ -1358,10 +1078,6 @@ def fit_run_model(games_2026, target_date, prior, environment):
         "uncertainty": uncertainty,
     }
 
-# ------------------------------------------------------------
-# Pitcher adjustment from confirmed starter observations only
-# ------------------------------------------------------------
-
 def build_pitcher_start_stats(games_2026, target_date):
     stats = {}
     for g in games_2026:
@@ -1370,10 +1086,7 @@ def build_pitcher_start_stats(games_2026, target_date):
         if not g.get("starter_confirmed"):
             continue
         hs, as_ = int(g["home_score"]), int(g["away_score"])
-        for side, team_score, opp_score in (
-            ("home", hs, as_),
-            ("away", as_, hs),
-        ):
+        for side, team_score, opp_score in (("home", hs, as_), ("away", as_, hs)):
             pitcher = (g.get(f"{side}_starter") or "").strip()
             if not pitcher or pitcher == "未定":
                 continue
@@ -1386,7 +1099,6 @@ def build_pitcher_start_stats(games_2026, target_date):
                 st["losses"] += 1
     return stats
 
-
 def get_pitcher_run_effect(pitcher_name, pitcher_stats):
     if not pitcher_name or pitcher_name in ("未定", "未確認"):
         return 0.0
@@ -1395,15 +1107,9 @@ def get_pitcher_run_effect(pitcher_name, pitcher_stats):
         return 0.0
 
     starts = st["starts"]
-    # Very strong shrinkage because starter results are contaminated by team
-    # offense/defense and because current manual starter history is sparse.
     shrunk_win = (st["wins"] + 0.5 * PITCHER_PRIOR_STARTS) / (starts + PITCHER_PRIOR_STARTS)
     effect = (shrunk_win - 0.5) * 0.30
     return max(-MAX_PITCHER_LOG_RUN_EFFECT, min(MAX_PITCHER_LOG_RUN_EFFECT, effect))
-
-# ------------------------------------------------------------
-# Rest calculation and three-way score probabilities
-# ------------------------------------------------------------
 
 def build_last_known_game_dates(games, cutoff_date=None, include_scheduled=False):
     latest = {}
@@ -1420,7 +1126,6 @@ def build_last_known_game_dates(games, cutoff_date=None, include_scheduled=False
             latest[g["away"]] = g["date"]
     return latest
 
-
 def rest_difference_for_game(game, all_games, as_of_date=None):
     target = game["date"]
     last_dates = build_last_known_game_dates(
@@ -1436,7 +1141,6 @@ def rest_difference_for_game(game, all_games, as_of_date=None):
     a_rest = max(0, (parse_date(target) - parse_date(a_prev)).days - 1)
     return float(max(-4, min(4, h_rest - a_rest)))
 
-
 def poisson_pmf(k, lam):
     if k < 0:
         return 0.0
@@ -1444,15 +1148,7 @@ def poisson_pmf(k, lam):
         return 1.0 if k == 0 else 0.0
     return math.exp(-lam + k * math.log(lam) - math.lgamma(k + 1.0))
 
-
 def three_way_from_scores(lam_home, lam_away, draw_rate):
-    """Return H/D/A probabilities with a calibrated NPB draw rate.
-
-    Poisson scoring still supplies the relative home/away odds, but draw is
-    explicitly calibrated to the empirical league/season level. This avoids
-    the severe overprediction of draws caused by treating independent Poisson
-    same-score probability as the actual NPB draw probability.
-    """
     ph = pa = 0.0
     home_pmf = [poisson_pmf(k, lam_home) for k in range(MAX_RUNS + 1)]
     away_pmf = [poisson_pmf(k, lam_away) for k in range(MAX_RUNS + 1)]
@@ -1474,7 +1170,6 @@ def three_way_from_scores(lam_home, lam_away, draw_rate):
     p_away = non_draw * pa / decisive_total
     return p_home, draw_rate, p_away
 
-
 def apply_conditional_logit_adjustment(p_home, p_draw, p_away, log_odds_adjust):
     decision_mass = max(1e-9, p_home + p_away)
     cond_home = p_home / decision_mass
@@ -1483,14 +1178,11 @@ def apply_conditional_logit_adjustment(p_home, p_draw, p_away, log_odds_adjust):
     new_away = decision_mass * (1.0 - new_cond_home)
     return new_home, p_draw, new_away
 
-
 def predict_game(model, home, away, stadium, home_starter, away_starter, pitcher_stats, rest_diff, rest_effect, draw_rate):
     park = model["park_log"].get(stadium, 0.0)
     home_log = model["intercept"] + model["home_adv_log"] + park + model["attack"][home] - model["defense"][away]
     away_log = model["intercept"] + park + model["attack"][away] - model["defense"][home]
 
-    # A good home starter suppresses the away team's scoring; a good away
-    # starter suppresses the home team's scoring.
     home_log -= get_pitcher_run_effect(away_starter, pitcher_stats)
     away_log -= get_pitcher_run_effect(home_starter, pitcher_stats)
 
@@ -1498,8 +1190,6 @@ def predict_game(model, home, away, stadium, home_starter, away_starter, pitcher
     lam_away = safe_exp(away_log)
     p_home, p_draw, p_away = three_way_from_scores(lam_home, lam_away, draw_rate)
 
-    # Data-derived rest adjustment, applied only to the decided-game odds so
-    # that draw probability remains tied to the score distribution.
     if rest_effect and abs(rest_diff) > 0:
         p_home, p_draw, p_away = apply_conditional_logit_adjustment(
             p_home, p_draw, p_away, rest_effect * rest_diff
@@ -1513,19 +1203,13 @@ def predict_game(model, home, away, stadium, home_starter, away_starter, pitcher
         "lambda_away": lam_away,
     }
 
-# ------------------------------------------------------------
-# Standings / H2H / CN
-# ------------------------------------------------------------
-
 def get_remaining_h2h(t1, t2, h2h_played, rem_1, rem_2):
     played = h2h_played.get(t1, {}).get(t2, 0)
     is_intra = (t1 in CENTRAL_TEAMS and t2 in CENTRAL_TEAMS) or (t1 in PACIFIC_TEAMS and t2 in PACIFIC_TEAMS)
     max_games = GAMES_INTRA if is_intra else GAMES_INTER
     return max(0, min(max_games - played, rem_1, rem_2))
 
-
 def _remaining_league_games(team, h2h_played):
-    """Count remaining same-league games from the current H2H ledger."""
     league = CENTRAL_TEAMS if team in CENTRAL_TEAMS else PACIFIC_TEAMS
     return sum(
         max(0, GAMES_INTRA - h2h_played.get(team, {}).get(opp, 0))
@@ -1533,23 +1217,11 @@ def _remaining_league_games(team, h2h_played):
         if opp != team
     )
 
-
 def _tie_break_rival_above_target(
-    target,
-    rival,
-    target_wins,
-    target_losses,
-    rival_wins,
-    rival_losses,
-    target_h2h_wins,
-    rival_h2h_wins,
-    target_league_wins,
-    target_league_losses,
-    rival_league_wins,
-    rival_league_losses,
-    previous_rank_map,
+    target, rival, target_wins, target_losses, rival_wins, rival_losses,
+    target_h2h_wins, rival_h2h_wins, target_league_wins, target_league_losses,
+    rival_league_wins, rival_league_losses, previous_rank_map,
 ):
-    """Apply the official two-team tiebreak sequence after equal overall rate."""
     target_rate = calc_win_rate(target_wins, target_losses)
     rival_rate = calc_win_rate(rival_wins, rival_losses)
 
@@ -1560,7 +1232,6 @@ def _tie_break_rival_above_target(
 
     is_central = target in CENTRAL_TEAMS and rival in CENTRAL_TEAMS
 
-    # Central League: winning percentage -> wins -> H2H -> previous rank.
     if is_central:
         if rival_wins > target_wins:
             return True
@@ -1574,7 +1245,6 @@ def _tie_break_rival_above_target(
     if rival_h2h_rate < target_h2h_rate:
         return False
 
-    # Pacific League: after H2H, compare league-only winning percentage.
     if not is_central:
         target_league_rate = calc_win_rate(target_league_wins, target_league_losses)
         rival_league_rate = calc_win_rate(rival_league_wins, rival_league_losses)
@@ -1583,24 +1253,10 @@ def _tie_break_rival_above_target(
         if rival_league_rate < target_league_rate:
             return False
 
-    # Lower previous-season rank number is the official tiebreak advantage.
     return previous_rank_map.get(rival, 999) < previous_rank_map.get(target, 999)
 
-
-def evaluate_clinch_target(
-    team_a, target_k, all_teams, h2h_played, previous_rank_map=None
-):
-    """Calculate CN / clinch numbers using official tiebreaks.
-
-    A candidate is calculated for every team.  The presentation layer decides
-    whether the sole self-clinchable 1st-place candidate gets the special M.
-    Equal winning percentages are resolved with the league-specific official
-    tiebreak sequence.  Multi-team equal-rate ambiguity is handled
-    conservatively rather than declaring an early false clinch.
-    """
-    previous_rank_map = previous_rank_map or {
-        t["team"]: t["rank"] for t in all_teams
-    }
+def evaluate_clinch_target(team_a, target_k, all_teams, h2h_played, previous_rank_map=None):
+    previous_rank_map = previous_rank_map or {t["team"]: t["rank"] for t in all_teams}
     ta = team_a["team"]
     rem_a = team_a["remaining"]
     a_w, a_l = team_a["win"], team_a["lose"]
@@ -1612,7 +1268,6 @@ def evaluate_clinch_target(
     for rival in all_teams:
         if rival["team"] == ta:
             continue
-        # ライバルの「現在の確定勝利数」と「残り全敗時の敗戦数」での最低勝率
         min_rate_rival = calc_win_rate(rival["win"], rival["lose"] + rival["remaining"])
         if min_rate_rival > max_rate_a:
             rivals_already_above += 1
@@ -1638,9 +1293,6 @@ def evaluate_clinch_target(
             rem_b = rival["remaining"]
             rem_h2h = get_remaining_h2h(ta, tb, h2h_played, rem_a, rem_b)
 
-            # To maximize the rival, allocate the target's losses to H2H first.
-            # The target therefore wins the minimum feasible number of the
-            # remaining games against this rival.
             target_h2h_future_wins = max(0, rem_h2h - target_future_losses)
             target_h2h_future_wins = min(rem_h2h, target_h2h_future_wins)
             rival_h2h_future_wins = rem_h2h - target_h2h_future_wins
@@ -1655,57 +1307,30 @@ def evaluate_clinch_target(
             if rival_rate < target_rate:
                 continue
 
-            # At equal overall rate, evaluate the official two-team tiebreak.
-            target_h2h_current_wins = int(
-                team_a.get("h2h", {}).get(tb, {}).get("win", 0)
-            )
-            rival_h2h_current_wins = int(
-                rival.get("h2h", {}).get(ta, {}).get("win", 0)
-            )
+            target_h2h_current_wins = int(team_a.get("h2h", {}).get(tb, {}).get("win", 0))
+            rival_h2h_current_wins = int(rival.get("h2h", {}).get(ta, {}).get("win", 0))
 
             target_league_remaining = _remaining_league_games(ta, h2h_played)
             rival_league_remaining = _remaining_league_games(tb, h2h_played)
 
-            # For the Pacific tiebreak, minimize the target's league winning
-            # percentage while keeping its total number of wins at x.
-            target_inter_remaining = max(
-                0, rem_a - target_league_remaining
-            )
-            target_league_future_wins = max(
-                target_h2h_future_wins,
-                max(0, x - target_inter_remaining),
-            )
-            target_league_future_wins = min(
-                target_league_remaining, target_league_future_wins
-            )
-            target_league_future_losses = (
-                target_league_remaining - target_league_future_wins
-            )
+            target_inter_remaining = max(0, rem_a - target_league_remaining)
+            target_league_future_wins = max(target_h2h_future_wins, max(0, x - target_inter_remaining))
+            target_league_future_wins = min(target_league_remaining, target_league_future_wins)
+            target_league_future_losses = target_league_remaining - target_league_future_wins
 
-            # Maximize the rival's league record: every remaining league game
-            # other than mandatory losses to the target is a rival win.
-            rival_league_future_wins = max(
-                0, rival_league_remaining - target_h2h_future_wins
-            )
+            rival_league_future_wins = max(0, rival_league_remaining - target_h2h_future_wins)
             rival_league_future_losses = target_h2h_future_wins
 
             can_outrank = _tie_break_rival_above_target(
-                ta,
-                tb,
-                target_final_wins,
-                target_final_losses,
-                rival_final_wins,
-                rival_final_losses,
+                ta, tb,
+                target_final_wins, target_final_losses,
+                rival_final_wins, rival_final_losses,
                 target_h2h_current_wins + target_h2h_future_wins,
                 rival_h2h_current_wins + rival_h2h_future_wins,
-                team_a.get("league", {}).get("win", 0)
-                + target_league_future_wins,
-                team_a.get("league", {}).get("lose", 0)
-                + target_league_future_losses,
-                rival.get("league", {}).get("win", 0)
-                + rival_league_future_wins,
-                rival.get("league", {}).get("lose", 0)
-                + rival_league_future_losses,
+                team_a.get("league", {}).get("win", 0) + target_league_future_wins,
+                team_a.get("league", {}).get("lose", 0) + target_league_future_losses,
+                rival.get("league", {}).get("win", 0) + rival_league_future_wins,
+                rival.get("league", {}).get("lose", 0) + rival_league_future_losses,
                 previous_rank_map,
             )
 
@@ -1714,33 +1339,16 @@ def evaluate_clinch_target(
             else:
                 equal_rate_unresolved += 1
 
-        # With multiple rivals at exactly the same attainable overall rate,
-        # a three-way H2H configuration can affect the result.  Unless the
-        # data prove otherwise, keep the clinch open rather than overstate it.
         if strict_threats == 0 and equal_rate_unresolved >= 2:
             strict_threats = equal_rate_unresolved
 
         return strict_threats
 
-    # Search beyond the physically remaining games as well.
-    #
-    # This is intentional for this site's Championship Number definition:
-    # CN is a "how many additional wins are needed" indicator, not merely a
-    # conventional magic number constrained to the remaining schedule.
-    # Therefore CN may legitimately exceed the number of games left.  The
-    # presentation layer marks such values as ◇N◇ so that users can see both
-    # the numerical threshold and that it is no longer self-clinchable.
-    #
-    # For x > remaining_games, the extra wins are hypothetical.  All actual
-    # remaining games are treated as wins for the target, while the extra
-    # amount only raises its final win total.
     search_limit = rem_a + TOTAL_GAMES + 20
     for x in range(0, search_limit + 1):
         if threats_for_target_wins(x) < target_k:
             return "確定" if x == 0 else x
 
-    # A value should be found well before this point because the target's
-    # winning percentage approaches 1 as hypothetical wins increase.
     return search_limit + 1
 
 def validate_and_assert_standings(teams):
@@ -1770,22 +1378,12 @@ def validate_and_assert_standings(teams):
                     last_val = val
     return teams
 
-# ------------------------------------------------------------
-# Monte Carlo
-# ------------------------------------------------------------
-
 def build_future_probabilities(league_teams, remaining_matches, model, pitcher_stats, rest_effect, all_games, draw_rate):
     result = []
     league_set = set(league_teams)
-    scheduled_matches = [
-        m for m in remaining_matches if m.get("status") == "scheduled"
-    ]
+    scheduled_matches = [m for m in remaining_matches if m.get("status") == "scheduled"]
     scheduled_matches.sort(
-        key=lambda x: (
-            x.get("date") or "9999-12-31",
-            x["home"],
-            x["away"],
-        )
+        key=lambda x: (x.get("date") or "9999-12-31", x["home"], x["away"])
     )
     for match in scheduled_matches:
         h, a = match["home"], match["away"]
@@ -1796,12 +1394,7 @@ def build_future_probabilities(league_teams, remaining_matches, model, pitcher_s
         a_start = match.get("away_starter") if match.get("starter_confirmed") else "未定"
         h_start = h_start or "未定"
         a_start = a_start or "未定"
-        if match.get("date"):
-            rest_diff = rest_difference_for_game(match, all_games, as_of_date=None)
-        else:
-            # Undated postponed games have no valid rest calendar or confirmed
-            # starter information, so do not manufacture a rest adjustment.
-            rest_diff = 0.0
+        rest_diff = rest_difference_for_game(match, all_games, as_of_date=None) if match.get("date") else 0.0
         probs = predict_game(
             model, h, a, stadium, h_start, a_start,
             pitcher_stats, rest_diff, rest_effect, draw_rate,
@@ -1816,28 +1409,10 @@ def build_future_probabilities(league_teams, remaining_matches, model, pitcher_s
     return result
 
 def determine_clinched(
-    leader,
-    teams,
-    sim_w,
-    sim_l,
-    sim_league_w,
-    sim_league_l,
-    sim_h2h,
-    remaining_after_date,
-    remaining_league_after_date,
-    remaining_h2h_after_date,
+    leader, teams, sim_w, sim_l, sim_league_w, sim_league_l, sim_h2h,
+    remaining_after_date, remaining_league_after_date, remaining_h2h_after_date,
     previous_rank_map,
 ):
-    """Determine mathematical 1st-place clinch after a simulated date.
-
-    The leader is given every remaining win.  For each rival, that rival is
-    given every possible non-leader game as a win and every remaining H2H
-    game against the leader as a loss.  This maximizes the rival's final
-    winning percentage.  Ties are then resolved using the official league
-    tiebreak sequence.  If multiple rivals can simultaneously reach the same
-    winning percentage as the leader, the result remains open because a
-    multi-team tiebreak cannot be certified safely from pairwise extremes.
-    """
     leader_rem = remaining_after_date.get(leader, 0)
     leader_final_w = sim_w[leader] + leader_rem
     leader_final_l = sim_l[leader]
@@ -1852,7 +1427,6 @@ def determine_clinched(
         rival_rem = remaining_after_date.get(rival, 0)
         h2h_rem = remaining_h2h_after_date.get(leader, {}).get(rival, 0)
 
-        # Rival wins every remaining game except H2H games against the leader.
         rival_final_w = sim_w[rival] + rival_rem - h2h_rem
         rival_final_l = sim_l[rival] + h2h_rem
         rival_rate = calc_win_rate(rival_final_w, rival_final_l)
@@ -1862,7 +1436,6 @@ def determine_clinched(
         if rival_rate < leader_rate:
             continue
 
-        # Exact two-team tiebreak at equal overall winning percentage.
         leader_h2h_current = sim_h2h.get(leader, {}).get(rival, {})
         rival_h2h_current = sim_h2h.get(rival, {}).get(leader, {})
 
@@ -1875,17 +1448,13 @@ def determine_clinched(
         leader_league_future_w = leader_league_rem
         leader_league_future_l = 0
 
-        # H2H games are league games, and rival loses all of them.
         rival_league_future_w = max(0, rival_league_rem - h2h_rem)
         rival_league_future_l = h2h_rem
 
         rival_above = _tie_break_rival_above_target(
-            leader,
-            rival,
-            leader_final_w,
-            leader_final_l,
-            rival_final_w,
-            rival_final_l,
+            leader, rival,
+            leader_final_w, leader_final_l,
+            rival_final_w, rival_final_l,
             int(leader_h2h_current.get("win", 0)) + leader_h2h_future_w,
             int(rival_h2h_current.get("win", 0)) + rival_h2h_future_w,
             sim_league_w[leader] + leader_league_future_w,
@@ -1899,13 +1468,10 @@ def determine_clinched(
 
         equal_rate_rivals += 1
 
-    # A three-or-more-team equal-WP case requires aggregate H2H handling.
-    # Keep the clinch open unless the leader has a strict WP advantage over all.
     if equal_rate_rivals >= 2:
         return False
 
     return True
-
 
 def _simulated_records(league_teams, sim_w, sim_l, sim_league_w, sim_league_l, sim_league_d):
     return {
@@ -1923,34 +1489,18 @@ def _simulated_records(league_teams, sim_w, sim_l, sim_league_w, sim_league_l, s
         for t in league_teams
     }
 
-
 def _rank_simulated_teams(
-    league_teams,
-    sim_w,
-    sim_l,
-    sim_league_w,
-    sim_league_l,
-    sim_league_d,
-    sim_h2h,
-    previous_rank_map,
+    league_teams, sim_w, sim_l, sim_league_w, sim_league_l, sim_league_d,
+    sim_h2h, previous_rank_map,
 ):
     records = _simulated_records(
         league_teams, sim_w, sim_l, sim_league_w, sim_league_l, sim_league_d
     )
     return rank_teams_official(league_teams, records, sim_h2h, previous_rank_map)
 
-
 def simulate_full_season_probabilities(
-    league_teams,
-    current_standings,
-    remaining_matches,
-    model,
-    pitcher_stats,
-    rest_effect,
-    all_games,
-    draw_rate,
-    num_sims=MAIN_NUM_SIMS,
-    rng=None,
+    league_teams, current_standings, remaining_matches, model, pitcher_stats,
+    rest_effect, all_games, draw_rate, num_sims=MAIN_NUM_SIMS, rng=None,
     previous_rank_map=None,
 ):
     rank_counts = {t: {r: 0 for r in range(1, 7)} for t in league_teams}
@@ -1996,16 +1546,12 @@ def simulate_full_season_probabilities(
     }
 
     for fp in future_probs:
-        h = fp["match"]["home"]
-        a = fp["match"]["away"]
+        h, a = fp["match"]["home"], fp["match"]["away"]
         h_in = h in remaining_counts
         a_in = a in remaining_counts
 
-        if h_in:
-            remaining_counts[h] += 1
-        if a_in:
-            remaining_counts[a] += 1
-
+        if h_in: remaining_counts[h] += 1
+        if a_in: remaining_counts[a] += 1
         if h_in and a_in:
             remaining_league_counts[h] += 1
             remaining_league_counts[a] += 1
@@ -2014,16 +1560,12 @@ def simulate_full_season_probabilities(
 
     for d in sorted_dates:
         for fp in matches_by_date[d]:
-            h = fp["match"]["home"]
-            a = fp["match"]["away"]
+            h, a = fp["match"]["home"], fp["match"]["away"]
             h_in = h in remaining_counts
             a_in = a in remaining_counts
 
-            if h_in:
-                remaining_counts[h] -= 1
-            if a_in:
-                remaining_counts[a] -= 1
-
+            if h_in: remaining_counts[h] -= 1
+            if a_in: remaining_counts[a] -= 1
             if h_in and a_in:
                 remaining_league_counts[h] -= 1
                 remaining_league_counts[a] -= 1
@@ -2032,9 +1574,7 @@ def simulate_full_season_probabilities(
 
         future_after[d] = dict(remaining_counts)
         future_league_after[d] = dict(remaining_league_counts)
-        future_h2h_after[d] = {
-            t: dict(remaining_h2h_counts[t]) for t in league_teams
-        }
+        future_h2h_after[d] = {t: dict(remaining_h2h_counts[t]) for t in league_teams}
 
     for _ in range(num_sims):
         sim_w = dict(base_wins)
@@ -2042,16 +1582,12 @@ def simulate_full_season_probabilities(
         sim_league_w = dict(base_league_wins)
         sim_league_l = dict(base_league_losses)
         sim_league_d = dict(base_league_draws)
-        sim_h2h = {
-            t: {o: dict(base_h2h[t][o]) for o in base_h2h[t]}
-            for t in base_h2h
-        }
+        sim_h2h = {t: {o: dict(base_h2h[t][o]) for o in base_h2h[t]} for t in base_h2h}
         clinched_day = {t: None for t in league_teams}
 
         for d in sorted_dates:
             for fp in matches_by_date[d]:
-                h = fp["match"]["home"]
-                a = fp["match"]["away"]
+                h, a = fp["match"]["home"], fp["match"]["away"]
                 h_in = h in league_teams
                 a_in = a in league_teams
                 rnd = rng.random()
@@ -2063,24 +1599,18 @@ def simulate_full_season_probabilities(
                         sim_h2h[a][h]["draw"] += 1
                     continue
 
-                home_wins = rng.random() < (
-                    fp["p_home"] / max(1e-9, fp["p_home"] + fp["p_away"])
-                )
+                home_wins = rng.random() < (fp["p_home"] / max(1e-9, fp["p_home"] + fp["p_away"]))
                 if home_wins:
-                    if h_in:
-                        sim_w[h] += 1
-                    if a_in:
-                        sim_l[a] += 1
+                    if h_in: sim_w[h] += 1
+                    if a_in: sim_l[a] += 1
                     if h_in and a_in:
                         sim_league_w[h] += 1
                         sim_league_l[a] += 1
                         sim_h2h[h][a]["win"] += 1
                         sim_h2h[a][h]["lose"] += 1
                 else:
-                    if a_in:
-                        sim_w[a] += 1
-                    if h_in:
-                        sim_l[h] += 1
+                    if a_in: sim_w[a] += 1
+                    if h_in: sim_l[h] += 1
                     if h_in and a_in:
                         sim_league_w[a] += 1
                         sim_league_l[h] += 1
@@ -2088,55 +1618,28 @@ def simulate_full_season_probabilities(
                         sim_h2h[h][a]["lose"] += 1
 
             ranked = _rank_simulated_teams(
-                league_teams,
-                sim_w,
-                sim_l,
-                sim_league_w,
-                sim_league_l,
-                sim_league_d,
-                sim_h2h,
-                previous_rank_map,
+                league_teams, sim_w, sim_l, sim_league_w, sim_league_l, sim_league_d,
+                sim_h2h, previous_rank_map,
             )
             leader = ranked[0]
             remaining_after = dict(future_after.get(d, {t: 0 for t in league_teams}))
-            remaining_league_after = dict(
-                future_league_after.get(d, {t: 0 for t in league_teams})
-            )
+            remaining_league_after = dict(future_league_after.get(d, {t: 0 for t in league_teams}))
             remaining_h2h_after = {
-                t: dict(
-                    future_h2h_after.get(d, {}).get(
-                        t, {o: 0 for o in league_teams if o != t}
-                    )
-                )
+                t: dict(future_h2h_after.get(d, {}).get(t, {o: 0 for o in league_teams if o != t}))
                 for t in league_teams
             }
             if (
                 determine_clinched(
-                    leader,
-                    league_teams,
-                    sim_w,
-                    sim_l,
-                    sim_league_w,
-                    sim_league_l,
-                    sim_h2h,
-                    remaining_after,
-                    remaining_league_after,
-                    remaining_h2h_after,
-                    previous_rank_map,
+                    leader, league_teams, sim_w, sim_l, sim_league_w, sim_league_l, sim_h2h,
+                    remaining_after, remaining_league_after, remaining_h2h_after, previous_rank_map,
                 )
                 and clinched_day[leader] is None
             ):
                 clinched_day[leader] = d
 
         final_order = _rank_simulated_teams(
-            league_teams,
-            sim_w,
-            sim_l,
-            sim_league_w,
-            sim_league_l,
-            sim_league_d,
-            sim_h2h,
-            previous_rank_map,
+            league_teams, sim_w, sim_l, sim_league_w, sim_league_l, sim_league_d,
+            sim_h2h, previous_rank_map,
         )
         champ = final_order[0]
         if clinched_day[champ] is not None:
@@ -2146,20 +1649,16 @@ def simulate_full_season_probabilities(
         for idx, team in enumerate(final_order):
             rank_counts[team][idx + 1] += 1
 
-    champ_raw = {t: rank_counts[t][1] / num_sims * 100.0 for t in league_teams}
-    champ_norm = normalize_probabilities_to_100(champ_raw)
-
     final_rank_matrix = {}
     for t in league_teams:
-        final_rank_matrix[t] = {1: champ_norm[t]}
-        for r in range(2, 7):
-            final_rank_matrix[t][r] = int(round(rank_counts[t][r] / num_sims * 100.0))
+        final_rank_matrix[t] = {}
+        for r in range(1, 7):
+            final_rank_matrix[t][r] = round(rank_counts[t][r] / num_sims * 100.0, 1)
 
-    for t in league_teams:
-        total = sum(final_rank_matrix[t].values())
-        if total != 100:
+        total = round(sum(final_rank_matrix[t].values()), 1)
+        if total != 100.0:
             modal_rank = max(final_rank_matrix[t], key=final_rank_matrix[t].get)
-            final_rank_matrix[t][modal_rank] += 100 - total
+            final_rank_matrix[t][modal_rank] = round(final_rank_matrix[t][modal_rank] + (100.0 - total), 1)
 
     clinch_date_probs = {
         t: {d: (count / num_sims) * 100.0 for d, count in clinch_date_counts[t].items()}
@@ -2169,10 +1668,8 @@ def simulate_full_season_probabilities(
     return final_rank_matrix, clinch_date_probs
 
 def sample_model_variant(model, rng):
-    """Sample an approximate plausible model state for the uncertainty band."""
     variant = {
-        "attack": {},
-        "defense": {},
+        "attack": {}, "defense": {},
         "intercept": model["intercept"],
         "home_adv_log": model["home_adv_log"],
         "park_log": dict(model["park_log"]),
@@ -2193,20 +1690,10 @@ def sample_model_variant(model, rng):
     variant["intercept"] += mean_a - mean_d
     return variant
 
-
 def simulate_championship_probability_band(
-    league_teams,
-    current_standings,
-    remaining_matches,
-    model,
-    pitcher_stats,
-    rest_effect,
-    all_games,
-    draw_rate,
-    seed_offset=0,
-    previous_rank_map=None,
+    league_teams, current_standings, remaining_matches, model, pitcher_stats,
+    rest_effect, all_games, draw_rate, seed_offset=0, previous_rank_map=None,
 ):
-    """Compute a model-uncertainty sensitivity band for championship probability."""
     samples = {t: [] for t in league_teams}
     future_matches = [m for m in remaining_matches if m.get("status") == "scheduled"]
     if not future_matches:
@@ -2217,17 +1704,9 @@ def simulate_championship_probability_band(
         rng = random.Random(base_seed + s * 7919)
         variant = sample_model_variant(model, rng)
         mat, _ = simulate_full_season_probabilities(
-            league_teams,
-            current_standings,
-            future_matches,
-            variant,
-            pitcher_stats,
-            rest_effect,
-            all_games,
-            draw_rate,
-            UNCERTAINTY_SEASON_SIMS,
-            rng=rng,
-            previous_rank_map=previous_rank_map,
+            league_teams, current_standings, future_matches, variant,
+            pitcher_stats, rest_effect, all_games, draw_rate,
+            UNCERTAINTY_SEASON_SIMS, rng=rng, previous_rank_map=previous_rank_map,
         )
         for t in league_teams:
             samples[t].append(float(mat[t][1]))
@@ -2243,15 +1722,7 @@ def simulate_championship_probability_band(
         result[t] = {"low": vals[low_idx], "high": vals[high_idx], "samples": len(vals)}
     return result
 
-
 def self_clinchable_first_count(table):
-    """Number of teams that can still win 1st place by their own wins alone.
-
-    This is the key trigger for the Championship Number (CN).  A numeric
-    magic_1st value is considered active only when it can actually be achieved
-    within the team's remaining games.  The current rank is irrelevant: a
-    trailing team may still be the only team with a self-clinchable path.
-    """
     count = 0
     for t in table:
         v = t.get("magic_1st")
@@ -2261,11 +1732,6 @@ def self_clinchable_first_count(table):
         elif isinstance(v, int) and v <= rem:
             count += 1
     return count
-
-
-# ------------------------------------------------------------
-# Presentation helpers
-# ------------------------------------------------------------
 
 def build_aligned_championship_grid(top_teams_standings):
     teams_data = []
@@ -2278,16 +1744,12 @@ def build_aligned_championship_grid(top_teams_standings):
             l = rem - w
             rate = calc_win_rate(cur_w + w, cur_l + l)
             patterns.append({
-                "w": w,
-                "l": l,
-                "rate": round(rate, 3),
+                "w": w, "l": l, "rate": round(rate, 3),
                 "rate_str": f".{round(rate * 1000):03d}",
             })
         teams_data.append({
-            "team": t["team"],
-            "remaining": rem,
-            "current_w": cur_w,
-            "current_l": cur_l,
+            "team": t["team"], "remaining": rem,
+            "current_w": cur_w, "current_l": cur_l,
             "patterns": patterns,
         })
 
@@ -2317,16 +1779,13 @@ def build_aligned_championship_grid(top_teams_standings):
     return {
         "headers": [
             {
-                "team": td["team"],
-                "remaining": td["remaining"],
-                "current_w": td["current_w"],
-                "current_l": td["current_l"],
+                "team": td["team"], "remaining": td["remaining"],
+                "current_w": td["current_w"], "current_l": td["current_l"],
             }
             for td in teams_data
         ],
         "rows": aligned_rows,
     }
-
 
 def format_league(records, league_teams, h2h_played, h2h_details, previous_rank_map):
     table = []
@@ -2349,13 +1808,9 @@ def format_league(records, league_teams, h2h_played, h2h_details, previous_rank_
     for t in table:
         for rank in range(1, 6):
             t[magic_names[rank]] = evaluate_clinch_target(
-            t, rank, table, h2h_played, previous_rank_map
-        )
+                t, rank, table, h2h_played, previous_rank_map
+            )
     return validate_and_assert_standings(table)
-
-# ------------------------------------------------------------
-# Full history build
-# ------------------------------------------------------------
 
 def build_all_history_with_predictions(historical_games, games_2026):
     prior = estimate_multi_year_prior(historical_games)
@@ -2363,38 +1818,25 @@ def build_all_history_with_predictions(historical_games, games_2026):
     rest_effect = estimate_rest_effect(historical_games)
     draw_baseline_rate = estimate_historical_draw_rate(historical_games)
 
-    # Undated postponed games are real future games but must not create a
-    # selectable historical snapshot date.
     all_dates = sorted({g["date"] for g in games_2026 if g.get("date")})
     history_snapshots = {}
     random.seed(RANDOM_SEED)
     central_previous_ranks = previous_season_ranks_for_target(2026, historical_games, CENTRAL_TEAMS)
+    pacific_previous_ranks = previous_season_ranks_for_target(2026, historical_games, PACIFIC_TEAMS)
 
-    # Historical uncertainty bands are expensive. They are useful for the
-    # current evaluation point, but are not needed for every past/future
-    # snapshot. Compute them only for the latest date with an actual result.
     last_eval_date = max(
         (g["date"] for g in games_2026 if is_finished(g)),
         default=all_dates[0],
     )
-    pacific_previous_ranks = previous_season_ranks_for_target(2026, historical_games, PACIFIC_TEAMS)
 
     for target_date in all_dates:
         snapshot_games = load_2026_games_as_of_date(target_date)
         games_for_date = snapshot_games if snapshot_games is not None else games_2026
         records = {
             t: {
-                "team": t,
-                "games": 0,
-                "win": 0,
-                "lose": 0,
-                "draw": 0,
-                "rs": 0,
-                "ra": 0,
-                "home": {"win": 0, "lose": 0, "draw": 0},
-                "away": {"win": 0, "lose": 0, "draw": 0},
-                "interleague": {"win": 0, "lose": 0, "draw": 0},
-                "league": {"win": 0, "lose": 0, "draw": 0},
+                "team": t, "games": 0, "win": 0, "lose": 0, "draw": 0, "rs": 0, "ra": 0,
+                "home": {"win": 0, "lose": 0, "draw": 0}, "away": {"win": 0, "lose": 0, "draw": 0},
+                "interleague": {"win": 0, "lose": 0, "draw": 0}, "league": {"win": 0, "lose": 0, "draw": 0},
             }
             for t in ALL_TEAMS
         }
@@ -2405,7 +1847,6 @@ def build_all_history_with_predictions(historical_games, games_2026):
             for t1 in ALL_TEAMS
         }
 
-        # Strictly pre-target-date information for the prediction model.
         pitcher_stats = build_pitcher_start_stats(games_for_date, target_date)
         model = fit_run_model(games_for_date, target_date, prior, environment)
         draw_rate_target = estimate_current_draw_rate(games_for_date, target_date)
@@ -2417,7 +1858,6 @@ def build_all_history_with_predictions(historical_games, games_2026):
             hs, as_ = int(g["home_score"]), int(g["away_score"])
             g_date = g["date"]
 
-            # Pre-game model totals: strict < target_date only.
             if g_date < target_date:
                 team_total_stats_before_today[h]["rs"] += hs
                 team_total_stats_before_today[h]["ra"] += as_
@@ -2426,57 +1866,37 @@ def build_all_history_with_predictions(historical_games, games_2026):
                 team_total_stats_before_today[a]["ra"] += hs
                 team_total_stats_before_today[a]["games"] += 1
 
-            # Standings through target_date.
             if g_date <= target_date:
-                records[h]["games"] += 1
-                records[a]["games"] += 1
-                records[h]["rs"] += hs
-                records[h]["ra"] += as_
-                records[a]["rs"] += as_
-                records[a]["ra"] += hs
-                h2h_played[h][a] += 1
-                h2h_played[a][h] += 1
+                records[h]["games"] += 1; records[a]["games"] += 1
+                records[h]["rs"] += hs; records[h]["ra"] += as_
+                records[a]["rs"] += as_; records[a]["ra"] += hs
+                h2h_played[h][a] += 1; h2h_played[a][h] += 1
 
                 is_inter = (h in CENTRAL_TEAMS and a in PACIFIC_TEAMS) or (h in PACIFIC_TEAMS and a in CENTRAL_TEAMS)
                 if hs > as_:
-                    records[h]["win"] += 1
-                    records[h]["home"]["win"] += 1
-                    records[a]["lose"] += 1
-                    records[a]["away"]["lose"] += 1
-                    h2h_details[h][a]["win"] += 1
-                    h2h_details[a][h]["lose"] += 1
+                    records[h]["win"] += 1; records[h]["home"]["win"] += 1
+                    records[a]["lose"] += 1; records[a]["away"]["lose"] += 1
+                    h2h_details[h][a]["win"] += 1; h2h_details[a][h]["lose"] += 1
                     if is_inter:
-                        records[h]["interleague"]["win"] += 1
-                        records[a]["interleague"]["lose"] += 1
+                        records[h]["interleague"]["win"] += 1; records[a]["interleague"]["lose"] += 1
                     else:
-                        records[h]["league"]["win"] += 1
-                        records[a]["league"]["lose"] += 1
+                        records[h]["league"]["win"] += 1; records[a]["league"]["lose"] += 1
                 elif hs < as_:
-                    records[a]["win"] += 1
-                    records[a]["away"]["win"] += 1
-                    records[h]["lose"] += 1
-                    records[h]["home"]["lose"] += 1
-                    h2h_details[a][h]["win"] += 1
-                    h2h_details[h][a]["lose"] += 1
+                    records[a]["win"] += 1; records[a]["away"]["win"] += 1
+                    records[h]["lose"] += 1; records[h]["home"]["lose"] += 1
+                    h2h_details[a][h]["win"] += 1; h2h_details[h][a]["lose"] += 1
                     if is_inter:
-                        records[a]["interleague"]["win"] += 1
-                        records[h]["interleague"]["lose"] += 1
+                        records[a]["interleague"]["win"] += 1; records[h]["interleague"]["lose"] += 1
                     else:
-                        records[a]["league"]["win"] += 1
-                        records[h]["league"]["lose"] += 1
+                        records[a]["league"]["win"] += 1; records[h]["league"]["lose"] += 1
                 else:
-                    records[h]["draw"] += 1
-                    records[h]["home"]["draw"] += 1
-                    records[a]["draw"] += 1
-                    records[a]["away"]["draw"] += 1
-                    h2h_details[h][a]["draw"] += 1
-                    h2h_details[a][h]["draw"] += 1
+                    records[h]["draw"] += 1; records[h]["home"]["draw"] += 1
+                    records[a]["draw"] += 1; records[a]["away"]["draw"] += 1
+                    h2h_details[h][a]["draw"] += 1; h2h_details[a][h]["draw"] += 1
                     if is_inter:
-                        records[h]["interleague"]["draw"] += 1
-                        records[a]["interleague"]["draw"] += 1
+                        records[h]["interleague"]["draw"] += 1; records[a]["interleague"]["draw"] += 1
                     else:
-                        records[h]["league"]["draw"] += 1
-                        records[a]["league"]["draw"] += 1
+                        records[h]["league"]["draw"] += 1; records[a]["league"]["draw"] += 1
 
         c_table = format_league(records, CENTRAL_TEAMS, h2h_played, h2h_details, central_previous_ranks)
         p_table = format_league(records, PACIFIC_TEAMS, h2h_played, h2h_details, pacific_previous_ranks)
@@ -2520,12 +1940,9 @@ def build_all_history_with_predictions(historical_games, games_2026):
                 a_label = f"先発: {a_start}"
 
             day_predictions.append({
-                "home": h,
-                "away": a,
-                "home_starter": h_start,
-                "away_starter": a_start,
-                "home_status_text": h_label,
-                "away_status_text": a_label,
+                "home": h, "away": a,
+                "home_starter": h_start, "away_starter": a_start,
+                "home_status_text": h_label, "away_status_text": a_label,
                 "home_prob": round(probs["home"] * 100.0, 1),
                 "away_prob": round(probs["away"] * 100.0, 1),
                 "draw_prob": round(probs["draw"] * 100.0, 1),
@@ -2575,14 +1992,14 @@ def build_all_history_with_predictions(historical_games, games_2026):
 
         for t in c_table:
             info = c_band.get(t["team"]) if c_band else None
-            if info:
+            if info and t.get("magic_1st") != "-":
                 t["champ_prob_low"] = round(info["low"], 1)
                 t["champ_prob_high"] = round(info["high"], 1)
                 t["champ_prob_band_n"] = info["samples"]
 
         for t in p_table:
             info = p_band.get(t["team"]) if p_band else None
-            if info:
+            if info and t.get("magic_1st") != "-":
                 t["champ_prob_low"] = round(info["low"], 1)
                 t["champ_prob_high"] = round(info["high"], 1)
                 t["champ_prob_band_n"] = info["samples"]
@@ -2593,12 +2010,10 @@ def build_all_history_with_predictions(historical_games, games_2026):
             "predictions": day_predictions,
         }
 
-        # Store per-date fitted model privately for historical probability pass.
         history_snapshots[target_date]["_model"] = model
         history_snapshots[target_date]["_pitcher_stats"] = pitcher_stats
         history_snapshots[target_date]["_draw_rate"] = draw_rate_target
 
-    # Latest evaluation point.
     dates_with_finished = [
         d for d in all_dates if any(g["date"] == d and is_finished(g) for g in games_2026)
     ]
@@ -2608,7 +2023,6 @@ def build_all_history_with_predictions(historical_games, games_2026):
     latest_pitcher_stats = latest_snapshot["_pitcher_stats"]
     latest_draw_rate = latest_snapshot["_draw_rate"]
 
-    # Current/future matches = games without results and not cancelled.
     future_matches = [
         g for g in games_2026
         if g.get("home_score") is None and g.get("away_score") is None and not is_cancelled(g)
@@ -2617,32 +2031,16 @@ def build_all_history_with_predictions(historical_games, games_2026):
     p_future = [g for g in future_matches if g["home"] in PACIFIC_TEAMS or g["away"] in PACIFIC_TEAMS]
 
     c_rank_matrix, c_clinch_dates = simulate_full_season_probabilities(
-        CENTRAL_TEAMS,
-        latest_snapshot["central"],
-        c_future,
-        latest_model,
-        latest_pitcher_stats,
-        rest_effect,
-        games_2026,
-        latest_draw_rate,
-        MAIN_NUM_SIMS,
-        previous_rank_map=central_previous_ranks,
+        CENTRAL_TEAMS, latest_snapshot["central"], c_future,
+        latest_model, latest_pitcher_stats, rest_effect, games_2026, latest_draw_rate,
+        MAIN_NUM_SIMS, previous_rank_map=central_previous_ranks,
     )
     p_rank_matrix, p_clinch_dates = simulate_full_season_probabilities(
-        PACIFIC_TEAMS,
-        latest_snapshot["pacific"],
-        p_future,
-        latest_model,
-        latest_pitcher_stats,
-        rest_effect,
-        games_2026,
-        latest_draw_rate,
-        MAIN_NUM_SIMS,
-        previous_rank_map=pacific_previous_ranks,
+        PACIFIC_TEAMS, latest_snapshot["pacific"], p_future,
+        latest_model, latest_pitcher_stats, rest_effect, games_2026, latest_draw_rate,
+        MAIN_NUM_SIMS, previous_rank_map=pacific_previous_ranks,
     )
 
-    # Historical as-of-date champion/CS probabilities.
-    # These are now genuine model-based probabilities rather than a heuristic.
     for d in all_dates:
         snap = history_snapshots[d]
         snapshot_games = load_2026_games_as_of_date(d)
@@ -2650,9 +2048,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
         model_d = snap["_model"]
         pitcher_d = snap["_pitcher_stats"]
         draw_rate_d = snap["_draw_rate"]
-        # Historical simulation uses the Git-tracked schedule/result state that
-        # existed by the end of the target date.  Thus later schedule changes,
-        # later result entries, and later starter announcements cannot leak in.
+
         future_d = []
         for g in games_for_date:
             if is_cancelled(g):
@@ -2671,14 +2067,10 @@ def build_all_history_with_predictions(historical_games, games_2026):
         p_future_d = [g for g in future_d if g["home"] in PACIFIC_TEAMS or g["away"] in PACIFIC_TEAMS]
 
         snapshot_future_keys = {
-            (g["date"], g["home"], g["away"])
-            for g in future_d
-            if g.get("status") == "scheduled"
+            (g["date"], g["home"], g["away"]) for g in future_d if g.get("status") == "scheduled"
         }
         current_future_keys = {
-            (g["date"], g["home"], g["away"])
-            for g in future_matches
-            if g.get("status") == "scheduled"
+            (g["date"], g["home"], g["away"]) for g in future_matches if g.get("status") == "scheduled"
         }
 
         if d == last_eval_date and snapshot_future_keys == current_future_keys:
@@ -2686,47 +2078,41 @@ def build_all_history_with_predictions(historical_games, games_2026):
             p_mat, _ = p_rank_matrix, p_clinch_dates
         else:
             c_mat, _ = simulate_full_season_probabilities(
-                CENTRAL_TEAMS,
-                snap["central"],
-                c_future_d,
-                model_d,
-                pitcher_d,
-                rest_effect,
-                games_for_date,
-                draw_rate_d,
-                HISTORICAL_NUM_SIMS,
-                previous_rank_map=central_previous_ranks,
+                CENTRAL_TEAMS, snap["central"], c_future_d,
+                model_d, pitcher_d, rest_effect, games_for_date, draw_rate_d,
+                HISTORICAL_NUM_SIMS, previous_rank_map=central_previous_ranks,
             )
             p_mat, _ = simulate_full_season_probabilities(
-                PACIFIC_TEAMS,
-                snap["pacific"],
-                p_future_d,
-                model_d,
-                pitcher_d,
-                rest_effect,
-                games_for_date,
-                draw_rate_d,
-                HISTORICAL_NUM_SIMS,
-                previous_rank_map=pacific_previous_ranks,
+                PACIFIC_TEAMS, snap["pacific"], p_future_d,
+                model_d, pitcher_d, rest_effect, games_for_date, draw_rate_d,
+                HISTORICAL_NUM_SIMS, previous_rank_map=pacific_previous_ranks,
             )
 
-        # Raw Monte-Carlo championship probabilities.
-        c_raw = {t["team"]: (100.0 if t.get("magic_1st") == "確定" else float(c_mat[t["team"]][1])) for t in snap["central"]}
-        p_raw = {t["team"]: (100.0 if t.get("magic_1st") == "確定" else float(p_mat[t["team"]][1])) for t in snap["pacific"]}
+        c_raw = {
+            t["team"]: (
+                0.0 if t.get("magic_1st") == "-"
+                else (100.0 if t.get("magic_1st") == "確定" else float(c_mat[t["team"]][1]))
+            )
+            for t in snap["central"]
+        }
+        p_raw = {
+            t["team"]: (
+                0.0 if t.get("magic_1st") == "-"
+                else (100.0 if t.get("magic_1st") == "確定" else float(p_mat[t["team"]][1]))
+            )
+            for t in snap["pacific"]
+        }
 
-        # Apply the early-season historical prior/shrinkage ONLY to the
-        # championship forecast.  The underlying game probabilities remain
-        # the existing Poisson model.
         c_band_raw = {}
         p_band_raw = {}
         for t in snap["central"]:
-            if "champ_prob_low" in t and "champ_prob_high" in t:
+            if "champ_prob_low" in t and "champ_prob_high" in t and t.get("magic_1st") != "-":
                 c_band_raw[t["team"]] = {
                     "low": float(t["champ_prob_low"]),
                     "high": float(t["champ_prob_high"]),
                 }
         for t in snap["pacific"]:
-            if "champ_prob_low" in t and "champ_prob_high" in t:
+            if "champ_prob_low" in t and "champ_prob_high" in t and t.get("magic_1st") != "-":
                 p_band_raw[t["team"]] = {
                     "low": float(t["champ_prob_low"]),
                     "high": float(t["champ_prob_high"]),
@@ -2741,16 +2127,26 @@ def build_all_history_with_predictions(historical_games, games_2026):
 
         for t in snap["central"]:
             mat = c_mat[t["team"]]
-            t["cs_prob"] = 100 if t.get("magic_3rd") == "確定" else sum(mat[r] for r in (1, 2, 3))
+            if t.get("magic_3rd") == "確定":
+                t["cs_prob"] = 100
+            elif t.get("magic_3rd") == "-":
+                t["cs_prob"] = 0
+            else:
+                t["cs_prob"] = int(round(sum(mat[r] for r in (1, 2, 3))))
+
         for t in snap["pacific"]:
             mat = p_mat[t["team"]]
-            t["cs_prob"] = 100 if t.get("magic_3rd") == "確定" else sum(mat[r] for r in (1, 2, 3))
+            if t.get("magic_3rd") == "確定":
+                t["cs_prob"] = 100
+            elif t.get("magic_3rd") == "-":
+                t["cs_prob"] = 0
+            else:
+                t["cs_prob"] = int(round(sum(mat[r] for r in (1, 2, 3))))
 
         del snap["_model"]
         del snap["_pitcher_stats"]
         del snap["_draw_rate"]
 
-    # Latest schedules for championship-clinch cards.
     def build_filtered_clinch_schedule(team_name, future_matches_local, clinch_date_map, champ_prob, model, pitcher_stats, draw_rate):
         known_dates = {
             m["date"] for m in future_matches_local
@@ -2764,7 +2160,6 @@ def build_all_history_with_predictions(historical_games, games_2026):
         all_future_dates = sorted(known_dates | set(clinch_date_map.keys()))
         if has_undated:
             all_future_dates.append("9999-12-31")
-        # Remove duplicates while preserving order.
         all_future_dates = list(dict.fromkeys(all_future_dates))
         rows = []
         cumulative = 0.0
@@ -2791,10 +2186,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
 
             if match:
                 is_home = match["home"] == team_name
-                undated_group = (
-                    d == "9999-12-31"
-                    and match.get("undated_postponed")
-                )
+                undated_group = (d == "9999-12-31" and match.get("undated_postponed"))
                 if undated_group:
                     undated_all = [
                         m for m in future_matches_local
@@ -2802,15 +2194,9 @@ def build_all_history_with_predictions(historical_games, games_2026):
                         and (m["home"] == team_name or m["away"] == team_name)
                     ]
                     opponents = sorted(
-                        set(
-                            m["away"] if m["home"] == team_name else m["home"]
-                            for m in undated_all
-                        )
+                        set(m["away"] if m["home"] == team_name else m["home"] for m in undated_all)
                     )
-                    opp = (
-                        f"{'・'.join(opponents)}（{len(undated_all)}試合）"
-                        if opponents else f"未定（{len(undated_all)}試合）"
-                    )
+                    opp = f"{'・'.join(opponents)}（{len(undated_all)}試合）" if opponents else f"未定（{len(undated_all)}試合）"
                     ground = STADIUM_NAMES.get(match["home"], "球場")
                     win_expect_str = "-"
                 else:
@@ -2819,20 +2205,12 @@ def build_all_history_with_predictions(historical_games, games_2026):
                     ground = STADIUM_NAMES.get(host, "球場")
                     stadium = STADIUM_NAMES.get(host, "東京D")
                     h_start = match.get("home_starter") if match.get("starter_confirmed") else "未定"
-                a_start = match.get("away_starter") if match.get("starter_confirmed") else "未定"
-                if d != "9999-12-31":
+                    a_start = match.get("away_starter") if match.get("starter_confirmed") else "未定"
                     rest_diff = rest_difference_for_game(match, games_2026, as_of_date=None)
                     probs = predict_game(
-                        model,
-                        match["home"],
-                        match["away"],
-                        stadium,
-                        h_start or "未定",
-                        a_start or "未定",
-                        pitcher_stats,
-                        rest_diff,
-                        rest_effect,
-                        draw_rate,
+                        model, match["home"], match["away"], stadium,
+                        h_start or "未定", a_start or "未定", pitcher_stats,
+                        rest_diff, rest_effect, draw_rate,
                     )
                     win_expect = probs["home"] if is_home else probs["away"]
                     win_expect_str = str(int(round(win_expect * 100.0)))
@@ -2949,10 +2327,6 @@ def build_all_history_with_predictions(historical_games, games_2026):
     final_default_date = jst_today if jst_today in all_dates else last_eval_date
     return all_dates, final_default_date, history_snapshots, simulation_payload
 
-# ------------------------------------------------------------
-# Main
-# ------------------------------------------------------------
-
 def main():
     historical_games, games_2026 = load_all_games()
     dates, default_latest, history, sim_data = build_all_history_with_predictions(historical_games, games_2026)
@@ -2983,7 +2357,6 @@ def main():
         f"Poisson攻守モデル + 複数年prior + recency + park/home + starter + rest / "
         f"Monte Carlo {MAIN_NUM_SIMS}回"
     )
-
 
 if __name__ == "__main__":
     main()
