@@ -352,7 +352,23 @@
     for(let r=1;r<=6;r++){
       let html=`<tr><td class="rank-label">${r}位</td>`;
       teams.forEach(t=>{
-        const obj=list.find(x=>x.team===t); const cur=obj?.rank||0; const prob=Number(mat[t]?.[r] ?? 0);
+        const obj=list.find(x=>x.team===t); const cur=obj?.rank||0;
+        let prob;
+        if(r===1 && obj){
+          // The headline championship probability is the site's final blended
+          // championship estimate. Keep rank-1 visible even when the raw
+          // Monte Carlo sampling is too coarse to produce a non-zero cell.
+          prob=Number(obj.champ_prob ?? mat[t]?.[1] ?? 0);
+        }else{
+          const rawRest=Array.from({length:5},(_,i)=>Number(mat[t]?.[i+2] ?? 0));
+          const restTotal=rawRest.reduce((a,b)=>a+b,0);
+          const champP=Number(obj?.champ_prob ?? mat[t]?.[1] ?? 0);
+          if(r>=2 && restTotal>0 && champP<100){
+            prob=rawRest[r-2] * (100-champP) / restTotal;
+          }else{
+            prob=0;
+          }
+        }
         let cls='';
         const c=teamColor(t);
         let style='';
@@ -391,8 +407,29 @@
     let top='<tr>', sub='<tr>', cols='<tr>';
     data.headers.forEach(h=>{const c=teamColor(h.team);top+=`<th colspan="3" class="banner-team" style="--team-main:${c.main};background:${c.light};color:${c.text}">${esc(h.team)}</th>`;sub+=`<th colspan="3" class="banner-sub">残り${h.remaining}試合（現在${h.current_w}勝${h.current_l}敗）</th>`;cols+='<th>勝</th><th>敗</th><th>勝率</th>'});
     head.innerHTML=top+'</tr>'+sub+'</tr>'+cols+'</tr>';
-    data.rows.forEach(row=>{
-      let tr='<tr>'; row.forEach(cell=>{if(cell){const hi=cell.rate>=.540&&cell.rate<=.550;tr+=`<td class="${hi?'line-highlight':''}">${cell.w}</td><td class="${hi?'line-highlight':''}">${cell.l}</td><td class="${hi?'line-highlight':''}">${esc(cell.rate_str)}</td>`}else tr+='<td>-</td><td>-</td><td>-</td>'});tr+='</tr>';body.insertAdjacentHTML('beforeend',tr);
+    const highlightRates = {};
+    (data.headers || []).forEach(h=>{
+      const currentRate=(Number(h.current_w)+Number(h.current_l))>0
+        ? Number(h.current_w)/(Number(h.current_w)+Number(h.current_l))
+        : 0;
+      const candidates=(data.rows || [])
+        .map((row,idx)=>({idx,cell:row[data.headers.indexOf(h)]}))
+        .filter(x=>x.cell)
+        .filter(x=>x.cell.rate>=currentRate-1e-9)
+        .sort((a,b)=>a.cell.rate-b.cell.rate);
+      highlightRates[h.team]=new Set(candidates.slice(0,3).map(x=>x.idx));
+    });
+    data.rows.forEach((row,rowIdx)=>{
+      let tr='<tr>';
+      row.forEach((cell,colIdx)=>{
+        if(cell){
+          const team=data.headers[colIdx]?.team;
+          const hi=highlightRates[team]?.has(rowIdx);
+          tr+=`<td class="${hi?'line-highlight':''}">${cell.w}</td><td class="${hi?'line-highlight':''}">${cell.l}</td><td class="${hi?'line-highlight':''}">${esc(cell.rate_str)}</td>`;
+        }else tr+='<td>-</td><td>-</td><td>-</td>';
+      });
+      tr+='</tr>';
+      body.insertAdjacentHTML('beforeend',tr);
     });
   }
 
