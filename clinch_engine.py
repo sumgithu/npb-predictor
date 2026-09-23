@@ -1371,7 +1371,7 @@ def fit_run_model(games_2026, target_date, prior, environment):
 def build_pitcher_start_stats(games_2026, target_date):
     stats = {}
     for g in games_2026:
-        if not is_finished(g) or g["date"] >= target_date:
+        if not is_finished(g) or not g.get("date") or g["date"] >= target_date:
             continue
         if not g.get("starter_confirmed"):
             continue
@@ -1413,7 +1413,10 @@ def get_pitcher_run_effect(pitcher_name, pitcher_stats):
 
 def build_last_known_game_dates(games, cutoff_date=None, include_scheduled=False):
     latest = {}
-    for g in sorted(games, key=lambda x: (x["date"], x["home"], x["away"])):
+    for g in sorted(
+        [x for x in games if x.get("date")],
+        key=lambda x: (x["date"], x["home"], x["away"])
+    ):
         if cutoff_date is not None and g["date"] >= cutoff_date:
             continue
         if is_cancelled(g):
@@ -2351,7 +2354,9 @@ def build_all_history_with_predictions(historical_games, games_2026):
     rest_effect = estimate_rest_effect(historical_games)
     draw_baseline_rate = estimate_historical_draw_rate(historical_games)
 
-    all_dates = sorted({g["date"] for g in games_2026})
+    # Undated postponed games are real future games but must not create a
+    # selectable historical snapshot date.
+    all_dates = sorted({g["date"] for g in games_2026 if g.get("date")})
     history_snapshots = {}
     random.seed(RANDOM_SEED)
     central_previous_ranks = previous_season_ranks_for_target(2026, historical_games, CENTRAL_TEAMS)
@@ -2531,7 +2536,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
         if target_date == last_eval_date and c_self_clinchable != 1:
             c_future_d = [
                 g for g in games_for_date
-                if g["date"] > target_date
+                if (g.get("date") is None or g["date"] > target_date)
                 and (g["home"] in CENTRAL_TEAMS or g["away"] in CENTRAL_TEAMS)
                 and g.get("home_score") is None and g.get("away_score") is None
                 and not is_cancelled(g)
@@ -2546,7 +2551,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
         if target_date == last_eval_date and p_self_clinchable != 1:
             p_future_d = [
                 g for g in games_for_date
-                if g["date"] > target_date
+                if (g.get("date") is None or g["date"] > target_date)
                 and (g["home"] in PACIFIC_TEAMS or g["away"] in PACIFIC_TEAMS)
                 and g.get("home_score") is None and g.get("away_score") is None
                 and not is_cancelled(g)
@@ -2638,7 +2643,9 @@ def build_all_history_with_predictions(historical_games, games_2026):
         # later result entries, and later starter announcements cannot leak in.
         future_d = []
         for g in games_for_date:
-            if g["date"] <= d or is_cancelled(g):
+            if is_cancelled(g):
+                continue
+            if g.get("date") is not None and g["date"] <= d:
                 continue
             future_copy = dict(g)
             future_copy["home_score"] = None
