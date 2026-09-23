@@ -2371,7 +2371,8 @@ def build_all_history_with_predictions(historical_games, games_2026):
     pacific_previous_ranks = previous_season_ranks_for_target(2026, historical_games, PACIFIC_TEAMS)
 
     for target_date in all_dates:
-        games_for_date = load_2026_games_as_of_date(target_date) or games_2026
+        snapshot_games = load_2026_games_as_of_date(target_date)
+        games_for_date = snapshot_games if snapshot_games is not None else games_2026
         records = {
             t: {
                 "team": t,
@@ -2635,6 +2636,8 @@ def build_all_history_with_predictions(historical_games, games_2026):
     # These are now genuine model-based probabilities rather than a heuristic.
     for d in all_dates:
         snap = history_snapshots[d]
+        snapshot_games = load_2026_games_as_of_date(d)
+        games_for_date = snapshot_games if snapshot_games is not None else games_2026
         model_d = snap["_model"]
         pitcher_d = snap["_pitcher_stats"]
         draw_rate_d = snap["_draw_rate"]
@@ -2953,6 +2956,17 @@ def main():
     }
     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
+
+    print("最新基準日の確認：")
+    for league_key, league_label in (("central", "セ"), ("pacific", "パ")):
+        latest_rows = history[default_latest][league_key]
+        summary = " / ".join(
+            f"{r['team']} {r['win']}-{r['lose']}-{r['draw']} 残{r['remaining']} CN1={r['magic_1st']} 優勝{float(r.get('champ_prob', 0.0)):.1f}%"
+            for r in latest_rows
+        )
+        print(f"{league_label}：{summary}")
+    undated_count = sum(1 for g in games_2026 if g.get("undated_postponed"))
+    print(f"日程未定振替試合：{undated_count}試合")
 
     print(
         "解析・予測更新完了："
