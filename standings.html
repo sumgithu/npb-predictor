@@ -27,7 +27,7 @@
     .tabs{display:flex;gap:8px}
     .tab{border:1px solid var(--border);background:#fff;padding:8px 20px;border-radius:20px;font-weight:800;cursor:pointer}
     .tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-        .section-title{font-size:1.12rem;font-weight:800;color:#1e3a8a;margin:26px 0 12px 3px}
+    .section-title{font-size:1.12rem;font-weight:800;color:#1e3a8a;margin:26px 0 12px 3px}
     .section-title .desc{font-size:.78rem;color:var(--sub);font-weight:400;margin-left:6px}
     .table-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow-x:auto;box-shadow:0 2px 5px rgba(0,0,0,.03);margin-bottom:12px}
     table{width:100%;border-collapse:collapse;text-align:center;font-size:.86rem;min-width:820px}
@@ -59,8 +59,8 @@
     .h2h{min-width:1050px}.h2h th{font-size:.74rem}.self{background:#f8fafc;color:#94a3b8;font-weight:800}.draw-sub{display:block;font-size:.69rem;color:#64748b}
     .notes{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;font-size:.79rem;line-height:1.7;color:#334155}.notes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:18px}.notes dt{font-weight:800;color:#1e3a8a;margin-bottom:3px}.notes dd{margin:0 0 10px;color:#475569}.model-meta-footer{margin-top:18px;color:#94a3b8;font-size:.66rem;line-height:1.65;text-align:center;border-top:1px solid #e2e8f0;padding-top:10px}.model-meta-line{display:flex;justify-content:center;gap:11px;flex-wrap:wrap}.model-meta-label{color:#94a3b8}.model-meta-value{color:#64748b;font-weight:700}.foot{margin-top:10px;text-align:center;color:#94a3b8;font-size:.68rem}
     @media(max-width:650px){body{padding:12px 7px 50px}header h1{font-size:1.28rem}.prediction-grid{grid-template-columns:1fr}.section-title{font-size:1rem}.guide{grid-template-columns:1fr}.controls{align-items:stretch}.tabs{width:100%}.tab{flex:1}}
-      .champ-range{white-space:nowrap;font-weight:900;color:#1e3a8a}.prob-high .champ-range{color:#991b1b}
-</style>
+    .champ-range{white-space:nowrap;font-weight:900;color:#1e3a8a}.prob-high .champ-range{color:#991b1b}
+  </style>
 </head>
 <body>
 <div class="container">
@@ -213,8 +213,6 @@
     if (v === '確定') return '<span class="badge badge-fixed">確定</span>';
     if (typeof v === 'number') {
       if (v > rem) return `<span class="badge badge-elim">◇${v}◇</span>`;
-      // 1位のCNは常に数値を表示する。自力優勝可能チームが1球団だけ
-      // になった時だけ、その球団のCNに「M」を付ける。
       if (targetRank === 1 && showChampionshipM) {
         return `<span class="badge badge-magic">M${v}</span>`;
       }
@@ -230,8 +228,7 @@
     return fmtPct(t.champ_prob ?? 0);
   }
   function getJstDate() {
-    const s = new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-    return s;
+    return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   }
   function currentList() {
     return rawData && rawData.history && rawData.history[selectedDate] ? rawData.history[selectedDate][currentLeague] : null;
@@ -348,26 +345,46 @@
     const key = currentLeague === 'central' ? 'central_rank_matrix' : 'pacific_rank_matrix';
     const mat = rawData?.simulation?.[key] || {};
     const teams = list.map(t=>t.team);
-    head.innerHTML = `<tr><th class="corner">最終順位</th>${teams.map(t=>{const c=teamColor(t);return `<th class="team-head" style="--team-main:${c.main};--team-light:${c.light};--team-text:${c.text}" title="${esc(FULL_NAMES[t]||t)}">${esc(t)}</th>`}).join('')}</tr>`;
-    for(let r=1;r<=6;r++){
-      let html=`<tr><td class="rank-label">${r}位</td>`;
+    head.innerHTML = `<tr><th class="corner">最終順位</th>${teams.map(t=>{const c=teamColor(t);return `<th class="team-head" style="--team-main:${c.main};--team-light:${c.light};--team-text:${c.text}" title="${esc(FULL_NAMES[t]\vert{}\vert{}t)}">${esc(t)}</th>`}).join('')}</tr>`;
+
+    for(let r=1; r<=6; r++){
+      let html = `<tr><td class="rank-label">${r}位</td>`;
       teams.forEach(t=>{
-        const obj=list.find(x=>x.team===t); const cur=obj?.rank||0;
-        const prob = (r === 1 && obj && obj.champ_prob != null)
-          ? Number(obj.champ_prob)
-          : Number(mat[t]?.[r] ?? 0);
-        let cls='';
-        const c=teamColor(t);
-        let style='';
-        if(r===cur){ cls='cell-current'; style=`style="--team-main:${c.main}"`; }
-        else if(r<cur && prob>0){
-          const key2=r===1?'magic_1st':r===2?'magic_2nd':'magic_3rd';
-          const mv=obj?.[key2]; cls=(typeof mv==='number' && mv<=obj.remaining)?'cell-climb':'cell-pot';
-        } else if(r>cur && prob>0) cls='cell-drop';
-        const val=prob>0?fmtPct(prob):(r===cur?'0%':'-');
+        const obj = list.find(x=>x.team===t);
+        const cur = obj?.rank || 0;
+        let prob = Number(mat[t]?.[r] ?? 0);
+
+        if (r === 1 && obj && obj.champ_prob != null) {
+          prob = Number(obj.champ_prob);
+        }
+
+        let cls = '';
+        const c = teamColor(t);
+        let style = '';
+        if(r === cur){
+          cls = 'cell-current';
+          style = `style="--team-main:${c.main}"`;
+        } else if(r < cur && prob > 0){
+          const key2 = r === 1 ? 'magic_1st' : r === 2 ? 'magic_2nd' : 'magic_3rd';
+          const mv = obj?.[key2];
+          cls = (typeof mv === 'number' && mv <= obj.remaining) ? 'cell-climb' : 'cell-pot';
+        } else if(r > cur && prob > 0) {
+          cls = 'cell-drop';
+        }
+
+        let val = '-';
+        if (prob > 0) {
+          val = prob >= 0.05 ? `${prob.toFixed(1)}%` : '<0.1%';
+          if (val === '0.0%') val = '0%';
+          if (val === '100.0%') val = '100%';
+        } else if (r === cur) {
+          val = '0%';
+        }
+
         html += `<td><span class="cell ${cls}" ${style} title="${esc((FULL_NAMES[t]||t)+'：'+r+'位 '+val)}">${val}</span></td>`;
       });
-      html += `</tr>`; body.insertAdjacentHTML('beforeend',html);
+      html += `</tr>`;
+      body.insertAdjacentHTML('beforeend', html);
     }
   }
 
