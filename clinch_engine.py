@@ -43,7 +43,7 @@ FALLBACK_CSV_FILE = "npb_games_clean.csv"
 
 # Simulation
 MAIN_NUM_SIMS = 5000
-HISTORICAL_NUM_SIMS = 300
+HISTORICAL_NUM_SIMS = 100
 RANDOM_SEED = 20260921
 
 # Early/mid-season model-uncertainty band.
@@ -63,7 +63,7 @@ MODEL_UNCERTAINTY_INFLATION = 0.70
 RECENCY_HALF_LIFE_DAYS = 50.0
 PRIOR_SEASON_DECAY = 0.55
 PRIOR_L2 = 8.0
-FIT_ITERATIONS = 70
+FIT_ITERATIONS = 35
 FIT_LEARNING_RATE = 0.025
 
 # Pitcher information in the current DB is sparse and W/L is noisy.
@@ -1157,6 +1157,20 @@ def fit_run_model(games_2026, target_date, prior, environment):
 
     # Adam optimizer. Pure standard-library implementation so GitHub Actions
     # does not require numpy/scipy.
+    #
+    # Performance: model weights and date parsing are precomputed once per
+    # target date instead of being recomputed on every optimizer iteration.
+    weighted_completed = []
+    for g in completed:
+        w = _model_weight(g["date"], target_date)
+        if w <= 1e-5:
+            continue
+        h, a = g["home"], g["away"]
+        hs = float(g["home_score"])
+        as_ = float(g["away_score"])
+        park = environment["park_log"].get(STADIUM_NAMES.get(h, "東京D"), 0.0)
+        weighted_completed.append((h, a, hs, as_, w, park))
+
     m = {"intercept": 0.0}
     v = {"intercept": 0.0}
     for t in ALL_TEAMS:
@@ -1173,15 +1187,7 @@ def fit_run_model(games_2026, target_date, prior, environment):
         grad_a = {t: 0.0 for t in ALL_TEAMS}
         grad_d = {t: 0.0 for t in ALL_TEAMS}
 
-        for g in completed:
-            w = _model_weight(g["date"], target_date)
-            if w <= 1e-5:
-                continue
-            h, a = g["home"], g["away"]
-            hs = float(g["home_score"])
-            as_ = float(g["away_score"])
-            park = environment["park_log"].get(STADIUM_NAMES.get(h, "東京D"), 0.0)
-
+        for h, a, hs, as_, w, park in weighted_completed:
             log_h = intercept + environment["home_adv_log"] + park + attack[h] - defense[a]
             log_a = intercept + park + attack[a] - defense[h]
             lam_h = safe_exp(log_h)
@@ -1236,10 +1242,7 @@ def fit_run_model(games_2026, target_date, prior, environment):
     attack_info = {t: PRIOR_L2 for t in ALL_TEAMS}
     defense_info = {t: PRIOR_L2 for t in ALL_TEAMS}
     intercept_info = PRIOR_L2
-    for g in completed:
-        w = _model_weight(g["date"], target_date)
-        h, a = g["home"], g["away"]
-        park = environment["park_log"].get(STADIUM_NAMES.get(h, "東京D"), 0.0)
+    for h, a, hs, as_, w, park in weighted_completed:
         log_h = intercept + environment["home_adv_log"] + park + attack[h] - defense[a]
         log_a = intercept + park + attack[a] - defense[h]
         lam_h = safe_exp(log_h)
@@ -1967,6 +1970,14 @@ def build_all_history_with_predictions(historical_games, games_2026):
     history_snapshots = {}
     random.seed(RANDOM_SEED)
     central_previous_ranks = previous_season_ranks_for_target(2026, historical_games, CENTRAL_TEAMS)
+
+    # Historical uncertainty bands are expensive. They are useful for the
+    # current evaluation point, but are not needed for every past/future
+    # snapshot. Compute them only for the latest date with an actual result.
+    last_eval_date = max(
+        (g["date"] for g in games_2026 if is_finished(g)),
+        default=all_dates[0],
+    )
     pacific_previous_ranks = previous_season_ranks_for_target(2026, historical_games, PACIFIC_TEAMS)
 
     for target_date in all_dates:
@@ -2132,7 +2143,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
 
         c_band = None
         p_band = None
-        if c_self_clinchable != 1:
+        if target_date == last_eval_date and c_self_clinchable != 1:
             c_future_d = [
                 g for g in games_for_date
                 if g["date"] > target_date
@@ -2147,7 +2158,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
                     previous_rank_map=central_previous_ranks,
                 )
 
-        if p_self_clinchable != 1:
+        if target_date == last_eval_date and p_self_clinchable != 1:
             p_future_d = [
                 g for g in games_for_date
                 if g["date"] > target_date
