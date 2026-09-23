@@ -949,7 +949,14 @@ def apply_championship_prior_shrinkage(table, league_teams, raw_champ_probs, raw
         team = t["team"]
         p0 = prior.get(team, 1.0 / len(league_teams)) * 100.0
         raw = float(raw_champ_probs.get(team, 0.0))
-        blended_p = prior_weight * p0 + current_weight * raw
+        
+        # 1位の自力・他力可能性が数学的に消滅しているチームは強制的に0%
+        if t.get("magic_1st") == "-":
+            blended_p = 0.0
+            p0 = 0.0
+        else:
+            blended_p = prior_weight * p0 + current_weight * raw
+            
         blended[team] = blended_p
         t["championship_prior"] = round(p0, 3)
         t["champ_prob_raw"] = round(raw, 3)
