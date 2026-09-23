@@ -239,6 +239,34 @@
       "reserve_day": false,
       "detail": "エスコンＦ 18:00 くもり時々晴れ",
       "source": "manual"
+    },
+    {
+      "date": "2026-09-24",
+      "home": "広島",
+      "away": "巨人",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "森下",
+      "away_starter": "西舘",
+      "status": "scheduled",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "マツダスタジアム 18:00 晴れ時々くもり",
+      "source": "manual"
+    },
+    {
+      "date": "2026-09-24",
+      "home": "日本ハム",
+      "away": "楽天",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "達",
+      "away_starter": "前田健",
+      "status": "scheduled",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "エスコンＦ 18:00 くもり",
+      "source": "manual"
     }
   ]
 }
