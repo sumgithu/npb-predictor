@@ -1413,63 +1413,52 @@ def determine_clinched(
     remaining_after_date, remaining_league_after_date, remaining_h2h_after_date,
     previous_rank_map,
 ):
+    """首位球団がその日時点で優勝を確定（クリンチ）したかを厳密に判定する。
+    首位球団が残りの全試合を全敗したとしても、どのライバルも残り全勝で首位を逆転できない状態。
+    """
     leader_rem = remaining_after_date.get(leader, 0)
-    leader_final_w = sim_w[leader] + leader_rem
-    leader_final_l = sim_l[leader]
+    leader_final_w = sim_w[leader]
+    leader_final_l = sim_l[leader] + leader_rem
     leader_rate = calc_win_rate(leader_final_w, leader_final_l)
-
-    equal_rate_rivals = 0
 
     for rival in teams:
         if rival == leader:
             continue
 
         rival_rem = remaining_after_date.get(rival, 0)
-        h2h_rem = remaining_h2h_after_date.get(leader, {}).get(rival, 0)
-
-        rival_final_w = sim_w[rival] + rival_rem - h2h_rem
-        rival_final_l = sim_l[rival] + h2h_rem
+        # ライバルは首位との直接対決も含め、残り試合すべてに勝利可能（首位が全敗想定のため）
+        rival_final_w = sim_w[rival] + rival_rem
+        rival_final_l = sim_l[rival]
         rival_rate = calc_win_rate(rival_final_w, rival_final_l)
 
+        # ライバルが逆転できる可能性がまだ残っているならクリンチ不成立
         if rival_rate > leader_rate:
             return False
         if rival_rate < leader_rate:
             continue
 
+        # 同率の場合のタイブレーク判定
+        h2h_rem = remaining_h2h_after_date.get(leader, {}).get(rival, 0)
         leader_h2h_current = sim_h2h.get(leader, {}).get(rival, {})
         rival_h2h_current = sim_h2h.get(rival, {}).get(leader, {})
 
-        leader_h2h_future_w = h2h_rem
-        rival_h2h_future_w = 0
-
         leader_league_rem = remaining_league_after_date.get(leader, 0)
         rival_league_rem = remaining_league_after_date.get(rival, 0)
-
-        leader_league_future_w = leader_league_rem
-        leader_league_future_l = 0
-
-        rival_league_future_w = max(0, rival_league_rem - h2h_rem)
-        rival_league_future_l = h2h_rem
 
         rival_above = _tie_break_rival_above_target(
             leader, rival,
             leader_final_w, leader_final_l,
             rival_final_w, rival_final_l,
-            int(leader_h2h_current.get("win", 0)) + leader_h2h_future_w,
-            int(rival_h2h_current.get("win", 0)) + rival_h2h_future_w,
-            sim_league_w[leader] + leader_league_future_w,
-            sim_league_l[leader] + leader_league_future_l,
-            sim_league_w[rival] + rival_league_future_w,
-            sim_league_l[rival] + rival_league_future_l,
+            int(leader_h2h_current.get("win", 0)),
+            int(rival_h2h_current.get("win", 0)) + h2h_rem,
+            sim_league_w[leader],
+            sim_league_l[leader] + leader_league_rem,
+            sim_league_w[rival] + rival_league_rem,
+            sim_league_l[rival],
             previous_rank_map,
         )
         if rival_above:
             return False
-
-        equal_rate_rivals += 1
-
-    if equal_rate_rivals >= 2:
-        return False
 
     return True
 
@@ -2147,126 +2136,125 @@ def build_all_history_with_predictions(historical_games, games_2026):
         del snap["_pitcher_stats"]
         del snap["_draw_rate"]
 
-    def build_filtered_clinch_schedule(team_name, future_matches_local, clinch_date_map, champ_prob, model, pitcher_stats, draw_rate):
-        known_dates = {
-            m["date"] for m in future_matches_local
-            if m.get("date") and (m["home"] == team_name or m["away"] == team_name)
-        }
+    def build_unified_clinch_schedules(top3_teams, future_matches_local, clinch_dates_dict, champ_probs, model, pitcher_stats, draw_rate):
+        """上位3チームの日程行を完全に同じ日付で揃えて出力する"""
+        common_dates = set()
+        for t in top3_teams:
+            known = {m["date"] for m in future_matches_local if m.get("date") and (m["home"] == t or m["away"] == t)}
+            common_dates |= known
+            common_dates |= set(clinch_dates_dict.get(t, {}).keys())
+
         has_undated = any(
-            m.get("undated_postponed")
-            and (m["home"] == team_name or m["away"] == team_name)
+            m.get("undated_postponed") and (m["home"] in top3_teams or m["away"] in top3_teams)
             for m in future_matches_local
         )
-        all_future_dates = sorted(known_dates | set(clinch_date_map.keys()))
+
+        sorted_common_dates = sorted(common_dates)
         if has_undated:
-            all_future_dates.append("9999-12-31")
-        all_future_dates = list(dict.fromkeys(all_future_dates))
-        rows = []
-        cumulative = 0.0
-        for d in all_future_dates:
-            if d == "9999-12-31":
-                undated = [
-                    m for m in future_matches_local
-                    if m.get("undated_postponed")
-                    and (m["home"] == team_name or m["away"] == team_name)
-                ]
-                match = undated[0] if undated else None
-            else:
-                match = next(
-                    (m for m in future_matches_local if m.get("date") == d and (m["home"] == team_name or m["away"] == team_name)),
-                    None,
-                )
-            prob_raw = clinch_date_map.get(d, 0.0)
-            if d == "9999-12-31":
-                date_display = "未定（2試合）"
-            else:
-                m_int, d_int = int(d[5:7]), int(d[8:10])
-                is_tentative = (m_int == 10 and d_int >= 7)
-                date_display = f"({m_int}/{d_int})" if is_tentative else f"{m_int}/{d_int}"
+            sorted_common_dates.append("9999-12-31")
 
-            if match:
-                is_home = match["home"] == team_name
-                undated_group = (d == "9999-12-31" and match.get("undated_postponed"))
-                if undated_group:
-                    undated_all = [
+        schedules = {}
+        for t in top3_teams:
+            clinch_map = clinch_dates_dict.get(t, {})
+            rows = []
+            cumulative = 0.0
+            for d in sorted_common_dates:
+                if d == "9999-12-31":
+                    undated = [
                         m for m in future_matches_local
-                        if m.get("undated_postponed")
-                        and (m["home"] == team_name or m["away"] == team_name)
+                        if m.get("undated_postponed") and (m["home"] == t or m["away"] == t)
                     ]
-                    opponents = sorted(
-                        set(m["away"] if m["home"] == team_name else m["home"] for m in undated_all)
-                    )
-                    opp = f"{'・'.join(opponents)}（{len(undated_all)}試合）" if opponents else f"未定（{len(undated_all)}試合）"
-                    ground = STADIUM_NAMES.get(match["home"], "球場")
-                    win_expect_str = "-"
+                    match = undated[0] if undated else None
+                    date_display = "未定（2試合）"
                 else:
-                    opp = match["away"] if is_home else match["home"]
-                    host = match["home"]
-                    ground = STADIUM_NAMES.get(host, "球場")
-                    stadium = STADIUM_NAMES.get(host, "東京D")
-                    h_start = match.get("home_starter") if match.get("starter_confirmed") else "未定"
-                    a_start = match.get("away_starter") if match.get("starter_confirmed") else "未定"
-                    rest_diff = rest_difference_for_game(match, games_2026, as_of_date=None)
-                    probs = predict_game(
-                        model, match["home"], match["away"], stadium,
-                        h_start or "未定", a_start or "未定", pitcher_stats,
-                        rest_diff, rest_effect, draw_rate,
+                    match = next(
+                        (m for m in future_matches_local if m.get("date") == d and (m["home"] == t or m["away"] == t)),
+                        None
                     )
-                    win_expect = probs["home"] if is_home else probs["away"]
-                    win_expect_str = str(int(round(win_expect * 100.0)))
-            else:
-                opp = "-"
-                ground = "-"
-                win_expect_str = "-"
+                    m_int, d_int = int(d[5:7]), int(d[8:10])
+                    is_tentative = (m_int == 10 and d_int >= 7)
+                    date_display = f"({m_int}/{d_int})" if is_tentative else f"{m_int}/{d_int}"
 
-            cumulative += prob_raw
-            rows.append({
-                "date": date_display,
-                "raw_date": d,
-                "opp": opp,
-                "ground": ground,
-                "clinch_prob_val": prob_raw,
-                "win_expect": win_expect_str,
-            })
+                prob_raw = clinch_map.get(d, 0.0)
 
-        first_idx = next((i for i, r in enumerate(rows) if r["clinch_prob_val"] > 0.001), None)
-        if first_idx is not None:
-            rows = rows[first_idx:]
-        else:
-            rows = [r for r in rows if r["opp"] != "-"][-8:]
+                if match:
+                    is_home = match["home"] == t
+                    undated_group = (d == "9999-12-31" and match.get("undated_postponed"))
+                    if undated_group:
+                        undated_all = [
+                            m for m in future_matches_local
+                            if m.get("undated_postponed") and (m["home"] == t or m["away"] == t)
+                        ]
+                        opponents = sorted(set(m["away"] if m["home"] == t else m["home"] for m in undated_all))
+                        opp = f"{'・'.join(opponents)}（{len(undated_all)}試合）" if opponents else f"未定（{len(undated_all)}試合）"
+                        ground = STADIUM_NAMES.get(match["home"], "球場")
+                        win_expect_str = "-"
+                    else:
+                        opp = match["away"] if is_home else match["home"]
+                        host = match["home"]
+                        ground = STADIUM_NAMES.get(host, "球場")
+                        stadium = STADIUM_NAMES.get(host, "東京D")
+                        h_start = match.get("home_starter") if match.get("starter_confirmed") else "未定"
+                        a_start = match.get("away_starter") if match.get("starter_confirmed") else "未定"
+                        rest_diff = rest_difference_for_game(match, games_2026, as_of_date=None)
+                        probs = predict_game(
+                            model, match["home"], match["away"], stadium,
+                            h_start or "未定", a_start or "未定", pitcher_stats,
+                            rest_diff, rest_effect, draw_rate,
+                        )
+                        win_expect = probs["home"] if is_home else probs["away"]
+                        win_expect_str = str(int(round(win_expect * 100.0)))
+                else:
+                    opp = "-"
+                    ground = "-"
+                    win_expect_str = "-"
 
-        cum = 0.0
-        for row in rows:
-            val = row["clinch_prob_val"]
-            cum += val
-            if val < 0.001:
-                row["clinch_prob_str"] = "-"
-            elif val < 1.0:
-                row["clinch_prob_str"] = f"{val:.1f}%" if val >= 0.1 else f"{val:.2f}%"
-            else:
-                row["clinch_prob_str"] = f"{int(round(val))}%"
-            if cum < 0.001:
-                row["cum_prob_str"] = "-"
-            elif cum < 1.0:
-                row["cum_prob_str"] = f"{cum:.1f}%" if cum >= 0.1 else f"{cum:.2f}%"
-            else:
-                row["cum_prob_str"] = f"{int(round(cum))}%"
-        return rows
+                cumulative += prob_raw
+                rows.append({
+                    "date": date_display,
+                    "raw_date": d,
+                    "opp": opp,
+                    "ground": ground,
+                    "clinch_prob_val": prob_raw,
+                    "win_expect": win_expect_str,
+                })
+
+            cum = 0.0
+            for row in rows:
+                val = row["clinch_prob_val"]
+                cum += val
+                if val < 0.001:
+                    row["clinch_prob_str"] = "-"
+                elif val < 1.0:
+                    row["clinch_prob_str"] = f"{val:.1f}%" if val >= 0.1 else f"{val:.2f}%"
+                else:
+                    row["clinch_prob_str"] = f"{int(round(val))}%"
+
+                if cum < 0.001:
+                    row["cum_prob_str"] = "-"
+                elif cum < 1.0:
+                    row["cum_prob_str"] = f"{cum:.1f}%" if cum >= 0.1 else f"{cum:.2f}%"
+                else:
+                    row["cum_prob_str"] = f"{int(round(cum))}%"
+
+            schedules[t] = rows
+
+        return schedules
 
     latest_c = history_snapshots[last_eval_date]["central"]
     latest_p = history_snapshots[last_eval_date]["pacific"]
-    c_schedules = {
-        t["team"]: build_filtered_clinch_schedule(
-            t["team"], c_future, c_clinch_dates.get(t["team"], {}), t["champ_prob"], latest_model, latest_pitcher_stats, latest_draw_rate
-        )
-        for t in latest_c
-    }
-    p_schedules = {
-        t["team"]: build_filtered_clinch_schedule(
-            t["team"], p_future, p_clinch_dates.get(t["team"], {}), t["champ_prob"], latest_model, latest_pitcher_stats, latest_draw_rate
-        )
-        for t in latest_p
-    }
+
+    top3_c = [t["team"] for t in latest_c[:3]]
+    top3_p = [t["team"] for t in latest_p[:3]]
+
+    c_schedules = build_unified_clinch_schedules(
+        top3_c, c_future, c_clinch_dates, {t["team"]: t["champ_prob"] for t in latest_c},
+        latest_model, latest_pitcher_stats, latest_draw_rate
+    )
+    p_schedules = build_unified_clinch_schedules(
+        top3_p, p_future, p_clinch_dates, {t["team"]: t["champ_prob"] for t in latest_p},
+        latest_model, latest_pitcher_stats, latest_draw_rate
+    )
 
     simulation_payload = {
         "central_rank_matrix": c_rank_matrix,
