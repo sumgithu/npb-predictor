@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>プロ野球チャンピョンシップナンバー＆対戦成績解析 | 優勝確率・CS確率・勝敗予測</title>
+  <title>プロ野球チャンピョンシップナンバー＆対戦成績解析 by パ</title>
   <meta name="description" content="NPBセ・パ両リーグの順位、チャンピョンシップナンバー、試合別勝・分・敗確率、全143試合完走シミュレーションによる優勝確率・CS確率、対戦成績を解析します。">
   <style>
     :root {
@@ -17,7 +17,6 @@
     .container{max-width:1120px;margin:0 auto}
     header{text-align:center;margin-bottom:16px}
     header h1{font-size:1.5rem;font-weight:800;color:#1e3a8a}
-    header p{font-size:.84rem;color:var(--sub);margin-top:5px;line-height:1.6}
     .banner{background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:14px 18px;margin-bottom:18px;color:#1e3a8a;line-height:1.65}
     .banner-title{font-weight:800;margin-bottom:4px}
     .panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:20px;box-shadow:0 2px 5px rgba(0,0,0,.03)}
@@ -65,8 +64,7 @@
 <body>
 <div class="container">
   <header>
-    <h1>プロ野球チャンピョンシップナンバー＆対戦成績解析</h1>
-    <p>チャンピョンシップナンバー・試合別勝/分/敗確率・143試合完走シミュレーション・優勝/CS確率・対戦成績</p>
+    <h1>プロ野球チャンピョンシップナンバー＆対戦成績解析 by パ</h1>
   </header>
 
   <div class="banner">
@@ -163,24 +161,24 @@
 </div>
 
 <script>
-  let rawData = null;
-  let currentLeague = 'central';
-  let selectedDate = '';
+  var rawData = null;
+  var currentLeague = 'central';
+  var selectedDate = '';
 
-  const SHORT_CODE = {
+  var SHORT_CODE = {
     "阪神":"T","巨人":"G","ＤｅＮＡ":"DB","ヤクルト":"S","中日":"D","広島":"C",
     "ソフトバンク":"H","日本ハム":"F","ロッテ":"M","楽天":"E","オリックス":"B","西武":"L"
   };
-  const SHORT_NAMES = {
+  var SHORT_NAMES = {
     "阪神":"対神","巨人":"対巨","ＤｅＮＡ":"対デ","ヤクルト":"対ヤ","中日":"対中","広島":"対広",
     "ソフトバンク":"対ソ","日本ハム":"対日","ロッテ":"対ロ","楽天":"対楽","オリックス":"対オ","西武":"対西"
   };
-  const FULL_NAMES = {
+  var FULL_NAMES = {
     "阪神":"阪神タイガース","巨人":"読売ジャイアンツ","ＤｅＮＡ":"横浜DeNAベイスターズ","ヤクルト":"東京ヤクルトスワローズ",
     "中日":"中日ドラゴンズ","広島":"広島東洋カープ","ソフトバンク":"福岡ソフトバンクホークス","日本ハム":"北海道日本ハムファイターズ",
     "ロッテ":"千葉ロッテマリーンズ","楽天":"東北楽天ゴールデンイーグルス","オリックス":"オリックス・バファローズ","西武":"埼玉西武ライオンズ"
   };
-  const TEAM_COLORS = {
+  var TEAM_COLORS = {
     "阪神": {main:"#f4c300", light:"#fff8d8", text:"#111827"},
     "巨人": {main:"#f28c28", light:"#fff1e3", text:"#7c2d12"},
     "ＤｅＮＡ": {main:"#0055a5", light:"#eaf3ff", text:"#003b73"},
@@ -197,141 +195,141 @@
   function teamColor(team){ return TEAM_COLORS[team] || {main:"#64748b", light:"#f1f5f9", text:"#334155"}; }
 
   function esc(v) {
-    return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
   function fmtPct(v) {
-    const n = Number(v || 0);
-    if (Math.abs(n - Math.round(n)) < 0.05) return `${Math.round(n)}%`;
-    return `${n.toFixed(1)}%`;
+    var n = Number(v || 0);
+    if (Math.abs(n - Math.round(n)) < 0.05) return Math.round(n) + '%';
+    return n.toFixed(1) + '%';
   }
   function formatRecord(w,l,d) {
-    let s = `${w}-${l}`;
-    if (Number(d) > 0) s += `<span class="draw-sub">(${d})</span>`;
+    var s = w + '-' + l;
+    if (Number(d) > 0) s += '<span class="draw-sub">(' + d + ')</span>';
     return s;
   }
   function badge(v, rem, targetRank, showChampionshipM) {
     if (v === '確定') return '<span class="badge badge-fixed">確定</span>';
     if (typeof v === 'number') {
-      if (v > rem) return `<span class="badge badge-elim">◇${v}◇</span>`;
+      if (v > rem) return '<span class="badge badge-elim">◇' + v + '◇</span>';
       if (targetRank === 1 && showChampionshipM) {
-        return `<span class="badge badge-magic">M${v}</span>`;
+        return '<span class="badge badge-magic">M' + v + '</span>';
       }
-      return `<span class="badge badge-magic">${v}</span>`;
+      return '<span class="badge badge-magic">' + v + '</span>';
     }
     return '<span class="badge-dash">-</span>';
   }
   function isNum(v){ return typeof v === 'number' && Number.isFinite(v); }
   function champDisplay(t){
     if(isNum(t.champ_prob_low) && isNum(t.champ_prob_high) && t.champ_prob_high > t.champ_prob_low){
-      return `<span class="champ-range">${fmtPct(t.champ_prob_low)}–${fmtPct(t.champ_prob_high)}</span>`;
+      return '<span class="champ-range">' + fmtPct(t.champ_prob_low) + '–' + fmtPct(t.champ_prob_high) + '</span>';
     }
-    return fmtPct(t.champ_prob ?? 0);
+    return fmtPct(t.champ_prob != null ? t.champ_prob : 0);
   }
   function getJstDate() {
     return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   }
   function currentList() {
-    return rawData && rawData.history && rawData.history[selectedDate] ? rawData.history[selectedDate][currentLeague] : null;
+    return (rawData && rawData.history && rawData.history[selectedDate]) ? rawData.history[selectedDate][currentLeague] : null;
   }
   function modelMeta() {
-    return rawData?.simulation?.model || {};
+    return (rawData && rawData.simulation && rawData.simulation.model) ? rawData.simulation.model : {};
   }
 
   function renderModelMetaFooter(){
-    const m = modelMeta();
-    const band = m.championship_band || {};
-    const draw = m.draw_baseline_rate == null ? '--' : `${Number(m.draw_baseline_rate).toFixed(1)}%`;
-    document.getElementById('model-meta-footer').innerHTML = `
-      <div class="model-meta-line">
-        <span><span class="model-meta-label">モデル</span> <span class="model-meta-value">${esc(m.version || '不明')}</span></span>
-        <span><span class="model-meta-label">最新基準日</span> <span class="model-meta-value">${esc(rawData?.latest_date || '-')}</span></span>
-        <span><span class="model-meta-label">完走</span> <span class="model-meta-value">${esc(m.main_simulations || '-')}回</span></span>
-        <span><span class="model-meta-label">過去日</span> <span class="model-meta-value">${esc(m.historical_simulations || '-')}回</span></span>
-        <span><span class="model-meta-label">半減期</span> <span class="model-meta-value">${esc(m.recency_half_life_days || '-')}日</span></span>
-        <span><span class="model-meta-label">引き分け基準率</span> <span class="model-meta-value">${draw}</span></span>
-        <span><span class="model-meta-label">球場補正</span> <span class="model-meta-value">過去実績から推定</span></span>
-      </div>
-      <div class="model-meta-line">
-        <span class="model-meta-label">序盤の優勝可能性帯：${esc(band.low_quantile != null ? `${Math.round(Number(band.low_quantile)*100)}–${Math.round(Number(band.high_quantile)*100)}パーセンタイル` : '未設定')}</span>
-      </div>`;
+    var m = modelMeta();
+    var band = m.championship_band || {};
+    var draw = m.draw_baseline_rate == null ? '--' : Number(m.draw_baseline_rate).toFixed(1) + '%';
+    var bandText = band.low_quantile != null ? (Math.round(Number(band.low_quantile)*100) + '–' + Math.round(Number(band.high_quantile)*100) + 'パーセンタイル') : '未設定';
+    document.getElementById('model-meta-footer').innerHTML = 
+      '<div class="model-meta-line">' +
+        '<span><span class="model-meta-label">モデル</span> <span class="model-meta-value">' + esc(m.version || '不明') + '</span></span>' +
+        '<span><span class="model-meta-label">最新基準日</span> <span class="model-meta-value">' + esc(rawData ? rawData.latest_date : '-') + '</span></span>' +
+        '<span><span class="model-meta-label">完走</span> <span class="model-meta-value">' + esc(m.main_simulations || '-') + '回</span></span>' +
+        '<span><span class="model-meta-label">過去日</span> <span class="model-meta-value">' + esc(m.historical_simulations || '-') + '回</span></span>' +
+        '<span><span class="model-meta-label">半減期</span> <span class="model-meta-value">' + esc(m.recency_half_life_days || '-') + '日</span></span>' +
+        '<span><span class="model-meta-label">引き分け基準率</span> <span class="model-meta-value">' + draw + '</span></span>' +
+        '<span><span class="model-meta-label">球場補正</span> <span class="model-meta-value">過去実績から推定</span></span>' +
+      '</div>' +
+      '<div class="model-meta-line">' +
+        '<span class="model-meta-label">序盤の優勝可能性帯：' + esc(bandText) + '</span>' +
+      '</div>';
   }
 
   function renderStandings(list) {
-    const body = document.getElementById('standings-body');
-    const note = document.getElementById('champ-prob-note');
+    var body = document.getElementById('standings-body');
+    var note = document.getElementById('champ-prob-note');
     body.innerHTML = '';
-    const rangeMode = list.some(t => isNum(t.champ_prob_low) && isNum(t.champ_prob_high));
+    var rangeMode = list.some(function(t){ return isNum(t.champ_prob_low) && isNum(t.champ_prob_high); });
     note.textContent = rangeMode ? '（チャンピョンシップナンバー点灯前：モデル不確実性を含む優勝可能性の幅）' : '';
-    const selfClinchable = list.filter(t => {
-      const rem = t.remaining ?? (143 - t.games);
-      const v = t.magic_1st;
+    var selfClinchable = list.filter(function(t) {
+      var rem = t.remaining != null ? t.remaining : (143 - t.games);
+      var v = t.magic_1st;
       return v === '確定' || (typeof v === 'number' && v <= rem);
     });
-    const championshipMTeam = selfClinchable.length === 1 ? selfClinchable[0].team : null;
+    var championshipMTeam = selfClinchable.length === 1 ? selfClinchable[0].team : null;
 
-    list.forEach(t => {
-      const rem = t.remaining ?? (143 - t.games);
-      const champP = t.champ_prob ?? 0;
-      const csP = t.magic_3rd === '確定' ? 100 : (t.cs_prob ?? 0);
-      const c = teamColor(t.team);
-      const showChampionshipM = championshipMTeam === t.team;
-      body.insertAdjacentHTML('beforeend', `
-        <tr>
-          <td class="rank">${esc(t.rank)}</td><td class="team"><span class="team-dot" style="background:${c.main}"></span>${esc(t.team)}</td>
-          <td>${esc(t.games)}</td><td>${esc(t.win)}</td><td>${esc(t.lose)}</td><td>${esc(t.draw)}</td><td class="rem">${esc(rem)}</td>
-          <td>${Number(t.rate || 0).toFixed(3).replace('0.','.')}</td><td>${t.diff === 0 ? '--' : Number(t.diff || 0).toFixed(1)}</td>
-          <td>${badge(t.magic_1st,rem,1,showChampionshipM)}</td><td>${badge(t.magic_2nd,rem,2,false)}</td><td>${badge(t.magic_3rd,rem,3,false)}</td>
-          <td class="prob ${champP > 50 ? 'prob-high':''}">${champDisplay(t)}</td><td class="prob">${fmtPct(csP)}</td>
-        </tr>`);
+    list.forEach(function(t) {
+      var rem = t.remaining != null ? t.remaining : (143 - t.games);
+      var champP = t.champ_prob != null ? t.champ_prob : 0;
+      var csP = t.magic_3rd === '確定' ? 100 : (t.cs_prob != null ? t.cs_prob : 0);
+      var c = teamColor(t.team);
+      var showChampionshipM = championshipMTeam === t.team;
+      var row = 
+        '<tr>' +
+          '<td class="rank">' + esc(t.rank) + '</td><td class="team"><span class="team-dot" style="background:' + c.main + '"></span>' + esc(t.team) + '</td>' +
+          '<td>' + esc(t.games) + '</td><td>' + esc(t.win) + '</td><td>' + esc(t.lose) + '</td><td>' + esc(t.draw) + '</td><td class="rem">' + esc(rem) + '</td>' +
+          '<td>' + Number(t.rate || 0).toFixed(3).replace('0.','.') + '</td><td>' + (t.diff === 0 ? '--' : Number(t.diff || 0).toFixed(1)) + '</td>' +
+          '<td>' + badge(t.magic_1st,rem,1,showChampionshipM) + '</td><td>' + badge(t.magic_2nd,rem,2,false) + '</td><td>' + badge(t.magic_3rd,rem,3,false) + '</td>' +
+          '<td class="prob ' + (champP > 50 ? 'prob-high' : '') + '">' + champDisplay(t) + '</td><td class="prob">' + fmtPct(csP) + '</td>' +
+        '</tr>';
+      body.insertAdjacentHTML('beforeend', row);
     });
   }
 
   function renderPredictions(list, day) {
-    const grid = document.getElementById('prediction-grid');
-    const title = document.getElementById('pred-title');
-    const sub = document.getElementById('pred-subtitle');
-    const preds = day.predictions || [];
-    const hasFinished = preds.some(p => p.is_finished);
+    var grid = document.getElementById('prediction-grid');
+    var title = document.getElementById('pred-title');
+    var sub = document.getElementById('pred-subtitle');
+    var preds = day.predictions || [];
+    var hasFinished = preds.some(function(p){ return p.is_finished; });
     title.firstChild.textContent = hasFinished ? '⚾ 試合結果 ' : '🎯 試合別予想勝/分/敗確率 ';
-    sub.textContent = hasFinished ? `（${selectedDate}の結果。試合前モデル確率も併記）` : `（${selectedDate}の試合予測）`;
+    sub.textContent = hasFinished ? ('（' + selectedDate + 'の結果。試合前モデル確率も併記）') : ('（' + selectedDate + 'の試合予測）');
 
-    const teamSet = new Set(list.map(t => t.team));
-    const filtered = preds.filter(p => teamSet.has(p.home) || teamSet.has(p.away));
+    var teamSet = new Set(list.map(function(t){ return t.team; }));
+    var filtered = preds.filter(function(p){ return teamSet.has(p.home) || teamSet.has(p.away); });
     if (!filtered.length) {
       grid.innerHTML = '<div style="grid-column:1/-1;padding:18px;text-align:center;color:#64748b;background:#fff;border:1px solid var(--border);border-radius:12px">この日の該当リーグの試合予定・結果はありません。</div>';
       return;
     }
     grid.innerHTML = '';
-    filtered.forEach(p => {
-      const hp = Number(p.home_prob || 0), dp = Number(p.draw_prob || 0), ap = Number(p.away_prob || 0);
-      const card = document.createElement('div'); card.className = 'pred-card';
+    filtered.forEach(function(p) {
+      var hp = Number(p.home_prob || 0), dp = Number(p.draw_prob || 0), ap = Number(p.away_prob || 0);
+      var card = document.createElement('div'); card.className = 'pred-card';
       if (p.is_finished && p.actual_home_score !== null && p.actual_away_score !== null) {
-        const hs = Number(p.actual_home_score), as = Number(p.actual_away_score);
-        const hw = hs > as, aw = as > hs, dr = hs === as;
-        card.innerHTML = `
-          <div class="pred-head"><div class="pred-team"><div class="role">ホーム</div>${esc(p.home)}</div><div class="vs">VS</div><div class="pred-team right"><div class="role">ビジター</div>${esc(p.away)}</div></div>
-          <div class="result"><div class="score ${hw?'winner':(dr?'draw-result':'loser')}">${hs}</div><div class="vs">-</div><div class="score right ${aw?'winner':(dr?'draw-result':'loser')}">${as}</div></div>
-          <div class="pregame">試合前モデル：<span class="home-p">H ${hp.toFixed(1)}%</span> / <span class="draw-p">D ${dp.toFixed(1)}%</span> / <span class="away-p">A ${ap.toFixed(1)}%</span></div>
-        `;
+        var hs = Number(p.actual_home_score), as = Number(p.actual_away_score);
+        var hw = hs > as, aw = as > hs, dr = hs === as;
+        card.innerHTML = 
+          '<div class="pred-head"><div class="pred-team"><div class="role">ホーム</div>' + esc(p.home) + '</div><div class="vs">VS</div><div class="pred-team right"><div class="role">ビジター</div>' + esc(p.away) + '</div></div>' +
+          '<div class="result"><div class="score ' + (hw?'winner':(dr?'draw-result':'loser')) + '">' + hs + '</div><div class="vs">-</div><div class="score right ' + (aw?'winner':(dr?'draw-result':'loser')) + '">' + as + '</div></div>' +
+          '<div class="pregame">試合前モデル：<span class="home-p">H ' + hp.toFixed(1) + '%</span> / <span class="draw-p">D ' + dp.toFixed(1) + '%</span> / <span class="away-p">A ' + ap.toFixed(1) + '%</span></div>';
       } else {
-        card.innerHTML = `
-          <div class="pred-head"><div class="pred-team"><div class="role">ホーム</div>${esc(p.home)}<div class="starter">${esc(p.home_status_text || '')}</div></div><div class="vs">VS</div><div class="pred-team right"><div class="role">ビジター</div>${esc(p.away)}<div class="starter">${esc(p.away_status_text || '')}</div></div></div>
-          <div class="outcome-values"><span class="home-p">${hp.toFixed(1)}%</span><span class="draw-p">${dp.toFixed(1)}%</span><span class="away-p">${ap.toFixed(1)}%</span></div>
-          <div class="bar"><div class="bar-home" style="width:${hp}%"></div><div class="bar-draw" style="width:${dp}%"></div><div class="bar-away" style="width:${ap}%"></div></div>
-          <div class="outcome-values" style="font-size:.67rem;font-weight:700;margin-top:4px"><span>ホーム勝</span><span>引分</span><span>ビジター勝</span></div>
-          <div class="expected">予想得点：${Number(p.expected_home_runs || 0).toFixed(2)} - ${Number(p.expected_away_runs || 0).toFixed(2)}</div>
-        `;
+        card.innerHTML = 
+          '<div class="pred-head"><div class="pred-team"><div class="role">ホーム</div>' + esc(p.home) + '<div class="starter">' + esc(p.home_status_text || '') + '</div></div><div class="vs">VS</div><div class="pred-team right"><div class="role">ビジター</div>' + esc(p.away) + '<div class="starter">' + esc(p.away_status_text || '') + '</div></div></div>' +
+          '<div class="outcome-values"><span class="home-p">' + hp.toFixed(1) + '%</span><span class="draw-p">' + dp.toFixed(1) + '%</span><span class="away-p">' + ap.toFixed(1) + '%</span></div>' +
+          '<div class="bar"><div class="bar-home" style="width:' + hp + '%"></div><div class="bar-draw" style="width:' + dp + '%"></div><div class="bar-away" style="width:' + ap + '%"></div></div>' +
+          '<div class="outcome-values" style="font-size:.67rem;font-weight:700;margin-top:4px"><span>ホーム勝</span><span>引分</span><span>ビジター勝</span></div>' +
+          '<div class="expected">予想得点：' + Number(p.expected_home_runs || 0).toFixed(2) + ' - ' + Number(p.expected_away_runs || 0).toFixed(2) + '</div>';
       }
       grid.appendChild(card);
     });
   }
 
   function renderHistoryNotice() {
-    const notice = document.getElementById('history-notice');
-    const latest = rawData?.latest_date || '';
+    var notice = document.getElementById('history-notice');
+    var latest = rawData ? rawData.latest_date : '';
     if (selectedDate && latest && selectedDate !== latest) {
       notice.style.display = 'block';
-      notice.textContent = `※ ${selectedDate}を参照中。上段の優勝確率は、その日より後の結果を使わず当時の情報だけで再計算しています。下段の最終順位早見表・優勝決定日確率・優勝ラインは、最新基準日（${latest}）のシーズン完走シミュレーションです。`;
+      notice.textContent = '※ ' + selectedDate + 'を参照中。上段の優勝確率は、その日より後の結果を使わず当時の情報だけで再計算しています。下段の最終順位早見表・優勝決定日確率・優勝ラインは、最新基準日（' + latest + '）のシーズン完走シミュレーションです。';
       document.getElementById('future-sections-wrapper').classList.add('dimmed');
     } else {
       notice.style.display = 'none';
@@ -340,145 +338,191 @@
   }
 
   function renderRankMatrix(list) {
-    const head = document.getElementById('rank-matrix-head');
-    const body = document.getElementById('rank-matrix-body');
+    var head = document.getElementById('rank-matrix-head');
+    var body = document.getElementById('rank-matrix-body');
     head.innerHTML = '';
     body.innerHTML = '';
-    const key = currentLeague === 'central' ? 'central_rank_matrix' : 'pacific_rank_matrix';
-    const mat = rawData?.simulation?.[key] || {};
-    const teams = list.map(t => t.team);
-    head.innerHTML = `<tr><th class="corner">最終順位</th>${teams.map(t => {
-      const c = teamColor(t);
-      return `<th class="team-head" style="--team-main:${c.main};--team-light:${c.light};--team-text:${c.text}" title="${esc(FULL_NAMES[t] \vert{}\vert{} t)}">${esc(t)}</th>`;
-    }).join('')}</tr>`;
+    var key = currentLeague === 'central' ? 'central_rank_matrix' : 'pacific_rank_matrix';
+    var mat = (rawData && rawData.simulation && rawData.simulation[key]) ? rawData.simulation[key] : {};
+    var teams = list.map(function(t){ return t.team; });
 
-    for (let r = 1; r <= 6; r++) {
-      let html = `<tr><td class="rank-label">${r}位</td>`;
-      teams.forEach(t => {
-        const obj = list.find(x => x.team === t);
-        const cur = obj?.rank || 0;
-        let prob = Number(mat[t]?.[r] ?? 0);
+    var headHtml = '<tr><th class="corner">最終順位</th>';
+    for (var i = 0; i < teams.length; i++) {
+      var t = teams[i];
+      var c = teamColor(t);
+      var fn = FULL_NAMES[t] || t;
+      headHtml += '<th class="team-head" style="--team-main:' + c.main + ';--team-light:' + c.light + ';--team-text:' + c.text + '" title="' + esc(fn) + '">' + esc(t) + '</th>';
+    }
+    headHtml += '</tr>';
+    head.innerHTML = headHtml;
+
+    for (var r = 1; r <= 6; r++) {
+      var html = '<tr><td class="rank-label">' + r + '位</td>';
+      for (var j = 0; j < teams.length; j++) {
+        var teamName = teams[j];
+        var obj = list.find(function(x){ return x.team === teamName; });
+        var cur = obj ? obj.rank : 0;
+        var prob = Number((mat[teamName] && mat[teamName][r] != null) ? mat[teamName][r] : 0);
 
         if (r === 1 && obj && obj.champ_prob != null) {
           prob = Number(obj.champ_prob);
         }
 
-        let cls = '';
-        const c = teamColor(t);
-        let style = '';
+        var cls = '';
+        var color = teamColor(teamName);
+        var style = '';
         if (r === cur) {
           cls = 'cell-current';
-          style = `style="--team-main:${c.main}"`;
+          style = 'style="--team-main:' + color.main + '"';
         } else if (r < cur && prob > 0) {
-          const key2 = r === 1 ? 'magic_1st' : r === 2 ? 'magic_2nd' : 'magic_3rd';
-          const mv = obj?.[key2];
-          cls = (typeof mv === 'number' && mv <= obj.remaining) ? 'cell-climb' : 'cell-pot';
+          var key2 = r === 1 ? 'magic_1st' : (r === 2 ? 'magic_2nd' : 'magic_3rd');
+          var mv = obj ? obj[key2] : null;
+          cls = (typeof mv === 'number' && mv <= (obj ? obj.remaining : 0)) ? 'cell-climb' : 'cell-pot';
         } else if (r > cur && prob > 0) {
           cls = 'cell-drop';
         }
 
-        let val = '-';
+        var val = '-';
         if (prob > 0) {
-          val = prob >= 0.05 ? `${prob.toFixed(1)}%` : '<0.1%';
+          val = prob >= 0.05 ? prob.toFixed(1) + '%' : '<0.1%';
           if (val === '0.0%') val = '0%';
           if (val === '100.0%') val = '100%';
         } else if (r === cur) {
           val = '0%';
         }
 
-        const titleText = esc((FULL_NAMES[t] || t) + '：' + r + '位 ' + val);
-        html += `<td><span class="cell ${cls}" ${style} title="${titleText}">${esc(val)}</span></td>`;
-      });
-      html += `</tr>`;
+        var fullName = FULL_NAMES[teamName] || teamName;
+        var titleText = esc(fullName + '：' + r + '位 ' + val);
+        html += '<td><span class="cell ' + cls + '" ' + style + ' title="' + titleText + '">' + esc(val) + '</span></td>';
+      }
+      html += '</tr>';
       body.insertAdjacentHTML('beforeend', html);
     }
   }
 
   function renderClinch(list){
-    const container=document.getElementById('clinch-schedule-container'); container.innerHTML='';
-    const key=currentLeague==='central'?'central_clinch_schedules':'pacific_clinch_schedules';
-    const sched=rawData?.simulation?.[key]||{};
-    list.slice(0,3).forEach(t=>{
-      const rows=sched[t.team]||[]; if(!rows.length) return;
-      let body='';
-      rows.forEach(x=>{const has=x.clinch_prob_str!=='-'; body+=`<tr><td><b>${esc(x.date)}</b></td><td><b>${esc(x.opp)}</b></td><td>${esc(x.ground)}</td><td class="${has?'val-clinch':''}">${esc(x.clinch_prob_str)}</td><td class="${x.cum_prob_str!=='-'?'val-cum':''}">${esc(x.cum_prob_str)}</td><td><b>${esc(x.win_expect)}%</b></td></tr>`});
-      const card=document.createElement('div'); card.className='clinch-card';
-      const hasUndated = rows.some(x => x.raw_date === '9999-12-31');
-      const undatedNote = hasUndated ? '<div style="text-align:left;font-size:.72rem;color:#64748b;margin-top:7px">※日程未定の振替試合も完走シミュレーションに含めています。日付未定のため、決定確率は「未定（2試合）」として表示します。</div>' : '';
-      card.innerHTML=`<h3><span>${esc(t.team)}</span><span class="champ-tag">優勝確率 ${fmtPct(t.champ_prob)}</span></h3><table class="clinch-table"><thead><tr><th>月日</th><th>対戦</th><th>開催地</th><th>決定確率</th><th>累計</th><th>見込勝率</th></tr></thead><tbody>${body}</tbody></table>${undatedNote}<div style="text-align:right;font-size:.7rem;color:#94a3b8;margin-top:7px">※モデル設定：${esc(modelMeta().main_simulations||'-')}回完走解析</div>`;
+    var container=document.getElementById('clinch-schedule-container'); container.innerHTML='';
+    var key=currentLeague==='central'?'central_clinch_schedules':'pacific_clinch_schedules';
+    var sched=(rawData && rawData.simulation && rawData.simulation[key]) ? rawData.simulation[key] : {};
+    list.slice(0,3).forEach(function(t){
+      var rows=sched[t.team]||[]; if(!rows.length) return;
+      var body='';
+      rows.forEach(function(x){
+        var has=x.clinch_prob_str!=='-'; 
+        body += '<tr><td><b>' + esc(x.date) + '</b></td><td><b>' + esc(x.opp) + '</b></td><td>' + esc(x.ground) + '</td><td class="' + (has?'val-clinch':'') + '">' + esc(x.clinch_prob_str) + '</td><td class="' + (x.cum_prob_str!=='-'?'val-cum':'') + '">' + esc(x.cum_prob_str) + '</td><td><b>' + esc(x.win_expect) + '%</b></td></tr>';
+      });
+      var card=document.createElement('div'); card.className='clinch-card';
+      var hasUndated = rows.some(function(x){ return x.raw_date === '9999-12-31'; });
+      var undatedNote = hasUndated ? '<div style="text-align:left;font-size:.72rem;color:#64748b;margin-top:7px">※日程未定の振替試合も完走シミュレーションに含めています。日付未定のため、決定確率は「未定（2試合）」として表示します。</div>' : '';
+      card.innerHTML = '<h3><span>' + esc(t.team) + '</span><span class="champ-tag">優勝確率 ' + fmtPct(t.champ_prob) + '</span></h3><table class="clinch-table"><thead><tr><th>月日</th><th>対戦</th><th>開催地</th><th>決定確率</th><th>累計</th><th>見込勝率</th></tr></thead><tbody>' + body + '</tbody></table>' + undatedNote + '<div style="text-align:right;font-size:.7rem;color:#94a3b8;margin-top:7px">※モデル設定：' + esc(modelMeta().main_simulations||'-') + '回完走解析</div>';
       container.appendChild(card);
     });
   }
 
   function renderLineGrid(){
-    const head=document.getElementById('line-grid-head'), body=document.getElementById('line-grid-body'); head.innerHTML=''; body.innerHTML='';
-    const key=currentLeague==='central'?'central_lines_grid':'pacific_lines_grid'; const data=rawData?.simulation?.[key];
-    if(!data?.headers?.length) return;
-    let top='<tr>', sub='<tr>', cols='<tr>';
-    data.headers.forEach(h=>{const c=teamColor(h.team);top+=`<th colspan="3" class="banner-team" style="--team-main:${c.main};background:${c.light};color:${c.text}">${esc(h.team)}</th>`;sub+=`<th colspan="3" class="banner-sub">残り${h.remaining}試合（現在${h.current_w}勝${h.current_l}敗）</th>`;cols+='<th>勝</th><th>敗</th><th>勝率</th>'});
-    head.innerHTML=top+'</tr>'+sub+'</tr>'+cols+'</tr>';
-    const highlightRates = {};
-    (data.headers || []).forEach(h=>{
-      const currentRate=(Number(h.current_w)+Number(h.current_l))>0
-        ? Number(h.current_w)/(Number(h.current_w)+Number(h.current_l))
-        : 0;
-      const candidates=(data.rows || [])
-        .map((row,idx)=>({idx,cell:row[data.headers.indexOf(h)]}))
-        .filter(x=>x.cell)
-        .filter(x=>x.cell.rate>=currentRate-1e-9)
-        .sort((a,b)=>a.cell.rate-b.cell.rate);
-      highlightRates[h.team]=new Set(candidates.slice(0,3).map(x=>x.idx));
+    var head=document.getElementById('line-grid-head'), body=document.getElementById('line-grid-body'); head.innerHTML=''; body.innerHTML='';
+    var key=currentLeague==='central'?'central_lines_grid':'pacific_lines_grid'; var data=(rawData && rawData.simulation && rawData.simulation[key]) ? rawData.simulation[key] : null;
+    if(!data || !data.headers || !data.headers.length) return;
+    var top='<tr>', sub='<tr>', cols='<tr>';
+    data.headers.forEach(function(h){
+      var c=teamColor(h.team);
+      top += '<th colspan="3" class="banner-team" style="--team-main:' + c.main + ';background:' + c.light + ';color:' + c.text + '">' + esc(h.team) + '</th>';
+      sub += '<th colspan="3" class="banner-sub">残り' + h.remaining + '試合（現在' + h.current_w + '勝' + h.current_l + '敗）</th>';
+      cols += '<th>勝</th><th>敗</th><th>勝率</th>';
     });
-    data.rows.forEach((row,rowIdx)=>{
-      let tr='<tr>';
-      row.forEach((cell,colIdx)=>{
+    head.innerHTML=top+'</tr>'+sub+'</tr>'+cols+'</tr>';
+    var highlightRates = {};
+    (data.headers || []).forEach(function(h){
+      var totalDecided = Number(h.current_w) + Number(h.current_l);
+      var currentRate = totalDecided > 0 ? Number(h.current_w) / totalDecided : 0;
+      var colIndex = data.headers.indexOf(h);
+      var candidates = (data.rows || [])
+        .map(function(row, idx){ return {idx: idx, cell: row[colIndex]}; })
+        .filter(function(x){ return x.cell; })
+        .filter(function(x){ return x.cell.rate >= currentRate - 1e-9; })
+        .sort(function(a, b){ return a.cell.rate - b.cell.rate; });
+      highlightRates[h.team] = new Set(candidates.slice(0, 3).map(function(x){ return x.idx; }));
+    });
+    data.rows.forEach(function(row, rowIdx){
+      var tr = '<tr>';
+      row.forEach(function(cell, colIdx){
         if(cell){
-          const team=data.headers[colIdx]?.team;
-          const hi=highlightRates[team]?.has(rowIdx);
-          tr+=`<td class="${hi?'line-highlight':''}">${cell.w}</td><td class="${hi?'line-highlight':''}">${cell.l}</td><td class="${hi?'line-highlight':''}">${esc(cell.rate_str)}</td>`;
-        }else tr+='<td>-</td><td>-</td><td>-</td>';
+          var team = data.headers[colIdx] ? data.headers[colIdx].team : null;
+          var hi = highlightRates[team] && highlightRates[team].has(rowIdx);
+          tr += '<td class="' + (hi?'line-highlight':'') + '">' + cell.w + '</td><td class="' + (hi?'line-highlight':'') + '">' + cell.l + '</td><td class="' + (hi?'line-highlight':'') + '">' + esc(cell.rate_str) + '</td>';
+        } else {
+          tr += '<td>-</td><td>-</td><td>-</td>';
+        }
       });
-      tr+='</tr>';
-      body.insertAdjacentHTML('beforeend',tr);
+      tr += '</tr>';
+      body.insertAdjacentHTML('beforeend', tr);
     });
   }
 
   function renderH2H(list){
-    const th=document.getElementById('matrix-head'), tb=document.getElementById('matrix-body'); th.innerHTML='';tb.innerHTML='';
-    const teams=list.map(t=>t.team);
-    th.innerHTML=`<tr><th style="min-width:140px;text-align:left;padding-left:12px">チーム</th><th>試合</th><th>勝</th><th>敗</th><th>分</th><th>勝率</th><th>差</th><th>ホーム</th><th>ロード</th>${teams.map(t=>{const c=teamColor(t);return `<th style="background:${c.light};color:${c.text};border-top:3px solid ${c.main}">${esc(SHORT_NAMES[t]||t)}</th>`}).join('')}<th>交流戦</th></tr>`;
-    list.forEach(t=>{
-      const c=teamColor(t.team);
-      let row=`<tr><td class="team" style="padding-left:12px"><span class="team-dot" style="background:${c.main}"></span>${esc(FULL_NAMES[t.team]||t.team)}</td><td>${t.games}</td><td>${t.win}</td><td>${t.lose}</td><td>${t.draw}</td><td>${Number(t.rate||0).toFixed(3).replace('0.','.')}</td><td>${t.diff===0?'--':Number(t.diff||0).toFixed(1)}</td><td>${formatRecord(t.home.win,t.home.lose,t.home.draw)}</td><td>${formatRecord(t.away.win,t.away.lose,t.away.draw)}</td>`;
-      teams.forEach(o=>{if(o===t.team) row+='<td class="self">***</td>';else{const x=t.h2h?.[o]||{win:0,lose:0,draw:0};row+=`<td>${formatRecord(x.win,x.lose,x.draw)}</td>`}});
-      row+=`<td>${formatRecord(t.interleague.win,t.interleague.lose,t.interleague.draw)}</td></tr>`;
-      tb.insertAdjacentHTML('beforeend',row);
+    var th=document.getElementById('matrix-head'), tb=document.getElementById('matrix-body'); th.innerHTML='';tb.innerHTML='';
+    var teams=list.map(function(t){ return t.team; });
+    var thHtml = '<tr><th style="min-width:140px;text-align:left;padding-left:12px">チーム</th><th>試合</th><th>勝</th><th>敗</th><th>分</th><th>勝率</th><th>差</th><th>ホーム</th><th>ロード</th>';
+    teams.forEach(function(t){
+      var c=teamColor(t);
+      thHtml += '<th style="background:' + c.light + ';color:' + c.text + ';border-top:3px solid ' + c.main + '">' + esc(SHORT_NAMES[t]||t) + '</th>';
+    });
+    thHtml += '<th>交流戦</th></tr>';
+    th.innerHTML = thHtml;
+
+    list.forEach(function(t){
+      var c=teamColor(t.team);
+      var row = '<tr><td class="team" style="padding-left:12px"><span class="team-dot" style="background:' + c.main + '"></span>' + esc(FULL_NAMES[t.team]||t.team) + '</td><td>' + t.games + '</td><td>' + t.win + '</td><td>' + t.lose + '</td><td>' + t.draw + '</td><td>' + Number(t.rate||0).toFixed(3).replace('0.','.') + '</td><td>' + (t.diff===0?'--':Number(t.diff||0).toFixed(1)) + '</td><td>' + formatRecord(t.home.win,t.home.lose,t.home.draw) + '</td><td>' + formatRecord(t.away.win,t.away.lose,t.away.draw) + '</td>';
+      teams.forEach(function(o){
+        if(o===t.team){
+          row += '<td class="self">***</td>';
+        } else {
+          var x = (t.h2h && t.h2h[o]) ? t.h2h[o] : {win:0,lose:0,draw:0};
+          row += '<td>' + formatRecord(x.win,x.lose,x.draw) + '</td>';
+        }
+      });
+      row += '<td>' + formatRecord(t.interleague.win,t.interleague.lose,t.interleague.draw) + '</td></tr>';
+      tb.insertAdjacentHTML('beforeend', row);
     });
   }
 
   function render(){
-    if(!rawData?.history) return;
+    if(!rawData || !rawData.history) return;
     if(!rawData.history[selectedDate]){
-      const ds=rawData.available_dates||[]; const past=ds.filter(d=>d<=selectedDate); selectedDate=past.length?past[past.length-1]:(ds[0]||''); document.getElementById('date-picker').value=selectedDate;
+      var ds=rawData.available_dates||[];
+      var past=ds.filter(function(d){ return d<=selectedDate; });
+      selectedDate=past.length?past[past.length-1]:(ds[0]||'');
+      document.getElementById('date-picker').value=selectedDate;
     }
-    const day=rawData.history[selectedDate]; if(!day) return; const list=day[currentLeague]; if(!list) return;
+    var day=rawData.history[selectedDate]; if(!day) return;
+    var list=day[currentLeague]; if(!list) return;
     renderStandings(list); renderPredictions(list,day); renderHistoryNotice(); renderRankMatrix(list); renderClinch(list); renderLineGrid(); renderH2H(list);
   }
 
   function switchLeague(league,button){
-    currentLeague=league; document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); if(button) button.classList.add('active'); render();
+    currentLeague=league;
+    var tabs=document.querySelectorAll('.tab');
+    for(var i=0; i<tabs.length; i++) tabs[i].classList.remove('active');
+    if(button) button.classList.add('active');
+    render();
   }
 
   async function init(){
     try{
-      const res=await fetch(`history_standings.json?t=${Date.now()}`,{cache:'no-store'}); if(!res.ok) throw new Error(`HTTP ${res.status}`); rawData=await res.json(); renderModelMetaFooter();
-      const dates=rawData.available_dates||[]; const picker=document.getElementById('date-picker');
+      var res=await fetch('history_standings.json?t=' + Date.now(), {cache:'no-store'});
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      rawData=await res.json();
+      renderModelMetaFooter();
+      var dates=rawData.available_dates||[];
+      var picker=document.getElementById('date-picker');
       if(dates.length){picker.min=dates[0];picker.max=dates[dates.length-1]}
-      const today=getJstDate(); selectedDate=dates.includes(today)?today:(rawData.latest_date||dates[dates.length-1]||''); picker.value=selectedDate;
-      picker.addEventListener('change',e=>{selectedDate=e.target.value;render()});
+      var today=getJstDate();
+      selectedDate=dates.includes(today)?today:(rawData.latest_date||dates[dates.length-1]||'');
+      picker.value=selectedDate;
+      picker.addEventListener('change',function(e){selectedDate=e.target.value;render();});
       render();
     }catch(err){
-      document.getElementById('standings-body').innerHTML=`<tr><td colspan="14" style="padding:24px;color:#dc2626">データ読み込みに失敗しました。<br>${esc(err.message||err)}</td></tr>`;
+      document.getElementById('standings-body').innerHTML='<tr><td colspan="14" style="padding:24px;color:#dc2626">データ読み込みに失敗しました。<br>' + esc(err.message||err) + '</td></tr>';
     }
   }
   init();
