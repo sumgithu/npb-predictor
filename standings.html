@@ -340,17 +340,22 @@
   }
 
   function renderRankMatrix(list) {
-    const head = document.getElementById('rank-matrix-head'), body = document.getElementById('rank-matrix-body');
-    head.innerHTML=''; body.innerHTML='';
+    const head = document.getElementById('rank-matrix-head');
+    const body = document.getElementById('rank-matrix-body');
+    head.innerHTML = '';
+    body.innerHTML = '';
     const key = currentLeague === 'central' ? 'central_rank_matrix' : 'pacific_rank_matrix';
     const mat = rawData?.simulation?.[key] || {};
-    const teams = list.map(t=>t.team);
-    head.innerHTML = `<tr><th class="corner">最終順位</th>${teams.map(t=>{const c=teamColor(t);return `<th class="team-head" style="--team-main:${c.main};--team-light:${c.light};--team-text:${c.text}" title="${esc(FULL_NAMES[t]\vert{}\vert{}t)}">${esc(t)}</th>`}).join('')}</tr>`;
+    const teams = list.map(t => t.team);
+    head.innerHTML = `<tr><th class="corner">最終順位</th>${teams.map(t => {
+      const c = teamColor(t);
+      return `<th class="team-head" style="--team-main:${c.main};--team-light:${c.light};--team-text:${c.text}" title="${esc(FULL_NAMES[t] \vert{}\vert{} t)}">${esc(t)}</th>`;
+    }).join('')}</tr>`;
 
-    for(let r=1; r<=6; r++){
+    for (let r = 1; r <= 6; r++) {
       let html = `<tr><td class="rank-label">${r}位</td>`;
-      teams.forEach(t=>{
-        const obj = list.find(x=>x.team===t);
+      teams.forEach(t => {
+        const obj = list.find(x => x.team === t);
         const cur = obj?.rank || 0;
         let prob = Number(mat[t]?.[r] ?? 0);
 
@@ -361,14 +366,14 @@
         let cls = '';
         const c = teamColor(t);
         let style = '';
-        if(r === cur){
+        if (r === cur) {
           cls = 'cell-current';
           style = `style="--team-main:${c.main}"`;
-        } else if(r < cur && prob > 0){
+        } else if (r < cur && prob > 0) {
           const key2 = r === 1 ? 'magic_1st' : r === 2 ? 'magic_2nd' : 'magic_3rd';
           const mv = obj?.[key2];
           cls = (typeof mv === 'number' && mv <= obj.remaining) ? 'cell-climb' : 'cell-pot';
-        } else if(r > cur && prob > 0) {
+        } else if (r > cur && prob > 0) {
           cls = 'cell-drop';
         }
 
@@ -381,7 +386,8 @@
           val = '0%';
         }
 
-        html += `<td><span class="cell ${cls}" ${style} title="${esc((FULL_NAMES[t]||t)+'：'+r+'位 '+val)}">${val}</span></td>`;
+        const titleText = esc((FULL_NAMES[t] || t) + '：' + r + '位 ' + val);
+        html += `<td><span class="cell ${cls}" ${style} title="${titleText}">${esc(val)}</span></td>`;
       });
       html += `</tr>`;
       body.insertAdjacentHTML('beforeend', html);
