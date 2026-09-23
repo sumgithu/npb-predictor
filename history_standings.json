@@ -172341,10 +172341,20 @@
           "raw_date": "2026-09-23",
           "opp": "ヤクルト",
           "ground": "神宮",
-          "clinch_prob_val": 74.16,
+          "clinch_prob_val": 0.0,
           "win_expect": "69",
-          "clinch_prob_str": "74%",
-          "cum_prob_str": "74%"
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
+        {
+          "date": "9/24",
+          "raw_date": "2026-09-24",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 0.0,
+          "win_expect": "-",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
         },
         {
           "date": "9/25",
@@ -172354,7 +172364,7 @@
           "clinch_prob_val": 0.0,
           "win_expect": "45",
           "clinch_prob_str": "-",
-          "cum_prob_str": "74%"
+          "cum_prob_str": "-"
         },
         {
           "date": "9/26",
@@ -172364,56 +172374,96 @@
           "clinch_prob_val": 0.0,
           "win_expect": "45",
           "clinch_prob_str": "-",
-          "cum_prob_str": "74%"
+          "cum_prob_str": "-"
+        },
+        {
+          "date": "9/27",
+          "raw_date": "2026-09-27",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 0.0,
+          "win_expect": "-",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
+        {
+          "date": "9/28",
+          "raw_date": "2026-09-28",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 0.0,
+          "win_expect": "-",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
         },
         {
           "date": "9/29",
           "raw_date": "2026-09-29",
           "opp": "ヤクルト",
           "ground": "甲子園",
-          "clinch_prob_val": 0.0,
+          "clinch_prob_val": 0.2,
           "win_expect": "71",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "74%"
+          "clinch_prob_str": "0.2%",
+          "cum_prob_str": "0.2%"
         },
         {
           "date": "9/30",
           "raw_date": "2026-09-30",
           "opp": "ヤクルト",
           "ground": "甲子園",
-          "clinch_prob_val": 0.0,
+          "clinch_prob_val": 1.5,
           "win_expect": "69",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "74%"
+          "clinch_prob_str": "2%",
+          "cum_prob_str": "2%"
         },
         {
           "date": "10/1",
           "raw_date": "2026-10-01",
           "opp": "巨人",
           "ground": "甲子園",
-          "clinch_prob_val": 0.0,
+          "clinch_prob_val": 9.98,
           "win_expect": "46",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "74%"
+          "clinch_prob_str": "10%",
+          "cum_prob_str": "12%"
+        },
+        {
+          "date": "10/2",
+          "raw_date": "2026-10-02",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 4.7,
+          "win_expect": "-",
+          "clinch_prob_str": "5%",
+          "cum_prob_str": "16%"
         },
         {
           "date": "10/3",
           "raw_date": "2026-10-03",
           "opp": "広島",
           "ground": "マツダS",
-          "clinch_prob_val": 0.0,
+          "clinch_prob_val": 22.12,
           "win_expect": "69",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "74%"
+          "clinch_prob_str": "22%",
+          "cum_prob_str": "38%"
         },
         {
           "date": "10/4",
           "raw_date": "2026-10-04",
           "opp": "ＤｅＮＡ",
           "ground": "横浜",
-          "clinch_prob_val": 0.0,
+          "clinch_prob_val": 9.5,
           "win_expect": "45",
-          "clinch_prob_str": "-",
+          "clinch_prob_str": "10%",
+          "cum_prob_str": "48%"
+        },
+        {
+          "date": "未定（2試合）",
+          "raw_date": "9999-12-31",
+          "opp": "広島（2試合）",
+          "ground": "マツダS",
+          "clinch_prob_val": 26.16,
+          "win_expect": "-",
+          "clinch_prob_str": "26%",
           "cum_prob_str": "74%"
         },
         {
@@ -172421,115 +172471,175 @@
           "raw_date": "9999-12-31",
           "opp": "広島（2試合）",
           "ground": "マツダS",
-          "clinch_prob_val": 0.0,
+          "clinch_prob_val": 26.16,
           "win_expect": "-",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "74%"
+          "clinch_prob_str": "26%",
+          "cum_prob_str": "100%"
         }
       ],
       "巨人": [
+        {
+          "date": "9/23",
+          "raw_date": "2026-09-23",
+          "opp": "広島",
+          "ground": "マツダS",
+          "clinch_prob_val": 0.0,
+          "win_expect": "70",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
+        {
+          "date": "9/24",
+          "raw_date": "2026-09-24",
+          "opp": "広島",
+          "ground": "マツダS",
+          "clinch_prob_val": 0.0,
+          "win_expect": "70",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
         {
           "date": "9/25",
           "raw_date": "2026-09-25",
           "opp": "広島",
           "ground": "マツダS",
-          "clinch_prob_val": 3.2,
+          "clinch_prob_val": 0.0,
           "win_expect": "70",
-          "clinch_prob_str": "3%",
-          "cum_prob_str": "3%"
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
         },
         {
           "date": "9/26",
           "raw_date": "2026-09-26",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 6.72,
+          "clinch_prob_val": 0.0,
           "win_expect": "-",
-          "clinch_prob_str": "7%",
-          "cum_prob_str": "10%"
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
         },
         {
           "date": "9/27",
           "raw_date": "2026-09-27",
           "opp": "ヤクルト",
           "ground": "東京D",
-          "clinch_prob_val": 0.33999999999999997,
+          "clinch_prob_val": 0.0,
           "win_expect": "73",
-          "clinch_prob_str": "0.3%",
-          "cum_prob_str": "10%"
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
+        {
+          "date": "9/28",
+          "raw_date": "2026-09-28",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 0.0,
+          "win_expect": "-",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
         },
         {
           "date": "9/29",
           "raw_date": "2026-09-29",
           "opp": "広島",
           "ground": "東京D",
-          "clinch_prob_val": 3.04,
+          "clinch_prob_val": 0.0,
           "win_expect": "73",
-          "clinch_prob_str": "3%",
-          "cum_prob_str": "13%"
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
         },
         {
           "date": "9/30",
           "raw_date": "2026-09-30",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 2.8400000000000003,
+          "clinch_prob_val": 0.0,
           "win_expect": "-",
-          "clinch_prob_str": "3%",
-          "cum_prob_str": "16%"
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
         },
         {
           "date": "10/1",
           "raw_date": "2026-10-01",
           "opp": "阪神",
           "ground": "甲子園",
-          "clinch_prob_val": 0.38,
+          "clinch_prob_val": 1.04,
           "win_expect": "52",
-          "clinch_prob_str": "0.4%",
-          "cum_prob_str": "17%"
+          "clinch_prob_str": "1%",
+          "cum_prob_str": "1%"
         },
         {
           "date": "10/2",
           "raw_date": "2026-10-02",
           "opp": "ヤクルト",
           "ground": "神宮",
-          "clinch_prob_val": 0.0,
+          "clinch_prob_val": 2.3800000000000003,
           "win_expect": "68",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "17%"
+          "clinch_prob_str": "2%",
+          "cum_prob_str": "3%"
         },
         {
           "date": "10/3",
           "raw_date": "2026-10-03",
           "opp": "ＤｅＮＡ",
           "ground": "東京D",
-          "clinch_prob_val": 1.16,
+          "clinch_prob_val": 6.4,
           "win_expect": "42",
-          "clinch_prob_str": "1%",
-          "cum_prob_str": "18%"
+          "clinch_prob_str": "6%",
+          "cum_prob_str": "10%"
         },
         {
           "date": "10/4",
           "raw_date": "2026-10-04",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 2.7199999999999998,
+          "clinch_prob_val": 6.5,
           "win_expect": "-",
-          "clinch_prob_str": "3%",
-          "cum_prob_str": "20%"
+          "clinch_prob_str": "6%",
+          "cum_prob_str": "16%"
         },
         {
           "date": "未定（2試合）",
           "raw_date": "9999-12-31",
           "opp": "-",
           "ground": "-",
-          "clinch_prob_val": 5.4399999999999995,
+          "clinch_prob_val": 9.520000000000001,
           "win_expect": "-",
-          "clinch_prob_str": "5%",
+          "clinch_prob_str": "10%",
           "cum_prob_str": "26%"
+        },
+        {
+          "date": "未定（2試合）",
+          "raw_date": "9999-12-31",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 9.520000000000001,
+          "win_expect": "-",
+          "clinch_prob_str": "10%",
+          "cum_prob_str": "35%"
         }
       ],
       "ＤｅＮＡ": [
+        {
+          "date": "9/23",
+          "raw_date": "2026-09-23",
+          "opp": "中日",
+          "ground": "横浜",
+          "clinch_prob_val": 0.0,
+          "win_expect": "61",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
+        {
+          "date": "9/24",
+          "raw_date": "2026-09-24",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 0.0,
+          "win_expect": "-",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
         {
           "date": "9/25",
           "raw_date": "2026-09-25",
@@ -172591,6 +172701,26 @@
           "cum_prob_str": "-"
         },
         {
+          "date": "10/1",
+          "raw_date": "2026-10-01",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 0.0,
+          "win_expect": "-",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
+        {
+          "date": "10/2",
+          "raw_date": "2026-10-02",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 0.0,
+          "win_expect": "-",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
+        {
           "date": "10/3",
           "raw_date": "2026-10-03",
           "opp": "巨人",
@@ -172609,228 +172739,22 @@
           "win_expect": "53",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
-        }
-      ],
-      "中日": [
-        {
-          "date": "9/23",
-          "raw_date": "2026-09-23",
-          "opp": "ＤｅＮＡ",
-          "ground": "横浜",
-          "clinch_prob_val": 0.0,
-          "win_expect": "37",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
         },
         {
-          "date": "9/25",
-          "raw_date": "2026-09-25",
-          "opp": "ヤクルト",
-          "ground": "神宮",
+          "date": "未定（2試合）",
+          "raw_date": "9999-12-31",
+          "opp": "-",
+          "ground": "-",
           "clinch_prob_val": 0.0,
-          "win_expect": "63",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/26",
-          "raw_date": "2026-09-26",
-          "opp": "ヤクルト",
-          "ground": "神宮",
-          "clinch_prob_val": 0.0,
-          "win_expect": "63",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/29",
-          "raw_date": "2026-09-29",
-          "opp": "ＤｅＮＡ",
-          "ground": "横浜",
-          "clinch_prob_val": 0.0,
-          "win_expect": "43",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/1",
-          "raw_date": "2026-10-01",
-          "opp": "広島",
-          "ground": "マツダS",
-          "clinch_prob_val": 0.0,
-          "win_expect": "65",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/3",
-          "raw_date": "2026-10-03",
-          "opp": "ヤクルト",
-          "ground": "神宮",
-          "clinch_prob_val": 0.0,
-          "win_expect": "65",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        }
-      ],
-      "ヤクルト": [
-        {
-          "date": "9/25",
-          "raw_date": "2026-09-25",
-          "opp": "中日",
-          "ground": "神宮",
-          "clinch_prob_val": 0.0,
-          "win_expect": "35",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/26",
-          "raw_date": "2026-09-26",
-          "opp": "中日",
-          "ground": "神宮",
-          "clinch_prob_val": 0.0,
-          "win_expect": "35",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/27",
-          "raw_date": "2026-09-27",
-          "opp": "巨人",
-          "ground": "東京D",
-          "clinch_prob_val": 0.0,
-          "win_expect": "25",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/29",
-          "raw_date": "2026-09-29",
-          "opp": "阪神",
-          "ground": "甲子園",
-          "clinch_prob_val": 0.0,
-          "win_expect": "27",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/30",
-          "raw_date": "2026-09-30",
-          "opp": "阪神",
-          "ground": "甲子園",
-          "clinch_prob_val": 0.0,
-          "win_expect": "29",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/2",
-          "raw_date": "2026-10-02",
-          "opp": "巨人",
-          "ground": "神宮",
-          "clinch_prob_val": 0.0,
-          "win_expect": "30",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/3",
-          "raw_date": "2026-10-03",
-          "opp": "中日",
-          "ground": "神宮",
-          "clinch_prob_val": 0.0,
-          "win_expect": "33",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/4",
-          "raw_date": "2026-10-04",
-          "opp": "広島",
-          "ground": "神宮",
-          "clinch_prob_val": 0.0,
-          "win_expect": "50",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        }
-      ],
-      "広島": [
-        {
-          "date": "9/27",
-          "raw_date": "2026-09-27",
-          "opp": "ＤｅＮＡ",
-          "ground": "横浜",
-          "clinch_prob_val": 0.0,
-          "win_expect": "26",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/28",
-          "raw_date": "2026-09-28",
-          "opp": "ＤｅＮＡ",
-          "ground": "横浜",
-          "clinch_prob_val": 0.0,
-          "win_expect": "24",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/29",
-          "raw_date": "2026-09-29",
-          "opp": "巨人",
-          "ground": "東京D",
-          "clinch_prob_val": 0.0,
-          "win_expect": "25",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/30",
-          "raw_date": "2026-09-30",
-          "opp": "ＤｅＮＡ",
-          "ground": "横浜",
-          "clinch_prob_val": 0.0,
-          "win_expect": "24",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/1",
-          "raw_date": "2026-10-01",
-          "opp": "中日",
-          "ground": "マツダS",
-          "clinch_prob_val": 0.0,
-          "win_expect": "33",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/3",
-          "raw_date": "2026-10-03",
-          "opp": "阪神",
-          "ground": "マツダS",
-          "clinch_prob_val": 0.0,
-          "win_expect": "29",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/4",
-          "raw_date": "2026-10-04",
-          "opp": "ヤクルト",
-          "ground": "神宮",
-          "clinch_prob_val": 0.0,
-          "win_expect": "48",
+          "win_expect": "-",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
         },
         {
           "date": "未定（2試合）",
           "raw_date": "9999-12-31",
-          "opp": "阪神（2試合）",
-          "ground": "マツダS",
+          "opp": "-",
+          "ground": "-",
           "clinch_prob_val": 0.0,
           "win_expect": "-",
           "clinch_prob_str": "-",
@@ -172848,6 +172772,16 @@
           "clinch_prob_val": 100.0,
           "win_expect": "73",
           "clinch_prob_str": "100%",
+          "cum_prob_str": "100%"
+        },
+        {
+          "date": "9/24",
+          "raw_date": "2026-09-24",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 0.0,
+          "win_expect": "-",
+          "clinch_prob_str": "-",
           "cum_prob_str": "100%"
         },
         {
@@ -172877,6 +172811,26 @@
           "ground": "PayPay",
           "clinch_prob_val": 0.0,
           "win_expect": "85",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "100%"
+        },
+        {
+          "date": "9/28",
+          "raw_date": "2026-09-28",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 0.0,
+          "win_expect": "-",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "100%"
+        },
+        {
+          "date": "9/29",
+          "raw_date": "2026-09-29",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 0.0,
+          "win_expect": "-",
           "clinch_prob_str": "-",
           "cum_prob_str": "100%"
         },
@@ -172933,6 +172887,16 @@
           "cum_prob_str": "-"
         },
         {
+          "date": "9/24",
+          "raw_date": "2026-09-24",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 0.0,
+          "win_expect": "-",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
+        {
           "date": "9/25",
           "raw_date": "2026-09-25",
           "opp": "ロッテ",
@@ -172983,6 +172947,36 @@
           "cum_prob_str": "-"
         },
         {
+          "date": "10/1",
+          "raw_date": "2026-10-01",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 0.0,
+          "win_expect": "-",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
+        {
+          "date": "10/2",
+          "raw_date": "2026-10-02",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 0.0,
+          "win_expect": "-",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
+        {
+          "date": "10/3",
+          "raw_date": "2026-10-03",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 0.0,
+          "win_expect": "-",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
+        {
           "date": "未定（2試合）",
           "raw_date": "9999-12-31",
           "opp": "ロッテ（2試合）",
@@ -173011,6 +173005,16 @@
           "ground": "エスコンF",
           "clinch_prob_val": 0.0,
           "win_expect": "65",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
+        {
+          "date": "9/25",
+          "raw_date": "2026-09-25",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 0.0,
+          "win_expect": "-",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
         },
@@ -173045,6 +173049,16 @@
           "cum_prob_str": "-"
         },
         {
+          "date": "9/29",
+          "raw_date": "2026-09-29",
+          "opp": "-",
+          "ground": "-",
+          "clinch_prob_val": 0.0,
+          "win_expect": "-",
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
+        },
+        {
           "date": "10/1",
           "raw_date": "2026-10-01",
           "opp": "ロッテ",
@@ -173053,228 +173067,32 @@
           "win_expect": "70",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
-        }
-      ],
-      "オリックス": [
-        {
-          "date": "9/23",
-          "raw_date": "2026-09-23",
-          "opp": "ロッテ",
-          "ground": "ZOZO",
-          "clinch_prob_val": 0.0,
-          "win_expect": "43",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/25",
-          "raw_date": "2026-09-25",
-          "opp": "ソフトバンク",
-          "ground": "京セラ",
-          "clinch_prob_val": 0.0,
-          "win_expect": "14",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/26",
-          "raw_date": "2026-09-26",
-          "opp": "日本ハム",
-          "ground": "京セラ",
-          "clinch_prob_val": 0.0,
-          "win_expect": "27",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/27",
-          "raw_date": "2026-09-27",
-          "opp": "ソフトバンク",
-          "ground": "PayPay",
-          "clinch_prob_val": 0.0,
-          "win_expect": "13",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/29",
-          "raw_date": "2026-09-29",
-          "opp": "西武",
-          "ground": "ベルーナ",
-          "clinch_prob_val": 0.0,
-          "win_expect": "36",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/3",
-          "raw_date": "2026-10-03",
-          "opp": "楽天",
-          "ground": "楽天モバイル",
-          "clinch_prob_val": 0.0,
-          "win_expect": "47",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        }
-      ],
-      "ロッテ": [
-        {
-          "date": "9/28",
-          "raw_date": "2026-09-28",
-          "opp": "日本ハム",
-          "ground": "ZOZO",
-          "clinch_prob_val": 0.0,
-          "win_expect": "33",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/29",
-          "raw_date": "2026-09-29",
-          "opp": "楽天",
-          "ground": "楽天モバイル",
-          "clinch_prob_val": 0.0,
-          "win_expect": "47",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/30",
-          "raw_date": "2026-09-30",
-          "opp": "楽天",
-          "ground": "楽天モバイル",
-          "clinch_prob_val": 0.0,
-          "win_expect": "47",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/1",
-          "raw_date": "2026-10-01",
-          "opp": "日本ハム",
-          "ground": "ZOZO",
-          "clinch_prob_val": 0.0,
-          "win_expect": "28",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
         },
         {
           "date": "10/2",
           "raw_date": "2026-10-02",
-          "opp": "ソフトバンク",
-          "ground": "ZOZO",
-          "clinch_prob_val": 0.0,
-          "win_expect": "17",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/3",
-          "raw_date": "2026-10-03",
-          "opp": "ソフトバンク",
-          "ground": "ZOZO",
-          "clinch_prob_val": 0.0,
-          "win_expect": "17",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/4",
-          "raw_date": "2026-10-04",
-          "opp": "楽天",
-          "ground": "ZOZO",
-          "clinch_prob_val": 0.0,
-          "win_expect": "49",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "未定（2試合）",
-          "raw_date": "9999-12-31",
-          "opp": "西武（2試合）",
-          "ground": "ZOZO",
+          "opp": "-",
+          "ground": "-",
           "clinch_prob_val": 0.0,
           "win_expect": "-",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
-        }
-      ],
-      "楽天": [
-        {
-          "date": "9/27",
-          "raw_date": "2026-09-27",
-          "opp": "西武",
-          "ground": "ベルーナ",
-          "clinch_prob_val": 0.0,
-          "win_expect": "40",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/28",
-          "raw_date": "2026-09-28",
-          "opp": "西武",
-          "ground": "ベルーナ",
-          "clinch_prob_val": 0.0,
-          "win_expect": "40",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/29",
-          "raw_date": "2026-09-29",
-          "opp": "ロッテ",
-          "ground": "楽天モバイル",
-          "clinch_prob_val": 0.0,
-          "win_expect": "51",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "9/30",
-          "raw_date": "2026-09-30",
-          "opp": "ロッテ",
-          "ground": "楽天モバイル",
-          "clinch_prob_val": 0.0,
-          "win_expect": "51",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/1",
-          "raw_date": "2026-10-01",
-          "opp": "ソフトバンク",
-          "ground": "楽天モバイル",
-          "clinch_prob_val": 0.0,
-          "win_expect": "14",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
         },
         {
           "date": "10/3",
           "raw_date": "2026-10-03",
-          "opp": "オリックス",
-          "ground": "楽天モバイル",
+          "opp": "-",
+          "ground": "-",
           "clinch_prob_val": 0.0,
-          "win_expect": "51",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
-        {
-          "date": "10/4",
-          "raw_date": "2026-10-04",
-          "opp": "ロッテ",
-          "ground": "ZOZO",
-          "clinch_prob_val": 0.0,
-          "win_expect": "49",
+          "win_expect": "-",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
         },
         {
           "date": "未定（2試合）",
           "raw_date": "9999-12-31",
-          "opp": "ソフトバンク（1試合）",
-          "ground": "楽天モバイル",
+          "opp": "-",
+          "ground": "-",
           "clinch_prob_val": 0.0,
           "win_expect": "-",
           "clinch_prob_str": "-",
@@ -173615,18 +173433,18 @@
         "home_adv_log": 0.014321,
         "league_run_per_team_game": 3.8032,
         "park_log": {
-          "京セラ": -0.043952,
-          "エスコンF": -0.010673,
-          "マツダS": 0.023882,
+          "神宮": 0.136927,
           "ZOZO": 0.012505,
-          "東京D": -0.006074,
-          "横浜": 0.060396,
           "バンテリン": -0.136915,
+          "京セラ": -0.043952,
+          "横浜": 0.060396,
+          "マツダS": 0.023882,
+          "東京D": -0.006074,
+          "楽天モバイル": 0.002303,
+          "エスコンF": -0.010673,
           "ベルーナ": 0.042052,
           "PayPay": 0.001619,
-          "甲子園": -0.082069,
-          "楽天モバイル": 0.002303,
-          "神宮": 0.136927
+          "甲子園": -0.082069
         }
       },
       "starter_policy": "confirmed manual starter information only; strong shrinkage",
