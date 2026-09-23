@@ -18,7 +18,6 @@ on:
       - '2016-2026プロ野球レギュラーシーズン結果.txt'
       - 'games_db.json'
       - 'clinch_engine.py'
-      - 'convert_log.py'
 
 # 同じWorkflowが同時に複数走らないようにする
 concurrency:
@@ -57,22 +56,12 @@ jobs:
             echo "Attempt ${attempt}/${MAX_RETRIES}"
             echo "========================================"
 
-            # 最新のmainを取得
+            # 最新のmainを取得して作業ツリーに反映
             git fetch origin main
-
-            # GitHub上の最新mainを作業ツリーに反映
-            # ここで一度リセットしてから再計算することが重要
             git reset --hard origin/main
 
             echo "Current commit:"
             git rev-parse HEAD
-
-            echo ""
-            echo "Running convert_log.py ..."
-
-            if [ -f convert_log.py ]; then
-              python convert_log.py
-            fi
 
             echo ""
             echo "Running clinch_engine.py ..."
@@ -82,7 +71,7 @@ jobs:
             echo ""
             echo "Checking generated files ..."
 
-            git add npb_games_clean.csv history_standings.json
+            git add history_standings.json
 
             # 変更がなければ終了
             if git diff --cached --quiet; then
@@ -93,7 +82,7 @@ jobs:
             echo ""
             echo "Committing changes ..."
 
-            git commit -m "Auto update standings and clean CSV [skip ci]"
+            git commit -m "Auto update standings [skip ci]"
 
             echo ""
             echo "Attempting push ..."
@@ -105,10 +94,7 @@ jobs:
             fi
 
             echo ""
-            echo "Push failed because remote main advanced."
-            echo "The latest main will be fetched and the engine will be run again."
-
-            # 次の試行前に少し待つ
+            echo "Push failed because remote main advanced. Retrying..."
             sleep 2
           done
 
