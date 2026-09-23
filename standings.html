@@ -353,22 +353,9 @@
       let html=`<tr><td class="rank-label">${r}位</td>`;
       teams.forEach(t=>{
         const obj=list.find(x=>x.team===t); const cur=obj?.rank||0;
-        let prob;
-        if(r===1 && obj){
-          // The headline championship probability is the site's final blended
-          // championship estimate. Keep rank-1 visible even when the raw
-          // Monte Carlo sampling is too coarse to produce a non-zero cell.
-          prob=Number(obj.champ_prob ?? mat[t]?.[1] ?? 0);
-        }else{
-          const rawRest=Array.from({length:5},(_,i)=>Number(mat[t]?.[i+2] ?? 0));
-          const restTotal=rawRest.reduce((a,b)=>a+b,0);
-          const champP=Number(obj?.champ_prob ?? mat[t]?.[1] ?? 0);
-          if(r>=2 && restTotal>0 && champP<100){
-            prob=rawRest[r-2] * (100-champP) / restTotal;
-          }else{
-            prob=0;
-          }
-        }
+        const prob = (r === 1 && obj && obj.champ_prob != null)
+          ? Number(obj.champ_prob)
+          : Number(mat[t]?.[r] ?? 0);
         let cls='';
         const c=teamColor(t);
         let style='';
