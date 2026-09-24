@@ -84,8 +84,8 @@
 
   <div class="section-title">📊 順位表・チャンピョンシップナンバー＆優勝/CS確率 <span class="desc" id="champ-prob-note"></span></div>
   <div class="table-wrap"><table>
-    <thead><tr><th>順位</th><th style="text-align:left">球団</th><th>試</th><th>勝</th><th>敗</th><th>分</th><th>残</th><th>勝率</th><th>差</th><th>1位CN</th><th>2位CN</th><th>3位CN</th><th>優勝確率<br><span style="font-size:.65rem">/ 可能性</span></th><th>CS確率</th></tr></thead>
-    <tbody id="standings-body"><tr><td colspan="14" style="padding:24px">データを読み込み中...</td></tr></tbody>
+    <thead><tr><th>順位</th><th style="text-align:left">球団</th><th>試</th><th>勝</th><th>敗</th><th>分</th><th>残</th><th>勝率</th><th>差</th><th>1位CN</th><th>2位</th><th>3位CS</th><th>4位</th><th>5位</th><th>優勝確率<br><span style="font-size:.65rem">/ 可能性</span></th><th>CS確率</th></tr></thead>
+    <tbody id="standings-body"><tr><td colspan="16" style="padding:24px">データを読み込み中...</td></tr></tbody>
   </table></div>
 
   <div class="guide">
@@ -279,7 +279,7 @@
           '<td class="rank">' + esc(t.rank) + '</td><td class="team"><span class="team-dot" style="background:' + c.main + '"></span>' + esc(t.team) + '</td>' +
           '<td>' + esc(t.games) + '</td><td>' + esc(t.win) + '</td><td>' + esc(t.lose) + '</td><td>' + esc(t.draw) + '</td><td class="rem">' + esc(rem) + '</td>' +
           '<td>' + Number(t.rate || 0).toFixed(3).replace('0.','.') + '</td><td>' + (t.diff === 0 ? '--' : Number(t.diff || 0).toFixed(1)) + '</td>' +
-          '<td>' + badge(t.magic_1st,rem,1,showChampionshipM) + '</td><td>' + badge(t.magic_2nd,rem,2,false) + '</td><td>' + badge(t.magic_3rd,rem,3,false) + '</td>' +
+          '<td>' + badge(t.magic_1st,rem,1,showChampionshipM) + '</td><td>' + badge(t.magic_2nd,rem,2,false) + '</td><td>' + badge(t.magic_3rd,rem,3,false) + '</td><td>' + badge(t.magic_4th,rem,4,false) + '</td><td>' + badge(t.magic_5th,rem,5,false) + '</td>' +
           '<td class="prob ' + (champP > 50 ? 'prob-high' : '') + '">' + champDisplay(t) + '</td><td class="prob">' + fmtPct(csP) + '</td>' +
         '</tr>';
       body.insertAdjacentHTML('beforeend', row);
