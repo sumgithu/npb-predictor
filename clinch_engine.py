@@ -2352,6 +2352,63 @@ def build_all_history_with_predictions(historical_games, games_2026):
         latest_draw_rate, p_champ_targets, p_raw_champ_targets
     )
 
+    # 最終整合性チェック：表示する優勝決定日確率の合計を、
+    # 最新スナップショットの優勝確率そのものに強制的に一致させる。
+    # build_unified_clinch_schedules 内でも正規化するが、ここで最新テーブルを
+    # 直接参照して再確認することで、他球団試合・未定試合の追加によるずれを防ぐ。
+    def reconcile_clinch_schedule_totals(schedules, latest_table):
+        target_map = {t["team"]: float(t.get("champ_prob", 0.0)) for t in latest_table}
+        for team, rows in schedules.items():
+            target = target_map.get(team, 0.0)
+            total = sum(float(r.get("clinch_prob_val", 0.0)) for r in rows)
+            if total > 0:
+                scale = target / total
+                cumulative = 0.0
+                for row in rows:
+                    row["clinch_prob_val"] = float(row.get("clinch_prob_val", 0.0)) * scale
+                    cumulative += row["clinch_prob_val"]
+                    val = row["clinch_prob_val"]
+                    if val < 0.001:
+                        row["clinch_prob_str"] = "-"
+                    elif val < 1.0:
+                        row["clinch_prob_str"] = f"{val:.1f}%" if val >= 0.1 else f"{val:.2f}%"
+                    else:
+                        row["clinch_prob_str"] = f"{int(round(val))}%"
+                    if cumulative < 0.001:
+                        row["cum_prob_str"] = "-"
+                    elif cumulative < 1.0:
+                        row["cum_prob_str"] = f"{cumulative:.1f}%" if cumulative >= 0.1 else f"{cumulative:.2f}%"
+                    else:
+                        row["cum_prob_str"] = f"{int(round(cumulative))}%"
+                # 浮動小数誤差を最後の行へ吸収し、数値合計も target と一致させる。
+                residual = target - sum(float(r.get("clinch_prob_val", 0.0)) for r in rows)
+                if rows and abs(residual) > 1e-12:
+                    rows[-1]["clinch_prob_val"] += residual
+                    cumulative = 0.0
+                    for row in rows:
+                        cumulative += row["clinch_prob_val"]
+                        val = row["clinch_prob_val"]
+                        if val < 0.001:
+                            row["clinch_prob_str"] = "-"
+                        elif val < 1.0:
+                            row["clinch_prob_str"] = f"{val:.1f}%" if val >= 0.1 else f"{val:.2f}%"
+                        else:
+                            row["clinch_prob_str"] = f"{int(round(val))}%"
+                        if cumulative < 0.001:
+                            row["cum_prob_str"] = "-"
+                        elif cumulative < 1.0:
+                            row["cum_prob_str"] = f"{cumulative:.1f}%" if cumulative >= 0.1 else f"{cumulative:.2f}%"
+                        else:
+                            row["cum_prob_str"] = f"{int(round(cumulative))}%"
+            elif target <= 0:
+                for row in rows:
+                    row["clinch_prob_val"] = 0.0
+                    row["clinch_prob_str"] = "-"
+                    row["cum_prob_str"] = "-"
+
+    reconcile_clinch_schedule_totals(c_schedules, latest_c)
+    reconcile_clinch_schedule_totals(p_schedules, latest_p)
+
     simulation_payload = {
         "central_rank_matrix": c_rank_matrix,
         "pacific_rank_matrix": p_rank_matrix,
