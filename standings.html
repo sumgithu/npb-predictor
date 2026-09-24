@@ -422,7 +422,8 @@
       var body = '';
       rows.forEach(function(x){
         var has = x.clinch_prob_str !== '-'; 
-        body += '<tr><td><b>' + esc(x.date) + '</b></td><td><b>' + esc(x.opp) + '</b></td><td>' + esc(x.ground) + '</td><td class="' + (has?'val-clinch':'') + '">' + esc(x.clinch_prob_str) + '</td><td class="' + (x.cum_prob_str!=='-'?'val-cum':'') + '">' + esc(x.cum_prob_str) + '</td><td><b>' + (x.win_expect !== '-' ? esc(x.win_expect) + '%' : '-') + '</b></td></tr>';
+        var isOther = x.opp === '他球団試合';
+        body += '<tr><td><b>' + esc(x.date) + '</b></td><td><b>' + esc(x.opp) + '</b></td><td>' + esc(x.ground) + '</td><td class="' + (has?'val-clinch':'') + '">' + esc(x.clinch_prob_str) + '</td><td class="' + (x.cum_prob_str!=='-'?'val-cum':'') + '">' + esc(x.cum_prob_str) + '</td><td><b>' + (x.win_expect !== '-' && x.win_expect !== '—' ? esc(x.win_expect) + '%' : (isOther ? '—' : '-')) + '</b></td></tr>';
       });
       var card = document.createElement('div'); 
       card.className = 'clinch-card';
