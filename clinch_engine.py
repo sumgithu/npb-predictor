@@ -1521,6 +1521,9 @@ def simulate_full_season_probabilities(
     previous_rank_map=None,
 ):
     rank_counts = {t: {r: 0 for r in range(1, 7)} for t in league_teams}
+    # 優勝者と優勝決定日を同じ完走シミュレーションから同時に集計する。
+    # これにより「優勝決定日確率」の合計と「優勝確率」の母集団が一致する。
+    champion_counts = {t: 0 for t in league_teams}
     clinch_date_counts = {t: {} for t in league_teams}
     base_wins = {t["team"]: t["win"] for t in current_standings}
     base_losses = {t["team"]: t["lose"] for t in current_standings}
@@ -1659,10 +1662,20 @@ def simulate_full_season_probabilities(
             sim_h2h, previous_rank_map,
         )
         champ = final_order[0]
-        if clinched_day[champ] is not None:
-            clinch_date_counts[champ][clinched_day[champ]] = (
-                clinch_date_counts[champ].get(clinched_day[champ], 0) + 1
+        champion_counts[champ] += 1
+
+        # そのシミュレーションで最終的な優勝球団が途中で数学的に確定しなかった場合でも、
+        # シーズン完走時点では最終順位が確定しているため、最後の日を「優勝決定日」とする。
+        # これにより、全優勝シミュレーションに必ず1つの決定日が割り当てられる。
+        clinch_date = clinched_day[champ]
+        if clinch_date is None and sorted_dates:
+            clinch_date = sorted_dates[-1]
+
+        if clinch_date is not None:
+            clinch_date_counts[champ][clinch_date] = (
+                clinch_date_counts[champ].get(clinch_date, 0) + 1
             )
+
         for idx, team in enumerate(final_order):
             rank_counts[team][idx + 1] += 1
 
@@ -1677,10 +1690,32 @@ def simulate_full_season_probabilities(
             modal_rank = max(final_rank_matrix[t], key=final_rank_matrix[t].get)
             final_rank_matrix[t][modal_rank] = round(final_rank_matrix[t][modal_rank] + (100.0 - total), 1)
 
+    # 整合性チェック：
+    # 各球団について「優勝者として数えられた回数」と
+    # 「優勝決定日が記録された回数」は必ず一致しなければならない。
+    for t in league_teams:
+        recorded = sum(clinch_date_counts[t].values())
+        if recorded != champion_counts[t]:
+            raise RuntimeError(
+                f"優勝決定日集計の不整合: {t} champion_count={champion_counts[t]} "
+                f"clinch_date_count={recorded}"
+            )
+
     clinch_date_probs = {
         t: {d: (count / num_sims) * 100.0 for d, count in clinch_date_counts[t].items()}
         for t in league_teams
     }
+
+    # final_rank_matrix[t][1] は同じシミュレーションから集計した優勝確率なので、
+    # 優勝決定日確率の合計と一致することを確認する。
+    for t in league_teams:
+        clinch_total = sum(clinch_date_probs[t].values())
+        champ_total = (champion_counts[t] / num_sims) * 100.0
+        if abs(clinch_total - champ_total) > 1e-9:
+            raise RuntimeError(
+                f"優勝確率と決定日確率の不整合: {t} "
+                f"champ={champ_total:.12f}% clinch_dates={clinch_total:.12f}%"
+            )
 
     return final_rank_matrix, clinch_date_probs
 
