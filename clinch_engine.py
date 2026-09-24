@@ -2271,7 +2271,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
                 if m.get("undated_postponed") and (m["home"] == t or m["away"] == t)
             ]
             if team_undated:
-                prob_raw = clinch_map.get("9999-12-31", 0.0)
+                prob_raw = float(clinch_map.get("9999-12-31", 0.0)) * date_scale
                 cumulative += prob_raw
                 opponents = sorted(set(m["away"] if m["home"] == t else m["home"] for m in team_undated))
                 opp_str = f"{'・'.join(opponents)}（{len(team_undated)}試合）" if opponents else f"未定（{len(team_undated)}試合）"
