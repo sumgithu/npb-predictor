@@ -2302,6 +2302,31 @@ def build_all_history_with_predictions(historical_games, games_2026):
                 else:
                     row["cum_prob_str"] = f"{int(round(cum))}%"
 
+            # 最終的な優勝確率と、表示する「優勝決定日確率」の合計を必ず一致させる。
+            # 他球団試合・日程未定試合を追加した後の rows を基準に再正規化することで、
+            # 日程追加やシミュレーション側の確率定義差による累計のずれを防ぐ。
+            target_total = float(champ_prob_targets.get(t, 0.0))
+            rows_total = sum(float(r.get("clinch_prob_val", 0.0)) for r in rows)
+            if rows_total > 0 and target_total >= 0:
+                final_scale = target_total / rows_total
+                cumulative = 0.0
+                for row in rows:
+                    row["clinch_prob_val"] = float(row.get("clinch_prob_val", 0.0)) * final_scale
+                    cumulative += row["clinch_prob_val"]
+                    val = row["clinch_prob_val"]
+                    if val < 0.001:
+                        row["clinch_prob_str"] = "-"
+                    elif val < 1.0:
+                        row["clinch_prob_str"] = f"{val:.1f}%" if val >= 0.1 else f"{val:.2f}%"
+                    else:
+                        row["clinch_prob_str"] = f"{int(round(val))}%"
+                    if cumulative < 0.001:
+                        row["cum_prob_str"] = "-"
+                    elif cumulative < 1.0:
+                        row["cum_prob_str"] = f"{cumulative:.1f}%" if cumulative >= 0.1 else f"{cumulative:.2f}%"
+                    else:
+                        row["cum_prob_str"] = f"{int(round(cumulative))}%"
+
             schedules[t] = rows
 
         return schedules
