@@ -2164,17 +2164,27 @@ def build_all_history_with_predictions(historical_games, games_2026):
         del snap["_pitcher_stats"]
         del snap["_draw_rate"]
 
-    def build_unified_clinch_schedules(contenders, future_matches_local, clinch_dates_dict, model, pitcher_stats, draw_rate):
+    def build_unified_clinch_schedules(
+        contenders,
+        future_matches_local,
+        clinch_dates_dict,
+        model,
+        pitcher_stats,
+        draw_rate,
+        champ_prob_targets,
+        raw_champ_prob_targets,
+    ):
         """優勝可能性球団のみを対象とし、全チームで決定確率が0%の日（9/23〜9/28など）を除外して日程を共通化する"""
         if not contenders:
             return {}
 
-        # 1. 全球団の確定日程を収集
-        all_dates_set = set()
-        for t in contenders:
-            known = {m["date"] for m in future_matches_local if m.get("date") and (m["home"] == t or m["away"] == t)}
-            all_dates_set |= known
-
+        # 1. リーグ内の将来日程をすべて収集
+        #    優勝候補自身が試合をしない日でも、他球団の結果だけで
+        #    優勝が決定する場合があるため、その日を落とさない。
+        all_dates_set = {
+            m["date"] for m in future_matches_local
+            if m.get("date")
+        }
         sorted_all_dates = sorted(all_dates_set)
 
         # 2. いずれかのチームで「決定確率 >= 0.01%」が最初に発生する日（start_date）を特定
@@ -2197,6 +2207,16 @@ def build_all_history_with_predictions(historical_games, games_2026):
             cumulative = 0.0
 
             # 確定日程の生成
+            raw_total = sum(float(v) for v in clinch_map.values())
+            raw_target = float(raw_champ_prob_targets.get(t, raw_total))
+            blended_target = float(champ_prob_targets.get(t, raw_target))
+
+            # 優勝決定日確率は「最終的な優勝確率」と同じ母集団になるよう
+            # まず生シミュレーションの決定日分布を raw 優勝確率へ正規化し、
+            # その後、優勝確率に適用した prior shrinkage と同じ比率で
+            # blended 優勝確率へ写像する。
+            date_scale = (blended_target / raw_total) if raw_total > 0 else 0.0
+
             for d in active_dates:
                 match = next(
                     (m for m in future_matches_local if m.get("date") == d and (m["home"] == t or m["away"] == t)),
@@ -2205,7 +2225,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
                 m_int, d_int = int(d[5:7]), int(d[8:10])
                 is_tentative = (m_int == 10 and d_int >= 7)
                 date_display = f"({m_int}/{d_int})" if is_tentative else f"{m_int}/{d_int}"
-                prob_raw = clinch_map.get(d, 0.0)
+                prob_raw = float(clinch_map.get(d, 0.0)) * date_scale
 
                 if match:
                     is_home = match["home"] == t
@@ -2229,6 +2249,13 @@ def build_all_history_with_predictions(historical_games, games_2026):
                     win_expect_str = "-"
 
                 cumulative += prob_raw
+                if not match:
+                    # この日は候補球団自身の試合がなく、他球団の結果だけで
+                    # 優勝決定となり得る日。
+                    opp = "他球団試合"
+                    ground = "—"
+                    win_expect_str = "—"
+
                 rows.append({
                     "date": date_display,
                     "raw_date": d,
@@ -2238,7 +2265,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
                     "win_expect": win_expect_str,
                 })
 
-            # その球団自身に関与する未定試合がある場合のみ末尾に追加（巨人は除外される）
+            # その球団自身に関与する未定試合がある場合のみ末尾に追加
             team_undated = [
                 m for m in future_matches_local
                 if m.get("undated_postponed") and (m["home"] == t or m["away"] == t)
@@ -2286,11 +2313,18 @@ def build_all_history_with_predictions(historical_games, games_2026):
     contenders_c = [t["team"] for t in latest_c if t.get("magic_1st") != "-" and float(t.get("champ_prob", 0)) > 0]
     contenders_p = [t["team"] for t in latest_p if t.get("magic_1st") != "-" and float(t.get("champ_prob", 0)) > 0]
 
+    c_champ_targets = {t["team"]: float(t.get("champ_prob", 0.0)) for t in latest_c}
+    c_raw_champ_targets = {t["team"]: float(t.get("champ_prob_raw", 0.0)) for t in latest_c}
+    p_champ_targets = {t["team"]: float(t.get("champ_prob", 0.0)) for t in latest_p}
+    p_raw_champ_targets = {t["team"]: float(t.get("champ_prob_raw", 0.0)) for t in latest_p}
+
     c_schedules = build_unified_clinch_schedules(
-        contenders_c, c_future, c_clinch_dates, latest_model, latest_pitcher_stats, latest_draw_rate
+        contenders_c, c_future, c_clinch_dates, latest_model, latest_pitcher_stats,
+        latest_draw_rate, c_champ_targets, c_raw_champ_targets
     )
     p_schedules = build_unified_clinch_schedules(
-        contenders_p, p_future, p_clinch_dates, latest_model, latest_pitcher_stats, latest_draw_rate
+        contenders_p, p_future, p_clinch_dates, latest_model, latest_pitcher_stats,
+        latest_draw_rate, p_champ_targets, p_raw_champ_targets
     )
 
     simulation_payload = {
