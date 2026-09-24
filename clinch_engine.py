@@ -24,7 +24,7 @@ FALLBACK_CSV_FILE = "npb_games_clean.csv"
 
 # Simulation
 MAIN_NUM_SIMS = 5000
-HISTORICAL_NUM_SIMS = 100
+HISTORICAL_NUM_SIMS = 1000
 RANDOM_SEED = 20260921
 
 UNCERTAINTY_MODEL_SIMS = 10
@@ -86,9 +86,9 @@ HISTORICAL_PRIOR_SMOOTHING = 3.0
 HISTORICAL_RANK_PRIOR_MIX = 0.70
 HISTORICAL_TEAM_PRIOR_MIX = 0.30
 
-EARLY_SEASON_CURRENT_WEIGHT_MIN = 0.08
-EARLY_SEASON_CURRENT_WEIGHT_MAX = 0.95
-EARLY_SEASON_CURRENT_WEIGHT_SCALE = 45.0
+EARLY_SEASON_CURRENT_WEIGHT_MIN = 0.02
+EARLY_SEASON_CURRENT_WEIGHT_MAX = 0.90
+EARLY_SEASON_CURRENT_WEIGHT_SCALE = 50.0
 
 DRAW_PRIOR_RATE = 0.045
 DRAW_PRIOR_EFFECTIVE_GAMES = 40.0
@@ -689,8 +689,20 @@ def current_season_information_weight(completed_games_per_team):
         EARLY_SEASON_CURRENT_WEIGHT_MAX - EARLY_SEASON_CURRENT_WEIGHT_MIN
     ) * growth
 
-def apply_championship_prior_shrinkage(table, league_teams, raw_champ_probs, raw_bands, target_year, historical_games):
-    prior = build_historical_championship_prior(target_year, historical_games, league_teams)
+def apply_championship_prior_shrinkage(
+    table, league_teams, raw_champ_probs, raw_bands, target_year, historical_games,
+    preseason_champ_probs=None,
+):
+    # 開幕前のチーム力を、過去順位だけでなく2026年の実際の全日程を
+    # 複数年攻守モデルで完走させたスケジュール調整済み事前分布として扱う。
+    if preseason_champ_probs is not None:
+        total = sum(max(0.0, float(preseason_champ_probs.get(t, 0.0))) for t in league_teams)
+        if total > 0:
+            prior = {t: max(0.0, float(preseason_champ_probs.get(t, 0.0))) / total for t in league_teams}
+        else:
+            prior = {t: 1.0 / len(league_teams) for t in league_teams}
+    else:
+        prior = build_historical_championship_prior(target_year, historical_games, league_teams)
     completed_avg = sum(float(t.get("games", 0)) for t in table) / max(1, len(table))
     current_weight = current_season_information_weight(completed_avg)
     prior_weight = 1.0 - current_weight
@@ -1864,11 +1876,71 @@ def format_league(records, league_teams, h2h_played, h2h_details, previous_rank_
             )
     return validate_and_assert_standings(table)
 
+def build_preseason_baseline_probabilities(historical_games, games_2026, prior, environment, rest_effect):
+    """2026開幕時点のスケジュール調整済み事前確率を作る。"""
+    scheduled_all = []
+    for g in games_2026:
+        if not g.get("date") or is_cancelled(g):
+            continue
+        cp = dict(g)
+        cp["home_score"] = None
+        cp["away_score"] = None
+        cp["status"] = "scheduled"
+        cp["starter_confirmed"] = False
+        cp["home_starter"] = "未定"
+        cp["away_starter"] = "未定"
+        scheduled_all.append(cp)
+
+    preseason_model = {
+        "attack": dict(prior["attack"]),
+        "defense": dict(prior["defense"]),
+        "intercept": prior["intercept"],
+        "home_adv_log": environment["home_adv_log"],
+        "park_log": dict(environment["park_log"]),
+        "uncertainty": {
+            "attack_sd": {t: 0.0 for t in ALL_TEAMS},
+            "defense_sd": {t: 0.0 for t in ALL_TEAMS},
+            "intercept_sd": 0.0,
+        },
+    }
+    draw_rate = DRAW_PRIOR_RATE
+    previous_c = previous_season_ranks_for_target(2026, historical_games, CENTRAL_TEAMS)
+    previous_p = previous_season_ranks_for_target(2026, historical_games, PACIFIC_TEAMS)
+
+    def empty_table(teams):
+        return [
+            {"team": t, "games": 0, "win": 0, "lose": 0, "draw": 0,
+             "league": {"win": 0, "lose": 0, "draw": 0}}
+            for t in teams
+        ]
+
+    c_mat, _ = simulate_full_season_probabilities(
+        CENTRAL_TEAMS, empty_table(CENTRAL_TEAMS), scheduled_all,
+        preseason_model, {}, rest_effect, games_2026, draw_rate,
+        MAIN_NUM_SIMS, previous_rank_map=previous_c,
+    )
+    p_mat, _ = simulate_full_season_probabilities(
+        PACIFIC_TEAMS, empty_table(PACIFIC_TEAMS), scheduled_all,
+        preseason_model, {}, rest_effect, games_2026, draw_rate,
+        MAIN_NUM_SIMS, previous_rank_map=previous_p,
+    )
+
+    c_champ = {t: float(c_mat[t][1]) for t in CENTRAL_TEAMS}
+    p_champ = {t: float(p_mat[t][1]) for t in PACIFIC_TEAMS}
+    c_cs = {t: float(sum(c_mat[t][r] for r in (1, 2, 3))) for t in CENTRAL_TEAMS}
+    p_cs = {t: float(sum(p_mat[t][r] for r in (1, 2, 3))) for t in PACIFIC_TEAMS}
+    return c_champ, p_champ, c_cs, p_cs
+
 def build_all_history_with_predictions(historical_games, games_2026):
     prior = estimate_multi_year_prior(historical_games)
     environment = estimate_environment(historical_games)
     rest_effect = estimate_rest_effect(historical_games)
     draw_baseline_rate = estimate_historical_draw_rate(historical_games)
+
+    # 開幕前ベースラインは固定し、2026年実績の重みだけをシーズン進行に応じて増やす。
+    preseason_c_champ, preseason_p_champ, preseason_c_cs, preseason_p_cs = build_preseason_baseline_probabilities(
+        historical_games, games_2026, prior, environment, rest_effect
+    )
 
     all_dates = sorted({g["date"] for g in games_2026 if g.get("date")})
     history_snapshots = {}
@@ -2171,29 +2243,27 @@ def build_all_history_with_predictions(historical_games, games_2026):
                 }
 
         c_prior, c_weight = apply_championship_prior_shrinkage(
-            snap["central"], CENTRAL_TEAMS, c_raw, c_band_raw, int(d[:4]), historical_games
+            snap["central"], CENTRAL_TEAMS, c_raw, c_band_raw, int(d[:4]), historical_games,
+            preseason_champ_probs=preseason_c_champ,
         )
         p_prior, p_weight = apply_championship_prior_shrinkage(
-            snap["pacific"], PACIFIC_TEAMS, p_raw, p_band_raw, int(d[:4]), historical_games
+            snap["pacific"], PACIFIC_TEAMS, p_raw, p_band_raw, int(d[:4]), historical_games,
+            preseason_champ_probs=preseason_p_champ,
         )
 
         for t in snap["central"]:
-            mat = c_mat[t["team"]]
-            if t.get("magic_3rd") == "確定":
-                t["cs_prob"] = 100
-            elif t.get("magic_3rd") == "-":
-                t["cs_prob"] = 0
-            else:
-                t["cs_prob"] = int(round(sum(mat[r] for r in (1, 2, 3))))
+            team = t["team"]
+            current_cs = float(sum(c_mat[team][r] for r in (1, 2, 3)))
+            baseline_cs = float(preseason_c_cs.get(team, 0.0))
+            blended_cs = (1.0 - c_weight) * baseline_cs + c_weight * current_cs
+            t["cs_prob"] = int(round(max(0.0, min(100.0, blended_cs))))
 
         for t in snap["pacific"]:
-            mat = p_mat[t["team"]]
-            if t.get("magic_3rd") == "確定":
-                t["cs_prob"] = 100
-            elif t.get("magic_3rd") == "-":
-                t["cs_prob"] = 0
-            else:
-                t["cs_prob"] = int(round(sum(mat[r] for r in (1, 2, 3))))
+            team = t["team"]
+            current_cs = float(sum(p_mat[team][r] for r in (1, 2, 3)))
+            baseline_cs = float(preseason_p_cs.get(team, 0.0))
+            blended_cs = (1.0 - p_weight) * baseline_cs + p_weight * current_cs
+            t["cs_prob"] = int(round(max(0.0, min(100.0, blended_cs))))
 
         del snap["_model"]
         del snap["_pitcher_stats"]
@@ -2482,8 +2552,8 @@ def build_all_history_with_predictions(historical_games, games_2026):
                 "future_result_and_starter_leakage_protected": True,
             },
             "championship_band": {
-                "method": "historical-prior shrinkage + parameter-uncertainty scenarios + reduced Monte Carlo",
-                "historical_prior_period": "2005-2024 rank-history reference; historical snapshots use only years available before the target season",
+                "method": "schedule-adjusted preseason baseline + current-season evidence + parameter-uncertainty scenarios",
+                "historical_prior_period": "2025年までの複数年攻守モデルから2026年全日程を完走させた開幕前ベースライン",
                 "historical_rank_prior_mix": HISTORICAL_RANK_PRIOR_MIX,
                 "historical_team_prior_mix": HISTORICAL_TEAM_PRIOR_MIX,
                 "historical_prior_smoothing": HISTORICAL_PRIOR_SMOOTHING,
