@@ -19,7 +19,6 @@ GAMES_INTRA = 25
 GAMES_INTER = 3
 HISTORY_FILE = "history_standings.json"
 MANUAL_DB_FILE = "games_db.json"
-MANUAL_SCHEDULE_FILE = "manual_schedule.json"
 TEXT_LOG_FILE = "2016-2026プロ野球レギュラーシーズン結果.txt"
 FALLBACK_CSV_FILE = "npb_games_clean.csv"
 
@@ -440,10 +439,8 @@ def load_2026_games_as_of_date(target_date):
     if master_text is None:
         return None
     master_games = parse_year_games_from_text(master_text, 2026)
-    manual_games = []
-    for manual_path in (MANUAL_DB_FILE, MANUAL_SCHEDULE_FILE):
-        manual_text = read_tracked_file_as_of_date(manual_path, target_date)
-        manual_games.extend(_parse_manual_games_text(manual_text))
+    db_text = read_tracked_file_as_of_date(MANUAL_DB_FILE, target_date)
+    manual_games = _parse_manual_games_text(db_text)
     merged = _merge_2026_master_and_manual(master_games, manual_games)
     return augment_unresolved_postponements(merged)
 
@@ -460,13 +457,12 @@ def load_all_games():
         games_2026_master = parse_year_games_from_text(raw_text, 2026)
 
     manual_games = []
-    for manual_path in (MANUAL_DB_FILE, MANUAL_SCHEDULE_FILE):
-        if os.path.exists(manual_path):
-            try:
-                with open(manual_path, "r", encoding="utf-8") as f:
-                    manual_games.extend(_parse_manual_games_text(f.read()))
-            except Exception as exc:
-                print(f"{manual_path} 読込警告: {exc}")
+    if os.path.exists(MANUAL_DB_FILE):
+        try:
+            with open(MANUAL_DB_FILE, "r", encoding="utf-8") as f:
+                manual_games = _parse_manual_games_text(f.read())
+        except Exception as exc:
+            print(f"games_db.json 読込警告: {exc}")
 
     merged_2026 = _merge_2026_master_and_manual(games_2026_master, manual_games)
     merged_2026 = augment_unresolved_postponements(merged_2026)
