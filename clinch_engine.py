@@ -682,6 +682,33 @@ def build_historical_championship_prior(target_year, historical_games, league_te
     total = sum(combined.values())
     return {t: combined[t] / total for t in league_teams}
 
+def build_historical_cs_prior(target_year, historical_games, league_teams):
+    """複数年の最終順位から、開幕時点のCS（3位以内）事前確率を作る。"""
+    rank_map = _league_historical_rank_map(league_teams)
+    max_hist_year = min(2024, target_year - 1)
+    available_years = [y for y in HISTORICAL_RANK_YEARS if y <= max_hist_year]
+    if not available_years:
+        return {t: 1.0 / len(league_teams) * 3.0 for t in league_teams}
+
+    # 各球団の「3位以内」頻度を、6球団中3球団という事前平均で平滑化する。
+    # その後、リーグ全体で合計300%（3枠分）になるよう正規化する。
+    raw = {}
+    prior_mean = 0.5
+    smoothing = HISTORICAL_PRIOR_SMOOTHING
+    for team in league_teams:
+        successes = sum(
+            1 for y in available_years
+            if rank_map[team][y - HISTORICAL_RANK_YEARS[0]] <= 3
+        )
+        raw[team] = (successes + smoothing * prior_mean) / (len(available_years) + smoothing)
+
+    total = sum(raw.values())
+    target_total = 3.0
+    return {
+        t: (raw[t] / total) * target_total if total > 0 else target_total / len(league_teams)
+        for t in league_teams
+    }
+
 def current_season_information_weight(completed_games_per_team):
     n = max(0.0, float(completed_games_per_team))
     growth = 1.0 - math.exp(-n / EARLY_SEASON_CURRENT_WEIGHT_SCALE)
@@ -1937,10 +1964,13 @@ def build_all_history_with_predictions(historical_games, games_2026):
     rest_effect = estimate_rest_effect(historical_games)
     draw_baseline_rate = estimate_historical_draw_rate(historical_games)
 
-    # 開幕前ベースラインは固定し、2026年実績の重みだけをシーズン進行に応じて増やす。
-    preseason_c_champ, preseason_p_champ, preseason_c_cs, preseason_p_cs = build_preseason_baseline_probabilities(
-        historical_games, games_2026, prior, environment, rest_effect
-    )
+    # 開幕前ベースラインは、短期の2026年結果ではなく複数年の実績から作る。
+    # フルシーズンの事前シミュレーションをそのまま使うと、攻守モデルの僅かな差が
+    # 162試合相当の積み上げで過度に増幅されるため、開幕時点では歴史的事前分布を基準とする。
+    preseason_c_champ = build_historical_championship_prior(2026, historical_games, CENTRAL_TEAMS)
+    preseason_p_champ = build_historical_championship_prior(2026, historical_games, PACIFIC_TEAMS)
+    preseason_c_cs = build_historical_cs_prior(2026, historical_games, CENTRAL_TEAMS)
+    preseason_p_cs = build_historical_cs_prior(2026, historical_games, PACIFIC_TEAMS)
 
     all_dates = sorted({g["date"] for g in games_2026 if g.get("date")})
     history_snapshots = {}
@@ -2552,8 +2582,8 @@ def build_all_history_with_predictions(historical_games, games_2026):
                 "future_result_and_starter_leakage_protected": True,
             },
             "championship_band": {
-                "method": "schedule-adjusted preseason baseline + current-season evidence + parameter-uncertainty scenarios",
-                "historical_prior_period": "2025年までの複数年攻守モデルから2026年全日程を完走させた開幕前ベースライン",
+                "method": "multi-year historical baseline + current-season evidence + parameter-uncertainty scenarios",
+                "historical_prior_period": "2024年までの複数年順位履歴から作成した開幕前ベースライン（2025年の順位を含む当年直前の実績を利用）",
                 "historical_rank_prior_mix": HISTORICAL_RANK_PRIOR_MIX,
                 "historical_team_prior_mix": HISTORICAL_TEAM_PRIOR_MIX,
                 "historical_prior_smoothing": HISTORICAL_PRIOR_SMOOTHING,
