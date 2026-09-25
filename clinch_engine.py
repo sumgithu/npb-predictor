@@ -28,6 +28,10 @@ MAIN_NUM_SIMS = 3000
 HISTORICAL_NUM_SIMS = 100
 RANDOM_SEED = 20260921
 
+# 通常更新は最新基準日だけ再計算し、過去日の完成済み履歴を再利用する。
+# 過去履歴を全件再生成すると20分以上かかるため、手動Full Rebuild時だけ全履歴を再計算する。
+FULL_REBUILD = os.environ.get("NPB_FULL_REBUILD", "0").lower() in ("1", "true", "yes")
+
 UNCERTAINTY_MODEL_SIMS = 10
 UNCERTAINTY_SEASON_SIMS = 60
 UNCERTAINTY_LOW_Q = 0.20
@@ -1982,7 +1986,24 @@ def build_all_history_with_predictions(historical_games, games_2026):
     preseason_p_cs = build_historical_cs_prior(2026, historical_games, PACIFIC_TEAMS)
 
     all_dates = sorted({g["date"] for g in games_2026 if g.get("date")})
-    history_snapshots = {}
+    if not all_dates:
+        raise RuntimeError("2026年の日程データがありません。")
+
+    # 通常更新では既存の履歴を保持し、最新基準日だけを再計算する。
+    existing_history = {}
+    existing_dates = []
+    if not FULL_REBUILD and os.path.exists(HISTORY_FILE):
+        try:
+            with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+                old_output = json.load(f)
+            existing_history = old_output.get("history", {})
+            existing_dates = old_output.get("available_dates", list(existing_history.keys()))
+        except Exception as exc:
+            print(f"既存履歴読込警告（Full Rebuildへ切替）: {exc}")
+            existing_history = {}
+            existing_dates = []
+
+    history_snapshots = dict(existing_history) if existing_history else {}
     random.seed(RANDOM_SEED)
     central_previous_ranks = previous_season_ranks_for_target(2026, historical_games, CENTRAL_TEAMS)
     pacific_previous_ranks = previous_season_ranks_for_target(2026, historical_games, PACIFIC_TEAMS)
@@ -1991,8 +2012,9 @@ def build_all_history_with_predictions(historical_games, games_2026):
         (g["date"] for g in games_2026 if is_finished(g)),
         default=all_dates[0],
     )
+    dates_to_build = all_dates if FULL_REBUILD or not existing_history else [last_eval_date]
 
-    for target_date in all_dates:
+    for target_date in dates_to_build:
         snapshot_games = load_2026_games_as_of_date(target_date)
         games_for_date = snapshot_games if snapshot_games is not None else games_2026
         records = {
@@ -2204,7 +2226,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
         MAIN_NUM_SIMS, previous_rank_map=pacific_previous_ranks,
     )
 
-    for d in all_dates:
+    for d in dates_to_build:
         snap = history_snapshots[d]
         snapshot_games = load_2026_games_as_of_date(d)
         games_for_date = snapshot_games if snapshot_games is not None else games_2026
@@ -2648,8 +2670,13 @@ def build_all_history_with_predictions(historical_games, games_2026):
     }
 
     jst_today = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=9)).strftime("%Y-%m-%d")
-    final_default_date = jst_today if jst_today in all_dates else last_eval_date
-    return all_dates, final_default_date, history_snapshots, simulation_payload
+    if FULL_REBUILD or not existing_history:
+        output_dates = all_dates
+    else:
+        # 既存の履歴＋新しく確定した最新日のみを利用。未確定の新規未来日を履歴へ仮登録しない。
+        output_dates = sorted(set(existing_dates) | {last_eval_date})
+    final_default_date = jst_today if jst_today in history_snapshots else last_eval_date
+    return output_dates, final_default_date, history_snapshots, simulation_payload
 
 def main():
     historical_games, games_2026 = load_all_games()
@@ -2679,7 +2706,7 @@ def main():
         "解析・予測更新完了："
         f"{dates[0]} ～ {dates[-1]} / "
         f"Poisson攻守モデル + 複数年prior + recency + park/home + starter + rest / "
-        f"Monte Carlo {MAIN_NUM_SIMS}回"
+        f"Monte Carlo {MAIN_NUM_SIMS}回 / historical={'full' if FULL_REBUILD else 'incremental'}"
     )
 
 if __name__ == "__main__":
