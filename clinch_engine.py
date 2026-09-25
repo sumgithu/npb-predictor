@@ -23,6 +23,7 @@ TEXT_LOG_FILE = "2016-2026プロ野球レギュラーシーズン結果.txt"
 FALLBACK_CSV_FILE = "npb_games_clean.csv"
 
 # Simulation
+# Fast daily updates: latest-day precision remains high; historical snapshots use a lighter Monte Carlo sample.
 MAIN_NUM_SIMS = 3000
 HISTORICAL_NUM_SIMS = 100
 RANDOM_SEED = 20260921
