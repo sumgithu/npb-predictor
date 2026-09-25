@@ -2,122 +2,225 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NPB Predictor 手動日程管理</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NPB 試合結果・先発 手動管理</title>
 <style>
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Yu Gothic",sans-serif;background:#f8fafc;color:#0f172a;margin:0;padding:24px}
-main{max-width:900px;margin:auto}
-h1{color:#1e3a8a;font-size:1.35rem}
-.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin:0 0 18px;box-shadow:0 2px 5px rgba(0,0,0,.03)}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-label{display:block;font-size:.82rem;font-weight:700;color:#475569}
-input,select{width:100%;box-sizing:border-box;margin-top:5px;padding:9px;border:1px solid #cbd5e1;border-radius:8px;font-size:.95rem}
-button{border:0;border-radius:8px;padding:9px 14px;font-weight:800;cursor:pointer;margin:6px 6px 0 0}
-.primary{background:#2563eb;color:white}.sub{background:#e2e8f0}.danger{background:#fee2e2;color:#991b1b}
-pre{white-space:pre-wrap;background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px;overflow:auto;font-size:.78rem}
-table{width:100%;border-collapse:collapse;font-size:.83rem}th,td{padding:8px;border-bottom:1px solid #e2e8f0;text-align:left}th{background:#f8fafc}
-.note{font-size:.82rem;line-height:1.6;color:#475569}
-.status{padding:9px 12px;border-radius:8px;background:#eff6ff;color:#1e40af;font-weight:700;display:none;margin-top:10px}
-@media(max-width:650px){.grid{grid-template-columns:1fr}}
+:root{--bg:#f8fafc;--card:#fff;--text:#0f172a;--sub:#64748b;--border:#e2e8f0;--blue:#2563eb;--green:#15803d;--red:#dc2626}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;padding:16px 10px 40px}
+.container{max-width:980px;margin:auto}.card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:15px;margin-bottom:14px}
+h1{font-size:1.25rem;margin:0 0 5px;color:#1e3a8a}.sub{margin:0;color:var(--sub);font-size:.78rem;line-height:1.5}
+.controls{display:flex;flex-wrap:wrap;align-items:end;gap:8px}.control{display:flex;flex-direction:column;gap:4px}.control label{font-size:.72rem;font-weight:800;color:#475569}.control input{padding:8px 9px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:.9rem}.date-input{width:145px}.token{width:280px}
+.btn{border:0;border-radius:8px;padding:9px 13px;font-weight:800;cursor:pointer}.load{background:var(--blue);color:#fff}.add{background:#e0f2fe;color:#075985}.save{background:var(--green);color:#fff}.today{background:#e2e8f0;color:#334155}.btn:disabled{opacity:.5;cursor:not-allowed}
+.status{margin-top:10px;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:#f8fafc;color:#475569;font-size:.76rem}.status.ok{background:#f0fdf4;border-color:#bbf7d0;color:#166534}.status.err{background:#fef2f2;border-color:#fecaca;color:#991b1b}
+.day-head{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}.day-title{font-size:1.05rem;font-weight:900}.day-meta{font-size:.72rem;color:var(--sub)}
+.games{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}.game{border:1px solid var(--border);border-radius:10px;padding:11px;background:#fff}.game.cancelled{background:#fff7ed;border-color:#fed7aa}
+.game-head{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px}.match{font-weight:900;font-size:.93rem}.badge{font-size:.64rem;font-weight:800;border-radius:999px;padding:3px 7px;background:#eff6ff;color:#1d4ed8}.finished{background:#dcfce7;color:#166534}.cancel{background:#ffedd5;color:#9a3412}.reserve{background:#fef3c7;color:#92400e}.manual{background:#ecfdf5;color:#166534}
+.score{display:grid;grid-template-columns:1fr 58px 14px 58px 1fr;gap:6px;align-items:center}.team{font-weight:800}.right{text-align:right}.score input,.starter input{width:100%;padding:8px 6px;border:1px solid var(--border);border-radius:7px;text-align:center;font-size:.95rem}.dash{text-align:center;color:#94a3b8;font-weight:800}
+.starters{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}.starter label,.small{display:block;font-size:.65rem;color:var(--sub);margin-bottom:3px}.starter input{text-align:left;padding:7px 8px;font-size:.82rem}
+.bottom{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)}.check{font-size:.72rem;font-weight:800;color:#9a3412}.detail{font-size:.65rem;color:var(--sub)}
+.empty{padding:18px;text-align:center;border:1px dashed var(--border);border-radius:10px;color:var(--sub);font-size:.8rem}
+@media(max-width:700px){.games{grid-template-columns:1fr}.token{width:220px}.score{grid-template-columns:1fr 54px 12px 54px 1fr}}
 </style>
 </head>
 <body>
-<main>
-<h1>NPB Predictor 手動日程管理</h1>
-<div class="card">
-<p class="note">
-元の日程表に載っていない振替試合・追加日程は、ここで登録した内容を
-<code>manual_schedule.json</code> として保存し、GitHub の main ブランチへ反映してください。
-このページ自体からGitHubへ直接書き込む機能はありません。
-</p>
-<div class="grid">
-<label>日付<input id="date" type="date"></label>
-<label>状態<select id="status"><option value="scheduled">scheduled（未消化）</option><option value="finished">finished（結果あり）</option><option value="cancelled">cancelled（中止）</option></select></label>
-<label>ホーム<input id="home" placeholder="例：阪神"></label>
-<label>ビジター<input id="away" placeholder="例：広島"></label>
-<label>ホーム先発<input id="home_starter" value="未定"></label>
-<label>ビジター先発<input id="away_starter" value="未定"></label>
-<label>ホーム得点（任意）<input id="home_score" type="number" min="0"></label>
-<label>ビジター得点（任意）<input id="away_score" type="number" min="0"></label>
-</div>
-<div>
-<button class="primary" onclick="addGame()">試合を追加</button>
-<button class="sub" onclick="loadGames()">現在の入力を再読込</button>
-</div>
-<div id="statusBox" class="status"></div>
+<div class="container">
+  <div class="card">
+    <h1>⚾ NPB 試合結果・先発 手動管理</h1>
+    <p class="sub">日程はマスターテキストから読み込み、試合結果・先発・中止だけを <b>games_db.json</b> に保存します。未来日の対戦予定も表示されます。保存すると GitHub Actions が自動実行されます。</p>
+  </div>
+
+  <div class="card">
+    <div class="controls">
+      <div class="control"><label>対象日</label><input id="targetDate" class="date-input" type="date"></div>
+      <button class="btn today" id="todayBtn">今日</button>
+      <button class="btn load" id="loadBtn">日程を読み込む</button>
+      <button class="btn add" id="addBtn">＋ 試合を追加</button>
+      <div class="control"><label>GitHub Token</label><input id="token" class="token" type="password" autocomplete="off" placeholder="保存時のみ必要"></div>
+      <button class="btn save" id="saveBtn" disabled>保存</button>
+    </div>
+    <div id="status" class="status">未読込です。</div>
+  </div>
+
+  <div class="card" id="addCard" style="display:none">
+    <div class="day-head"><div class="day-title">新しい試合を追加</div><div class="day-meta">未来の振替試合・追加日程など</div></div>
+    <div class="controls" style="margin-top:10px">
+      <div class="control"><label>日付</label><input id="addDate" class="date-input" type="date"></div>
+      <div class="control"><label>ホーム</label><input id="addHome" class="token" placeholder="例：阪神"></div>
+      <div class="control"><label>ビジター</label><input id="addAway" class="token" placeholder="例：広島"></div>
+      <div class="control"><label>ホーム先発</label><input id="addHomeStarter" class="token" value="未定"></div>
+      <div class="control"><label>ビジター先発</label><input id="addAwayStarter" class="token" value="未定"></div>
+      <button class="btn add" id="addConfirmBtn">登録</button>
+      <button class="btn today" id="addCancelBtn">キャンセル</button>
+    </div>
+  </div>
+
+  <div class="card" id="dayCard" style="display:none">
+    <div class="day-head"><div class="day-title" id="dayTitle"></div><div class="day-meta" id="dayMeta"></div></div>
+    <div id="games" class="games"></div>
+  </div>
 </div>
 
-<div class="card">
-<h2 style="font-size:1rem">登録予定</h2>
-<table><thead><tr><th>日付</th><th>対戦</th><th>状態</th><th>先発</th><th>結果</th><th></th></tr></thead><tbody id="gameRows"></tbody></table>
-</div>
-
-<div class="card">
-<h2 style="font-size:1rem">manual_schedule.json</h2>
-<p class="note">下の内容をコピーして、リポジトリの <code>manual_schedule.json</code> に貼り付けてコミットしてください。</p>
-<button class="primary" onclick="copyJson()">JSONをコピー</button>
-<button class="sub" onclick="downloadJson()">JSONを保存</button>
-<pre id="jsonOut">{"games":[]}</pre>
-</div>
-</main>
 <script>
-const TEAM_ALIASES={
-"DeNA":"ＤｅＮＡ","横浜":"ＤｅＮＡ","横浜DeNA":"ＤｅＮＡ","横浜ＤｅＮＡ":"ＤｅＮＡ",
-"阪神":"阪神","巨人":"巨人","広島":"広島","ヤクルト":"ヤクルト","中日":"中日",
-"ソフトバンク":"ソフトバンク","日本ハム":"日本ハム","ロッテ":"ロッテ","楽天":"楽天","オリックス":"オリックス","西武":"西武"
-};
-let games=[];
-function norm(x){x=(x||"").trim();return TEAM_ALIASES[x]||x}
-function key(g){return [g.date,g.home,g.away].join("|")}
-function setMsg(s){const b=document.getElementById("statusBox");b.textContent=s;b.style.display="block"}
-function render(){
- const body=document.getElementById("gameRows");
- body.innerHTML="";
- games.sort((a,b)=>((a.date||"")+"|"+(a.home||"")+"|"+(a.away||"")).localeCompare((b.date||"")+"|"+(b.home||"")+"|"+(b.away||"")));
- games.forEach((g,i)=>{
-   const tr=document.createElement("tr");
-   tr.innerHTML="<td>"+esc(g.date)+"</td><td>"+esc(g.home)+" - "+esc(g.away)+"</td><td>"+esc(g.status)+"</td><td>"+esc(g.home_starter||"未定")+" / "+esc(g.away_starter||"未定")+"</td><td>"+((g.home_score!=null&&g.away_score!=null)?esc(g.home_score+"-"+g.away_score"):"-")+"</td><td><button class='danger' onclick='removeGame("+i+")'>削除</button></td>";
-   body.appendChild(tr);
- });
- document.getElementById("jsonOut").textContent=JSON.stringify({games},null,2);
+const OWNER='sumgithu';
+const REPO='npb-predictor';
+const BRANCH='main';
+const MASTER_PATH='2016-2026プロ野球レギュラーシーズン結果.txt';
+const DB_PATH='games_db.json';
+const TEAMS=['阪神','巨人','ＤｅＮＡ','ヤクルト','中日','広島','ソフトバンク','日本ハム','ロッテ','楽天','オリックス','西武'];
+const ALIAS={'DeNA':'ＤｅＮＡ','横浜DeNA':'ＤｅＮＡ','横浜':'ＤｅＮＡ','日ハム':'日本ハム','ハム':'日本ハム','千葉ロッテ':'ロッテ','東北楽天':'楽天','福岡ソフトバンク':'ソフトバンク','北海道日本ハム':'日本ハム','埼玉西武':'西武','読売':'巨人','広島東洋':'広島','東京ヤクルト':'ヤクルト'};
+const state={master:[],manual:[],cards:[]};
+
+function $(id){return document.getElementById(id)}
+function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function normalizeTeam(v){const s=String(v||'').trim();return ALIAS[s]||s}
+function key(g){return `${g.date}|${g.home}|${g.away}`}
+function today(){const d=new Date();const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`}
+function jpDate(d){const x=new Date(`${d}T00:00:00+09:00`);const w='日月火水木金土'[x.getDay()];return `${Number(d.slice(5,7))}/${Number(d.slice(8,10))}（${w}）`}
+function status(msg,type=''){const e=$('status');e.textContent=msg;e.className='status'+(type?' '+type:'')}
+function api(){return `https://api.github.com/repos/${OWNER}/${REPO}`}
+function encPath(path){return path.split('/').map(encodeURIComponent).join('/')}
+function headers(){const h={'Accept':'application/vnd.github+json'};const t=$('token').value.trim();if(t)h.Authorization=`Bearer ${t}`;return h}
+
+async function getFile(path){
+  const url=`${api()}/contents/${encPath(path)}?ref=${encodeURIComponent(BRANCH)}`;
+  const res=await fetch(url,{headers:headers()});
+  if(res.status===404)return {exists:false,sha:null,text:''};
+  if(!res.ok)throw new Error(`GitHub読込失敗 ${res.status}`);
+  const data=await res.json();
+  const bin=atob((data.content||'').replace(/\n/g,''));
+  const bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));
+  return {exists:true,sha:data.sha,text:new TextDecoder('utf-8').decode(bytes)};
 }
-function esc(x){return String(x==null?"":x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
-function addGame(){
- const date=document.getElementById("date").value;
- const home=norm(document.getElementById("home").value);
- const away=norm(document.getElementById("away").value);
- const status=document.getElementById("status").value;
- if(!date||!home||!away){setMsg("日付・ホーム・ビジターを入力してください。");return}
- if(home===away){setMsg("ホームとビジターは別球団にしてください。");return}
- const hs=document.getElementById("home_score").value;
- const as=document.getElementById("away_score").value;
- const g={date,home,away,status,home_starter:document.getElementById("home_starter").value.trim()||"未定",away_starter:document.getElementById("away_starter").value.trim()||"未定"};
- if(hs!==""&&as!==""){g.home_score=Number(hs);g.away_score=Number(as);g.status="finished"}
- if(g.status!=="finished"){delete g.home_score;delete g.away_score}
- const k=key(g);
- const idx=games.findIndex(x=>key(x)===k);
- if(idx>=0) games[idx]=g; else games.push(g);
- render();setMsg(idx>=0?"同一試合を更新しました。":"試合を追加しました。");
+
+function parseMasterText(text){
+  const lines=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+  const out=[];let in2026=false,date=null;
+  const team='(阪神|巨人|ＤｅＮＡ|DeNA|ヤクルト|中日|広島|ソフトバンク|日本ハム|ロッテ|楽天|オリックス|西武)';
+  const dateRe=/^(\d{1,2})\/(\d{1,2})(?:[（(][日月火水木金土][）)])?\s*(.*)$/;
+  const scoreRe=new RegExp(`^\\s*${team}\\s+(\\d+)\\s*-\\s*(\\d+)\\s+${team}(?:\\s+(.*))?$`);
+  const schedRe=new RegExp(`^\\s*${team}\\s*-\\s*${team}(?:\\s+(.*))?$`);
+  const reserveRe=new RegExp(`^\\s*${team}\\s*\\(\\s*予備日\\s*\\)\\s*${team}(?:\\s+(.*))?$`);
+  for(let raw of lines){
+    let line=raw.trim();if(!line)continue;
+    if(/^2026$/.test(line)){in2026=true;continue}
+    if(in2026 && /^2027$/.test(line))break;
+    if(!in2026)continue;
+    const dm=line.match(dateRe);if(dm){date=`2026-${String(dm[1]).padStart(2,'0')}-${String(dm[2]).padStart(2,'0')}`;line=dm[3].trim();if(!line)continue}
+    if(!date)continue;
+    let m=line.match(scoreRe),home,away,hs=null,as=null,status='scheduled',detail='';
+    if(m){home=normalizeTeam(m[1]);hs=Number(m[2]);as=Number(m[3]);away=normalizeTeam(m[4]);status='finished';detail=m[5]||''}
+    else{m=line.match(reserveRe);if(m){home=normalizeTeam(m[1]);away=normalizeTeam(m[2]);detail=m[3]||''}
+      else{m=line.match(schedRe);if(!m)continue;home=normalizeTeam(m[1]);away=normalizeTeam(m[2]);detail=m[3]||''}}
+    if(!TEAMS.includes(home)||!TEAMS.includes(away))continue;
+    if(/中止|ノーゲーム/.test(line)){status='cancelled';hs=null;as=null}
+    const starters=[...line.matchAll(/(?:先発|予告)[:：]?\s*([^\s,，()（）]+)/g)].map(x=>x[1]);
+    out.push({date,home,away,home_score:hs,away_score:as,home_starter:starters[0]||'未定',away_starter:starters[1]||'未定',status,starter_confirmed:!!(starters[0]||starters[1]),reserve_day:/\(\s*予備日\s*\)/.test(line),detail});
+  }
+  const map=new Map();out.forEach(g=>map.set(key(g),g));return [...map.values()].sort((a,b)=>key(a).localeCompare(key(b)));
 }
-function removeGame(i){games.splice(i,1);render();setMsg("削除しました。")}
-async function loadGames(){
- try{
-  const r=await fetch("manual_schedule.json?t="+Date.now(),{cache:"no-store"});
-  if(!r.ok) throw new Error("HTTP "+r.status);
-  const d=await r.json(); games=Array.isArray(d)?d:(d.games||[]);
-  render();setMsg("manual_schedule.json を読み込みました。");
- }catch(e){games=[];render();setMsg("既存ファイルを読めませんでした。新規入力として開始します。")}
+
+function parseDB(text){
+  if(!text.trim())return [];
+  const p=JSON.parse(text);const arr=Array.isArray(p)?p:(Array.isArray(p.games)?p.games:[]);
+  return arr.map(g=>({...g,home:normalizeTeam(g.home),away:normalizeTeam(g.away),home_starter:g.home_starter||g.home_pitcher||'未定',away_starter:g.away_starter||g.away_pitcher||'未定'})).filter(g=>g.date&&g.home&&g.away);
 }
-async function copyJson(){
- await navigator.clipboard.writeText(JSON.stringify({games},null,2));
- setMsg("JSONをクリップボードへコピーしました。");
+function merged(date){
+  const manualMap=new Map(state.manual.map(g=>[key(g),g]));
+  const list=state.master.filter(g=>g.date===date).map(g=>({...g,...(manualMap.get(key(g))||{}),date:g.date,home:g.home,away:g.away}));
+  const keys=new Set(list.map(key));state.manual.filter(g=>g.date===date&&!keys.has(key(g))).forEach(g=>list.push(g));
+  return list.sort((a,b)=>`${a.home}${a.away}`.localeCompare(`${b.home}${b.away}`));
 }
-function downloadJson(){
- const blob=new Blob([JSON.stringify({games},null,2)],{type:"application/json"});
- const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="manual_schedule.json";a.click();URL.revokeObjectURL(a.href);
- setMsg("manual_schedule.json を保存しました。");
+function badge(g){if(g.status==='cancelled')return '<span class="badge cancel">中止</span>';if(g.status==='finished')return '<span class="badge finished">結果登録済</span>';if(g.reserve_day)return '<span class="badge reserve">予備日</span>';if(state.manual.some(x=>key(x)===key(g)))return '<span class="badge manual">手動DB</span>';return '<span class="badge">日程</span>'}
+
+function render(date){
+  const list=merged(date);state.cards=list;$('dayCard').style.display='block';$('dayTitle').textContent=jpDate(date)+' の試合';$('dayMeta').textContent=`${list.length}試合`;
+  const wrap=$('games');wrap.innerHTML='';$('saveBtn').disabled=!list.length;
+  if(!list.length){wrap.innerHTML='<div class="empty" style="grid-column:1/-1">この日の試合予定がありません。</div>';return}
+  list.forEach((g,i)=>{
+    const c=document.createElement('div');c.className='game'+(g.status==='cancelled'?' cancelled':'');c.dataset.index=i;
+    c.innerHTML=`
+      <div class="game-head"><div class="match">${esc(g.home)}　-　${esc(g.away)}</div>${badge(g)}</div>
+      <div class="score"><div class="team">${esc(g.home)}</div><input class="home-score" type="number" min="0" max="99" value="${g.home_score??''}"><div class="dash">-</div><input class="away-score" type="number" min="0" max="99" value="${g.away_score??''}"><div class="team right">${esc(g.away)}</div></div>
+      <div class="starters"><div class="starter"><label>ホーム先発</label><input class="home-starter" value="${esc(g.home_starter||'未定')}"></div><div class="starter"><label>ビジター先発</label><input class="away-starter" value="${esc(g.away_starter||'未定')}"></div></div>
+      <div class="bottom"><label class="check"><input class="cancelled" type="checkbox" ${g.status==='cancelled'?'checked':''}> 中止</label><span class="detail">${esc(g.detail||'')}</span></div>`;
+    wrap.appendChild(c);
+  });
 }
-loadGames();
+
+function openAddForm(){
+  $('addCard').style.display='block';
+  $('addDate').value=$('targetDate').value || today();
+  $('addHome').focus();
+}
+function closeAddForm(){ $('addCard').style.display='none'; }
+function addNewGame(){
+  const date=$('addDate').value;
+  const home=normalizeTeam($('addHome').value);
+  const away=normalizeTeam($('addAway').value);
+  const hs=$('addHomeStarter').value.trim()||'未定';
+  const as=$('addAwayStarter').value.trim()||'未定';
+  if(!date||!home||!away){status('日付・ホーム・ビジターを入力してください。','err');return}
+  if(!TEAMS.includes(home)||!TEAMS.includes(away)){status('球団名を確認してください。','err');return}
+  if(home===away){status('ホームとビジターは別球団にしてください。','err');return}
+  const g={date,home,away,home_score:null,away_score:null,home_starter:hs,away_starter:as,status:'scheduled',starter_confirmed:(hs!=='未定'||as!=='未定'),source:'manual'};
+  const k=key(g);
+  const idx=state.manual.findIndex(x=>key(x)===k);
+  if(idx>=0) state.manual[idx]=g; else state.manual.push(g);
+  $('targetDate').value=date;
+  closeAddForm();
+  render(date);
+  status(jpDate(date)+' に '+home+' - '+away+' を追加しました。保存ボタンでGitHubへ反映できます。','ok');
+}
+
+async function load(){
+  const date=$('targetDate').value;if(!date){status('日付を指定してください。','err');return}
+  try{status('日程と登録内容を読み込んでいます…');const [m,d]=await Promise.all([getFile(MASTER_PATH),getFile(DB_PATH)]);if(!m.exists)throw new Error('マスターテキストが見つかりません。');state.master=parseMasterText(m.text);state.manual=d.exists?parseDB(d.text):[];render(date);status(`${jpDate(date)} を読み込みました。未来日もマスター日程から表示されます。`,'ok')}
+  catch(e){console.error(e);status(e.message||String(e),'err')}
+}
+function edited(card,base){
+  const hs=card.querySelector('.home-score').value.trim(),as=card.querySelector('.away-score').value.trim();const cancel=card.querySelector('.cancelled').checked;const hst=card.querySelector('.home-starter').value.trim()||'未定',ast=card.querySelector('.away-starter').value.trim()||'未定';
+  const g={...base,home_starter:hst,away_starter:ast,source:'manual'};
+  if(cancel){g.home_score=null;g.away_score=null;g.status='cancelled'}else if(hs!==''&&as!==''){g.home_score=Number(hs);g.away_score=Number(as);g.status='finished'}else{g.home_score=null;g.away_score=null;g.status='scheduled'}
+  g.starter_confirmed=hst!=='未定'||ast!=='未定';return g;
+}
+function sameMeaning(a,b){return ['home_score','away_score','home_starter','away_starter','status'].every(f=>String(a[f]??'')===String(b[f]??''))}
+function b64(text){const bytes=new TextEncoder().encode(text);let s='';for(let i=0;i<bytes.length;i+=0x8000)s+=String.fromCharCode(...bytes.subarray(i,i+0x8000));return btoa(s)}
+
+async function save(){
+  const date=$('targetDate').value,token=$('token').value.trim();
+  if(!date||!state.cards.length){status('保存対象がありません。','err');return}
+  if(!token){status('保存にはGitHub Tokenが必要です。','err');return}
+  try{
+    status('最新の games_db.json に入力内容を反映しています…');
+    const latest=await getFile(DB_PATH);
+    const old=latest.exists?parseDB(latest.text):[];
+    const map=new Map(old.map(g=>[key(g),g]));
+    state.cards.forEach((base,i)=>{
+      const card=document.querySelector(`.game[data-index="${i}"]`);
+      const g=edited(card,base);
+      map.set(key(g),g);
+    });
+    state.manual=[...map.values()].sort((a,b)=>key(a).localeCompare(key(b)));
+    const body=JSON.stringify({games:state.manual},null,2)+'\n';
+    const url=`${api()}/contents/${encPath(DB_PATH)}`;
+    const payload={message:`Update NPB results/starters ${date}`,content:b64(body),branch:BRANCH};
+    if(latest.exists)payload.sha=latest.sha;
+    const res=await fetch(url,{method:'PUT',headers:{...headers(),'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(!res.ok)throw new Error(`GitHub保存失敗 ${res.status}`);
+    render(date);
+    status(`${jpDate(date)} を保存しました。GitHub Actions が自動実行されます。`,'ok');
+  }catch(e){console.error(e);status(e.message||String(e),'err')}
+}
+
+$('targetDate').value=today();
+$('todayBtn').onclick=()=>{$('targetDate').value=today();load()};
+$('loadBtn').onclick=load;
+$('saveBtn').onclick=save;
+$('addBtn').onclick=openAddForm;
+$('addConfirmBtn').onclick=addNewGame;
+$('addCancelBtn').onclick=closeAddForm;
+$('targetDate').onchange=()=>{if(state.master.length)render($('targetDate').value)};
+
 </script>
 </body>
 </html>
