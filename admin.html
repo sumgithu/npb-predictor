@@ -1,59 +1,123 @@
-# NPB Predictor & Standings Analytics
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NPB Predictor 手動日程管理</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Yu Gothic",sans-serif;background:#f8fafc;color:#0f172a;margin:0;padding:24px}
+main{max-width:900px;margin:auto}
+h1{color:#1e3a8a;font-size:1.35rem}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;margin:0 0 18px;box-shadow:0 2px 5px rgba(0,0,0,.03)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+label{display:block;font-size:.82rem;font-weight:700;color:#475569}
+input,select{width:100%;box-sizing:border-box;margin-top:5px;padding:9px;border:1px solid #cbd5e1;border-radius:8px;font-size:.95rem}
+button{border:0;border-radius:8px;padding:9px 14px;font-weight:800;cursor:pointer;margin:6px 6px 0 0}
+.primary{background:#2563eb;color:white}.sub{background:#e2e8f0}.danger{background:#fee2e2;color:#991b1b}
+pre{white-space:pre-wrap;background:#0f172a;color:#e2e8f0;border-radius:10px;padding:14px;overflow:auto;font-size:.78rem}
+table{width:100%;border-collapse:collapse;font-size:.83rem}th,td{padding:8px;border-bottom:1px solid #e2e8f0;text-align:left}th{background:#f8fafc}
+.note{font-size:.82rem;line-height:1.6;color:#475569}
+.status{padding:9px 12px;border-radius:8px;background:#eff6ff;color:#1e40af;font-weight:700;display:none;margin-top:10px}
+@media(max-width:650px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<h1>NPB Predictor 手動日程管理</h1>
+<div class="card">
+<p class="note">
+元の日程表に載っていない振替試合・追加日程は、ここで登録した内容を
+<code>manual_schedule.json</code> として保存し、GitHub の main ブランチへ反映してください。
+このページ自体からGitHubへ直接書き込む機能はありません。
+</p>
+<div class="grid">
+<label>日付<input id="date" type="date"></label>
+<label>状態<select id="status"><option value="scheduled">scheduled（未消化）</option><option value="finished">finished（結果あり）</option><option value="cancelled">cancelled（中止）</option></select></label>
+<label>ホーム<input id="home" placeholder="例：阪神"></label>
+<label>ビジター<input id="away" placeholder="例：広島"></label>
+<label>ホーム先発<input id="home_starter" value="未定"></label>
+<label>ビジター先発<input id="away_starter" value="未定"></label>
+<label>ホーム得点（任意）<input id="home_score" type="number" min="0"></label>
+<label>ビジター得点（任意）<input id="away_score" type="number" min="0"></label>
+</div>
+<div>
+<button class="primary" onclick="addGame()">試合を追加</button>
+<button class="sub" onclick="loadGames()">現在の入力を再読込</button>
+</div>
+<div id="statusBox" class="status"></div>
+</div>
 
-プロ野球（NPB）セ・パ両リーグの自力優勝チャンピョンシップナンバー（CN）、クリンチ確定状況、および全143試合完走モンテカルロ・シミュレーション（5,000回）による優勝確率・順位確率をリアルタイムに解析・可視化するWebシステムです。
+<div class="card">
+<h2 style="font-size:1rem">登録予定</h2>
+<table><thead><tr><th>日付</th><th>対戦</th><th>状態</th><th>先発</th><th>結果</th><th></th></tr></thead><tbody id="gameRows"></tbody></table>
+</div>
 
----
-
-## 🚀 主な機能 (Key Features)
-
-1. **チャンピョンシップナンバー（CN / Championship Number）**
-   - 他球団の自力優勝が残っている段階でも、全球団に対して常時確定数を算出。
-   - 自力優勝が消滅した場合でも、数学的な可能性が残る限り「逆転に必要な最小勝数」を継続表示（◇枠囲み数値）。
-2. **全143試合完走モンテカルロ・シミュレーション（5,000 runs）**
-   - シーズン残日程について、攻撃力・守備力のポアソン得失点モデル、球場得点環境（パークファクター）、ホームアドバンテージ、休養日数差、および実測引き分け率を反映したシミュレーションを実施。
-   - 最終順位確率分布、優勝決定日確率、優勝ラインテーブルを算出。
-3. **試合別予想確率（ポアソン得失点モデル）**
-   - 各チームの攻撃力・守備力パラメータから対戦ごとの期待得点を算出し、勝・分・敗の3分岐確率を算出。
-   - 予告先発投手が確定している試合のみ、先発投手の登板実績によるベイズ収縮補正を適用。
-4. **日付巻き戻し解析（カレンダー機能）**
-   - シーズン開幕日から現在までの過去任意の基準日における順位表・CN・対戦成績表（H2H）を完全再現。
-   - 過去時点の解析では、その日以降の未来データを用いずに当時の情報のみで再計算。
-
----
-
-## 📐 数理・統計モデル (Mathematical Models)
-
-本システムでは、セイバーメトリクスのエビデンスに基づき、直近の成績推移と長期的な実力値をバランスよく反映する統計モデルを採用しています。
-
-### 1. ポアソン攻撃・守備力モデル（Opponent-Adjusted Poisson Model）
-各試合のチーム得点をポアソン分布に従う確率変数としてモデル化します。
-- チームごとの「攻撃力パラメータ」および「守備力パラメータ」をAdamオプティマイザにより最尤推定。
-- 直近の試合ほど重視されるよう、半減期（50日）を設けた指数加重（Recency Weighting）を適用。
-- 過去シーズン（2016年〜2025年）の通算実績を事前分布（Prior）として利用し、標本数が少ない開幕直後の過剰適合を防止。
-
-### 2. 球場環境とホームアドバンテージ
-- 過去データから各本拠地球場の得点環境係数（Park Factor）を推定し、ヒッターズパーク・ピッチャーズパークの特性を補正。
-- ホーム球団の得点期待値に対し、実測値に基づくホームアドバンテージ係数を乗算。
-
-### 3. 先発投手と休養日数の動的補正
-- **先発投手補正**: 先発投手が確認済みの試合に限り、通算登板実績をベイズ収縮させた補正項を適用（未定の将来日程には適用せず未来情報リークを防止）。
-- **休養日数差**: 前回の試合からの間隔（連戦・休養日）の差に応じたロジスティック補正を勝敗オッズに反映。
-
-### 4. シーズン序盤のモデル不確実性バンド
-開幕直後など消化試合数が少ない時期は、パラメータ推定の不確実性を考慮し、モデルを揺らした複数シナリオのシミュレーション結果（パーセンタイル範囲）を「優勝可能性の幅」として提示。
-
----
-
-## 📂 リポジトリ構成
-
-```text
-├── .github/workflows/
-│   └── update_clinch.yml         # 自動集計＆更新ワークフロー
-├── clinch_engine.py              # 数理モデル解析・シミュレーション・JSON生成エンジン
-├── backtest.py                   # モデル予測精度のバックテスト・較正検証スクリプト
-├── convert_log.py                # テキストログ・CSV変換スクリプト
-├── standings.html                # メイン公開ダッシュボード（フロントエンド）
-├── admin.html                    # 試合結果入力・手動管理インターフェース
-├── games_db.json                 # 2026年レギュラーシーズン試合データベース（正本）
-├── history_standings.json        # 各日順位表・シミュレーションデータ（エンジン出力）
-└── README.md                     # 本ドキュメント
+<div class="card">
+<h2 style="font-size:1rem">manual_schedule.json</h2>
+<p class="note">下の内容をコピーして、リポジトリの <code>manual_schedule.json</code> に貼り付けてコミットしてください。</p>
+<button class="primary" onclick="copyJson()">JSONをコピー</button>
+<button class="sub" onclick="downloadJson()">JSONを保存</button>
+<pre id="jsonOut">{"games":[]}</pre>
+</div>
+</main>
+<script>
+const TEAM_ALIASES={
+"DeNA":"ＤｅＮＡ","横浜":"ＤｅＮＡ","横浜DeNA":"ＤｅＮＡ","横浜ＤｅＮＡ":"ＤｅＮＡ",
+"阪神":"阪神","巨人":"巨人","広島":"広島","ヤクルト":"ヤクルト","中日":"中日",
+"ソフトバンク":"ソフトバンク","日本ハム":"日本ハム","ロッテ":"ロッテ","楽天":"楽天","オリックス":"オリックス","西武":"西武"
+};
+let games=[];
+function norm(x){x=(x||"").trim();return TEAM_ALIASES[x]||x}
+function key(g){return [g.date,g.home,g.away].join("|")}
+function setMsg(s){const b=document.getElementById("statusBox");b.textContent=s;b.style.display="block"}
+function render(){
+ const body=document.getElementById("gameRows");
+ body.innerHTML="";
+ games.sort((a,b)=>((a.date||"")+"|"+(a.home||"")+"|"+(a.away||"")).localeCompare((b.date||"")+"|"+(b.home||"")+"|"+(b.away||"")));
+ games.forEach((g,i)=>{
+   const tr=document.createElement("tr");
+   tr.innerHTML="<td>"+esc(g.date)+"</td><td>"+esc(g.home)+" - "+esc(g.away)+"</td><td>"+esc(g.status)+"</td><td>"+esc(g.home_starter||"未定")+" / "+esc(g.away_starter||"未定")+"</td><td>"+((g.home_score!=null&&g.away_score!=null)?esc(g.home_score+"-"+g.away_score"):"-")+"</td><td><button class='danger' onclick='removeGame("+i+")'>削除</button></td>";
+   body.appendChild(tr);
+ });
+ document.getElementById("jsonOut").textContent=JSON.stringify({games},null,2);
+}
+function esc(x){return String(x==null?"":x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
+function addGame(){
+ const date=document.getElementById("date").value;
+ const home=norm(document.getElementById("home").value);
+ const away=norm(document.getElementById("away").value);
+ const status=document.getElementById("status").value;
+ if(!date||!home||!away){setMsg("日付・ホーム・ビジターを入力してください。");return}
+ if(home===away){setMsg("ホームとビジターは別球団にしてください。");return}
+ const hs=document.getElementById("home_score").value;
+ const as=document.getElementById("away_score").value;
+ const g={date,home,away,status,home_starter:document.getElementById("home_starter").value.trim()||"未定",away_starter:document.getElementById("away_starter").value.trim()||"未定"};
+ if(hs!==""&&as!==""){g.home_score=Number(hs);g.away_score=Number(as);g.status="finished"}
+ if(g.status!=="finished"){delete g.home_score;delete g.away_score}
+ const k=key(g);
+ const idx=games.findIndex(x=>key(x)===k);
+ if(idx>=0) games[idx]=g; else games.push(g);
+ render();setMsg(idx>=0?"同一試合を更新しました。":"試合を追加しました。");
+}
+function removeGame(i){games.splice(i,1);render();setMsg("削除しました。")}
+async function loadGames(){
+ try{
+  const r=await fetch("manual_schedule.json?t="+Date.now(),{cache:"no-store"});
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  const d=await r.json(); games=Array.isArray(d)?d:(d.games||[]);
+  render();setMsg("manual_schedule.json を読み込みました。");
+ }catch(e){games=[];render();setMsg("既存ファイルを読めませんでした。新規入力として開始します。")}
+}
+async function copyJson(){
+ await navigator.clipboard.writeText(JSON.stringify({games},null,2));
+ setMsg("JSONをクリップボードへコピーしました。");
+}
+function downloadJson(){
+ const blob=new Blob([JSON.stringify({games},null,2)],{type:"application/json"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="manual_schedule.json";a.click();URL.revokeObjectURL(a.href);
+ setMsg("manual_schedule.json を保存しました。");
+}
+loadGames();
+</script>
+</body>
+</html>
