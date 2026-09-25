@@ -9,6 +9,12 @@ on:
 
   # 手動実行
   workflow_dispatch:
+    inputs:
+      full_rebuild:
+        description: '過去日の履歴も含めて全日再計算する'
+        required: false
+        default: false
+        type: boolean
 
   # 指定ファイルがmainにpushされたとき
   push:
@@ -43,6 +49,10 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Configure rebuild mode
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.full_rebuild }}
+        run: echo "NPB_FULL_REBUILD=1" >> "$GITHUB_ENV"
+
       - name: Generate and Push Results Safely
         run: |
           set -euo pipefail
@@ -68,6 +78,15 @@ jobs:
             echo "Running clinch_engine.py ..."
 
             python clinch_engine.py
+
+            # 計算中にmainが更新された場合、古い結果をpushせず最新mainから再計算する。
+            git fetch origin main
+            REMOTE_HEAD="$(git rev-parse origin/main)"
+            LOCAL_HEAD="$(git rev-parse HEAD)"
+            if [ "$REMOTE_HEAD" != "$LOCAL_HEAD" ]; then
+              echo "Remote main advanced during calculation; discarding stale result and retrying."
+              continue
+            fi
 
             echo ""
             echo "Checking generated files ..."
