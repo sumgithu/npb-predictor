@@ -2512,7 +2512,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
                 elif cum < 1.0:
                     row["cum_prob_str"] = f"{cum:.1f}%" if cum >= 0.1 else f"{cum:.2f}%"
                 else:
-                    row["cum_prob_str"] = f"{int(round(cum))}%"
+                    row["cum_prob_str"] = f"{cum:.1f}%"
 
             # 最終的な優勝確率と、表示する「優勝決定日確率」の合計を必ず一致させる。
             # 他球団試合・日程未定試合を追加した後の rows を基準に再正規化することで、
@@ -2537,7 +2537,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
                     elif cumulative < 1.0:
                         row["cum_prob_str"] = f"{cumulative:.1f}%" if cumulative >= 0.1 else f"{cumulative:.2f}%"
                     else:
-                        row["cum_prob_str"] = f"{int(round(cumulative))}%"
+                        row["cum_prob_str"] = f"{cumulative:.1f}%"
 
             schedules[t] = rows
 
