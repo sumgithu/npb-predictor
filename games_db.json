@@ -337,6 +337,76 @@
       "reserve_day": false,
       "detail": "ベルーナドーム 18:00 くもり",
       "source": "manual"
+    },
+    {
+      "date": "2026-09-26",
+      "home": "ＤｅＮＡ",
+      "away": "阪神",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "尾形",
+      "away_starter": "才木",
+      "status": "scheduled",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "横　浜 14:00",
+      "source": "manual"
+    },
+    {
+      "date": "2026-09-26",
+      "home": "オリックス",
+      "away": "日本ハム",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "エスピノーザ",
+      "away_starter": "伊藤",
+      "status": "scheduled",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "京セラD大阪 14:00",
+      "source": "manual"
+    },
+    {
+      "date": "2026-09-26",
+      "home": "ソフトバンク",
+      "away": "楽天",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "モイネロ",
+      "away_starter": "古謝",
+      "status": "scheduled",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "みずほPayPay 18:00",
+      "source": "manual"
+    },
+    {
+      "date": "2026-09-26",
+      "home": "ヤクルト",
+      "away": "中日",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "高梨",
+      "away_starter": "涌井",
+      "status": "scheduled",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "神　宮 18:00",
+      "source": "manual"
+    },
+    {
+      "date": "2026-09-26",
+      "home": "西武",
+      "away": "ロッテ",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "菅井",
+      "away_starter": "小島",
+      "status": "scheduled",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "ベルーナドーム 14:00",
+      "source": "manual"
     }
   ]
 }
