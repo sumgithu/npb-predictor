@@ -21,7 +21,7 @@ on:
 
 # 同じWorkflowが同時に複数走らないようにする
 concurrency:
-  group: npb-predictor-engine
+  group: npb-predictor-engine-fast
   cancel-in-progress: true
 
 permissions:
