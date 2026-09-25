@@ -17,7 +17,6 @@ on:
     paths:
       - '2016-2026プロ野球レギュラーシーズン結果.txt'
       - 'games_db.json'
-      - 'manual_schedule.json'
       - 'clinch_engine.py'
 
 # 同じWorkflowが同時に複数走らないようにする
