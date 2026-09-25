@@ -19,6 +19,7 @@ GAMES_INTRA = 25
 GAMES_INTER = 3
 HISTORY_FILE = "history_standings.json"
 MANUAL_DB_FILE = "games_db.json"
+MANUAL_SCHEDULE_FILE = "manual_schedule.json"
 TEXT_LOG_FILE = "2016-2026プロ野球レギュラーシーズン結果.txt"
 FALLBACK_CSV_FILE = "npb_games_clean.csv"
 
@@ -439,8 +440,10 @@ def load_2026_games_as_of_date(target_date):
     if master_text is None:
         return None
     master_games = parse_year_games_from_text(master_text, 2026)
-    db_text = read_tracked_file_as_of_date(MANUAL_DB_FILE, target_date)
-    manual_games = _parse_manual_games_text(db_text)
+    manual_games = []
+    for manual_path in (MANUAL_DB_FILE, MANUAL_SCHEDULE_FILE):
+        manual_text = read_tracked_file_as_of_date(manual_path, target_date)
+        manual_games.extend(_parse_manual_games_text(manual_text))
     merged = _merge_2026_master_and_manual(master_games, manual_games)
     return augment_unresolved_postponements(merged)
 
@@ -457,12 +460,13 @@ def load_all_games():
         games_2026_master = parse_year_games_from_text(raw_text, 2026)
 
     manual_games = []
-    if os.path.exists(MANUAL_DB_FILE):
-        try:
-            with open(MANUAL_DB_FILE, "r", encoding="utf-8") as f:
-                manual_games = _parse_manual_games_text(f.read())
-        except Exception as exc:
-            print(f"games_db.json 読込警告: {exc}")
+    for manual_path in (MANUAL_DB_FILE, MANUAL_SCHEDULE_FILE):
+        if os.path.exists(manual_path):
+            try:
+                with open(manual_path, "r", encoding="utf-8") as f:
+                    manual_games.extend(_parse_manual_games_text(f.read()))
+            except Exception as exc:
+                print(f"{manual_path} 読込警告: {exc}")
 
     merged_2026 = _merge_2026_master_and_manual(games_2026_master, manual_games)
     merged_2026 = augment_unresolved_postponements(merged_2026)
@@ -688,10 +692,10 @@ def build_historical_cs_prior(target_year, historical_games, league_teams):
     max_hist_year = min(2024, target_year - 1)
     available_years = [y for y in HISTORICAL_RANK_YEARS if y <= max_hist_year]
     if not available_years:
-        return {t: 1.0 / len(league_teams) * 3.0 for t in league_teams}
+        return {t: 100.0 * 3.0 / len(league_teams) for t in league_teams}
 
     # 各球団の「3位以内」頻度を、6球団中3球団という事前平均で平滑化する。
-    # その後、リーグ全体で合計300%（3枠分）になるよう正規化する。
+    # その後、リーグ全体で合計300%（3枠分）になるよう「百分率」で正規化する。
     raw = {}
     prior_mean = 0.5
     smoothing = HISTORICAL_PRIOR_SMOOTHING
@@ -703,7 +707,7 @@ def build_historical_cs_prior(target_year, historical_games, league_teams):
         raw[team] = (successes + smoothing * prior_mean) / (len(available_years) + smoothing)
 
     total = sum(raw.values())
-    target_total = 3.0
+    target_total = 300.0
     return {
         t: (raw[t] / total) * target_total if total > 0 else target_total / len(league_teams)
         for t in league_teams
@@ -2281,19 +2285,52 @@ def build_all_history_with_predictions(historical_games, games_2026):
             preseason_champ_probs=preseason_p_champ,
         )
 
-        for t in snap["central"]:
-            team = t["team"]
-            current_cs = float(sum(c_mat[team][r] for r in (1, 2, 3)))
-            baseline_cs = float(preseason_c_cs.get(team, 0.0))
-            blended_cs = (1.0 - c_weight) * baseline_cs + c_weight * current_cs
-            t["cs_prob"] = int(round(max(0.0, min(100.0, blended_cs))))
+        def apply_cs_probabilities(table, rank_matrix, baseline_cs, current_weight):
+            # CS確率は「百分率」で扱い、リーグ内合計が300%（3枠分）になるよう整合させる。
+            raw_values = {}
+            for t in table:
+                team = t["team"]
+                if t.get("magic_3rd") == "-":
+                    value = 0.0
+                elif t.get("magic_3rd") == "確定":
+                    value = 100.0
+                else:
+                    current_cs = float(sum(rank_matrix[team][r] for r in (1, 2, 3)))
+                    baseline = float(baseline_cs.get(team, 0.0))
+                    value = (1.0 - current_weight) * baseline + current_weight * current_cs
+                raw_values[team] = max(0.0, min(100.0, value))
 
-        for t in snap["pacific"]:
-            team = t["team"]
-            current_cs = float(sum(p_mat[team][r] for r in (1, 2, 3)))
-            baseline_cs = float(preseason_p_cs.get(team, 0.0))
-            blended_cs = (1.0 - p_weight) * baseline_cs + p_weight * current_cs
-            t["cs_prob"] = int(round(max(0.0, min(100.0, blended_cs))))
+            rounded = {team: int(round(value)) for team, value in raw_values.items()}
+            residual = 300 - sum(rounded.values())
+            if residual:
+                # 丸め誤差だけを最大1チームずつ吸収し、全体で300%を維持する。
+                candidates = sorted(
+                    table,
+                    key=lambda t: raw_values.get(t["team"], 0.0),
+                    reverse=(residual > 0),
+                )
+                for t in candidates:
+                    if residual == 0:
+                        break
+                    team = t["team"]
+                    if t.get("magic_3rd") == "確定":
+                        continue
+                    current = rounded[team]
+                    if residual > 0:
+                        room = 100 - current
+                        delta = min(residual, room)
+                    else:
+                        room = current
+                        delta = -min(-residual, room)
+                    if delta:
+                        rounded[team] += delta
+                        residual -= delta
+
+            for t in table:
+                t["cs_prob"] = int(max(0, min(100, rounded[t["team"]])))
+
+        apply_cs_probabilities(snap["central"], c_mat, preseason_c_cs, c_weight)
+        apply_cs_probabilities(snap["pacific"], p_mat, preseason_p_cs, p_weight)
 
         del snap["_model"]
         del snap["_pitcher_stats"]
@@ -2535,6 +2572,12 @@ def build_all_history_with_predictions(historical_games, games_2026):
                             row["cum_prob_str"] = f"{cumulative:.1f}%" if cumulative >= 0.1 else f"{cumulative:.2f}%"
                         else:
                             row["cum_prob_str"] = f"{int(round(cumulative))}%"
+                final_total = sum(float(r.get("clinch_prob_val", 0.0)) for r in rows)
+                if abs(final_total - target) > 1e-8:
+                    raise RuntimeError(
+                        f"表示用優勝決定日確率の不整合: {team} "
+                        f"target={target:.12f}% total={final_total:.12f}%"
+                    )
             elif target <= 0:
                 for row in rows:
                     row["clinch_prob_val"] = 0.0
