@@ -22,7 +22,7 @@ on:
 # 同じWorkflowが同時に複数走らないようにする
 concurrency:
   group: npb-predictor-engine
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -30,6 +30,7 @@ permissions:
 jobs:
   run-engine:
     runs-on: ubuntu-latest
+    timeout-minutes: 6
 
     steps:
       - name: Checkout repository
