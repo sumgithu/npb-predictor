@@ -2013,7 +2013,17 @@ def build_all_history_with_predictions(historical_games, games_2026):
         (g["date"] for g in games_2026 if is_finished(g)),
         default=all_dates[0],
     )
-    dates_to_build = all_dates if FULL_REBUILD or not existing_history else [last_eval_date]
+    jst_today_for_build = (
+        datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=9)
+    ).strftime("%Y-%m-%d")
+    display_date = jst_today_for_build if jst_today_for_build in all_dates else last_eval_date
+
+    # 通常更新でも「最終表示日」と「決定日シミュレーション」の基準日を一致させる。
+    # 例えば9/26に9/25最終試合結果を表示する場合、9/26スナップショットも更新する。
+    if FULL_REBUILD or not existing_history:
+        dates_to_build = all_dates
+    else:
+        dates_to_build = sorted(set([last_eval_date, display_date])) if display_date != last_eval_date else [last_eval_date]
 
     for target_date in dates_to_build:
         snapshot_games = load_2026_games_as_of_date(target_date)
@@ -2204,7 +2214,9 @@ def build_all_history_with_predictions(historical_games, games_2026):
         d for d in all_dates if any(g["date"] == d and is_finished(g) for g in games_2026)
     ]
     last_eval_date = dates_with_finished[-1] if dates_with_finished else all_dates[0]
-    latest_snapshot = history_snapshots[last_eval_date]
+    # 優勝確率・決定日確率・最新順位表は、公開上の同一基準日に揃える。
+    latest_snapshot_date = display_date if display_date in history_snapshots else last_eval_date
+    latest_snapshot = history_snapshots[latest_snapshot_date]
     latest_model = latest_snapshot["_model"]
     latest_pitcher_stats = latest_snapshot["_pitcher_stats"]
     latest_draw_rate = latest_snapshot["_draw_rate"]
@@ -2674,9 +2686,9 @@ def build_all_history_with_predictions(historical_games, games_2026):
     if FULL_REBUILD or not existing_history:
         output_dates = all_dates
     else:
-        # 既存の履歴＋新しく確定した最新日のみを利用。未確定の新規未来日を履歴へ仮登録しない。
-        output_dates = sorted(set(existing_dates) | {last_eval_date})
-    final_default_date = jst_today if jst_today in history_snapshots else last_eval_date
+        # 既存の履歴＋新しく再計算した基準日を利用。
+        output_dates = sorted(set(existing_dates) | set(dates_to_build))
+    final_default_date = display_date if display_date in history_snapshots else last_eval_date
     return output_dates, final_default_date, history_snapshots, simulation_payload
 
 def main():
