@@ -407,6 +407,76 @@
       "reserve_day": false,
       "detail": "ベルーナドーム 14:00",
       "source": "manual"
+    },
+    {
+      "date": "2026-09-27",
+      "home": "ＤｅＮＡ",
+      "away": "広島",
+      "home_score": 3,
+      "away_score": 5,
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "status": "finished",
+      "starter_confirmed": false,
+      "reserve_day": false,
+      "detail": "横　浜 14:00",
+      "source": "manual"
+    },
+    {
+      "date": "2026-09-27",
+      "home": "ソフトバンク",
+      "away": "オリックス",
+      "home_score": 12,
+      "away_score": 5,
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "status": "finished",
+      "starter_confirmed": false,
+      "reserve_day": false,
+      "detail": "みずほPayPay 14:00",
+      "source": "manual"
+    },
+    {
+      "date": "2026-09-27",
+      "home": "ロッテ",
+      "away": "日本ハム",
+      "home_score": 6,
+      "away_score": 1,
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "status": "finished",
+      "starter_confirmed": false,
+      "reserve_day": false,
+      "detail": "ZOZOマリン 18:00",
+      "source": "manual"
+    },
+    {
+      "date": "2026-09-27",
+      "home": "巨人",
+      "away": "ヤクルト",
+      "home_score": 11,
+      "away_score": 0,
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "status": "finished",
+      "starter_confirmed": false,
+      "reserve_day": false,
+      "detail": "東京ドーム 18:00",
+      "source": "manual"
+    },
+    {
+      "date": "2026-09-27",
+      "home": "西武",
+      "away": "楽天",
+      "home_score": 3,
+      "away_score": 2,
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "status": "finished",
+      "starter_confirmed": false,
+      "reserve_day": false,
+      "detail": "ベルーナドーム 18:00",
+      "source": "manual"
     }
   ]
 }
