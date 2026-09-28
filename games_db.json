@@ -519,6 +519,76 @@
       "reserve_day": false,
       "detail": "ベルーナドーム 18:00",
       "source": "manual"
+    },
+    {
+      "date": "2026-09-29",
+      "home": "ＤｅＮＡ",
+      "away": "中日",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "status": "cancelled",
+      "starter_confirmed": false,
+      "reserve_day": true,
+      "detail": "横　浜 18:00",
+      "source": "manual"
+    },
+    {
+      "date": "2026-09-29",
+      "home": "楽天",
+      "away": "ロッテ",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "伊藤樹",
+      "away_starter": "吉川",
+      "status": "scheduled",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "楽天モバイル 18:00",
+      "source": "manual"
+    },
+    {
+      "date": "2026-09-29",
+      "home": "巨人",
+      "away": "広島",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "戸郷",
+      "away_starter": "玉村",
+      "status": "scheduled",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "東京ドーム 18:00",
+      "source": "manual"
+    },
+    {
+      "date": "2026-09-29",
+      "home": "阪神",
+      "away": "ヤクルト",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "大竹",
+      "away_starter": "中村優",
+      "status": "scheduled",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "甲子園 18:00",
+      "source": "manual"
+    },
+    {
+      "date": "2026-09-29",
+      "home": "西武",
+      "away": "オリックス",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "平良",
+      "away_starter": "東松",
+      "status": "scheduled",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "ベルーナドーム 18:00",
+      "source": "manual"
     }
   ]
 }
