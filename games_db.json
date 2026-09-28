@@ -477,6 +477,48 @@
       "reserve_day": false,
       "detail": "ベルーナドーム 18:00",
       "source": "manual"
+    },
+    {
+      "date": "2026-09-28",
+      "home": "ＤｅＮＡ",
+      "away": "広島",
+      "home_score": 3,
+      "away_score": 4,
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "status": "finished",
+      "starter_confirmed": false,
+      "reserve_day": false,
+      "detail": "横　浜 18:00",
+      "source": "manual"
+    },
+    {
+      "date": "2026-09-28",
+      "home": "ロッテ",
+      "away": "日本ハム",
+      "home_score": 3,
+      "away_score": 8,
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "status": "finished",
+      "starter_confirmed": false,
+      "reserve_day": false,
+      "detail": "ZOZOマリン 18:00",
+      "source": "manual"
+    },
+    {
+      "date": "2026-09-28",
+      "home": "西武",
+      "away": "楽天",
+      "home_score": 2,
+      "away_score": 4,
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "status": "finished",
+      "starter_confirmed": false,
+      "reserve_day": false,
+      "detail": "ベルーナドーム 18:00",
+      "source": "manual"
     }
   ]
 }
