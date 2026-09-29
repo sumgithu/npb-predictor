@@ -166342,7 +166342,7 @@
           "lose": 62,
           "draw": 2,
           "rs": 481,
-          "ra": 431,
+          "ra": 432,
           "home": {
             "win": 39,
             "lose": 30,
@@ -166575,7 +166575,7 @@
           "win": 58,
           "lose": 76,
           "draw": 4,
-          "rs": 410,
+          "rs": 411,
           "ra": 507,
           "home": {
             "win": 32,
@@ -167204,7 +167204,7 @@
           "expected_home_runs": 3.68,
           "expected_away_runs": 2.63,
           "actual_home_score": 3,
-          "actual_away_score": 0,
+          "actual_away_score": 1,
           "is_finished": true
         },
         {
@@ -175581,18 +175581,18 @@
         "home_adv_log": 0.014321,
         "league_run_per_team_game": 3.8032,
         "park_log": {
-          "PayPay": 0.001619,
-          "ZOZO": 0.012505,
+          "エスコンF": -0.010673,
+          "東京D": -0.006074,
           "神宮": 0.136927,
-          "バンテリン": -0.136915,
+          "ZOZO": 0.012505,
+          "楽天モバイル": 0.002303,
+          "マツダS": 0.023882,
+          "横浜": 0.060396,
+          "京セラ": -0.043952,
           "ベルーナ": 0.042052,
           "甲子園": -0.082069,
-          "楽天モバイル": 0.002303,
-          "エスコンF": -0.010673,
-          "京セラ": -0.043952,
-          "横浜": 0.060396,
-          "マツダS": 0.023882,
-          "東京D": -0.006074
+          "バンテリン": -0.136915,
+          "PayPay": 0.001619
         }
       },
       "starter_policy": "confirmed manual starter information only; strong shrinkage",
