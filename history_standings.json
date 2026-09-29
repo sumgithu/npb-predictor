@@ -166327,24 +166327,24 @@
           "magic_4th": "確定",
           "magic_5th": "確定",
           "championship_prior": 33.488,
-          "champ_prob_raw": 98.0,
-          "champ_prob": 94.283,
-          "champ_prob_prior_weight": 0.155,
-          "champ_prob_current_weight": 0.845,
-          "champ_prob_low": 88.003,
-          "champ_prob_high": 88.003,
+          "champ_prob_raw": 94.0,
+          "champ_prob": 90.67,
+          "champ_prob_prior_weight": 0.1546,
+          "champ_prob_current_weight": 0.8454,
+          "champ_prob_low": 84.645,
+          "champ_prob_high": 84.645,
           "cs_prob": 100
         },
         {
           "team": "巨人",
-          "games": 139,
-          "win": 75,
+          "games": 140,
+          "win": 76,
           "lose": 62,
           "draw": 2,
-          "rs": 478,
+          "rs": 481,
           "ra": 431,
           "home": {
-            "win": 38,
+            "win": 39,
             "lose": 30,
             "draw": 2
           },
@@ -166359,12 +166359,12 @@
             "draw": 2
           },
           "league": {
-            "win": 65,
+            "win": 66,
             "lose": 56,
             "draw": 0
           },
-          "remaining": 4,
-          "rate": 0.5474452554744526,
+          "remaining": 3,
+          "rate": 0.5507246376811594,
           "h2h": {
             "阪神": {
               "win": 8,
@@ -166392,25 +166392,25 @@
               "draw": 0
             },
             "広島": {
-              "win": 15,
+              "win": 16,
               "lose": 9,
               "draw": 0
             }
           },
           "rank": 2,
-          "diff": 2.0,
-          "magic_1st": 10,
+          "diff": 1.5,
+          "magic_1st": 9,
           "magic_2nd": "確定",
           "magic_3rd": "確定",
           "magic_4th": "確定",
           "magic_5th": "確定",
           "championship_prior": 23.528,
-          "champ_prob_raw": 2.0,
-          "champ_prob": 5.717,
-          "champ_prob_prior_weight": 0.155,
-          "champ_prob_current_weight": 0.845,
-          "champ_prob_low": 5.336,
-          "champ_prob_high": 5.336,
+          "champ_prob_raw": 6.0,
+          "champ_prob": 9.33,
+          "champ_prob_prior_weight": 0.1546,
+          "champ_prob_current_weight": 0.8454,
+          "champ_prob_low": 8.71,
+          "champ_prob_high": 8.71,
           "cs_prob": 100
         },
         {
@@ -166485,89 +166485,11 @@
           "championship_prior": 0.0,
           "champ_prob_raw": 0.0,
           "champ_prob": 0.0,
-          "champ_prob_prior_weight": 0.155,
-          "champ_prob_current_weight": 0.845,
+          "champ_prob_prior_weight": 0.1546,
+          "champ_prob_current_weight": 0.8454,
           "champ_prob_low": 0.0,
           "champ_prob_high": 0.0,
           "cs_prob": 100
-        },
-        {
-          "team": "広島",
-          "games": 137,
-          "win": 58,
-          "lose": 75,
-          "draw": 4,
-          "rs": 410,
-          "ra": 504,
-          "home": {
-            "win": 32,
-            "lose": 36,
-            "draw": 1
-          },
-          "away": {
-            "win": 26,
-            "lose": 39,
-            "draw": 3
-          },
-          "interleague": {
-            "win": 5,
-            "lose": 12,
-            "draw": 1
-          },
-          "league": {
-            "win": 53,
-            "lose": 63,
-            "draw": 3
-          },
-          "remaining": 6,
-          "rate": 0.43609022556390975,
-          "h2h": {
-            "阪神": {
-              "win": 10,
-              "lose": 11,
-              "draw": 1
-            },
-            "巨人": {
-              "win": 9,
-              "lose": 15,
-              "draw": 0
-            },
-            "ＤｅＮＡ": {
-              "win": 9,
-              "lose": 14,
-              "draw": 2
-            },
-            "ヤクルト": {
-              "win": 10,
-              "lose": 14,
-              "draw": 0
-            },
-            "中日": {
-              "win": 15,
-              "lose": 9,
-              "draw": 0
-            },
-            "広島": {
-              "win": 0,
-              "lose": 0,
-              "draw": 0
-            }
-          },
-          "rank": 4,
-          "diff": 17.0,
-          "magic_1st": "-",
-          "magic_2nd": "-",
-          "magic_3rd": "-",
-          "magic_4th": 6,
-          "magic_5th": 3,
-          "championship_prior": 0.0,
-          "champ_prob_raw": 0.0,
-          "champ_prob": 0.0,
-          "champ_prob_prior_weight": 0.155,
-          "champ_prob_current_weight": 0.845,
-          "champ_prob_low": 0.0,
-          "champ_prob_high": 0.0,
-          "cs_prob": 0
         },
         {
           "team": "ヤクルト",
@@ -166631,6 +166553,84 @@
               "draw": 0
             }
           },
+          "rank": 4,
+          "diff": 17.5,
+          "magic_1st": "-",
+          "magic_2nd": "-",
+          "magic_3rd": "-",
+          "magic_4th": 5,
+          "magic_5th": 3,
+          "championship_prior": 0.0,
+          "champ_prob_raw": 0.0,
+          "champ_prob": 0.0,
+          "champ_prob_prior_weight": 0.1546,
+          "champ_prob_current_weight": 0.8454,
+          "champ_prob_low": 0.0,
+          "champ_prob_high": 0.0,
+          "cs_prob": 0
+        },
+        {
+          "team": "広島",
+          "games": 138,
+          "win": 58,
+          "lose": 76,
+          "draw": 4,
+          "rs": 410,
+          "ra": 507,
+          "home": {
+            "win": 32,
+            "lose": 36,
+            "draw": 1
+          },
+          "away": {
+            "win": 26,
+            "lose": 40,
+            "draw": 3
+          },
+          "interleague": {
+            "win": 5,
+            "lose": 12,
+            "draw": 1
+          },
+          "league": {
+            "win": 53,
+            "lose": 64,
+            "draw": 3
+          },
+          "remaining": 5,
+          "rate": 0.43283582089552236,
+          "h2h": {
+            "阪神": {
+              "win": 10,
+              "lose": 11,
+              "draw": 1
+            },
+            "巨人": {
+              "win": 9,
+              "lose": 16,
+              "draw": 0
+            },
+            "ＤｅＮＡ": {
+              "win": 9,
+              "lose": 14,
+              "draw": 2
+            },
+            "ヤクルト": {
+              "win": 10,
+              "lose": 14,
+              "draw": 0
+            },
+            "中日": {
+              "win": 15,
+              "lose": 9,
+              "draw": 0
+            },
+            "広島": {
+              "win": 0,
+              "lose": 0,
+              "draw": 0
+            }
+          },
           "rank": 5,
           "diff": 17.5,
           "magic_1st": "-",
@@ -166641,8 +166641,8 @@
           "championship_prior": 0.0,
           "champ_prob_raw": 0.0,
           "champ_prob": 0.0,
-          "champ_prob_prior_weight": 0.155,
-          "champ_prob_current_weight": 0.845,
+          "champ_prob_prior_weight": 0.1546,
+          "champ_prob_current_weight": 0.8454,
           "champ_prob_low": 0.0,
           "champ_prob_high": 0.0,
           "cs_prob": 0
@@ -166714,13 +166714,13 @@
           "magic_1st": "-",
           "magic_2nd": "-",
           "magic_3rd": "-",
-          "magic_4th": 8,
+          "magic_4th": 6,
           "magic_5th": 6,
           "championship_prior": 0.0,
           "champ_prob_raw": 0.0,
           "champ_prob": 0.0,
-          "champ_prob_prior_weight": 0.155,
-          "champ_prob_current_weight": 0.845,
+          "champ_prob_prior_weight": 0.1546,
+          "champ_prob_current_weight": 0.8454,
           "champ_prob_low": 0.0,
           "champ_prob_high": 0.0,
           "cs_prob": 0
@@ -167196,16 +167196,16 @@
           "away": "広島",
           "home_starter": "戸郷",
           "away_starter": "玉村",
-          "home_status_text": "先発: 戸郷",
-          "away_status_text": "先発: 玉村",
+          "home_status_text": "勝利: 戸郷",
+          "away_status_text": "敗戦: 玉村",
           "home_prob": 69.7,
           "away_prob": 28.3,
           "draw_prob": 2.0,
           "expected_home_runs": 3.68,
           "expected_away_runs": 2.63,
-          "actual_home_score": null,
-          "actual_away_score": null,
-          "is_finished": false
+          "actual_home_score": 3,
+          "actual_away_score": 0,
+          "is_finished": true
         },
         {
           "home": "楽天",
@@ -167235,22 +167235,6 @@
           "draw_prob": 2.0,
           "expected_home_runs": 3.92,
           "expected_away_runs": 3.18,
-          "actual_home_score": null,
-          "actual_away_score": null,
-          "is_finished": false
-        },
-        {
-          "home": "阪神",
-          "away": "ヤクルト",
-          "home_starter": "大竹",
-          "away_starter": "中村優",
-          "home_status_text": "先発: 大竹",
-          "away_status_text": "先発: 中村優",
-          "home_prob": 73.6,
-          "away_prob": 24.4,
-          "draw_prob": 2.0,
-          "expected_home_runs": 3.88,
-          "expected_away_runs": 2.55,
           "actual_home_score": null,
           "actual_away_score": null,
           "is_finished": false
@@ -175117,16 +175101,16 @@
   "simulation": {
     "central_rank_matrix": {
       "阪神": {
-        "1": 94.0,
-        "2": 6.0,
+        "1": 91.9,
+        "2": 8.1,
         "3": 0.0,
         "4": 0.0,
         "5": 0.0,
         "6": 0.0
       },
       "巨人": {
-        "1": 6.0,
-        "2": 94.0,
+        "1": 8.1,
+        "2": 91.9,
         "3": 0.0,
         "4": 0.0,
         "5": 0.0,
@@ -175144,25 +175128,25 @@
         "1": 0.0,
         "2": 0.0,
         "3": 0.0,
-        "4": 30.9,
-        "5": 30.5,
-        "6": 38.6
+        "4": 31.9,
+        "5": 31.6,
+        "6": 36.5
       },
       "中日": {
         "1": 0.0,
         "2": 0.0,
         "3": 0.0,
-        "4": 27.5,
-        "5": 41.8,
-        "6": 30.7
+        "4": 31.9,
+        "5": 39.1,
+        "6": 29.0
       },
       "広島": {
         "1": 0.0,
         "2": 0.0,
         "3": 0.0,
-        "4": 41.7,
-        "5": 27.6,
-        "6": 30.7
+        "4": 36.1,
+        "5": 29.4,
+        "6": 34.5
       }
     },
     "pacific_rank_matrix": {
@@ -175176,8 +175160,8 @@
       },
       "日本ハム": {
         "1": 0.0,
-        "2": 22.4,
-        "3": 77.6,
+        "2": 22.3,
+        "3": 77.7,
         "4": 0.0,
         "5": 0.0,
         "6": 0.0
@@ -175208,8 +175192,8 @@
       },
       "西武": {
         "1": 0.0,
-        "2": 77.6,
-        "3": 22.4,
+        "2": 77.7,
+        "3": 22.3,
         "4": 0.0,
         "5": 0.0,
         "6": 0.0
@@ -175218,77 +175202,67 @@
     "central_clinch_schedules": {
       "阪神": [
         {
-          "date": "10/1",
-          "raw_date": "2026-10-01",
-          "opp": "巨人",
-          "ground": "甲子園",
-          "clinch_prob_val": 28.345972340425533,
-          "win_expect": "46",
-          "clinch_prob_str": "28%",
-          "cum_prob_str": "28%"
-        },
-        {
           "date": "10/2",
           "raw_date": "2026-10-02",
           "opp": "他球団試合",
           "ground": "—",
-          "clinch_prob_val": 5.550696453900708,
+          "clinch_prob_val": 9.405738121146173,
           "win_expect": "—",
-          "clinch_prob_str": "6%",
-          "cum_prob_str": "34%"
+          "clinch_prob_str": "9%",
+          "cum_prob_str": "9%"
         },
         {
           "date": "10/3",
           "raw_date": "2026-10-03",
           "opp": "広島",
           "ground": "マツダS",
-          "clinch_prob_val": 28.84491134751773,
+          "clinch_prob_val": 31.63748277112803,
           "win_expect": "67",
-          "clinch_prob_str": "29%",
-          "cum_prob_str": "63%"
+          "clinch_prob_str": "32%",
+          "cum_prob_str": "41%"
         },
         {
           "date": "10/4",
           "raw_date": "2026-10-04",
           "opp": "ＤｅＮＡ",
           "ground": "横浜",
-          "clinch_prob_val": 9.947596453900706,
+          "clinch_prob_val": 12.694457743924556,
           "win_expect": "48",
-          "clinch_prob_str": "10%",
-          "cum_prob_str": "73%"
+          "clinch_prob_str": "13%",
+          "cum_prob_str": "54%"
         },
         {
           "date": "10/6",
           "raw_date": "2026-10-06",
           "opp": "広島",
           "ground": "甲子園",
-          "clinch_prob_val": 9.635759574468082,
+          "clinch_prob_val": 17.035567645992018,
           "win_expect": "68",
-          "clinch_prob_str": "10%",
-          "cum_prob_str": "82%"
+          "clinch_prob_str": "17%",
+          "cum_prob_str": "71%"
         },
         {
           "date": "(10/7)",
           "raw_date": "2026-10-07",
           "opp": "広島",
           "ground": "甲子園",
-          "clinch_prob_val": 5.613063829787233,
+          "clinch_prob_val": 11.674954660863257,
           "win_expect": "68",
-          "clinch_prob_str": "6%",
-          "cum_prob_str": "88%"
+          "clinch_prob_str": "12%",
+          "cum_prob_str": "82%"
+        },
+        {
+          "date": "未定（1試合）",
+          "raw_date": "9999-12-31",
+          "opp": "ヤクルト（1試合）",
+          "ground": "甲子園",
+          "clinch_prob_val": 8.221799056945954,
+          "win_expect": "-",
+          "clinch_prob_str": "8%",
+          "cum_prob_str": "91%"
         }
       ],
       "巨人": [
-        {
-          "date": "10/1",
-          "raw_date": "2026-10-01",
-          "opp": "阪神",
-          "ground": "甲子園",
-          "clinch_prob_val": 0.0,
-          "win_expect": "52",
-          "clinch_prob_str": "-",
-          "cum_prob_str": "-"
-        },
         {
           "date": "10/2",
           "raw_date": "2026-10-02",
@@ -175304,40 +175278,40 @@
           "raw_date": "2026-10-03",
           "opp": "ＤｅＮＡ",
           "ground": "東京D",
-          "clinch_prob_val": 0.7371222222222221,
+          "clinch_prob_val": 0.0,
           "win_expect": "46",
-          "clinch_prob_str": "0.7%",
-          "cum_prob_str": "0.7%"
+          "clinch_prob_str": "-",
+          "cum_prob_str": "-"
         },
         {
           "date": "10/4",
           "raw_date": "2026-10-04",
           "opp": "他球団試合",
           "ground": "—",
-          "clinch_prob_val": 2.479411111111111,
+          "clinch_prob_val": 0.7927450980392156,
           "win_expect": "—",
-          "clinch_prob_str": "2%",
-          "cum_prob_str": "3%"
+          "clinch_prob_str": "0.8%",
+          "cum_prob_str": "0.8%"
         },
         {
           "date": "10/6",
           "raw_date": "2026-10-06",
           "opp": "他球団試合",
           "ground": "—",
-          "clinch_prob_val": 3.3505555555555557,
+          "clinch_prob_val": 2.8660784313725487,
           "win_expect": "—",
           "clinch_prob_str": "3%",
-          "cum_prob_str": "7%"
+          "cum_prob_str": "4%"
         },
         {
           "date": "(10/7)",
           "raw_date": "2026-10-07",
           "opp": "他球団試合",
           "ground": "—",
-          "clinch_prob_val": 5.494911111111111,
+          "clinch_prob_val": 5.671176470588235,
           "win_expect": "—",
-          "clinch_prob_str": "5%",
-          "cum_prob_str": "12%"
+          "clinch_prob_str": "6%",
+          "cum_prob_str": "9%"
         }
       ]
     },
@@ -175435,8 +175409,8 @@
         },
         {
           "team": "巨人",
-          "remaining": 4,
-          "current_w": 75,
+          "remaining": 3,
+          "current_w": 76,
           "current_l": 62
         }
       ],
@@ -175476,7 +175450,7 @@
             "rate_str": ".563"
           },
           {
-            "w": 4,
+            "w": 3,
             "l": 0,
             "rate": 0.56,
             "rate_str": ".560"
@@ -175490,7 +175464,7 @@
             "rate_str": ".556"
           },
           {
-            "w": 3,
+            "w": 2,
             "l": 1,
             "rate": 0.553,
             "rate_str": ".553"
@@ -175504,7 +175478,7 @@
             "rate_str": ".549"
           },
           {
-            "w": 2,
+            "w": 1,
             "l": 2,
             "rate": 0.546,
             "rate_str": ".546"
@@ -175518,7 +175492,7 @@
             "rate_str": ".542"
           },
           {
-            "w": 1,
+            "w": 0,
             "l": 3,
             "rate": 0.539,
             "rate_str": ".539"
@@ -175531,12 +175505,7 @@
             "rate": 0.535,
             "rate_str": ".535"
           },
-          {
-            "w": 0,
-            "l": 4,
-            "rate": 0.532,
-            "rate_str": ".532"
-          }
+          null
         ]
       ]
     },
@@ -175612,18 +175581,18 @@
         "home_adv_log": 0.014321,
         "league_run_per_team_game": 3.8032,
         "park_log": {
-          "横浜": 0.060396,
-          "ベルーナ": 0.042052,
           "PayPay": 0.001619,
-          "エスコンF": -0.010673,
-          "マツダS": 0.023882,
-          "京セラ": -0.043952,
+          "ZOZO": 0.012505,
           "神宮": 0.136927,
-          "東京D": -0.006074,
+          "バンテリン": -0.136915,
+          "ベルーナ": 0.042052,
           "甲子園": -0.082069,
           "楽天モバイル": 0.002303,
-          "バンテリン": -0.136915,
-          "ZOZO": 0.012505
+          "エスコンF": -0.010673,
+          "京セラ": -0.043952,
+          "横浜": 0.060396,
+          "マツダS": 0.023882,
+          "東京D": -0.006074
         }
       },
       "starter_policy": "confirmed manual starter information only; strong shrinkage",
