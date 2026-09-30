@@ -2026,8 +2026,16 @@ def build_all_history_with_predictions(historical_games, games_2026):
         dates_to_build = sorted(set([last_eval_date, display_date])) if display_date != last_eval_date else [last_eval_date]
 
     for target_date in dates_to_build:
-        snapshot_games = load_2026_games_as_of_date(target_date)
-        games_for_date = snapshot_games if snapshot_games is not None else games_2026
+        # 最新表示日だけは、現在の入力DBをそのまま使用する。
+        # 日付切替直後に「Git履歴上のその日まで」を再構成すると、
+        # 当日直前に追加された結果がコミット時刻の境界で欠落し、
+        # 消化試合数が前日より減って見えることがある。
+        # 過去日の履歴については従来どおりas-of版を使用して未来情報を遮断する。
+        if target_date == display_date:
+            games_for_date = games_2026
+        else:
+            snapshot_games = load_2026_games_as_of_date(target_date)
+            games_for_date = snapshot_games if snapshot_games is not None else games_2026
         records = {
             t: {
                 "team": t, "games": 0, "win": 0, "lose": 0, "draw": 0, "rs": 0, "ra": 0,
