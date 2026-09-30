@@ -631,6 +631,62 @@
       "reserve_day": false,
       "detail": "甲子園 18:00",
       "source": "manual"
+    },
+    {
+      "date": "2026-10-01",
+      "home": "ロッテ",
+      "away": "日本ハム",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "ロング",
+      "away_starter": "北山",
+      "status": "scheduled",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "ZOZOマリン 18:00 雨のちくもり",
+      "source": "manual"
+    },
+    {
+      "date": "2026-10-01",
+      "home": "楽天",
+      "away": "ソフトバンク",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "瀧中",
+      "away_starter": "上沢",
+      "status": "scheduled",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "楽天モバイル 18:00 晴れ時々くもり",
+      "source": "manual"
+    },
+    {
+      "date": "2026-10-01",
+      "home": "広島",
+      "away": "中日",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "庄田",
+      "away_starter": "大野",
+      "status": "scheduled",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "マツダスタジアム 18:00 晴れ",
+      "source": "manual"
+    },
+    {
+      "date": "2026-10-01",
+      "home": "阪神",
+      "away": "巨人",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "村上",
+      "away_starter": "竹丸",
+      "status": "scheduled",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "甲子園 18:00 晴れ時々くもり",
+      "source": "manual"
     }
   ]
 }
