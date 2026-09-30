@@ -2477,16 +2477,34 @@ def build_all_history_with_predictions(historical_games, games_2026):
                     "win_expect": win_expect_str,
                 })
 
-            # その球団自身に関与する未定試合がある場合のみ末尾に追加
-            team_undated = [
-                m for m in future_matches_local
-                if m.get("undated_postponed") and (m["home"] == t or m["away"] == t)
+            # 日程未定の振替試合。
+            # その球団自身が対象なら「未定（n試合）」として表示する。
+            # 他球団の試合によって優勝決定するケースも同じ9999-12-31に集約されるため、
+            # その球団自身が出場しない候補球団にも「他球団試合」を追加する。
+            undated_matches = [
+                m for m in future_matches_local if m.get("undated_postponed")
             ]
+            team_undated = [
+                m for m in undated_matches
+                if m["home"] == t or m["away"] == t
+            ]
+            other_undated = [
+                m for m in undated_matches
+                if m["home"] != t and m["away"] != t
+            ]
+            undated_prob = float(clinch_map.get("9999-12-31", 0.0)) * date_scale
+
             if team_undated:
-                prob_raw = float(clinch_map.get("9999-12-31", 0.0)) * date_scale
+                prob_raw = undated_prob
                 cumulative += prob_raw
-                opponents = sorted(set(m["away"] if m["home"] == t else m["home"] for m in team_undated))
-                opp_str = f"{'・'.join(opponents)}（{len(team_undated)}試合）" if opponents else f"未定（{len(team_undated)}試合）"
+                opponents = sorted(
+                    set(m["away"] if m["home"] == t else m["home"] for m in team_undated)
+                )
+                opp_str = (
+                    f"{'・'.join(opponents)}（{len(team_undated)}試合）"
+                    if opponents
+                    else f"未定（{len(team_undated)}試合）"
+                )
                 rows.append({
                     "date": f"未定（{len(team_undated)}試合）",
                     "raw_date": "9999-12-31",
@@ -2494,6 +2512,16 @@ def build_all_history_with_predictions(historical_games, games_2026):
                     "ground": STADIUM_NAMES.get(team_undated[0]["home"], "球場"),
                     "clinch_prob_val": prob_raw,
                     "win_expect": "-",
+                })
+            elif other_undated and undated_prob > 0.0:
+                # 自球団は試合をしないが、他球団の未定振替試合で優勝が決まる場合。
+                rows.append({
+                    "date": "未定（他球団試合）",
+                    "raw_date": "9999-12-31",
+                    "opp": "他球団試合",
+                    "ground": "—",
+                    "clinch_prob_val": undated_prob,
+                    "win_expect": "—",
                 })
 
             cum = 0.0
@@ -2543,8 +2571,10 @@ def build_all_history_with_predictions(historical_games, games_2026):
 
         return schedules
 
-    latest_c = history_snapshots[last_eval_date]["central"]
-    latest_p = history_snapshots[last_eval_date]["pacific"]
+    # 表示する順位表・優勝確率と、優勝決定日シミュレーションは
+    # 必ず同じ公開基準日（latest_snapshot_date）を使う。
+    latest_c = latest_snapshot["central"]
+    latest_p = latest_snapshot["pacific"]
 
     # 優勝可能性がある球団（magic_1st != "-" かつ 確率 > 0）のみ抽出
     contenders_c = [t["team"] for t in latest_c if t.get("magic_1st") != "-" and float(t.get("champ_prob", 0)) > 0]
@@ -2591,7 +2621,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
                     elif cumulative < 1.0:
                         row["cum_prob_str"] = f"{cumulative:.1f}%" if cumulative >= 0.1 else f"{cumulative:.2f}%"
                     else:
-                        row["cum_prob_str"] = f"{int(round(cumulative))}%"
+                        row["cum_prob_str"] = f"{cumulative:.1f}%"
                 # 浮動小数誤差を最後の行へ吸収し、数値合計も target と一致させる。
                 residual = target - sum(float(r.get("clinch_prob_val", 0.0)) for r in rows)
                 if rows and abs(residual) > 1e-12:
@@ -2611,7 +2641,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
                         elif cumulative < 1.0:
                             row["cum_prob_str"] = f"{cumulative:.1f}%" if cumulative >= 0.1 else f"{cumulative:.2f}%"
                         else:
-                            row["cum_prob_str"] = f"{int(round(cumulative))}%"
+                            row["cum_prob_str"] = f"{cumulative:.1f}%"
                 final_total = sum(float(r.get("clinch_prob_val", 0.0)) for r in rows)
                 if abs(final_total - target) > 1e-8:
                     raise RuntimeError(
