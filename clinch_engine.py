@@ -2435,7 +2435,13 @@ def build_all_history_with_predictions(historical_games, games_2026):
                     None
                 )
                 m_int, d_int = int(d[5:7]), int(d[8:10])
-                is_tentative = (m_int == 10 and d_int >= 7)
+                # 日付の括弧は、実データ側で予備日・仮日程と明示された場合だけ付ける。
+                # 「10/7以降」という日付だけを理由に仮日程扱いしてはいけない。
+                day_matches = [m for m in future_matches_local if m.get("date") == d]
+                is_tentative = any(
+                    bool(m.get("tentative")) or bool(m.get("reserve_day"))
+                    for m in day_matches
+                )
                 date_display = f"({m_int}/{d_int})" if is_tentative else f"{m_int}/{d_int}"
                 prob_raw = float(clinch_map.get(d, 0.0)) * date_scale
 
