@@ -166327,12 +166327,12 @@
           "magic_4th": "確定",
           "magic_5th": "確定",
           "championship_prior": 33.488,
-          "champ_prob_raw": 94.0,
-          "champ_prob": 90.67,
+          "champ_prob_raw": 92.0,
+          "champ_prob": 88.86,
           "champ_prob_prior_weight": 0.1546,
           "champ_prob_current_weight": 0.8454,
-          "champ_prob_low": 84.645,
-          "champ_prob_high": 84.645,
+          "champ_prob_low": 82.954,
+          "champ_prob_high": 82.954,
           "cs_prob": 100
         },
         {
@@ -166405,12 +166405,12 @@
           "magic_4th": "確定",
           "magic_5th": "確定",
           "championship_prior": 23.528,
-          "champ_prob_raw": 6.0,
-          "champ_prob": 9.33,
+          "champ_prob_raw": 8.0,
+          "champ_prob": 11.14,
           "champ_prob_prior_weight": 0.1546,
           "champ_prob_current_weight": 0.8454,
-          "champ_prob_low": 8.71,
-          "champ_prob_high": 8.71,
+          "champ_prob_low": 10.4,
+          "champ_prob_high": 10.4,
           "cs_prob": 100
         },
         {
@@ -167313,12 +167313,12 @@
           "magic_4th": "確定",
           "magic_5th": "確定",
           "championship_prior": 33.488,
-          "champ_prob_raw": 92.0,
-          "champ_prob": 88.86,
+          "champ_prob_raw": 95.0,
+          "champ_prob": 91.576,
           "champ_prob_prior_weight": 0.1546,
           "champ_prob_current_weight": 0.8454,
-          "champ_prob_low": 82.954,
-          "champ_prob_high": 82.954,
+          "champ_prob_low": 85.491,
+          "champ_prob_high": 85.491,
           "cs_prob": 100
         },
         {
@@ -167391,12 +167391,12 @@
           "magic_4th": "確定",
           "magic_5th": "確定",
           "championship_prior": 23.528,
-          "champ_prob_raw": 8.0,
-          "champ_prob": 11.14,
+          "champ_prob_raw": 5.0,
+          "champ_prob": 8.424,
           "champ_prob_prior_weight": 0.1546,
           "champ_prob_current_weight": 0.8454,
-          "champ_prob_low": 10.4,
-          "champ_prob_high": 10.4,
+          "champ_prob_low": 7.864,
+          "champ_prob_high": 7.864,
           "cs_prob": 100
         },
         {
@@ -168180,14 +168180,14 @@
         {
           "home": "楽天",
           "away": "ロッテ",
-          "home_starter": "未定",
-          "away_starter": "未定",
-          "home_status_text": "先発: 未定",
-          "away_status_text": "先発: 未定",
-          "home_prob": 52.8,
-          "away_prob": 45.2,
+          "home_starter": "庄司",
+          "away_starter": "ルケーシー",
+          "home_status_text": "先発: 庄司",
+          "away_status_text": "先発: ルケーシー",
+          "home_prob": 53.8,
+          "away_prob": 44.2,
           "draw_prob": 2.0,
-          "expected_home_runs": 3.84,
+          "expected_home_runs": 3.9,
           "expected_away_runs": 3.61,
           "actual_home_score": null,
           "actual_away_score": null,
@@ -168196,31 +168196,15 @@
         {
           "home": "阪神",
           "away": "ヤクルト",
-          "home_starter": "未定",
-          "away_starter": "未定",
-          "home_status_text": "先発: 未定",
-          "away_status_text": "先発: 未定",
-          "home_prob": 73.7,
-          "away_prob": 24.3,
+          "home_starter": "高橋",
+          "away_starter": "奥川",
+          "home_status_text": "先発: 高橋",
+          "away_status_text": "先発: 奥川",
+          "home_prob": 75.1,
+          "away_prob": 22.9,
           "draw_prob": 2.0,
-          "expected_home_runs": 3.89,
-          "expected_away_runs": 2.55,
-          "actual_home_score": null,
-          "actual_away_score": null,
-          "is_finished": false
-        },
-        {
-          "home": "ＤｅＮＡ",
-          "away": "広島",
-          "home_starter": "未定",
-          "away_starter": "未定",
-          "home_status_text": "先発: 未定",
-          "away_status_text": "先発: 未定",
-          "home_prob": 71.7,
-          "away_prob": 26.3,
-          "draw_prob": 2.0,
-          "expected_home_runs": 4.36,
-          "expected_away_runs": 3.06,
+          "expected_home_runs": 3.95,
+          "expected_away_runs": 2.51,
           "actual_home_score": null,
           "actual_away_score": null,
           "is_finished": false
@@ -175128,25 +175112,25 @@
         "1": 0.0,
         "2": 0.0,
         "3": 0.0,
-        "4": 32.1,
-        "5": 31.7,
-        "6": 36.2
+        "4": 34.4,
+        "5": 31.6,
+        "6": 34.0
       },
       "中日": {
         "1": 0.0,
         "2": 0.0,
         "3": 0.0,
-        "4": 32.3,
-        "5": 39.0,
-        "6": 28.7
+        "4": 33.8,
+        "5": 38.8,
+        "6": 27.4
       },
       "広島": {
         "1": 0.0,
         "2": 0.0,
         "3": 0.0,
-        "4": 35.5,
-        "5": 29.3,
-        "6": 35.2
+        "4": 31.8,
+        "5": 29.6,
+        "6": 38.6
       }
     },
     "pacific_rank_matrix": {
@@ -175160,8 +175144,8 @@
       },
       "日本ハム": {
         "1": 0.0,
-        "2": 22.3,
-        "3": 77.7,
+        "2": 22.5,
+        "3": 77.5,
         "4": 0.0,
         "5": 0.0,
         "6": 0.0
@@ -175170,8 +175154,8 @@
         "1": 0.0,
         "2": 0.0,
         "3": 0.0,
-        "4": 3.7,
-        "5": 96.3,
+        "4": 3.6,
+        "5": 96.4,
         "6": 0.0
       },
       "楽天": {
@@ -175186,14 +175170,14 @@
         "1": 0.0,
         "2": 0.0,
         "3": 0.0,
-        "4": 96.3,
-        "5": 3.7,
+        "4": 96.4,
+        "5": 3.6,
         "6": 0.0
       },
       "西武": {
         "1": 0.0,
-        "2": 77.7,
-        "3": 22.3,
+        "2": 77.5,
+        "3": 22.5,
         "4": 0.0,
         "5": 0.0,
         "6": 0.0
@@ -175206,7 +175190,7 @@
           "raw_date": "2026-10-02",
           "opp": "他球団試合",
           "ground": "—",
-          "clinch_prob_val": 9.182188747731399,
+          "clinch_prob_val": 8.805364791288566,
           "win_expect": "—",
           "clinch_prob_str": "9%",
           "cum_prob_str": "9%"
@@ -175216,7 +175200,7 @@
           "raw_date": "2026-10-03",
           "opp": "広島",
           "ground": "マツダS",
-          "clinch_prob_val": 31.660450090744103,
+          "clinch_prob_val": 32.479862068965524,
           "win_expect": "67",
           "clinch_prob_str": "32%",
           "cum_prob_str": "41%"
@@ -175226,40 +175210,40 @@
           "raw_date": "2026-10-04",
           "opp": "ＤｅＮＡ",
           "ground": "横浜",
-          "clinch_prob_val": 12.769495462794922,
+          "clinch_prob_val": 11.901756805807624,
           "win_expect": "48",
-          "clinch_prob_str": "13%",
-          "cum_prob_str": "54%"
+          "clinch_prob_str": "12%",
+          "cum_prob_str": "53%"
         },
         {
           "date": "10/6",
           "raw_date": "2026-10-06",
           "opp": "広島",
           "ground": "甲子園",
-          "clinch_prob_val": 17.146667876588022,
+          "clinch_prob_val": 16.707615245009077,
           "win_expect": "68",
           "clinch_prob_str": "17%",
-          "cum_prob_str": "71%"
+          "cum_prob_str": "70%"
         },
         {
           "date": "(10/7)",
           "raw_date": "2026-10-07",
           "opp": "広島",
           "ground": "甲子園",
-          "clinch_prob_val": 11.716341197822143,
+          "clinch_prob_val": 11.482453720508168,
           "win_expect": "68",
-          "clinch_prob_str": "12%",
-          "cum_prob_str": "82%"
+          "clinch_prob_str": "11%",
+          "cum_prob_str": "81%"
         },
         {
           "date": "未定（1試合）",
           "raw_date": "9999-12-31",
           "opp": "ヤクルト（1試合）",
           "ground": "甲子園",
-          "clinch_prob_val": 8.19485662431942,
+          "clinch_prob_val": 7.482947368421054,
           "win_expect": "-",
-          "clinch_prob_str": "8%",
-          "cum_prob_str": "91%"
+          "clinch_prob_str": "7%",
+          "cum_prob_str": "89%"
         }
       ],
       "巨人": [
@@ -175279,7 +175263,7 @@
           "opp": "ＤｅＮＡ",
           "ground": "東京D",
           "clinch_prob_val": 0.0,
-          "win_expect": "47",
+          "win_expect": "41",
           "clinch_prob_str": "-",
           "cum_prob_str": "-"
         },
@@ -175288,30 +175272,30 @@
           "raw_date": "2026-10-04",
           "opp": "他球団試合",
           "ground": "—",
-          "clinch_prob_val": 0.7131210191082803,
+          "clinch_prob_val": 1.989285714285714,
           "win_expect": "—",
-          "clinch_prob_str": "0.7%",
-          "cum_prob_str": "0.7%"
+          "clinch_prob_str": "2%",
+          "cum_prob_str": "2%"
         },
         {
           "date": "10/6",
           "raw_date": "2026-10-06",
           "opp": "他球団試合",
           "ground": "—",
-          "clinch_prob_val": 2.9713375796178347,
+          "clinch_prob_val": 3.978571428571428,
           "win_expect": "—",
-          "clinch_prob_str": "3%",
-          "cum_prob_str": "4%"
+          "clinch_prob_str": "4%",
+          "cum_prob_str": "6%"
         },
         {
           "date": "(10/7)",
           "raw_date": "2026-10-07",
           "opp": "他球団試合",
           "ground": "—",
-          "clinch_prob_val": 5.645541401273886,
+          "clinch_prob_val": 5.172142857142857,
           "win_expect": "—",
-          "clinch_prob_str": "6%",
-          "cum_prob_str": "9%"
+          "clinch_prob_str": "5%",
+          "cum_prob_str": "11%"
         }
       ]
     },
@@ -175581,18 +175565,18 @@
         "home_adv_log": 0.014321,
         "league_run_per_team_game": 3.8032,
         "park_log": {
-          "PayPay": 0.001619,
-          "バンテリン": -0.136915,
+          "ZOZO": 0.012505,
           "楽天モバイル": 0.002303,
-          "京セラ": -0.043952,
+          "バンテリン": -0.136915,
+          "PayPay": 0.001619,
+          "甲子園": -0.082069,
+          "横浜": 0.060396,
+          "エスコンF": -0.010673,
+          "東京D": -0.006074,
           "マツダS": 0.023882,
           "ベルーナ": 0.042052,
-          "東京D": -0.006074,
-          "神宮": 0.136927,
-          "エスコンF": -0.010673,
-          "横浜": 0.060396,
-          "ZOZO": 0.012505,
-          "甲子園": -0.082069
+          "京セラ": -0.043952,
+          "神宮": 0.136927
         }
       },
       "starter_policy": "confirmed manual starter information only; strong shrinkage",
