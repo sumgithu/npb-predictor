@@ -2513,7 +2513,7 @@ def build_all_history_with_predictions(historical_games, games_2026):
                     "clinch_prob_val": prob_raw,
                     "win_expect": "-",
                 })
-            elif other_undated and undated_prob > 0.0:
+            elif other_undated:
                 # 自球団は試合をしないが、他球団の未定振替試合で優勝が決まる場合。
                 rows.append({
                     "date": "未定（他球団試合）",
