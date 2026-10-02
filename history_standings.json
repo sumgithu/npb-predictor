@@ -175190,37 +175190,37 @@
           "raw_date": "2026-10-03",
           "opp": "広島",
           "ground": "マツダS",
-          "clinch_prob_val": 50.200666216672296,
-          "win_expect": "68",
+          "clinch_prob_val": 50.072111373607825,
+          "win_expect": "67",
           "clinch_prob_str": "50%",
-          "cum_prob_str": "50.2%"
+          "cum_prob_str": "50.1%"
         },
         {
           "date": "10/4",
           "raw_date": "2026-10-04",
           "opp": "ＤｅＮＡ",
           "ground": "横浜",
-          "clinch_prob_val": 19.44392001349983,
+          "clinch_prob_val": 19.411781302733715,
           "win_expect": "50",
           "clinch_prob_str": "19%",
-          "cum_prob_str": "69.6%"
+          "cum_prob_str": "69.5%"
         },
         {
           "date": "10/6",
           "raw_date": "2026-10-06",
           "opp": "広島",
           "ground": "甲子園",
-          "clinch_prob_val": 14.848084373945328,
+          "clinch_prob_val": 14.944500506243672,
           "win_expect": "68",
           "clinch_prob_str": "15%",
-          "cum_prob_str": "84.5%"
+          "cum_prob_str": "84.4%"
         },
         {
           "date": "10/7",
           "raw_date": "2026-10-07",
           "opp": "広島",
           "ground": "甲子園",
-          "clinch_prob_val": 7.7454292946338175,
+          "clinch_prob_val": 7.745429294633817,
           "win_expect": "68",
           "clinch_prob_str": "8%",
           "cum_prob_str": "92.2%"
@@ -175230,7 +175230,7 @@
           "raw_date": "9999-12-31",
           "opp": "ヤクルト（1試合）",
           "ground": "甲子園",
-          "clinch_prob_val": 2.988900101248735,
+          "clinch_prob_val": 3.0531775227809654,
           "win_expect": "-",
           "clinch_prob_str": "3%",
           "cum_prob_str": "95.2%"
@@ -175504,18 +175504,18 @@
         "home_adv_log": 0.014321,
         "league_run_per_team_game": 3.8032,
         "park_log": {
-          "ZOZO": 0.012505,
-          "横浜": 0.060396,
           "バンテリン": -0.136915,
-          "京セラ": -0.043952,
-          "神宮": 0.136927,
-          "PayPay": 0.001619,
-          "楽天モバイル": 0.002303,
-          "エスコンF": -0.010673,
           "マツダS": 0.023882,
           "ベルーナ": 0.042052,
-          "東京D": -0.006074,
-          "甲子園": -0.082069
+          "PayPay": 0.001619,
+          "横浜": 0.060396,
+          "神宮": 0.136927,
+          "甲子園": -0.082069,
+          "ZOZO": 0.012505,
+          "楽天モバイル": 0.002303,
+          "京セラ": -0.043952,
+          "エスコンF": -0.010673,
+          "東京D": -0.006074
         }
       },
       "starter_policy": "confirmed manual starter information only; strong shrinkage",
