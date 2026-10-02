@@ -729,6 +729,76 @@
       "reserve_day": true,
       "detail": "マツダスタジアム 18:00 晴れ時々くもり",
       "source": "manual"
+    },
+    {
+      "date": "2026-10-03",
+      "home": "ヤクルト",
+      "away": "中日",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "status": "scheduled",
+      "starter_confirmed": false,
+      "reserve_day": false,
+      "detail": "神　宮 18:00 くもり時々晴れ",
+      "source": "manual"
+    },
+    {
+      "date": "2026-10-03",
+      "home": "ロッテ",
+      "away": "ソフトバンク",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "status": "scheduled",
+      "starter_confirmed": false,
+      "reserve_day": false,
+      "detail": "ZOZOマリン 18:00 くもり時々晴れ",
+      "source": "manual"
+    },
+    {
+      "date": "2026-10-03",
+      "home": "楽天",
+      "away": "オリックス",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "status": "scheduled",
+      "starter_confirmed": false,
+      "reserve_day": false,
+      "detail": "楽天モバイル 18:00 晴れ時々くもり",
+      "source": "manual"
+    },
+    {
+      "date": "2026-10-03",
+      "home": "巨人",
+      "away": "ＤｅＮＡ",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "status": "scheduled",
+      "starter_confirmed": false,
+      "reserve_day": false,
+      "detail": "東京ドーム 18:00 くもり時々晴れ",
+      "source": "manual"
+    },
+    {
+      "date": "2026-10-03",
+      "home": "広島",
+      "away": "阪神",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "森下",
+      "away_starter": "才木",
+      "status": "scheduled",
+      "starter_confirmed": true,
+      "reserve_day": false,
+      "detail": "マツダスタジアム 14:00 晴れ時々くもり",
+      "source": "manual"
     }
   ]
 }
