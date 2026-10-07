@@ -925,6 +925,18 @@
       "reserve_day": false,
       "detail": "甲子園 18:00",
       "source": "manual"
+    },
+    {
+      "date": "2026-10-08",
+      "home": "阪神",
+      "away": "ヤクルト",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "ルーカス",
+      "away_starter": "中村優",
+      "status": "scheduled",
+      "starter_confirmed": true,
+      "source": "manual"
     }
   ]
 }
