@@ -841,6 +841,34 @@
       "reserve_day": false,
       "detail": "ZOZOマリン 18:00 くもり時々晴れ",
       "source": "manual"
+    },
+    {
+      "date": "2026-10-05",
+      "home": "ロッテ",
+      "away": "西武",
+      "home_score": 1,
+      "away_score": 7,
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "status": "finished",
+      "starter_confirmed": false,
+      "reserve_day": false,
+      "detail": "ZOZOマリン 18:00 くもり一時雨",
+      "source": "manual"
+    },
+    {
+      "date": "2026-10-05",
+      "home": "楽天",
+      "away": "ソフトバンク",
+      "home_score": 3,
+      "away_score": 1,
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "status": "finished",
+      "starter_confirmed": false,
+      "reserve_day": false,
+      "detail": "楽天モバイル 18:00 くもり一時雨",
+      "source": "manual"
     }
   ]
 }
