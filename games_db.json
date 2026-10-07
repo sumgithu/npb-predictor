@@ -911,6 +911,20 @@
       "reserve_day": false,
       "detail": "甲子園 18:00 くもり時々晴れ",
       "source": "manual"
+    },
+    {
+      "date": "2026-10-07",
+      "home": "阪神",
+      "away": "広島",
+      "home_score": 2,
+      "away_score": 1,
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "status": "finished",
+      "starter_confirmed": false,
+      "reserve_day": false,
+      "detail": "甲子園 18:00",
+      "source": "manual"
     }
   ]
 }
