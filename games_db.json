@@ -869,6 +869,48 @@
       "reserve_day": false,
       "detail": "楽天モバイル 18:00 くもり一時雨",
       "source": "manual"
+    },
+    {
+      "date": "2026-10-06",
+      "home": "ロッテ",
+      "away": "西武",
+      "home_score": 0,
+      "away_score": 3,
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "status": "finished",
+      "starter_confirmed": false,
+      "reserve_day": false,
+      "detail": "ZOZOマリン 18:00 くもり",
+      "source": "manual"
+    },
+    {
+      "date": "2026-10-06",
+      "home": "楽天",
+      "away": "ソフトバンク",
+      "home_score": null,
+      "away_score": null,
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "status": "cancelled",
+      "starter_confirmed": false,
+      "reserve_day": true,
+      "detail": "楽天モバイル 18:00 くもり",
+      "source": "manual"
+    },
+    {
+      "date": "2026-10-06",
+      "home": "阪神",
+      "away": "広島",
+      "home_score": 2,
+      "away_score": 1,
+      "home_starter": "未定",
+      "away_starter": "未定",
+      "status": "finished",
+      "starter_confirmed": false,
+      "reserve_day": false,
+      "detail": "甲子園 18:00 くもり時々晴れ",
+      "source": "manual"
     }
   ]
 }
