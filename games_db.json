@@ -930,11 +930,11 @@
       "date": "2026-10-08",
       "home": "阪神",
       "away": "ヤクルト",
-      "home_score": null,
-      "away_score": null,
+      "home_score": 0,
+      "away_score": 4,
       "home_starter": "ルーカス",
       "away_starter": "中村優",
-      "status": "scheduled",
+      "status": "finished",
       "starter_confirmed": true,
       "source": "manual"
     }
